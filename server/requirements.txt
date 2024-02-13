@@ -1,2 +1,10 @@
 fastapi
 uvicorn[standard]
+python-multipart
+SQLAlchemy
+python-dotenv
+langchain
+langchain-openai
+langchain-community
+faiss-cpu
+pypdf

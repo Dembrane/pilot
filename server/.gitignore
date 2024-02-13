@@ -1,1 +1,5 @@
 **/__pycache__/
+db.sqlite3
+uploads
+embeddings_cache
+faiss_index

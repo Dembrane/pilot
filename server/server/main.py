@@ -1,9 +1,11 @@
 import os
 import time
+from typing import List
 from uuid import uuid4
 from logging import getLogger
 
 from fastapi import Depends, FastAPI, UploadFile, HTTPException
+from pydantic import BaseModel
 from server.models import DocumentModel, SessionModel, db
 from fastapi import Request, Response
 
@@ -56,9 +58,15 @@ async def initiate_session(request: Request, response: Response, session_id: str
 
     return {"message": "Session initiated successfully"}
 
+class DocumentSchema(BaseModel):
+    id: str
+    title: str | None
+    description: str | None
+    context: str | None
+    is_processed: bool
+    processing_error: str | None
 
-
-@app.post("/upload-document")
+@app.post("/upload-document", response_model=DocumentSchema)
 async def upload_document(file: UploadFile, session: SessionModel = Depends(require_session)):
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Invalid file format. Only .pdf files are supported.")
@@ -89,17 +97,32 @@ async def upload_document(file: UploadFile, session: SessionModel = Depends(requ
     
     process_document_queue.add_task(ProcessDocumentTaskQueueItem(document))
     
-    return {"message": "Document uploaded successfully", "document_id": document.id}
+    return document
 
-@app.get("/document")
+@app.get("/document", response_model=List[DocumentSchema])
 async def get_documents(session: SessionModel = Depends(require_session)):
     documents = db.query(DocumentModel).filter(DocumentModel.session_id == session.id).all()
     return documents
 
-@app.get("/document/{document_id}")
-async def get_document(document_id: int, session: SessionModel = Depends(require_session)):
+@app.get("/document/{document_id}", response_model=DocumentSchema)
+async def get_document(document_id: str, session: SessionModel = Depends(require_session)):
     document = db.query(DocumentModel).filter(DocumentModel.id == document_id, DocumentModel.session_id == session.id).first()
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
     
+    return document
+
+class PutDocumentRequest(BaseModel):
+    context: str | None
+
+@app.put("/document/{document_id}", response_model=DocumentSchema)
+async def put_document(document_id: str, request: PutDocumentRequest, session: SessionModel = Depends(require_session)):
+    document = db.query(DocumentModel).filter(DocumentModel.id == document_id, DocumentModel.session_id == session.id).first()
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    document.context = request.context
+
+    db.add(document)
+    db.commit()
     return document

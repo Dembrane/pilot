@@ -95,7 +95,7 @@ class ProcessDocumentTaskQueue(TaskQueue):
             except Exception as e:
                 if item.retry_left <= 0:
                     self.logger.error(f"Failed to process document {item.document.id} after retries")
-                    item.document.processing_error = f"Failed to process document after retries: {e}"
+                    item.document.processing_error = "Failed to process document"
                     db.add(item.document)
                     db.commit()
                     self.task_done()

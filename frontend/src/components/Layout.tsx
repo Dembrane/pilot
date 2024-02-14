@@ -1,48 +1,34 @@
-import React, { PropsWithChildren } from 'react';
-import { Container, Grid, GridCol, Paper, Text } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
+import { Button, Group, Paper, Stack, Title } from "@mantine/core";
+import { Logo } from "./Logo";
 
-const Header = () => (
-    <Paper p="md" shadow="xs">
-        <Text >Logo</Text>
-    </Paper>
-);
+export const Layout = () => {
+  return (
+    <div>
+      <header>
+        <Paper p="md" shadow="xs">
+          <Group justify="space-between">
+            <Logo />
+            <Button disabled variant="filled">
+              Export
+            </Button>
+          </Group>
+        </Paper>
+      </header>
 
-const Sidebar = ({ isOpen }: {isOpen: boolean}) => (
-    <Paper p="md" shadow="xs" style={{ display: isOpen ? 'block' : 'none' }}>
-        <Text>Section 1</Text>
-        <Text>Section 2</Text>
-    </Paper>
-);
+      <div className="grid grid-cols-12">
+        <aside className="col-span-12 sm:col-span-4">
+          <Stack p="sm">
+            <Title order={2}>Documents</Title>
+            <Title order={2}>History</Title>
+          </Stack>
+        </aside>
 
-const Main = ({ children } : PropsWithChildren) => (
-    <Paper p="md" shadow="xs">
-        {children}
-    </Paper>
-);
-
-const Layout = ({ children }: PropsWithChildren) => {
-    const isMobile = useMediaQuery('(max-width: 768px)');
-    const [isOpen, setIsOpen] = React.useState(!isMobile);
-
-    const toggleSidebar = () => {
-        setIsOpen(!isOpen);
-    };
-
-    return (
-        <Container>
-            <Header />
-            <Grid >
-                <GridCol span={12}  >
-                    <Sidebar isOpen={isOpen} />
-                </GridCol>
-                <GridCol span={12} >
-                    <button onClick={toggleSidebar} style={{ marginBottom: '1em' }} />
-                    <Main>{children}</Main>
-                </GridCol>
-            </Grid>
-        </Container>
-    );
+        <main className="col-span-12 sm:col-span-8">
+          <Stack p="sm">
+            <Title order={2}>Analysis</Title>
+          </Stack>
+        </main>
+      </div>
+    </div>
+  );
 };
-
-export default Layout;

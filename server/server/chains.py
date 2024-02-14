@@ -6,8 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain.chains import load_summarize_chain as lc_load_summarize_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain.memory import ConversationSummaryBufferMemory
 
 from server.models import DocumentMessageModel, DocumentModel, db
@@ -53,7 +52,6 @@ def ask_document(document: DocumentModel, question: str):
     memory.prune()
 
     summary_message = SystemMessage(content=memory.moving_summary_buffer)
-    logger.info(f"Generated messages summary: {summary_message.content}")
 
     retriever = vectorstore.as_retriever(
         search_kwargs={"k": 2, "filter": {"document_id": document.id}}
@@ -64,7 +62,6 @@ def ask_document(document: DocumentModel, question: str):
     logger.info(f"Retrieved documents: {retrieved_documents}")
 
     context = [d.page_content for d in retrieved_documents]
-    logger.info(f"Generated context: {context}")
 
     prompt = [
         SystemMessage(
@@ -81,6 +78,7 @@ def ask_document(document: DocumentModel, question: str):
     chat_history = memory.load_memory_variables({})
 
     if summary_message.content != "":
+        logger.info(f"Generated messages summary: {summary_message.content}")
         prompt.append(summary_message)
 
     if len(chat_history) > 0:

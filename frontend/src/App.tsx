@@ -1,14 +1,20 @@
+import '@fontsource-variable/space-grotesk';
 import '@mantine/core/styles.css';
 
-import { MantineProvider } from '@mantine/core';
-import Layout from './components/Layout';
+import { MantineProvider, createTheme } from '@mantine/core';
+import { Layout } from './components/Layout';
+
+const theme = createTheme({
+  fontFamily: "'Space Grotesk Variable', sans-serif",
+  headings: {
+    fontFamily: "'Space Grotesk Variable', sans-serif",
+    fontWeight: "500"
+  },
+})
 
 export const App = () => {
-  return <MantineProvider>
+  return <MantineProvider theme={theme}>
     <Layout>
-    <div>
-        Hello world!
-    </div>
 
     </Layout>
   </MantineProvider>;

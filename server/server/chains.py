@@ -56,7 +56,7 @@ def ask_document(document: DocumentModel, question: str):
     logger.info(f"Generated messages summary: {summary_message.content}")
 
     retriever = vectorstore.as_retriever(
-        search_kwargs={"filter": {"document_id": document.id}}
+        search_kwargs={"k": 2, "filter": {"document_id": document.id}}
     )
 
     retrieved_documents = retriever.get_relevant_documents(question)
@@ -109,6 +109,8 @@ def ask_document(document: DocumentModel, question: str):
 
 if __name__ == "__main__":
     document = db.query(DocumentModel).first()
-    question = "what was my last question about?"
-    response = ask_document(document, question)
-    print("Done")
+    # question = "what was my last question about?"
+    # response = ask_document(document, question)
+    # print("Done")
+
+    print(vectorstore.similarity_search("XYZ Shareholder"))

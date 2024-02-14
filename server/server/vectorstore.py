@@ -1,5 +1,7 @@
 import os
+import faiss
 from langchain_community.vectorstores.faiss import FAISS
+from langchain_community.docstore.in_memory import InMemoryDocstore
 from logging import getLogger
 
 from langchain_openai import OpenAIEmbeddings
@@ -10,7 +12,7 @@ from server.config import EMBEDDINGS_CACHE_DIR, FAISS_INDEX_PATH
 
 logger = getLogger("vectorstore")
 
-underlying_embeddings = OpenAIEmbeddings()
+underlying_embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 
 store = LocalFileStore(EMBEDDINGS_CACHE_DIR)
 
@@ -24,6 +26,5 @@ if os.path.exists(FAISS_INDEX_PATH):
     logger.info(f"Loading FAISS index from {FAISS_INDEX_PATH}")
     vectorstore = FAISS.load_local(FAISS_INDEX_PATH, cached_embedder)
 
-vectorstore = FAISS.from_texts(
-    [""], cached_embedder
-)
+_index = faiss.IndexFlatL2(1536)
+vectorstore = FAISS(cached_embedder, _index, InMemoryDocstore(), {})

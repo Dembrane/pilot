@@ -1,5 +1,6 @@
 import { Button, Group, Paper, Stack, Title } from "@mantine/core";
 import { Logo } from "./Logo";
+import { DocumentPanel } from "./Documents";
 
 export const Layout = () => {
   return (
@@ -17,8 +18,8 @@ export const Layout = () => {
 
       <div className="grid grid-cols-12">
         <aside className="col-span-12 sm:col-span-4">
-          <Stack p="sm">
-            <Title order={2}>Documents</Title>
+          <Stack p="sm" gap="xl">
+            <DocumentPanel />
             <Title order={2}>History</Title>
           </Stack>
         </aside>

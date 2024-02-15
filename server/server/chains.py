@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timezone
 from logging import getLogger
 from typing import List
@@ -9,7 +10,13 @@ from langchain.chains import load_summarize_chain as lc_load_summarize_chain
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain.memory import ConversationSummaryBufferMemory
 
-from server.models import DocumentMessageModel, DocumentModel, db
+from server.models import (
+    DocumentMessageModel,
+    DocumentModel,
+    SessionMessageModel,
+    SessionModel,
+    db,
+)
 from server.vectorstore import vectorstore
 
 logger = getLogger("chains")
@@ -30,11 +37,15 @@ def load_summary_chain():
     )
 
 
-def ask_document(document: DocumentModel, question: str):
+async def ask_document(document: DocumentModel, question: str, is_global=False):
+    logger.info(
+        f"Processing document question, document: {document.id}, question: {question}"
+    )
     user_message = DocumentMessageModel(
         id=str(uuid4()),
         text=question,
         from_user=True,
+        is_global=is_global,
         document_id=document.id,
         created_at=datetime.now(tz=timezone.utc),
     )
@@ -94,6 +105,7 @@ def ask_document(document: DocumentModel, question: str):
         id=str(uuid4()),
         text=prediction.content,
         from_user=False,
+        is_global=is_global,
         document_id=document.id,
         created_at=datetime.now(tz=timezone.utc),
     )
@@ -103,6 +115,133 @@ def ask_document(document: DocumentModel, question: str):
     db.commit()
 
     return ai_response
+
+
+global_llm = ChatOpenAI(temperature=0.2, model_name="gpt-4-0125-preview", max_retries=6)
+
+
+async def ask_global(session: SessionModel, question: str):
+    logger.info(f"Processing global question, question: {question}")
+    try:
+        documents = session.documents
+
+        logger.info(f"Loaded {len(documents)} documents from session {session.id}")
+
+        if len(documents) == 0:
+            raise ValueError("No documents available")
+
+        session.processing_since = datetime.now(tz=timezone.utc)
+
+        user_message = SessionMessageModel(
+            id=str(uuid4()),
+            session_id=session.id,
+            text=question,
+            from_user=True,
+            documents_used=set(documents),
+        )
+
+        db.add(session)
+        db.add(user_message)
+        db.commit()
+
+        ai_response_futures = []
+
+        for document in documents:
+            ai_response_futures.append(ask_document(document, question, is_global=True))
+
+        ai_responses: List[DocumentMessageModel] = await asyncio.gather(
+            *ai_response_futures
+        )
+
+        # ai_responses are already added to db, so we can continue
+
+        message_history = session.messages
+        message_history.sort(key=lambda x: x.created_at)
+        logger.info(f"Loaded {len(message_history)} messages from session {session.id}")
+
+        memory = ConversationSummaryBufferMemory(llm=llm, return_messages=True)
+
+        for message in message_history:
+            memory.chat_memory.add_message(message.get_lc_message())
+
+        # generate summary if needed
+        memory.prune()
+
+        summary_message = SystemMessage(content=memory.moving_summary_buffer)
+
+        # No filter on this
+        # retriever = vectorstore.as_retriever(
+        #     search_kwargs={"k": 3}
+        # )
+
+        # retrieved_documents = retriever.get_relevant_documents(question)
+
+        # logger.info(f"Retrieved {len(retrieved_documents)} documents")
+        # logger.info(f"Retrieved documents: {retrieved_documents}")
+
+        # context = [d.page_content for d in retrieved_documents]
+
+        prompt_per_document = []
+
+        for ai_response in ai_responses:
+            prompt_per_document.extend(
+                [
+                    "{}: {}\nContext about document: {}".format(
+                        ai_response.document.title,
+                        ai_response.text,
+                        ai_response.document.context,
+                    )
+                ]
+            )
+
+        prompt = [
+            SystemMessage(
+                content=(
+                    "You are a helpful and analytical research assistant. Given the following text, respond to the user's research question."
+                    + f"\nAdditional Context: {session.context}"
+                    + "The user has asked a question that is relevant to the following documents, and the following was found"
+                    + "\nResponses per document:"
+                    + "\n".join(prompt_per_document)
+                    + "Please consolidate these findings and provide an in-depth and detailed response to the user answering all of their questions systematically."
+                )
+            )
+        ]
+
+        chat_history = memory.load_memory_variables({})
+
+        if summary_message.content != "":
+            logger.info(f"Generated messages summary: {summary_message.content}")
+            prompt.append(summary_message)
+
+        if len(chat_history) > 0:
+            prompt.extend(chat_history["history"])
+
+        prompt.append(HumanMessage(content=question))
+
+        logger.info(f"Generated prompt: {prompt}")
+
+        prediction = global_llm.invoke([*prompt])
+
+        global_response = SessionMessageModel(
+            id=str(uuid4()),
+            session_id=session.id,
+            text=prediction.content,
+            from_user=False,
+            documents_used=set(documents),
+        )
+
+        session.processing_since = None
+
+        db.add(session)
+        db.add(global_response)
+        db.commit()
+
+        return global_response
+    except Exception as e:
+        logger.error(f"Error while processing global question: {e}")
+        session.processing_since = None
+        db.commit()
+        raise e
 
 
 if __name__ == "__main__":

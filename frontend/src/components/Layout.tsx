@@ -1,6 +1,8 @@
-import { Button, Group, Paper, Stack, Title } from "@mantine/core";
+import { Button, Group, Paper, Stack, Title, Text, Box } from "@mantine/core";
 import { Logo } from "./Logo";
 import { DocumentPanel } from "./Documents";
+import { Toaster } from "./Toaster";
+import { Outlet } from "react-router-dom";
 
 export const Layout = () => {
   return (
@@ -20,15 +22,19 @@ export const Layout = () => {
         <aside className="col-span-12 sm:col-span-4">
           <Stack p="sm" gap="xl">
             <DocumentPanel />
-            <Title order={2}>History</Title>
+            <Box>
+              <Title order={2}>History</Title>
+              <Text size="sm" mt="xs">
+                Currently unavailable
+              </Text>
+            </Box>
           </Stack>
         </aside>
 
         <main className="col-span-12 sm:col-span-8">
-          <Stack p="sm">
-            <Title order={2}>Analysis</Title>
-          </Stack>
+          <Outlet />
         </main>
+        <Toaster />
       </div>
     </div>
   );

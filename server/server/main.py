@@ -1,7 +1,7 @@
 from datetime import datetime
 import os
 import time
-from typing import List
+from typing import List, Optional
 from uuid import uuid4
 from logging import getLogger
 
@@ -16,7 +16,7 @@ from server.process import (
     seed_process_document_queue,
     process_document_queue,
 )
-from server.chains import ask_document
+from server.chains import ask_document, ask_global
 
 logger = getLogger("server")
 
@@ -68,6 +68,36 @@ async def initiate_session(
     return {"message": "Session initiated successfully"}
 
 
+class SessionSchema(BaseModel):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    name: str | None
+    context: str | None
+    processing_since: datetime | None
+
+
+@app.get("/session", response_model=SessionSchema)
+async def get_session(session: SessionModel = Depends(require_session)):
+    return session
+
+
+class PutSessionRequest(BaseModel):
+    context: str | None
+
+
+@app.put("/session", response_model=SessionSchema)
+async def put_session(
+    request: PutSessionRequest, session: SessionModel = Depends(require_session)
+):
+    if request.context:
+        session.context = request.context
+
+    db.add(session)
+    db.commit()
+    return session
+
+
 class DocumentSchema(BaseModel):
     id: str
     created_at: datetime
@@ -78,7 +108,7 @@ class DocumentSchema(BaseModel):
     processing_error: str | None
 
 
-@app.post("/upload-document", response_model=List[DocumentSchema])
+@app.post("/upload-documents", response_model=List[DocumentSchema])
 async def upload_document(
     files: List[UploadFile], session: SessionModel = Depends(require_session)
 ):
@@ -171,12 +201,49 @@ async def put_document(
     return document
 
 
+@app.delete("/document/{document_id}")
+async def delete_document(
+    document_id: str,
+    session: SessionModel = Depends(require_session),
+):
+    document = (
+        db.query(DocumentModel)
+        .filter(DocumentModel.id == document_id, DocumentModel.session_id == session.id)
+        .first()
+    )
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    db.delete(document)
+    db.commit()
+    return {"message": "Document deleted successfully"}
+
+
 class DocumentMessageSchema(BaseModel):
     id: str
     document_id: str
     created_at: datetime
     text: str
     from_user: bool
+    is_global: bool
+
+
+@app.get("/document/{document_id}/chat", response_model=List[DocumentMessageSchema])
+async def get_chat_with_document(
+    document_id: str, session: SessionModel = Depends(require_session)
+):
+    document = (
+        db.query(DocumentModel)
+        .filter(DocumentModel.id == document_id, DocumentModel.session_id == session.id)
+        .order_by(DocumentModel.created_at.desc())
+        .first()
+    )
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    messages = document.messages
+
+    return messages
 
 
 class PostDocumentMessageRequest(BaseModel):
@@ -197,24 +264,55 @@ async def chat_with_document(
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
 
-    ai_response = ask_document(document, body.message)
+    ai_response = await ask_document(document, body.message)
 
     return ai_response
 
 
-@app.get("/document/{document_id}/chat", response_model=List[DocumentMessageSchema])
-async def get_chat_with_document(
-    document_id: str, session: SessionModel = Depends(require_session)
+class SessionMessageSchema(BaseModel):
+    id: str
+    created_at: datetime
+    text: str
+    from_user: bool
+    documents_used: List[str]
+
+
+@app.get("/session/chat", response_model=List[SessionMessageSchema])
+async def get_chat_with_session(session: SessionModel = Depends(require_session)):
+    messages = session.messages
+    messages.sort(key=lambda x: x.created_at)
+
+    response = []
+
+    for message in messages:
+        response.append(
+            SessionMessageSchema(
+                id=message.id,
+                created_at=message.created_at,
+                text=message.text,
+                from_user=message.from_user,
+                documents_used=[str(doc.id) for doc in message.documents_used],
+            )
+        )
+
+    return response
+
+
+class PostSessionMessageRequest(BaseModel):
+    message: str
+
+
+@app.post("/session/chat", response_model=SessionMessageSchema)
+async def chat_with_session(
+    body: PostSessionMessageRequest,
+    session: SessionModel = Depends(require_session),
 ):
-    document = (
-        db.query(DocumentModel)
-        .filter(DocumentModel.id == document_id, DocumentModel.session_id == session.id)
-        .first()
+    message = await ask_global(session, body.message)
+
+    return SessionMessageSchema(
+        id=message.id,
+        created_at=message.created_at,
+        text=message.text,
+        from_user=message.from_user,
+        documents_used=[str(doc.id) for doc in message.documents_used],
     )
-    if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
-
-    messages = document.messages
-    messages.sort(key=lambda m: m.created_at, reverse=True)
-
-    return messages

@@ -23,6 +23,10 @@ lc_summarize_chain = load_summary_chain()
 lc_title_chain = load_title_chain()
 
 
+class EmptyDocumentException(Exception):
+    pass
+
+
 # Mutates the document
 # sets is_processed to True
 # adds title and description
@@ -42,6 +46,9 @@ def process_document(document: DocumentModel):
     lc_documents = lc_loader.load_and_split(lc_text_splitter)
 
     logger.info(f"Loaded {len(lc_documents)} pages from {document.path}")
+
+    if len(lc_documents) == 0:
+        raise EmptyDocumentException
 
     # summarize
     summary_result = lc_summarize_chain.invoke({"documents": lc_documents}).get(
@@ -93,20 +100,41 @@ class ProcessDocumentTaskQueue(TaskQueue):
     logger = getLogger("ProcessDocumentTaskQueue")
 
     def add_task(self, item: ProcessDocumentTaskQueueItem):
+        logger.info(f"Adding task for document {item.document.id}")
         self.put(item)
 
     def worker(self):
         while True:
             item: ProcessDocumentTaskQueueItem = self.get()
+            logger.info(f"Document {item.document.id} picked up by worker")
             try:
                 item()
             except Exception as e:
+                if isinstance(e, EmptyDocumentException):
+                    self.logger.error(f"Document {item.document.id} is empty")
+                    item.document.processing_error = (
+                        "Unable to read text from the document"
+                    )
+                    filename = item.document.path.split("/")[-1]
+                    db.query(DocumentModel).filter(
+                        DocumentModel.id == item.document.id
+                    ).update(
+                        values={
+                            "processing_error": f"Unable to read text from the document: {filename}"
+                        }
+                    )
+                    db.commit()
+                    self.task_done()
+                    return
+
                 if item.retry_left <= 0:
                     self.logger.error(
                         f"Failed to process document {item.document.id} after retries"
                     )
                     item.document.processing_error = "Failed to process document"
-                    db.add(item.document)
+                    db.query(DocumentModel).filter(
+                        DocumentModel.id == item.document.id
+                    ).update(values={"processing_error": "Failed to process document"})
                     db.commit()
                     self.task_done()
                     return
@@ -116,14 +144,20 @@ class ProcessDocumentTaskQueue(TaskQueue):
                 self.put(item)
 
             self.task_done()
+            return
 
 
-process_document_queue = ProcessDocumentTaskQueue(num_workers=2)
+process_document_queue = ProcessDocumentTaskQueue(num_workers=5)
 
 
 # init the queue with documents that don't have title and desc
 def seed_process_document_queue():
-    documents = db.query(DocumentModel).filter(DocumentModel.is_processed == 0).all()
+    documents = (
+        db.query(DocumentModel)
+        .filter(DocumentModel.is_processed == 0)
+        .filter(DocumentModel.processing_error == None)
+        .all()
+    )
     logger.info(
         f"Seeding process document queue with {len(documents)} pending documents"
     )

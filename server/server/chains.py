@@ -44,15 +44,26 @@ def transform_question_for_global_analysis(document: DocumentModel, question: st
     context = document.context
     session_context = document.session.context
 
+    # prompt = ChatPromptTemplate.from_template(
+    #     "The user asked a global research question that is relevant to a set of documents they uploaded."
+    #     f"\nGlobal context: {session_context}"
+    #     "\nYour task is to transform the question to be relevant to the current document below"
+    #     f"\nDocument title: {title}"
+    #     f"\nDocument description: {description}"
+    #     f"\nDocument context: {context}"
+    #     f"\nHere is the question that you need to transform: {question}"
+    #     f"\nTransformed question:"
+    # )
     prompt = ChatPromptTemplate.from_template(
-        "The user asked a global research question that is relevant to a set of documents they uploaded."
-        f"\nGlobal context: {session_context}"
-        "\nYour task is to transform the question to be relevant to the current document below"
-        f"\nDocument title: {title}"
-        f"\nDocument description: {description}"
-        f"\nDocument context: {context}"
-        f"\nHere is the question that you need to transform: {question}"
-        f"\nTransformed question:"
+        "Een onderzoeker heeft een onderzoek vraag gesteld die relevant is voor een set van bronnen"
+        f"\nGlobale context: {session_context}"
+        "\nJij bent een zorgvuldige onderzoeker en een deskundige schrijver. Jou taak is om een sub-onderzoeksvraag te formuleren waarvan de antwoord op de vraag alle context geeft om de globale onderzoek vraag doorgronding te beantwoorden als deze vraag aan alle bronnen wordt gevraagd. Hier is de relevante bron:"
+        f"\nBron titel: {title}"
+        f"\Bron omschrijving: {description}"
+        f"\nBron extra context: {context}"
+        f"\nDit is de vraag die de onderzoeker heeft gesteld die zij aan de hand van alle bronnen willen beantwoorden: {question}"
+        "\nAls voorbeeld - een onderzoeker vraagt wat de bronnen gemeen hebben, en waar ze verschillen - dan is het belangrijk dat de geherformuleerde sub-onderzoeksvraag per bron een overzicht maakt van wat de bron probeert te communiceren en hoe, alle sleutel thema's benoemt en omschrijft, de perspectief van de bron vermeld (voor wie, door wie, voor wat). In het kort: Vraag de vraag waarvan de antwoord kan worden gebruikt om de globale onderzoek vraag doorgronding te beantwoorden."
+        f"\nGeherformuleerde onderzoeksvraag voor dit specifieke bron:"
     )
 
     chain = prompt | llm | StrOutputParser()
@@ -76,7 +87,7 @@ async def ask_document(document: DocumentModel, question: str, is_global=False):
     user_question = (
         original_question
         if not is_global
-        else original_question + f"\n\n(in the context of this document: {question})"
+        else original_question + f"\n\n(in de context van deze bron: {question})"
     )
 
     user_message = DocumentMessageModel(
@@ -117,14 +128,25 @@ async def ask_document(document: DocumentModel, question: str, is_global=False):
     context = [d.page_content for d in retrieved_documents]
 
     # Add all the relevant context to a mega prompt to return to the user. TODO
+    # prompt = [
+    #     SystemMessage(
+    #         content=(
+    #             "You are a helpful assistant. Given the following text, respond to the user's queries."
+    #             f"\nAbout the document: {document.title}"
+    #             f"\nDocument summary: {document.description}"
+    #             f"\n{document.context if document.context else ''}"
+    #             f"\nAdditional Context: {' '.join(context)}"
+    #         )
+    #     )
+    # ]
     prompt = [
         SystemMessage(
             content=(
-                "You are a helpful assistant. Given the following text, respond to the user's queries."
-                f"\nAbout the document: {document.title}"
-                f"\nDocument summary: {document.description}"
+                "Jij bent een zorgvuldige onderzoeker en een deskundige schrijver. Gegeven de volgende tekst, reageer op de vraag van de gebruiker."
+                f"\nOver deze bron: {document.title}"
+                f"\Bron samenvatting: {document.description}"
                 f"\n{document.context if document.context else ''}"
-                f"\nAdditional Context: {' '.join(context)}"
+                f"\nExtra context: {' '.join(context)}"
             )
         )
     ]
@@ -232,7 +254,7 @@ async def ask_global(session: SessionModel, question: str):
         for ai_response in ai_responses:
             prompt_per_document.extend(
                 [
-                    "{}: {}\nContext about document: {}\n{}".format(
+                    "{}: {}\nContext van deze bron: {}\n{}".format(
                         ai_response.document.title,
                         ai_response.text,
                         ai_response.document.context,
@@ -242,15 +264,27 @@ async def ask_global(session: SessionModel, question: str):
             )
 
         # Big prompt, TODO consolidate and summarise
+        # prompt = [
+        #     SystemMessage(
+        #         content=(
+        #             "You are a helpful and analytical research assistant. Given the following text, respond to the user's research question."
+        #             + f"\nAdditional Context: {session.context}"
+        #             + "The user has asked a question that is relevant to the following documents, and the following was found"
+        #             + "\nResponses per document:"
+        #             + "\n".join(prompt_per_document)
+        #             + "Please consolidate these findings and provide an in-depth and detailed response to the user answering all of their questions systematically."
+        #         )
+        #     )
+        # ]
         prompt = [
             SystemMessage(
                 content=(
-                    "You are a helpful and analytical research assistant. Given the following text, respond to the user's research question."
-                    + f"\nAdditional Context: {session.context}"
-                    + "The user has asked a question that is relevant to the following documents, and the following was found"
-                    + "\nResponses per document:"
+                    "Jij bent een zorgvuldige onderzoeker en een deskundige schrijver. Gegeven de volgende tekst, reageer op de vraag van de gebruiker."
+                    + f"\Aditionele context: {session.context}"
+                    + "De gebruiker heeft een vraag gesteld die relevant is voor de volgende bronnen, en het volgende is gevonden"
+                    + "\nAntwoorden per bron:"
                     + "\n".join(prompt_per_document)
-                    + "Please consolidate these findings and provide an in-depth and detailed response to the user answering all of their questions systematically."
+                    + "Consolideer deze bevindingen en geef een diepgaand en gedetailleerd antwoord aan de gebruiker in markdown formaat waarin alle vragen systematisch worden beantwoord."
                 )
             )
         ]

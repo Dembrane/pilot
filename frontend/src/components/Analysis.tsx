@@ -1,21 +1,21 @@
-import { ActionIcon, Group, Skeleton, Stack, Title } from "@mantine/core";
-import { Icons } from "../icons";
-import { useDocuments } from "../lib/query";
+import { ActionIcon, Group, Skeleton, Stack, Title } from "@mantine/core"
+import { Icons } from "../icons"
+import { useDocuments } from "../lib/query"
 import {
   AIMessage,
   AllDocumentsReadyMessages,
   DropzoneUploadDocumentsMessage,
   GlobalContextAIMessage,
   InputGlobalContextHumanMessage,
-} from "./Message";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+} from "./Message"
+import { useAutoAnimate } from "@formkit/auto-animate/react"
 
 const AnalysisSkeleton = () =>
-  [1, 2].map((i) => <Skeleton key={i} height={120} radius="md" />);
+  [1, 2].map((i) => <Skeleton key={i} height={120} radius="md" />)
 
 export const GlobalAnalysisPanel = () => {
-  const documentsQuery = useDocuments();
-  const [parent] = useAutoAnimate();
+  const documentsQuery = useDocuments()
+  const [parent] = useAutoAnimate()
 
   return (
     <Stack p="sm">
@@ -33,11 +33,11 @@ export const GlobalAnalysisPanel = () => {
       )}
 
       <Stack ref={parent}>
-        <AIMessage text="Hello, I will be your research assistant today. To get started please upload the documents you want to analyse." />
+        <AIMessage text="Hallo, ik ben vandaag je onderzoeksassistent. Om te beginnen upload je de documenten die je wilt analyseren." />
         <DropzoneUploadDocumentsMessage />
         {documentsQuery.data && documentsQuery.data.length > 0 && (
           <>
-            <AIMessage text="Great! Your documents are now being uploaded. While the documents are being processed, can you tell me what this analysis is about?" />
+            <AIMessage text="Geweldig! Uw documenten worden nu geüpload. Terwijl de documenten worden verwerkt, kun je me vertellen waar deze analyse over gaat?" />
             <InputGlobalContextHumanMessage />
             <GlobalContextAIMessage />
             <AllDocumentsReadyMessages />
@@ -45,5 +45,5 @@ export const GlobalAnalysisPanel = () => {
         )}
       </Stack>
     </Stack>
-  );
-};
+  )
+}

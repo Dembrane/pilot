@@ -2,6 +2,7 @@ import {
   ActionIcon,
   Box,
   Button,
+  Divider,
   Group,
   Input,
   Loader,
@@ -13,10 +14,10 @@ import {
   Text,
   Textarea,
   Tooltip,
-  TypographyStylesProvider,
   rem,
   useMantineTheme,
 } from "@mantine/core";
+import { Markdown } from "./Markdown";
 import { PropsWithChildren, useEffect, useState } from "react";
 import { Icons } from "../icons";
 import { Dropzone, PDF_MIME_TYPE } from "@mantine/dropzone";
@@ -245,22 +246,6 @@ export const GlobalContextAIMessage = () => {
   );
 };
 
-// import rehypeStringify from "rehype-stringify";
-// import remarkParse from "remark-parse";
-// import remarkRehype from "remark-rehype";
-// import { unified } from "unified";
-
-// const parseMd = (md: string) => {
-//   return unified()
-//     .use(remarkParse)
-//     .use(remarkFrontmatter)
-//     .use(remarkGfm)
-//     .use(remarkRehype)
-//     .use(rehypeStringify)
-//     .process(md)
-//     .then((file) => file.toString());
-// };
-
 export const GlobalAIChatMessages = () => {
   const messagesQuery = useSessionMessages();
 
@@ -272,20 +257,16 @@ export const GlobalAIChatMessages = () => {
     <>
       {messagesQuery.data?.map((message) => {
         if (!message.from_user) {
-          return <GlobalAIChatMessage key={message.id} message={message} />;
+          return (
+            <AIMessage key={message.id} text="">
+              <Markdown content={message.text} />
+            </AIMessage>
+          );
         } else {
           return <HumanMessage key={message.id} text={message.text} />;
         }
       })}
     </>
-  );
-};
-
-const GlobalAIChatMessage = ({ message }: { message: TSessionMessage }) => {
-  return (
-    <AIMessage key={message.id} text={""}>
-      <TypographyStylesProvider>{message.text}</TypographyStylesProvider>
-    </AIMessage>
   );
 };
 
@@ -388,35 +369,47 @@ export const DocumentChatMessages = ({
 
   return (
     <>
-      <DocumentAIMessage text="What kind of question do you want to ask for this document?" />
-      {documentMessagesQuery.data?.map((message) => {
-        if (!message.from_user) {
-          if (message.is_global) {
-            return (
-              <AIMessage
-                key={message.id}
-                title="Global Research Question"
-                text={message.text}
-              />
-            );
+      <Stack gap="sm">
+        <DocumentAIMessage text="What kind of question do you want to ask for this document?" />
+        {documentMessagesQuery.data?.map((message) => {
+          if (!message.from_user) {
+            if (message.is_global) {
+              return (
+                <AIMessage
+                  key={message.id}
+                  title="Global Research Question"
+                  text={""}
+                >
+                  <Markdown content={message.text} />
+                </AIMessage>
+              );
+            } else {
+              return (
+                <DocumentAIMessage key={message.id} text={""}>
+                  <Markdown content={message.text} />
+                </DocumentAIMessage>
+              );
+            }
           } else {
-            return <DocumentAIMessage key={message.id} text={message.text} />;
+            if (message.is_global) {
+              return (
+                <HumanMessage
+                  key={message.id}
+                  title="Global Research Question"
+                  text={message.text}
+                />
+              );
+            } else {
+              return <HumanMessage key={message.id} text={message.text} />;
+            }
           }
-        } else {
-          if (message.is_global) {
-            return (
-              <HumanMessage
-                key={message.id}
-                title="Global Research Question"
-                text={message.text}
-              />
-            );
-          } else {
-            return <HumanMessage key={message.id} text={message.text} />;
-          }
-        }
-      })}
-      <div ref={targetRef} className="h-[1px]" role="presentation"></div>
+        })}
+      </Stack>
+      <div
+        ref={targetRef}
+        className="-mt-4 h-[0.1px]"
+        role="presentation"
+      ></div>
     </>
   );
 };
@@ -440,7 +433,7 @@ export const DocumentChatInput = (
   };
 
   return (
-    <>
+    <div className="bg-white pb-4">
       {/* {true && ( */}
       {postDocumentMessageMutation.isPending && (
         <DocumentAIMessage
@@ -458,16 +451,17 @@ export const DocumentChatInput = (
           pos: "sticky",
           bottom: 0,
           py: "sm",
+          shadow: "xs",
         }}
       >
-        <Paper className="sticky bottom-0" bg="gray.1">
+        <Box bg="gray.1">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSend();
             }}
           >
-            <Group gap="xs">
+            <Group gap="xs" align="center">
               <Input
                 flex={1}
                 placeholder="Ask a question..."
@@ -477,21 +471,19 @@ export const DocumentChatInput = (
               />
               <Tooltip label="Ask Question">
                 <ActionIcon
-                  h="100%"
-                  p={0}
-                  m={0}
                   type="submit"
                   onClick={handleSend}
                   loading={postDocumentMessageMutation.isPending}
+                  className="h-full"
                   bg="blue"
                 >
-                  <IconArrowUp size="sm" color="white" />
+                  <IconArrowUp color="white" />
                 </ActionIcon>
               </Tooltip>
             </Group>
           </form>
-        </Paper>
+        </Box>
       </HumanMessage>
-    </>
+    </div>
   );
 };

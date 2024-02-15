@@ -15,7 +15,7 @@ export const DocumentAnalysisRoute = () => {
   const [parent] = useAutoAnimate();
 
   return (
-    <Stack p="sm">
+    <Stack p="sm" h="100%">
       <Group justify="space-between">
         <Group align="center" gap="xs" wrap="nowrap">
           <Link to="/">
@@ -34,11 +34,13 @@ export const DocumentAnalysisRoute = () => {
         </Stack>
       )}
 
-      <Stack ref={parent}>
+      <Stack ref={parent} className="h-full relative">
         {documentQuery.data && (
           <>
             <DocumentChatMessages document={documentQuery.data} />
-            <DocumentChatInput document={documentQuery.data} />
+            <div className="sticky bottom-0 w-full">
+              <DocumentChatInput document={documentQuery.data} />
+            </div>
           </>
         )}
       </Stack>

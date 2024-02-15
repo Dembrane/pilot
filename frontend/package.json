@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@chengsokdara/use-whisper": "^0.2.0",
     "@fontsource-variable/space-grotesk": "^5.0.16",
     "@formkit/auto-animate": "^0.8.1",
     "@mantine/colors-generator": "^7.5.2",
@@ -27,22 +26,19 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.0",
-    "rehype-sanitize": "^6.0.0",
-    "rehype-stringify": "^10.0.0",
-    "remark-html": "^16.0.1",
-    "remark-parse": "^11.0.0",
-    "remark-rehype": "^11.1.0",
+    "showdown": "^2.1.0",
     "sonner": "^1.4.0",
-    "sort-by": "^1.2.0",
-    "unified": "^11.0.4"
+    "sort-by": "^1.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
+    "@types/showdown": "^2.0.6",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
+    "debug": "^4.3.4",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",

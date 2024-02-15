@@ -38,7 +38,7 @@ export const DocumentPanel = () => {
   const { data, isLoading } = useDocuments();
 
   return (
-    <Stack>
+    <Stack p="sm">
       <Group justify="space-between">
         <Title order={2}>Documents</Title>
         <Tooltip label="Upload documents">

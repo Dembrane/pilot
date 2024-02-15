@@ -76,7 +76,7 @@ async def ask_document(document: DocumentModel, question: str, is_global=False):
     user_question = (
         original_question
         if not is_global
-        else original_question + f"(for this document: {question})"
+        else original_question + f"\n\n(in the context of this document: {question})"
     )
 
     user_message = DocumentMessageModel(

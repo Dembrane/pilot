@@ -38,9 +38,17 @@ def load_summary_chain():
     )
     # You can add anther argument to this function check langchain TODO
 
+
+def transform_question_for_global_analysis(document: DocumentModel, question: str):
+    # TODO
+    return question
+
+
 # Q+A for a document
 async def ask_document(document: DocumentModel, question: str, is_global=False):
-    # if is global, change the question to be relevant to a single document TODO-SAMEER
+    if is_global:
+        question = transform_question_for_global_analysis(document, question)
+
     logger.info(
         f"Processing document question, document: {document.id}, question: {question}"
     )
@@ -124,6 +132,7 @@ async def ask_document(document: DocumentModel, question: str, is_global=False):
     db.commit()
 
     return ai_response
+
 
 # For global question answering
 global_llm = ChatOpenAI(temperature=0.2, model_name="gpt-4-0125-preview", max_retries=6)

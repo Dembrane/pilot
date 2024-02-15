@@ -27,8 +27,7 @@ api.interceptors.response.use(
     ) {
       (config as CustomAxiosRequestConfig)._retry = true;
       try {
-        const response = await initiateSession();
-        console.log("init session", response);
+        await initiateSession();
         return api(config);
       } catch (e) {
         console.error("init session error", e);

@@ -2,7 +2,6 @@ import {
   ActionIcon,
   Box,
   Button,
-  Divider,
   Group,
   Input,
   Loader,
@@ -18,7 +17,13 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { Markdown } from "./Markdown";
-import { PropsWithChildren, useEffect, useState } from "react";
+import {
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Icons } from "../icons";
 import { Dropzone, PDF_MIME_TYPE } from "@mantine/dropzone";
 import { IconArrowUp, IconUpload, IconX } from "@tabler/icons-react";
@@ -33,21 +38,7 @@ import {
   useUploadDocuments,
 } from "../lib/query";
 import { toast } from "./Toaster";
-import { useScrollIntoView } from "@mantine/hooks";
-
-// const Message = (
-//   props: PropsWithChildren<{
-//     text: string;
-//     role: "human" | "ai";
-//   }>
-// ) => {
-//   return (
-//     <Group>
-//       <Icons.Octagon color={color} />
-//       <Stack></Stack>
-//     </Group>
-//   );
-// };
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 export const AIMessage = (
   props: PropsWithChildren<{ text: string; title?: string }>
@@ -270,6 +261,19 @@ export const GlobalAIChatMessages = () => {
   );
 };
 
+const GeneratingAnswerMessage = () => (
+  <Paper bg="lime.1" p="md">
+    <Group wrap="nowrap">
+      <Group flex={1} wrap="nowrap">
+        <Loader size="sm" c="lime" color="lime" />
+        <Text size="sm" c="lime.9">
+          Generating answer...
+        </Text>
+      </Group>
+    </Group>
+  </Paper>
+);
+
 export const InputGlobalResearchQuestionHumanMessage = () => {
   const currentSessionQuery = useCurrentSession();
   const postSessionMessageMutation = usePostSessionMessage();
@@ -283,28 +287,7 @@ export const InputGlobalResearchQuestionHumanMessage = () => {
   return (
     <>
       {currentSessionQuery.data?.processing_since && (
-        <Paper bg="lime.1" p="md">
-          <Group wrap="nowrap">
-            <Group flex={1} wrap="nowrap">
-              <Loader size="sm" c="lime" color="lime" />
-              <Text size="sm" c="lime.9">
-                Generating answer...
-              </Text>
-            </Group>
-            {/* <Text>
-            {currentSessionQuery.data?.processing_since &&
-              "Elapsed time: " +
-                (
-                  (Date.now() -
-                    new Date(
-                      currentSessionQuery.data?.processing_since
-                    ).getTime()) /
-                  1000
-                ).toFixed(0) +
-                "s"}
-          </Text> */}
-          </Group>
-        </Paper>
+        <GeneratingAnswerMessage />
       )}
       <HumanMessage title="Ask a global research question">
         <LoadingOverlay visible={postSessionMessageMutation.isPending} />
@@ -349,19 +332,42 @@ export const AllDocumentsReadyMessages = () => {
   );
 };
 
-export const DocumentChatMessages = ({
+export const DocumentChat = ({
   document,
 }: PropsWithChildren<{ document: TDocument }>) => {
+  const [animatePresence] = useAutoAnimate();
+  const item = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = useCallback(() => {
+    item.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [item]);
+
+  return (
+    <div className="h-full relative">
+      <Stack ref={animatePresence}>
+        <DocumentChatMessages
+          document={document}
+          scrollToBottom={scrollToBottom}
+        />
+        <DocumentChatInput
+          document={document}
+          scrollToBottom={scrollToBottom}
+        />
+        <div ref={item} className="h-[1px]" role="presentation" />
+      </Stack>
+    </div>
+  );
+};
+
+export const DocumentChatMessages = ({
+  document,
+  scrollToBottom,
+}: PropsWithChildren<{ document: TDocument; scrollToBottom: () => void }>) => {
   const documentMessagesQuery = useDocumentMessages(document.id);
-  const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
-    offset: 60,
-  });
 
   useEffect(() => {
-    scrollIntoView({
-      alignment: "start",
-    });
-  }, [documentMessagesQuery.data, scrollIntoView]);
+    scrollToBottom();
+  }, [documentMessagesQuery.data, scrollToBottom]);
 
   if (documentMessagesQuery.isLoading) {
     return <Skeleton height={200} />;
@@ -405,85 +411,85 @@ export const DocumentChatMessages = ({
           }
         })}
       </Stack>
-      <div
-        ref={targetRef}
-        className="-mt-4 h-[0.1px]"
-        role="presentation"
-      ></div>
     </>
   );
 };
 
-export const DocumentChatInput = (
-  props: PropsWithChildren<{ document: TDocument }>
-) => {
+export const DocumentChatInput = ({
+  document,
+  scrollToBottom,
+}: PropsWithChildren<{ document: TDocument; scrollToBottom: () => void }>) => {
   const [message, setMessage] = useState("");
-  const postDocumentMessageMutation = usePostDocumentMessage();
+  const { isPending, ...postDocumentMessageMutation } =
+    usePostDocumentMessage();
 
   const handleSend = () => {
     if (message == "") {
       toast.info("Please enter a message");
       return;
     }
-    postDocumentMessageMutation.mutate({
-      documentId: props.document.id,
-      message,
-    });
-    setMessage("");
+    try {
+      postDocumentMessageMutation.mutate({
+        documentId: document.id,
+        message,
+      });
+      setMessage("");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [isPending, scrollToBottom]);
+
   return (
-    <div className="bg-white pb-4">
-      {/* {true && ( */}
-      {postDocumentMessageMutation.isPending && (
-        <DocumentAIMessage
-          text=""
-          title="Document AI Assistant is thinking... 🧠 "
-        >
-          <Stack w="100%">
-            <Skeleton w="100%" h="20px" animate={false} />
-            <Skeleton w="20%" h="20px" animate={false} />
-          </Stack>
-        </DocumentAIMessage>
+    <>
+      {isPending && (
+        <div>
+          <GeneratingAnswerMessage />
+        </div>
       )}
-      <HumanMessage
-        paperProps={{
-          pos: "sticky",
-          bottom: 0,
-          py: "sm",
-          shadow: "xs",
-        }}
-      >
-        <Box bg="gray.1">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSend();
-            }}
-          >
-            <Group gap="xs" align="center">
-              <Input
-                flex={1}
-                placeholder="Ask a question..."
-                value={message}
-                onChange={(e) => setMessage(e.currentTarget.value)}
-                disabled={postDocumentMessageMutation.isPending}
-              />
-              <Tooltip label="Ask Question">
-                <ActionIcon
-                  type="submit"
-                  onClick={handleSend}
-                  loading={postDocumentMessageMutation.isPending}
-                  className="h-full"
-                  bg="blue"
-                >
-                  <IconArrowUp color="white" />
-                </ActionIcon>
-              </Tooltip>
-            </Group>
-          </form>
-        </Box>
-      </HumanMessage>
-    </div>
+      <div className="sticky bottom-0 w-full pb-2">
+        <HumanMessage
+          paperProps={{
+            pos: "sticky",
+            bottom: 0,
+            py: "sm",
+            shadow: "xs",
+          }}
+        >
+          <Box bg="gray.1">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSend();
+              }}
+            >
+              <Group gap="xs" align="center">
+                <Input
+                  flex={1}
+                  placeholder="Ask a question..."
+                  value={message}
+                  onChange={(e) => setMessage(e.currentTarget.value)}
+                  disabled={isPending}
+                />
+                <Tooltip label="Ask Question">
+                  <ActionIcon
+                    type="submit"
+                    onClick={handleSend}
+                    loading={isPending}
+                    className="h-full"
+                    bg="blue"
+                  >
+                    <IconArrowUp color="white" />
+                  </ActionIcon>
+                </Tooltip>
+              </Group>
+            </form>
+          </Box>
+        </HumanMessage>
+      </div>
+    </>
   );
 };

@@ -1,7 +1,6 @@
 import { Anchor, Group, Skeleton, Stack, Title } from "@mantine/core";
 import { useDocumentById } from "../lib/query";
-import { DocumentChatInput, DocumentChatMessages } from "../components/Message";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { DocumentChat } from "../components/Message";
 import { Link, useLoaderData } from "react-router-dom";
 import { IconChevronRight } from "@tabler/icons-react";
 
@@ -11,8 +10,6 @@ const AnalysisSkeleton = () =>
 export const DocumentAnalysisRoute = () => {
   const initialData: TDocument = useLoaderData() as TDocument;
   const documentQuery = useDocumentById(initialData.id, initialData);
-
-  const [parent] = useAutoAnimate();
 
   return (
     <Stack p="sm" h="100%">
@@ -34,16 +31,7 @@ export const DocumentAnalysisRoute = () => {
         </Stack>
       )}
 
-      <Stack ref={parent} className="h-full relative">
-        {documentQuery.data && (
-          <>
-            <DocumentChatMessages document={documentQuery.data} />
-            <div className="sticky bottom-0 w-full">
-              <DocumentChatInput document={documentQuery.data} />
-            </div>
-          </>
-        )}
-      </Stack>
+      {documentQuery.data && <DocumentChat document={documentQuery.data} />}
     </Stack>
   );
 };

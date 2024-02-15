@@ -7,7 +7,7 @@ from logging import getLogger
 
 from fastapi import Depends, FastAPI, UploadFile, HTTPException
 from pydantic import BaseModel
-from server.models import DocumentModel, SessionModel, db
+from server.models import DocumentMessageModel, DocumentModel, SessionModel, db
 from fastapi import Request, Response
 
 from server.config import UPLOADS_DIR
@@ -265,6 +265,19 @@ async def chat_with_document(
         raise HTTPException(status_code=404, detail="Document not found")
 
     ai_response = await ask_document(document, body.message)
+
+    # time.sleep(4)
+    # ai_response = DocumentMessageModel(
+    #     id=str(uuid4()),
+    #     document_id=document.id,
+    #     created_at=datetime.now(),
+    #     text="echo" + body.message,
+    #     from_user=False,
+    #     is_global=False,
+    # )
+
+    # db.add(ai_response)
+    # db.commit()
 
     return ai_response
 

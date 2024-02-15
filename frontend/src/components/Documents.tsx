@@ -118,7 +118,6 @@ const DocumentChatButton = ({
         c="white"
         bg="blue"
         fullWidth
-        onClick={() => console.log(document)}
       >
         Open Document Chat ✨
       </Button>

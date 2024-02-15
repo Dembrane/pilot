@@ -29,18 +29,22 @@ def load_title_chain():
         "Generate a title for the given text. Do not enclose the title in quotes. Only output the title.\nText:{text}\nTitle:"
     )
     return prompt | llm | StrOutputParser()
+    # TODO
 
 
 def load_summary_chain():
     return lc_load_summarize_chain(
         llm, chain_type="map_reduce", input_key="documents", output_key="output_text"
     )
+    # You can add anther argument to this function check langchain TODO
 
-
+# Q+A for a document
 async def ask_document(document: DocumentModel, question: str, is_global=False):
+    # if is global, change the question to be relevant to a single document TODO-SAMEER
     logger.info(
         f"Processing document question, document: {document.id}, question: {question}"
     )
+    #  retrieve messages
     user_message = DocumentMessageModel(
         id=str(uuid4()),
         text=question,
@@ -54,6 +58,7 @@ async def ask_document(document: DocumentModel, question: str, is_global=False):
     message_history.sort(key=lambda x: x.created_at)
     logger.info(f"Loaded {len(message_history)} messages from document {document.id}")
 
+    # if needed summarise the memory to stay within context
     memory = ConversationSummaryBufferMemory(llm=llm, return_messages=True)
 
     for message in message_history:
@@ -64,6 +69,9 @@ async def ask_document(document: DocumentModel, question: str, is_global=False):
 
     summary_message = SystemMessage(content=memory.moving_summary_buffer)
 
+    # Only retrieve documents that are relevant to the document in question
+    # A single pdf is split into multiple langchain documents here, doc.id refers to the PDF, but k=2 says slice the 2 most relevant chunks from the PDF.
+    #  Play around with number of chunks (in process.py) and chunk length to get the best results TODO
     retriever = vectorstore.as_retriever(
         search_kwargs={"k": 2, "filter": {"document_id": document.id}}
     )
@@ -74,6 +82,7 @@ async def ask_document(document: DocumentModel, question: str, is_global=False):
 
     context = [d.page_content for d in retrieved_documents]
 
+    # Add all the relevant context to a mega prompt to return to the user. TODO
     prompt = [
         SystemMessage(
             content=(
@@ -116,7 +125,7 @@ async def ask_document(document: DocumentModel, question: str, is_global=False):
 
     return ai_response
 
-
+# For global question answering
 global_llm = ChatOpenAI(temperature=0.2, model_name="gpt-4-0125-preview", max_retries=6)
 
 
@@ -169,6 +178,8 @@ async def ask_global(session: SessionModel, question: str):
 
         summary_message = SystemMessage(content=memory.moving_summary_buffer)
 
+        # No vectorstore for global questions because each individual doc is allready vector store queried. We are just summarising.
+
         # No filter on this
         # retriever = vectorstore.as_retriever(
         #     search_kwargs={"k": 3}
@@ -186,14 +197,16 @@ async def ask_global(session: SessionModel, question: str):
         for ai_response in ai_responses:
             prompt_per_document.extend(
                 [
-                    "{}: {}\nContext about document: {}".format(
+                    "{}: {}\nContext about document: {}\n{}".format(
                         ai_response.document.title,
                         ai_response.text,
                         ai_response.document.context,
+                        ai_response.document.description,
                     )
                 ]
             )
 
+        # Big prompt, TODO consolidate and summarise
         prompt = [
             SystemMessage(
                 content=(

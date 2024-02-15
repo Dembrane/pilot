@@ -39,22 +39,49 @@ def load_summary_chain():
 
 
 def transform_question_for_global_analysis(document: DocumentModel, question: str):
-    # TODO
-    return question
+    title = document.title
+    description = document.description
+    context = document.context
+    session_context = document.session.context
+
+    prompt = ChatPromptTemplate.from_template(
+        "The user asked a global research question that is relevant to a set of documents they uploaded."
+        f"\nGlobal context: {session_context}"
+        "\nYour task is to transform the question to be relevant to the current document below"
+        f"\nDocument title: {title}"
+        f"\nDocument description: {description}"
+        f"\nDocument context: {context}"
+        f"\nHere is the question that you need to transform: {question}"
+        f"\nTransformed question:"
+    )
+
+    chain = prompt | llm | StrOutputParser()
+
+    transformed_question = chain.invoke({})
+
+    return transformed_question
 
 
 # Q+A for a document
 async def ask_document(document: DocumentModel, question: str, is_global=False):
+    original_question = question
+
     if is_global:
         question = transform_question_for_global_analysis(document, question)
 
     logger.info(
         f"Processing document question, document: {document.id}, question: {question}"
     )
-    #  retrieve messages
+
+    user_question = (
+        original_question
+        if not is_global
+        else original_question + f"(for this document: {question})"
+    )
+
     user_message = DocumentMessageModel(
         id=str(uuid4()),
-        text=question,
+        text=user_question,
         from_user=True,
         is_global=is_global,
         document_id=document.id,
@@ -266,9 +293,19 @@ async def ask_global(session: SessionModel, question: str):
 
 
 if __name__ == "__main__":
-    document = db.query(DocumentModel).first()
+    # document = db.query(DocumentModel).first()
     # question = "what was my last question about?"
     # response = ask_document(document, question)
     # print("Done")
 
-    print(vectorstore.similarity_search("XYZ Shareholder"))
+    # print(vectorstore.similarity_search("XYZ Shareholder"))
+    document = (
+        db.query(DocumentModel)
+        .filter(DocumentModel.id == "73c6f810-f386-4651-a5f8-9df71748834c")
+        .first()
+    )
+    print(
+        transform_question_for_global_analysis(
+            document, "what is common about these documents?"
+        )
+    )

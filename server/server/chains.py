@@ -26,10 +26,9 @@ llm = ChatOpenAI(temperature=0.5, model_name="gpt-3.5-turbo-1106", max_retries=6
 
 def load_title_chain():
     prompt = ChatPromptTemplate.from_template(
-        "Generate a title for the given text. Do not enclose the title in quotes. Only output the title.\nText:{text}\nTitle:"
+        "Gegeven de volgende tekst, genereer een Nederlandse titel die kort is (maximaal 6 woorden), de meest relevante trefwoorden bevat, en geen aanhalingstekens of andere leestekens gebruikt. Alleen titel weergeven aub. \nTekst:{text}\nTitel:"
     )
     return prompt | llm | StrOutputParser()
-    # TODO
 
 
 def load_summary_chain():

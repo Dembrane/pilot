@@ -41,7 +41,7 @@ import { toast } from "./Toaster";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 export const AIMessage = (
-  props: PropsWithChildren<{ text: string; title?: string }>
+  props: PropsWithChildren<{ text: string; title?: string }>,
 ) => {
   const theme = useMantineTheme();
   return (
@@ -65,7 +65,7 @@ export const AIMessage = (
 };
 
 export const DocumentAIMessage = (
-  props: PropsWithChildren<{ text: string; title?: string }>
+  props: PropsWithChildren<{ text: string; title?: string }>,
 ) => {
   const theme = useMantineTheme();
   return (
@@ -93,7 +93,7 @@ export const HumanMessage = (
     text?: string;
     title?: string;
     paperProps?: PaperProps;
-  }>
+  }>,
 ) => {
   return (
     <Paper
@@ -126,7 +126,7 @@ export const DropzoneUploadDocuments = (
     idle?: React.ReactNode;
     reject?: React.ReactNode;
     accept?: React.ReactNode;
-  }>
+  }>,
 ) => {
   const uploadDocumentsMutation = useUploadDocuments();
 
@@ -254,7 +254,11 @@ export const GlobalAIChatMessages = () => {
             </AIMessage>
           );
         } else {
-          return <HumanMessage key={message.id} text={message.text} />;
+          return (
+            <HumanMessage key={message.id} text="">
+              <Markdown content={message.text} />
+            </HumanMessage>
+          );
         }
       })}
     </>
@@ -311,7 +315,7 @@ export const AllDocumentsReadyMessages = () => {
   const currentSessionQuery = useCurrentSession();
   const documentsQuery = useDocuments();
   const isReady = documentsQuery.data?.every(
-    (doc) => doc.is_processed && doc.context
+    (doc) => doc.is_processed && doc.context,
   );
   // ?.filter((doc) => !doc.processing_error)
 
@@ -402,11 +406,17 @@ export const DocumentChatMessages = ({
                 <HumanMessage
                   key={message.id}
                   title="Global Research Question"
-                  text={message.text}
-                />
+                  text=""
+                >
+                  <Markdown content={message.text} />
+                </HumanMessage>
               );
             } else {
-              return <HumanMessage key={message.id} text={message.text} />;
+              return (
+                <HumanMessage key={message.id} text="">
+                  <Markdown content={message.text} />
+                </HumanMessage>
+              );
             }
           }
         })}

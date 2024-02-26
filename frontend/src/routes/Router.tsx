@@ -4,6 +4,7 @@ import { GlobalAnalysisRoute } from "./GlobalAnalysis";
 import { DocumentAnalysisRoute } from "./DocumentAnalysis";
 import { NotFoundRoute } from "./404";
 import { getDocumentById } from "../lib/query";
+import { SelectSessionRoute } from "./SelectSession";
 
 export const router = createBrowserRouter([
   {
@@ -12,8 +13,8 @@ export const router = createBrowserRouter([
     errorElement: <NotFoundRoute />,
     children: [
       {
-        path: "",
-        element: <GlobalAnalysisRoute />,
+        path: "session",
+        element: <SelectSessionRoute />,
       },
       {
         path: "document/:documentId",
@@ -23,6 +24,10 @@ export const router = createBrowserRouter([
           const document = await getDocumentById(params.documentId as string);
           return document;
         },
+      },
+      {
+        element: <GlobalAnalysisRoute />,
+        index: true,
       },
     ],
   },

@@ -1,8 +1,8 @@
-import { Button, Group, Paper } from "@mantine/core";
+import { Anchor, Button, Group, Paper } from "@mantine/core";
 import { Logo } from "./Logo";
 import { DocumentPanel } from "./Documents";
 import { Toaster } from "./Toaster";
-import { Outlet } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 
 export const Layout = () => {
   return (
@@ -10,7 +10,19 @@ export const Layout = () => {
       <header className="h-[60px] sticky top-0 z-10">
         <Paper p="xs" shadow="xs" className="">
           <Group justify="space-between">
-            <Logo />
+            <Group gap="md">
+              <Logo />
+              <NavLink to="/">
+                {({ isActive }) => (
+                  <Anchor c={isActive ? "blue" : "gray"}>Analysis</Anchor>
+                )}
+              </NavLink>
+              <NavLink to="/session">
+                {({ isActive }) => (
+                  <Anchor c={isActive ? "blue" : "gray"}>Select Session</Anchor>
+                )}
+              </NavLink>
+            </Group>
             <Button disabled variant="filled">
               Export
             </Button>

@@ -37,8 +37,10 @@ const DocumentSkeleton = () => (
 export const DocumentPanel = () => {
   const { data, isLoading } = useDocuments();
 
+  const [parent] = useAutoAnimate();
+
   return (
-    <Stack p="sm">
+    <Stack p="sm" ref={parent}>
       <Group justify="space-between">
         <Title order={2}>Documents</Title>
         <Tooltip label="Upload documents">
@@ -50,12 +52,10 @@ export const DocumentPanel = () => {
         </Tooltip>
       </Group>
 
-      {isLoading && <DocumentSkeleton />}
-
-      {data && data.length > 0 ? (
-        <DocumentAccordion documents={data} />
+      {isLoading ? (
+        <DocumentSkeleton />
       ) : (
-        <Text>No documents uploaded yet</Text>
+        <DocumentAccordion documents={data ?? []} />
       )}
     </Stack>
   );
@@ -231,6 +231,15 @@ export const DocumentAccordion = ({
   documents,
 }: PropsWithChildren<{ documents: TDocument[] }>) => {
   const [parent] = useAutoAnimate();
+
+  if (documents.length == 0) {
+    return (
+      <Stack gap="xs" ref={parent}>
+        <Text size="sm">No documents uploaded yet</Text>
+      </Stack>
+    );
+  }
+
   return (
     // <ScrollArea.Autosize mah="75vh" offsetScrollbars>
     <Accordion variant="separated" radius="md">

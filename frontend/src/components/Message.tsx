@@ -194,10 +194,10 @@ export const DropzoneUploadDocumentsMessage = () => {
 };
 
 export const InputGlobalContextHumanMessage = ({
-  session: { context: initialContext },
-}: PropsWithChildren<{ session: TSession }>) => {
+  session,
+}: PropsWithChildren<{ session?: TSession }>) => {
   const updateSessionMutation = useUpdateSession();
-  const [context, setContext] = useState(initialContext ?? "");
+  const [context, setContext] = useState(session?.context ?? "");
 
   const handleSave = () => {
     updateSessionMutation.mutate({ context });

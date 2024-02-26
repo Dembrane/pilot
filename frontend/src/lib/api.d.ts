@@ -23,6 +23,7 @@ type TSession = {
   name?: str;
   context?: str;
   processing_since?: Date;
+  documents_count: int;
 };
 
 type TSessionMessage = {

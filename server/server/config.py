@@ -17,8 +17,9 @@ if not os.path.exists(UPLOADS_DIR):
 EMBEDDINGS_CACHE_DIR = os.path.join(BASE_DIR, "embeddings_cache")
 FAISS_INDEX_PATH = os.path.join(BASE_DIR, "faiss_index")
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
-assert DATABASE_URL, "DATABASE_URL environment variable is not set"
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///db.sqlite3")
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is not set"
+
+FRONTEND_DIST_DIR = os.path.join(BASE_DIR, "frontend_dist")

@@ -16,12 +16,12 @@ export const DocumentAnalysisRoute = () => {
       <Group justify="space-between">
         <Group align="center" gap="xs" wrap="nowrap">
           <Link to="/">
-            <Title component={Anchor} order={2}>
+            <Title component={Anchor} order={1}>
               Analysis
             </Title>
           </Link>
           <IconChevronRight />
-          <Title order={2}>{initialData.title}</Title>
+          <Title order={1}>{initialData.title}</Title>
         </Group>
       </Group>
 

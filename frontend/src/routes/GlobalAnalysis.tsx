@@ -1,29 +1,27 @@
-import { ActionIcon, Group, Skeleton, Stack, Title } from "@mantine/core"
-import { Icons } from "../icons"
-import { useCurrentSession, useDocuments } from "../lib/query"
+import { ActionIcon, Group, Skeleton, Stack, Title } from "@mantine/core";
+import { Icons } from "../icons";
+import { useCurrentSession, useDocuments } from "../lib/query";
 import {
   AIMessage,
   AllDocumentsReadyMessages,
   DropzoneUploadDocumentsMessage,
-  GlobalAIChatMessages,
   GlobalContextAIMessage,
   InputGlobalContextHumanMessage,
-  InputGlobalResearchQuestionHumanMessage,
-} from "../components/Message"
-import { useAutoAnimate } from "@formkit/auto-animate/react"
+} from "../components/Message";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const AnalysisSkeleton = () =>
-  [1, 2].map((i) => <Skeleton key={i} height={120} radius="md" />)
+  [1, 2].map((i) => <Skeleton key={i} height={120} radius="md" />);
 
 export const GlobalAnalysisRoute = () => {
-  const documentsQuery = useDocuments()
-  const sessionQuery = useCurrentSession()
-  const [parent] = useAutoAnimate()
+  const documentsQuery = useDocuments();
+  const sessionQuery = useCurrentSession();
+  const [parent] = useAutoAnimate();
 
   return (
     <Stack p="sm">
       <Group justify="space-between">
-        <Title order={2}>Analysis</Title>
+        <Title order={1}>Analysis</Title>
         <ActionIcon disabled opacity={"25%"}>
           <Icons.Refresh />
         </ActionIcon>
@@ -54,5 +52,5 @@ export const GlobalAnalysisRoute = () => {
         )}
       </Stack>
     </Stack>
-  )
-}
+  );
+};

@@ -1,21 +1,22 @@
-import { ActionIcon, Group, Skeleton, Stack, Title } from "@mantine/core"
-import { Icons } from "../icons"
-import { useDocuments } from "../lib/query"
+import { ActionIcon, Group, Skeleton, Stack, Title } from "@mantine/core";
+import { Icons } from "../icons";
+import { useCurrentSession, useDocuments } from "../lib/query";
 import {
   AIMessage,
   AllDocumentsReadyMessages,
   DropzoneUploadDocumentsMessage,
   GlobalContextAIMessage,
   InputGlobalContextHumanMessage,
-} from "./Message"
-import { useAutoAnimate } from "@formkit/auto-animate/react"
+} from "./Message";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const AnalysisSkeleton = () =>
-  [1, 2].map((i) => <Skeleton key={i} height={120} radius="md" />)
+  [1, 2].map((i) => <Skeleton key={i} height={120} radius="md" />);
 
 export const GlobalAnalysisPanel = () => {
-  const documentsQuery = useDocuments()
-  const [parent] = useAutoAnimate()
+  const session = useCurrentSession();
+  const documentsQuery = useDocuments();
+  const [parent] = useAutoAnimate();
 
   return (
     <Stack p="sm">
@@ -38,12 +39,12 @@ export const GlobalAnalysisPanel = () => {
         {documentsQuery.data && documentsQuery.data.length > 0 && (
           <>
             <AIMessage text="Geweldig! Uw documenten worden nu geüpload. Terwijl de documenten worden verwerkt, kun je me vertellen waar deze analyse over gaat?" />
-            <InputGlobalContextHumanMessage />
+            <InputGlobalContextHumanMessage session={session.data} />
             <GlobalContextAIMessage />
             <AllDocumentsReadyMessages />
           </>
         )}
       </Stack>
     </Stack>
-  )
-}
+  );
+};

@@ -1,13 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios, { AxiosError, AxiosRequestConfig } from "axios";
+import axios, {
+  AxiosError,
+  AxiosRequestConfig,
+  CreateAxiosDefaults,
+} from "axios";
 import { toast } from "../components/Toaster";
 
-export const api = axios.create({
+const commonConfig: CreateAxiosDefaults = {
   baseURL: "/api",
-});
+};
 
-const initiateSession = async () => {
-  return api.get("/initiate");
+export const apiNoAuth = axios.create(commonConfig);
+
+apiNoAuth.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    // Pass through errors
+    throw error;
+  },
+);
+
+export const api = axios.create(commonConfig);
+
+const initiateSession = async (sessionId?: number) => {
+  const url = sessionId ? `/initiate?session_id=${sessionId}` : "/initiate";
+  return api.get(url);
 };
 
 interface CustomAxiosRequestConfig extends AxiosRequestConfig {
@@ -37,7 +54,7 @@ api.interceptors.response.use(
     }
     // Pass through other errors
     throw error;
-  }
+  },
 );
 
 const getDocuments = async () => {
@@ -60,7 +77,7 @@ export const getDocumentById = async (documentId: string) => {
 
 export const useDocumentById = (
   documentId: string,
-  initialData?: TDocument
+  initialData?: TDocument,
 ) => {
   return useQuery({
     queryKey: ["document", documentId],
@@ -113,7 +130,7 @@ type TUpdateDocumentPayload = {
 const updateDocument = async (payload: TUpdateDocumentPayload) => {
   return api.put<TDocument, TDocument>(
     `/document/${payload.document.id}`,
-    payload.update
+    payload.update,
   );
 };
 
@@ -149,7 +166,7 @@ export const useDeleteDocument = () => {
         ["document"],
         (oldData: TDocument[] | undefined) => {
           return oldData ? oldData.filter((d) => d.id !== document.id) : [];
-        }
+        },
       );
     },
     onSuccess: () => {
@@ -163,6 +180,32 @@ export const useDeleteDocument = () => {
   });
 
   return mutation;
+};
+
+const getAllSessions = async () => {
+  return apiNoAuth.get<unknown, TSession[]>("/all-sessions");
+};
+
+export const useAllSessions = () => {
+  return useQuery({
+    queryKey: ["all-sessions"],
+    queryFn: getAllSessions,
+    refetchInterval: 10000,
+  });
+};
+
+export const useInitiateSessionById = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: initiateSession,
+    onSuccess: () => {
+      toast.success("Session updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["document"] });
+      queryClient.invalidateQueries({ queryKey: ["session"] });
+      queryClient.invalidateQueries({ queryKey: [] });
+      queryClient.resetQueries();
+    },
+  });
 };
 
 const getCurrentSession = async () => {
@@ -226,7 +269,7 @@ const postDocumentMessage = async (payload: PostDocumentMessagePayload) => {
     `/document/${payload.documentId}/chat`,
     {
       message: payload.message,
-    }
+    },
   );
 };
 
@@ -251,7 +294,7 @@ export const usePostDocumentMessage = () => {
                 } as TDocumentMessage,
               ]
             : [];
-        }
+        },
       );
     },
     onSuccess: ({ document_id }) => {
@@ -285,7 +328,7 @@ type PostSessionMessagePayload = {
 };
 
 export const postSessionMessage = async (
-  payload: PostSessionMessagePayload
+  payload: PostSessionMessagePayload,
 ) => {
   if (payload.message == "") {
     throw new Error("Please enter a message");
@@ -323,7 +366,7 @@ export const usePostSessionMessage = () => {
                 } as TSessionMessage,
               ]
             : [];
-        }
+        },
       );
     },
     onSuccess: () => {

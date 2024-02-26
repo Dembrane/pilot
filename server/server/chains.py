@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from logging import getLogger
 from typing import List
 from uuid import uuid4
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain.chains import load_summarize_chain as lc_load_summarize_chain
@@ -21,21 +21,62 @@ from server.vectorstore import vectorstore
 
 logger = getLogger("chains")
 
-llm = ChatOpenAI(temperature=0.5, model_name="gpt-3.5-turbo-1106", max_retries=6)
+chat_llm_small = ChatOpenAI(
+    temperature=0.5, model_name="gpt-3.5-turbo-1106", max_retries=6
+)
+
+
+# For global question answering
+chat_llm_large = ChatOpenAI(
+    temperature=0.2, model_name="gpt-4-0125-preview", max_retries=6
+)
 
 
 def load_title_chain():
     prompt = ChatPromptTemplate.from_template(
         "Gegeven de volgende tekst, genereer een Nederlandse titel die kort is (maximaal 6 woorden), de meest relevante trefwoorden bevat, en geen aanhalingstekens of andere leestekens gebruikt. Alleen titel weergeven aub. \nTekst:{text}\nTitel:"
     )
-    return prompt | llm | StrOutputParser()
+    return prompt | chat_llm_small | StrOutputParser()
 
 
 def load_summary_chain():
-    return lc_load_summarize_chain(
-        llm, chain_type="map_reduce", input_key="documents", output_key="output_text"
+    # prompt_template = (
+    #     "Jij bent een deskundige scrijver en een behulpzame onderzoeksassistent. Scrijf een onverzichtelijke, beknopte samenvatting van de volgende tekst:\n{text}\nSAMENVATTING:"
+    # )
+    # return lc_load_summarize_chain(
+    #     llm,
+    #     chain_type="map_reduce",
+    #     input_key="documents",
+    #     output_key="output_text",
+    #     map_prompt=PromptTemplate(template=prompt_template, input_variables=["text"]),
+    #     reduce_prompt=PromptTemplate(
+    #         template=prompt_template, input_variables=["text"]
+    #     ),
+    # )
+    prompt_template = """Jij bent een deskundige scrijver en een behulpzame onderzoeksassistent. Scrijf een onverzichtelijke, beknopte samenvatting van de volgende tekst:\n{text}\nSAMENVATTING:"""
+    prompt = PromptTemplate.from_template(prompt_template)
+    refine_template = (
+        "Jou taak is om een globale, concluderende samenvatting te schrijven\n"
+        "We hebben een bestaande samenvatting gegeven tot op een bepaald punt: {existing_answer}\n"
+        "We hebben de mogelijkheid om de bestaande samenvatting te verfijnen"
+        "(alleen indien nodig) met hieronder wat meer context.\n"
+        "------------\n"
+        "{text}\n"
+        "------------\n"
+        "De oorspronkelijke samenvatting in het Nederlands verfijnen met het oog op de nieuwe context"
+        "Als de context niet bruikbaar is, retourneer dan de oorspronkelijke samenvatting."
     )
-    # You can add anther argument to this function check langchain TODO
+    refine_prompt = PromptTemplate.from_template(refine_template)
+    chain = lc_load_summarize_chain(
+        llm=chat_llm_small,
+        chain_type="refine",
+        question_prompt=prompt,
+        refine_prompt=refine_prompt,
+        return_intermediate_steps=True,
+        input_key="documents",
+        output_key="output_text",
+    )
+    return chain
 
 
 def transform_question_for_global_analysis(document: DocumentModel, question: str):
@@ -66,7 +107,7 @@ def transform_question_for_global_analysis(document: DocumentModel, question: st
         f"\nGeherformuleerde onderzoeksvraag voor dit specifieke bron:"
     )
 
-    chain = prompt | llm | StrOutputParser()
+    chain = prompt | chat_llm_small | StrOutputParser()
 
     transformed_question = chain.invoke({})
 
@@ -104,7 +145,7 @@ async def ask_document(document: DocumentModel, question: str, is_global=False):
     logger.info(f"Loaded {len(message_history)} messages from document {document.id}")
 
     # if needed summarise the memory to stay within context
-    memory = ConversationSummaryBufferMemory(llm=llm, return_messages=True)
+    memory = ConversationSummaryBufferMemory(llm=chat_llm_small, return_messages=True)
 
     for message in message_history:
         memory.chat_memory.add_message(message.get_lc_message())
@@ -164,7 +205,7 @@ async def ask_document(document: DocumentModel, question: str, is_global=False):
 
     logger.info(f"Generated prompt: {prompt}")
 
-    prediction = llm.invoke([*prompt])
+    prediction = chat_llm_small.invoke([*prompt])
 
     ai_response = DocumentMessageModel(
         id=str(uuid4()),
@@ -180,10 +221,6 @@ async def ask_document(document: DocumentModel, question: str, is_global=False):
     db.commit()
 
     return ai_response
-
-
-# For global question answering
-global_llm = ChatOpenAI(temperature=0.2, model_name="gpt-4-0125-preview", max_retries=6)
 
 
 async def ask_global(session: SessionModel, question: str):
@@ -225,7 +262,9 @@ async def ask_global(session: SessionModel, question: str):
         message_history.sort(key=lambda x: x.created_at)
         logger.info(f"Loaded {len(message_history)} messages from session {session.id}")
 
-        memory = ConversationSummaryBufferMemory(llm=llm, return_messages=True)
+        memory = ConversationSummaryBufferMemory(
+            llm=chat_llm_small, return_messages=True
+        )
 
         for message in message_history:
             memory.chat_memory.add_message(message.get_lc_message())
@@ -302,7 +341,7 @@ async def ask_global(session: SessionModel, question: str):
 
         logger.info(f"Generated prompt: {prompt}")
 
-        prediction = global_llm.invoke([*prompt])
+        prediction = chat_llm_large.invoke([*prompt])
 
         global_response = SessionMessageModel(
             id=str(uuid4()),

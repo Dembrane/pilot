@@ -1,10 +1,18 @@
-import { LoadingOverlay, Stack, Title } from "@mantine/core";
+import {
+  Button,
+  Group,
+  LoadingOverlay,
+  Stack,
+  Title,
+  Tooltip,
+} from "@mantine/core";
 import {
   useAllSessions,
   useCurrentSession,
   useInitiateSessionById,
 } from "../lib/query";
 import { format } from "date-fns";
+import { IconPlus } from "@tabler/icons-react";
 
 const SessionCard = ({
   session,
@@ -62,9 +70,9 @@ const SessionCard = ({
 export const SelectSessionRoute = () => {
   const allSessionsQuery = useAllSessions();
   const currentSessionQuery = useCurrentSession();
+  const initiateSessionByIdMutation = useInitiateSessionById();
 
   if (allSessionsQuery.isLoading || currentSessionQuery.isLoading) {
-    console.log("loading");
     return (
       <div className="h-full">
         <LoadingOverlay visible />
@@ -72,9 +80,30 @@ export const SelectSessionRoute = () => {
     );
   }
 
+  const handleCreateNewSession = () => {
+    initiateSessionByIdMutation.mutate("new");
+  };
+
   return (
     <Stack className="h-full p-2">
-      <Title order={1}>Select Session</Title>
+      <Group justify="space-between">
+        <Title order={1}>Select Session</Title>
+        <Tooltip label="Create a new session">
+          {/* <ActionIcon onClick={handleCreateNewSession}>
+            <IconPlus color="black" />
+          </ActionIcon> */}
+          <Button
+            loading={initiateSessionByIdMutation.isPending}
+            onClick={handleCreateNewSession}
+            c="white"
+            bg="blue"
+            variant="filled"
+            rightSection={<IconPlus size="16" />}
+          >
+            Create
+          </Button>
+        </Tooltip>
+      </Group>
       <div className="container p-2">
         <div className="grid grid-cols-12 gap-4">
           {allSessionsQuery.data &&

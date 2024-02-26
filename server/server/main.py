@@ -58,14 +58,16 @@ async def health():
 async def initiate_session(
     request: Request, response: Response, session_id: str = None
 ):
-    if session_id:
-        session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
-    else:
+    logger.info(f"session_id {session_id}")
+    if not session_id or session_id == "new":
+        logger.info("user requested new session")
         session = SessionModel()
         db.add(session)
         db.commit()
+    else:
+        session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
 
     response.set_cookie(key="sid", value=session.id, httponly=True)
 

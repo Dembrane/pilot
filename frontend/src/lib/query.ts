@@ -22,7 +22,7 @@ apiNoAuth.interceptors.response.use(
 
 export const api = axios.create(commonConfig);
 
-const initiateSession = async (sessionId?: number) => {
+const initiateSession = async (sessionId?: number | "new") => {
   const url = sessionId ? `/initiate?session_id=${sessionId}` : "/initiate";
   return api.get(url);
 };
@@ -188,7 +188,7 @@ const getAllSessions = async () => {
 
 export const useAllSessions = () => {
   return useQuery({
-    queryKey: ["all-sessions"],
+    queryKey: ["session", "all"],
     queryFn: getAllSessions,
     refetchInterval: 10000,
   });
@@ -199,11 +199,10 @@ export const useInitiateSessionById = () => {
   return useMutation({
     mutationFn: initiateSession,
     onSuccess: () => {
-      toast.success("Session updated successfully");
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["session"] });
-      queryClient.invalidateQueries({ queryKey: [] });
       queryClient.resetQueries();
+      toast.success("Session updated successfully");
     },
   });
 };

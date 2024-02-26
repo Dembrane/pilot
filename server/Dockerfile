@@ -11,4 +11,4 @@ COPY ./ /code/app
 EXPOSE 8000
 
 # uvicorn server.main:app --host 0.0.0.0 --proxy-headers
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--proxy-headers"]
+CMD ["uvicorn", "server.main:app", "--host", "0.0.0.0", "--proxy-headers"]

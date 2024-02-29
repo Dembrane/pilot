@@ -10,9 +10,11 @@ import {
   useAllSessions,
   useCurrentSession,
   useInitiateSessionById,
+  useUpdateCurrentSession,
 } from "../lib/query";
 import { format } from "date-fns";
 import { IconPlus } from "@tabler/icons-react";
+import { Trans, t } from "@lingui/macro";
 
 const SessionCard = ({
   session,
@@ -51,10 +53,13 @@ const SessionCard = ({
       onClick={handleInitiateSession}
     >
       <LoadingOverlay visible={initiateSessionByIdMutation.isPending} />
-      <Stack className="text-left" align="start" gap="xs">
-        <div className="text-xs text-gray-500 font-medium">
-          ID: {session.id} | Docs: {session.documents_count}
-        </div>
+      <Stack className="text-left " align="start" gap="xs">
+        <Group justify="space-between w-full" align="end">
+          <div className="text-xs text-gray-500 font-medium flex-1">
+            ID: {session.id} | Docs: {session.documents_count}
+          </div>
+          <div className="text-xs uppercase">{session.language}</div>
+        </Group>
         <div className="text-xs text-gray-500">
           {formatDate(session.created_at)}
         </div>
@@ -71,6 +76,7 @@ export const SelectSessionRoute = () => {
   const allSessionsQuery = useAllSessions();
   const currentSessionQuery = useCurrentSession();
   const initiateSessionByIdMutation = useInitiateSessionById();
+  const updateCurrentSessionMutation = useUpdateCurrentSession();
 
   if (allSessionsQuery.isLoading || currentSessionQuery.isLoading) {
     return (
@@ -87,11 +93,10 @@ export const SelectSessionRoute = () => {
   return (
     <Stack className="h-full p-2">
       <Group justify="space-between">
-        <Title order={1}>Select Session</Title>
-        <Tooltip label="Create a new session">
-          {/* <ActionIcon onClick={handleCreateNewSession}>
-            <IconPlus color="black" />
-          </ActionIcon> */}
+        <Title order={1}>
+          <Trans>Select Session</Trans>
+        </Title>
+        <Tooltip label={t`Create a new session`}>
           <Button
             loading={initiateSessionByIdMutation.isPending}
             onClick={handleCreateNewSession}
@@ -108,17 +113,53 @@ export const SelectSessionRoute = () => {
         <div className="grid grid-cols-12 gap-4">
           {allSessionsQuery.data &&
             allSessionsQuery.data.length > 0 &&
-            allSessionsQuery.data.map((session) => (
-              <div key={session.id} className="col-span-6 lg:col-span-4">
-                <SessionCard
-                  session={session}
-                  key={session.id}
-                  isCurrentSession={currentSessionQuery.data?.id === session.id}
-                />
-              </div>
-            ))}
+            allSessionsQuery.data
+              .filter(
+                (session) =>
+                  session.documents_count > 0 ||
+                  session.id == currentSessionQuery.data?.id,
+              )
+              .map((session) => (
+                <div key={session.id} className="col-span-6 lg:col-span-4">
+                  <SessionCard
+                    session={session}
+                    key={session.id}
+                    isCurrentSession={
+                      currentSessionQuery.data?.id === session.id
+                    }
+                  />
+                </div>
+              ))}
         </div>
       </div>
+      {currentSessionQuery.data && (
+        <Stack className="container">
+          <Title order={2}>Update Current Session</Title>
+          <div>
+            {currentSessionQuery.data.language === "en" ? (
+              <Button
+                c="white"
+                bg="blue"
+                onClick={() => {
+                  updateCurrentSessionMutation.mutate({ language: "nl" });
+                }}
+              >
+                Use Dutch
+              </Button>
+            ) : (
+              <Button
+                c="white"
+                bg="blue"
+                onClick={() => {
+                  updateCurrentSessionMutation.mutate({ language: "en" });
+                }}
+              >
+                Use English
+              </Button>
+            )}
+          </div>
+        </Stack>
+      )}
     </Stack>
   );
 };

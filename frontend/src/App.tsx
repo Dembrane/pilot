@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { generateColors } from "@mantine/colors-generator";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./routes/Router";
+import { I18nProvider } from "./components/I18nProvider";
 
 const theme = createTheme({
   fontFamily: "'Space Grotesk Variable', sans-serif",
@@ -25,7 +26,9 @@ export const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <MantineProvider theme={theme}>
-        <RouterProvider router={router} />
+        <I18nProvider>
+          <RouterProvider router={router} />
+        </I18nProvider>
       </MantineProvider>
     </QueryClientProvider>
   );

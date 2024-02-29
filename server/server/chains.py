@@ -52,7 +52,7 @@ def load_summary_chain(language: str) -> Runnable:
         prompt_template = """Jij bent een deskundige scrijver en een behulpzame onderzoeksassistent. Scrijf een onverzichtelijke, beknopte samenvatting van de volgende tekst:\n{text}\nSAMENVATTING:"""
         prompt = PromptTemplate.from_template(prompt_template)
         refine_template = (
-            "Jou taak is om een globale, concluderende samenvatting te schrijven\n"
+            "Jou taak is om een globale, concluderende samenvatting te schrijven. Zorg ervoor dat de samenvatting binnen de 80-100 woorden valt\n"
             "We hebben een bestaande samenvatting gegeven tot op een bepaald punt: {existing_answer}\n"
             "We hebben de mogelijkheid om de bestaande samenvatting te verfijnen"
             "(alleen indien nodig) met hieronder wat meer context.\n"
@@ -67,7 +67,7 @@ def load_summary_chain(language: str) -> Runnable:
         prompt_template = """You are a helpful and analytical research assistant. Write a concise, informative summary of the following text:\n{text}\nSUMMARY:"""
         prompt = PromptTemplate.from_template(prompt_template)
         refine_template = (
-            "Your task is to write a global, concluding summary\n"
+            "Your task is to write a global, concluding summary. Ensure the summary is within 80-100 words\n"
             "We have given an existing summary up to a certain point: {existing_answer}\n"
             "We have the ability to refine the existing summary"
             "(if necessary) with the additional context below.\n"

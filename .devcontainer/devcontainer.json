@@ -12,7 +12,8 @@
 		},
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "18"
-		}
+		},
+		"ghcr.io/warrenbuckley/codespace-features/sqlite:latest": {}
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
@@ -27,7 +28,9 @@
 				"ms-python.python",
 				"alexcvzz.vscode-sqlite",
 				"ms-azuretools.vscode-docker",
-				"ms-python.mypy-type-checker"
+				"ms-python.mypy-type-checker",
+				"qwtel.sqlite-viewer",
+				"yy0931.vscode-sqlite3-editor"
 			]
 		}
 	}

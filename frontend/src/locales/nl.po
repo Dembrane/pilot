@@ -1,0 +1,166 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2024-02-29 16:08+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: nl\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#: src/components/Documents.tsx:90
+msgid "Add context to document"
+msgstr "Voeg context toe aan document"
+
+#: src/components/Documents.tsx:146
+msgid "Added context"
+msgstr "Context toegevoegd"
+
+#: src/components/Message.tsx:58
+msgid "AI Assistant"
+msgstr "AI Assistent"
+
+#: src/components/Message.tsx:340
+msgid "All documents are uploaded and ready now. What research question are you interested in asking? Optionally, you can now open an individual analysis chat for each document."
+msgstr "Alle documenten zijn geüpload en zijn nu klaar. Welke onderzoeksvraag wil je stellen? Optioneel kunt u nu voor elk document een individuele analysechat openen."
+
+#: src/components/Layout.tsx:19
+#: src/routes/GlobalAnalysis.tsx:26
+msgid "Analysis"
+msgstr "Analyse"
+
+#: src/components/Message.tsx:313
+msgid "Analyze!"
+msgstr "Analyseer!"
+
+#: src/components/Documents.tsx:199
+msgid "Are you sure you want to delete this document?"
+msgstr "Weet je zeker dat je dit document wilt verwijderen?"
+
+#: src/components/Message.tsx:303
+msgid "Ask a global research question"
+msgstr "Stel een algemene onderzoeksvraag"
+
+#: src/components/Message.tsx:493
+msgid "Ask a question..."
+msgstr "Stel een vraag..."
+
+#: src/components/Message.tsx:498
+msgid "Ask Question"
+msgstr "Stel Vraag"
+
+#: src/components/Message.tsx:193
+msgid "Attach as many documents as you like to analyse"
+msgstr "Voeg zoveel documenten toe als je wilt analyseren"
+
+#: src/components/Documents.tsx:106
+msgid "Cancel"
+msgstr "Annuleren"
+
+#: src/routes/SelectSession.tsx:97
+msgid "Create a new session"
+msgstr "Maak een nieuwe sessie aan"
+
+#: src/components/Documents.tsx:210
+msgid "Delete document"
+msgstr "Verwijder document"
+
+#: src/components/Documents.tsx:243
+msgid "Description"
+msgstr "Beschrijving"
+
+#: src/components/Message.tsx:82
+msgid "Document AI Assistant"
+msgstr "Document AI Assistent"
+
+#: src/components/Documents.tsx:226
+msgid "Document is being processed"
+msgstr "Document wordt verwerkt"
+
+#: src/components/Documents.tsx:201
+msgid "Document was deleted"
+msgstr "Document is verwijderd"
+
+#: src/components/Documents.tsx:48
+msgid "Documents"
+msgstr "Documenten"
+
+#: src/components/Message.tsx:190
+msgid "Drag documents here or select files"
+msgstr "Sleep documenten hierheen of selecteer bestanden"
+
+#: src/components/Layout.tsx:32
+msgid "Export"
+msgstr "Exporteer"
+
+#: src/components/Message.tsx:401
+#: src/components/Message.tsx:419
+msgid "Global Research Question"
+msgstr "Algemene Onderzoeksvraag"
+
+#: src/routes/GlobalAnalysis.tsx:47
+msgid "Great! Your documents are now being uploaded. While the documents are being processed, can you tell me what this analysis is about?"
+msgstr "Geweldig! Uw documenten worden nu geüpload. Terwijl de documenten worden verwerkt, kunt u mij vertellen waar deze analyse over gaat?"
+
+#: src/routes/GlobalAnalysis.tsx:41
+msgid "Hello, I will be your research assistant today. To get started please upload the documents you want to analyse."
+msgstr "Hallo, ik ben vandaag je onderzoeksassistent. Om te beginnen upload je de documenten die je wilt analyseren."
+
+#: src/components/Message.tsx:212
+msgid "Input global context"
+msgstr "Voer algemene context in"
+
+#: src/components/Documents.tsx:262
+msgid "No documents uploaded yet"
+msgstr "Nog geen documenten geüpload"
+
+#: src/components/Documents.tsx:128
+msgid "Open Document Chat ✨"
+msgstr "Open Document Chat ✨"
+
+#: src/components/Documents.tsx:235
+msgid "Original filename"
+msgstr "Originele bestandsnaam"
+
+#: src/components/Message.tsx:449
+msgid "Please enter a message"
+msgstr "Voer een bericht in"
+
+#: src/components/Documents.tsx:103
+msgid "Save"
+msgstr "Opslaan"
+
+#: src/components/Layout.tsx:26
+#: src/routes/SelectSession.tsx:95
+msgid "Select Session"
+msgstr "Selecteer Sessie"
+
+#: src/components/Message.tsx:242
+msgid "Thank you! In the meantime, click individual documents to add context to each file that I will take into account for further analysis."
+msgstr "Bedankt! Klik ondertussen op individuele documenten om context toe te voegen aan elk bestand dat ik zal meenemen voor verdere analyse."
+
+#: src/components/Message.tsx:308
+msgid "Type a question here..."
+msgstr "Typ hier een vraag..."
+
+#: src/components/Documents.tsx:99
+#: src/components/Message.tsx:217
+msgid "Type context here..."
+msgstr "Typ hier de context..."
+
+#: src/components/Documents.tsx:50
+msgid "Upload documents"
+msgstr "Upload documenten"
+
+#: src/components/Message.tsx:393
+msgid "What kind of question do you want to ask for this document?"
+msgstr "Wat voor soort vraag wil je stellen voor dit document?"
+
+#: src/components/Message.tsx:115
+msgid "You"
+msgstr "Jij"

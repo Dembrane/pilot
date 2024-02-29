@@ -3,6 +3,7 @@ import { Logo } from "./Logo";
 import { DocumentPanel } from "./Documents";
 import { Toaster } from "./Toaster";
 import { NavLink, Outlet } from "react-router-dom";
+import { Trans } from "@lingui/macro";
 
 export const Layout = () => {
   return (
@@ -14,17 +15,21 @@ export const Layout = () => {
               <Logo />
               <NavLink to="/">
                 {({ isActive }) => (
-                  <Anchor c={isActive ? "blue" : "gray"}>Analysis</Anchor>
+                  <Anchor c={isActive ? "blue" : "gray"}>
+                    <Trans>Analysis</Trans>
+                  </Anchor>
                 )}
               </NavLink>
               <NavLink to="/session">
                 {({ isActive }) => (
-                  <Anchor c={isActive ? "blue" : "gray"}>Select Session</Anchor>
+                  <Anchor c={isActive ? "blue" : "gray"}>
+                    <Trans>Select Session</Trans>
+                  </Anchor>
                 )}
               </NavLink>
             </Group>
             <Button disabled variant="filled">
-              Export
+              <Trans>Export</Trans>
             </Button>
           </Group>
         </Paper>

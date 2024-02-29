@@ -6,6 +6,7 @@ type TDocument = {
   context?: string;
   is_processed: boolean;
   processing_error?: string;
+  original_filename: string;
 };
 
 type TDocumentMessage = {
@@ -24,6 +25,7 @@ type TSession = {
   context?: str;
   processing_since?: Date;
   documents_count: int;
+  language: str;
 };
 
 type TSessionMessage = {

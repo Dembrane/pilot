@@ -219,15 +219,15 @@ export const useCurrentSession = () => {
   });
 };
 
-const updateSession = async (session: Partial<TSession>) => {
+const updateCurrentSession = async (session: Partial<TSession>) => {
   return api.put<TSession, TSession>(`/session`, session);
 };
 
-export const useUpdateSession = () => {
+export const useUpdateCurrentSession = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: updateSession,
+    mutationFn: updateCurrentSession,
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["session"],

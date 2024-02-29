@@ -12,6 +12,7 @@ import {
   Button,
   LoadingOverlay,
   ActionIcon,
+  Divider,
 } from "@mantine/core";
 import {
   useDeleteDocument,
@@ -25,6 +26,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { IconTrash } from "@tabler/icons-react";
 import { toast } from "./Toaster";
 import { Link } from "react-router-dom";
+import { Trans, t } from "@lingui/macro";
 
 const DocumentSkeleton = () => (
   <Stack>
@@ -42,8 +44,10 @@ export const DocumentPanel = () => {
   return (
     <Stack p="sm" ref={parent}>
       <Group justify="space-between">
-        <Title order={2}>Documents</Title>
-        <Tooltip label="Upload documents">
+        <Title order={2}>
+          <Trans>Documents</Trans>
+        </Title>
+        <Tooltip label={t`Upload documents`}>
           <div>
             <DropzoneUploadDocuments>
               <Icons.Plus />
@@ -82,7 +86,9 @@ const UpdateDocumentContextInput = ({
 
   return (
     <Stack gap="xs">
-      <Text size="sm">Add context to document</Text>
+      <Text size="sm">
+        <Trans>Add context to document</Trans>
+      </Text>
       <Stack gap="xs" pos="relative">
         <LoadingOverlay visible={updateDocumentMutation.isPending} />
         <Textarea
@@ -90,14 +96,14 @@ const UpdateDocumentContextInput = ({
           rows={5}
           value={context}
           onChange={(e) => setContext(e.currentTarget.value)}
-          placeholder="Type context here..."
+          placeholder={t`Type context here...`}
         />
         <Group justify="stretch" w="100%" gap="xs">
           <Button c="white" bg="blue" flex={1} onClick={handleSave}>
-            Save
+            <Trans>Save</Trans>
           </Button>
           <Button c="gray" bg="gray.1" onClick={handleCancel}>
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
         </Group>
       </Stack>
@@ -119,7 +125,7 @@ const DocumentChatButton = ({
         bg="blue"
         fullWidth
       >
-        Open Document Chat ✨
+        <Trans>Open Document Chat ✨</Trans>
       </Button>
     </Link>
   );
@@ -136,13 +142,18 @@ const DocumentContext = ({
     <Stack gap="xs">
       {document.context != null ? (
         <>
-          <Text size="sm">Added context</Text>
+          <Text size="sm">
+            <Trans>Added context</Trans>
+          </Text>
           <Text size="xs">{document.context}</Text>
-          <DocumentChatButton document={document} />
         </>
       ) : (
         <UpdateDocumentContextInput document={document} />
       )}
+
+      <Divider />
+
+      <DocumentChatButton document={document} />
     </Stack>
   );
 };
@@ -185,9 +196,9 @@ const DocumentProcessingError = ({
   const deleteDocumentMutation = useDeleteDocument();
 
   const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this document?")) {
+    if (window.confirm(t`Are you sure you want to delete this document?`)) {
       deleteDocumentMutation.mutate(document);
-      toast.info("Document was deleted");
+      toast.info(t`Document was deleted`);
     }
   };
 
@@ -196,7 +207,7 @@ const DocumentProcessingError = ({
       <Text size="xs" c="red">
         {document.processing_error}
       </Text>
-      <Tooltip label="Delete document">
+      <Tooltip label={t`Delete document`}>
         <ActionIcon variant="outline" color="red" onClick={handleDelete}>
           <IconTrash />
         </ActionIcon>
@@ -211,14 +222,26 @@ const DocumentAccordionDetail = ({
   return (
     <Stack gap="xs">
       {!document.is_processed && document.processing_error == null && (
-        <Text size="xs">Document is being processed</Text>
+        <Text size="xs">
+          <Trans>Document is being processed</Trans>
+        </Text>
       )}
       {document.processing_error && (
         <DocumentProcessingError document={document} />
       )}
+      {document.title !== document.original_filename && (
+        <>
+          <Text size="sm">
+            <Trans>Original filename</Trans>
+          </Text>
+          <Text size="xs">{document.original_filename}</Text>
+        </>
+      )}
       {document.description && (
         <>
-          <Text size="sm">Description</Text>
+          <Text size="sm">
+            <Trans>Description</Trans>
+          </Text>
           <Text size="xs">{document.description}</Text>
         </>
       )}
@@ -235,7 +258,9 @@ export const DocumentAccordion = ({
   if (documents.length == 0) {
     return (
       <Stack gap="xs" ref={parent}>
-        <Text size="sm">No documents uploaded yet</Text>
+        <Text size="sm">
+          <Trans>No documents uploaded yet</Trans>
+        </Text>
       </Stack>
     );
   }

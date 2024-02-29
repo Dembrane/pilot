@@ -52,13 +52,15 @@ async def health() -> dict:
 
 @api.get("/initiate", tags=["session"])
 async def initiate_session(
-    request: Request, response: Response, session_id: str = ""
+    request: Request, response: Response, session_id: str = "", language: str = "en"
 ) -> dict:
     logger.info(f"session_id {session_id}")
     session: Optional[SessionModel]
     if session_id == "" or session_id == "new":
-        logger.info("user requested new session")
-        session = SessionModel()
+        logger.info(f"user requested new session with language {language}")
+        session = SessionModel(
+            language=language,
+        )
         db.add(session)
         db.commit()
     else:
@@ -79,6 +81,7 @@ class SessionSchema(BaseModel):
     context: str | None
     processing_since: datetime | None
     documents_count: int
+    language: str
 
 
 @api.get("/session", response_model=SessionSchema, tags=["session"])
@@ -110,7 +113,8 @@ async def get_all_sessions() -> List[SessionModel]:
 
 
 class PutSessionRequest(BaseModel):
-    context: str | None
+    context: str | None = None
+    language: str | None = None
 
 
 @api.put("/session", response_model=SessionSchema, tags=["session"])
@@ -120,8 +124,18 @@ async def update_session(
     if request.context:
         session.context = request.context
 
+    if request.language:
+        session.language = request.language
+
     db.add(session)
     db.commit()
+
+    documents_count = documents_count = (
+        db.query(DocumentModel).filter(DocumentModel.session_id == session.id).count()
+    )
+
+    session.documents_count = documents_count
+
     return session
 
 
@@ -133,6 +147,7 @@ class DocumentSchema(BaseModel):
     context: str | None
     is_processed: bool
     processing_error: str | None
+    original_filename: str
 
 
 @api.post("/upload-documents", response_model=List[DocumentSchema], tags=["document"])

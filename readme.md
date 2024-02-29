@@ -37,6 +37,7 @@ yarn && yarn build-and-copy
   cd server
   cp .env.sample .env
   ```
+- Run migrations (see [Database migrations](#Database-migrations))
 - Run the server
 
   ```
@@ -46,7 +47,9 @@ yarn && yarn build-and-copy
   ```
 
 - Run the frontend
+
   > In development, Vite(frontend development server) proxies the FastAPI server running on `:8000` to `/api` (see [`/frontend/vite.config.ts`](/frontend/vite.config.ts))
+
   ```
   cd frontend
   yarn

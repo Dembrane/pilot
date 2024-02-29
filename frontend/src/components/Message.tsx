@@ -34,11 +34,14 @@ import {
   usePostDocumentMessage,
   usePostSessionMessage,
   useSessionMessages,
-  useUpdateSession,
+  useUpdateCurrentSession,
   useUploadDocuments,
 } from "../lib/query";
 import { toast } from "./Toaster";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+
+import { Trans } from "@lingui/macro";
+import { t } from "@lingui/macro";
 
 export const AIMessage = (
   props: PropsWithChildren<{ text: string; title?: string }>,
@@ -52,7 +55,7 @@ export const AIMessage = (
         </div>
         <Box>
           <Text mb="xs" size="sm" c="blue.9">
-            {props.title ?? "AI Assistant"}
+            {props.title ?? t`AI Assistant`}
           </Text>
           <Text size="sm" c="blue.9">
             {props.text}
@@ -76,7 +79,7 @@ export const DocumentAIMessage = (
         </div>
         <Box flex={1}>
           <Text mb="xs" size="sm" c="indigo.9">
-            {props.title ?? "Document AI Assistant"}
+            {props.title ?? t`Document AI Assistant`}
           </Text>
           <Text size="sm" c="indigo.9">
             {props.text}
@@ -109,7 +112,7 @@ export const HumanMessage = (
         </div>
         <Box flex={1}>
           <Text mb="xs" size="sm">
-            {props.title ?? "You"}
+            {props.title ?? t`You`}
           </Text>
           <div>
             {props.text && <Text size="sm">{props.text}</Text>}
@@ -183,9 +186,11 @@ export const DropzoneUploadDocumentsMessage = () => {
           <Icons.Document height={24} width={24} />
         </div>
         <div>
-          <Text size="xl">Drag documents here or select files</Text>
+          <Text size="xl">
+            <Trans>Drag documents here or select files</Trans>
+          </Text>
           <Text size="sm" c="dimmed">
-            Attach as many documents as you like to analyse
+            <Trans>Attach as many documents as you like to analyse</Trans>
           </Text>
         </div>
       </Group>
@@ -196,7 +201,7 @@ export const DropzoneUploadDocumentsMessage = () => {
 export const InputGlobalContextHumanMessage = ({
   session,
 }: PropsWithChildren<{ session?: TSession }>) => {
-  const updateSessionMutation = useUpdateSession();
+  const updateSessionMutation = useUpdateCurrentSession();
   const [context, setContext] = useState(session?.context ?? "");
 
   const handleSave = () => {
@@ -204,12 +209,12 @@ export const InputGlobalContextHumanMessage = ({
   };
 
   return (
-    <HumanMessage title="Input global context">
+    <HumanMessage title={t`Input global context`}>
       <LoadingOverlay visible={updateSessionMutation.isPending} />
       <Stack gap="xs">
         <Textarea
           rows={8}
-          placeholder="Type context here..."
+          placeholder={t`Type context here...`}
           value={context}
           onChange={(e) => setContext(e.currentTarget.value)}
         />
@@ -233,7 +238,9 @@ export const GlobalContextAIMessage = () => {
   }
 
   return (
-    <AIMessage text="Thank you! In the meantime, click individual documents to add context to each file that I will take into account for further analysis." />
+    <AIMessage
+      text={t`Thank you! In the meantime, click individual documents to add context to each file that I will take into account for further analysis.`}
+    />
   );
 };
 
@@ -293,17 +300,17 @@ export const InputGlobalResearchQuestionHumanMessage = () => {
       {currentSessionQuery.data?.processing_since && (
         <GeneratingAnswerMessage />
       )}
-      <HumanMessage title="Ask a global research question">
+      <HumanMessage title={t`Ask a global research question`}>
         <LoadingOverlay visible={postSessionMessageMutation.isPending} />
         <Stack gap="xs">
           <Textarea
             rows={8}
-            placeholder="Type a question here..."
+            placeholder={t`Type a question here...`}
             value={question}
             onChange={(e) => setQuestion(e.currentTarget.value)}
           />
           <Button c="white" bg="blue" fullWidth onClick={handleSave}>
-            Analyze!
+            <Trans>Analyze!</Trans>
           </Button>
         </Stack>
       </HumanMessage>
@@ -329,7 +336,9 @@ export const AllDocumentsReadyMessages = () => {
 
   return (
     <>
-      <AIMessage text="All documents are uploaded and ready now. What research question are you interested in asking? Optionally, you can now open an individual analysis chat for each document." />
+      <AIMessage
+        text={t`All documents are uploaded and ready now. What research question are you interested in asking? Optionally, you can now open an individual analysis chat for each document.`}
+      />
       <GlobalAIChatMessages />
       <InputGlobalResearchQuestionHumanMessage />
     </>
@@ -380,14 +389,16 @@ export const DocumentChatMessages = ({
   return (
     <>
       <Stack gap="sm">
-        <DocumentAIMessage text="What kind of question do you want to ask for this document?" />
+        <DocumentAIMessage
+          text={t`What kind of question do you want to ask for this document?`}
+        />
         {documentMessagesQuery.data?.map((message) => {
           if (!message.from_user) {
             if (message.is_global) {
               return (
                 <AIMessage
                   key={message.id}
-                  title="Global Research Question"
+                  title={t`Global Research Question`}
                   text={""}
                 >
                   <Markdown content={message.text} />
@@ -405,7 +416,7 @@ export const DocumentChatMessages = ({
               return (
                 <HumanMessage
                   key={message.id}
-                  title="Global Research Question"
+                  title={t`Global Research Question`}
                   text=""
                 >
                   <Markdown content={message.text} />
@@ -435,7 +446,7 @@ export const DocumentChatInput = ({
 
   const handleSend = () => {
     if (message == "") {
-      toast.info("Please enter a message");
+      toast.info(t`Please enter a message`);
       return;
     }
     try {
@@ -479,12 +490,12 @@ export const DocumentChatInput = ({
               <Group gap="xs" align="center">
                 <Input
                   flex={1}
-                  placeholder="Ask a question..."
+                  placeholder={t`Ask a question...`}
                   value={message}
                   onChange={(e) => setMessage(e.currentTarget.value)}
                   disabled={isPending}
                 />
-                <Tooltip label="Ask Question">
+                <Tooltip label={t`Ask Question`}>
                   <ActionIcon
                     type="submit"
                     onClick={handleSend}

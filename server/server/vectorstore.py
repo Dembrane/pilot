@@ -1,5 +1,5 @@
 import os
-import faiss
+import faiss  # type: ignore
 from langchain_community.vectorstores.faiss import FAISS
 from langchain_community.docstore.in_memory import InMemoryDocstore
 from logging import getLogger

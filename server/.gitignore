@@ -5,3 +5,4 @@ embeddings_cache
 faiss_index
 .env
 dist
+.mypy_cache

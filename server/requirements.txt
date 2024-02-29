@@ -16,3 +16,6 @@ alembic~=1.13.1
 
 # Config
 python-dotenv~=1.0.1
+
+# Tools
+mypy

@@ -1,4 +1,6 @@
 from logging import getLogger
+from queue import Queue
+import threading
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
@@ -6,7 +8,6 @@ from langchain.text_splitter import CharacterTextSplitter
 from server.models import DocumentModel, db
 from server.chains import load_title_chain, load_summary_chain
 from server.config import FAISS_INDEX_PATH
-from server.task_queue import TaskQueue, run_with_timeout
 from server.vectorstore import vectorstore
 
 logger = getLogger("process")
@@ -19,9 +20,6 @@ lc_text_splitter = CharacterTextSplitter(
     is_separator_regex=False,
 )
 
-lc_summarize_chain = load_summary_chain()
-lc_title_chain = load_title_chain()
-
 
 class EmptyDocumentException(Exception):
     pass
@@ -31,7 +29,7 @@ class EmptyDocumentException(Exception):
 # sets is_processed to True
 # adds title and description
 # adds to vectorstore
-def process_document(document: DocumentModel):
+def process_document(language: str, document: DocumentModel) -> DocumentModel:
     if document is None:
         logger.info("Document is None")
         return None
@@ -51,11 +49,13 @@ def process_document(document: DocumentModel):
         raise EmptyDocumentException
 
     # summarize
+    lc_summarize_chain = load_summary_chain(language=language)
     summary_result = lc_summarize_chain.invoke({"documents": lc_documents}).get(
         "output_text"
     )
 
     # get title
+    lc_title_chain = load_title_chain(language=language)
     title = lc_title_chain.invoke({"text": summary_result})
 
     # add metadata
@@ -78,32 +78,63 @@ def process_document(document: DocumentModel):
     return document
 
 
-def process_document_with_timeout(document: DocumentModel, timeout=60):
-    return run_with_timeout(process_document, args=[document], timeout=timeout)
+def run_with_timeout(func, args=(), kwargs={}, timeout_sec: int = 60):  # type: ignore
+    def timeout_handler() -> None:
+        raise TimeoutError("Function execution timed out")
+
+    timer = threading.Timer(timeout_sec, timeout_handler)
+    timer.start()
+
+    try:
+        result = func(*args, **kwargs)  # noqa
+        timer.cancel()
+        return result
+    except Exception as e:
+        timer.cancel()
+        raise e
+
+
+def process_document_with_timeout(
+    language: str, document: DocumentModel, timeout_sec: int
+) -> DocumentModel:
+    return run_with_timeout(
+        process_document, args=[language, document], timeout_sec=timeout_sec
+    )
 
 
 class ProcessDocumentTaskQueueItem:
     logger = getLogger("ProcessDocumentTaskQueueItem")
 
-    def __init__(self, document: DocumentModel, retry_left=3):
+    def __init__(
+        self, document: DocumentModel, language: str, retry_left: int = 3
+    ) -> None:
         self.document = document
+        self.language = language
         self.retry_left = retry_left
 
-    def __call__(self):
+    def __call__(self) -> None:
         logger.info(f"Processing document {self.document.id}")
-        process_document_with_timeout(self.document)
+        process_document_with_timeout(self.language, self.document, 60)
         logger.info(f"Document {self.document.id} processed successfully")
 
 
 # should be a singleton
-class ProcessDocumentTaskQueue(TaskQueue):
+class ProcessDocumentTaskQueue(Queue):
     logger = getLogger("ProcessDocumentTaskQueue")
 
-    def add_task(self, item: ProcessDocumentTaskQueueItem):
+    def __init__(self, num_workers: int = 1) -> None:
+        super().__init__()
+        self.num_workers = num_workers
+        for _ in range(num_workers):
+            t = threading.Thread(target=self.worker)
+            t.daemon = True
+            t.start()
+
+    def add_task(self, item: ProcessDocumentTaskQueueItem) -> None:  # noqa
         logger.info(f"Adding task for document {item.document.id}")
         self.put(item)
 
-    def worker(self):
+    def worker(self) -> None:
         while True:
             item: ProcessDocumentTaskQueueItem = self.get()
             logger.info(f"Document {item.document.id} picked up by worker")
@@ -147,11 +178,11 @@ class ProcessDocumentTaskQueue(TaskQueue):
             return
 
 
-process_document_queue = ProcessDocumentTaskQueue(num_workers=5)
+process_document_queue = ProcessDocumentTaskQueue(num_workers=2)
 
 
 # init the queue with documents that don't have title and desc
-def seed_process_document_queue():
+def seed_process_document_queue() -> None:
     documents = (
         db.query(DocumentModel)
         .filter(DocumentModel.is_processed == 0)
@@ -162,13 +193,13 @@ def seed_process_document_queue():
         f"Seeding process document queue with {len(documents)} pending documents"
     )
     for document in documents:
-        process_document_queue.add_task(ProcessDocumentTaskQueueItem(document))
+        # get language
+        session = document.session
+        language = session.language
+        process_document_queue.add_task(
+            ProcessDocumentTaskQueueItem(document=document, language=language)
+        )
 
 
 if __name__ == "__main__":
-    document = (
-        db.query(DocumentModel)
-        .filter(DocumentModel.id == "f7ec5e10-ecc6-418d-a851-a9a2a6fcdc11")
-        .first()
-    )
-    process_document(document)
+    pass

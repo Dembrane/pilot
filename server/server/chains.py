@@ -3,11 +3,12 @@ from datetime import datetime, timezone
 from logging import getLogger
 from typing import List
 from uuid import uuid4
+from langchain_core.runnables import Runnable
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain.chains import load_summarize_chain as lc_load_summarize_chain
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage, BaseMessage
 from langchain.memory import ConversationSummaryBufferMemory
 
 from server.models import (
@@ -23,50 +24,63 @@ logger = getLogger("chains")
 
 chat_llm_small = ChatOpenAI(
     temperature=0.5, model_name="gpt-3.5-turbo-1106", max_retries=6
-)
-
+)  # type: ignore
 
 # For global question answering
 chat_llm_large = ChatOpenAI(
     temperature=0.2, model_name="gpt-4-0125-preview", max_retries=6
-)
+)  # type: ignore
 
 
-def load_title_chain():
-    prompt = ChatPromptTemplate.from_template(
-        "Gegeven de volgende tekst, genereer een Nederlandse titel die kort is (maximaal 6 woorden), de meest relevante trefwoorden bevat, en geen aanhalingstekens of andere leestekens gebruikt. Alleen titel weergeven aub. \nTekst:{text}\nTitel:"
-    )
+def load_title_chain(language: str) -> Runnable:
+    if language == "nl":
+        prompt = ChatPromptTemplate.from_template(
+            "Gegeven de volgende tekst, genereer een Nederlandse titel die kort is (maximaal 6 woorden), de meest relevante trefwoorden bevat, en geen aanhalingstekens of andere leestekens gebruikt. Alleen titel weergeven aub. \nTekst:{text}\nTitel:"
+        )
+    elif language == "en":
+        prompt = ChatPromptTemplate.from_template(
+            "Given the following text, generate a title that is short (max 6 words), contains the most relevant keywords, and does not use quotes or other punctuation. Only display the title please.\nText:{text}\nTitle:"
+        )
+    else:
+        raise ValueError(f"Language {language} not supported")
+
     return prompt | chat_llm_small | StrOutputParser()
 
 
-def load_summary_chain():
-    # prompt_template = (
-    #     "Jij bent een deskundige scrijver en een behulpzame onderzoeksassistent. Scrijf een onverzichtelijke, beknopte samenvatting van de volgende tekst:\n{text}\nSAMENVATTING:"
-    # )
-    # return lc_load_summarize_chain(
-    #     llm,
-    #     chain_type="map_reduce",
-    #     input_key="documents",
-    #     output_key="output_text",
-    #     map_prompt=PromptTemplate(template=prompt_template, input_variables=["text"]),
-    #     reduce_prompt=PromptTemplate(
-    #         template=prompt_template, input_variables=["text"]
-    #     ),
-    # )
-    prompt_template = """Jij bent een deskundige scrijver en een behulpzame onderzoeksassistent. Scrijf een onverzichtelijke, beknopte samenvatting van de volgende tekst:\n{text}\nSAMENVATTING:"""
-    prompt = PromptTemplate.from_template(prompt_template)
-    refine_template = (
-        "Jou taak is om een globale, concluderende samenvatting te schrijven\n"
-        "We hebben een bestaande samenvatting gegeven tot op een bepaald punt: {existing_answer}\n"
-        "We hebben de mogelijkheid om de bestaande samenvatting te verfijnen"
-        "(alleen indien nodig) met hieronder wat meer context.\n"
-        "------------\n"
-        "{text}\n"
-        "------------\n"
-        "De oorspronkelijke samenvatting in het Nederlands verfijnen met het oog op de nieuwe context"
-        "Als de context niet bruikbaar is, retourneer dan de oorspronkelijke samenvatting."
-    )
-    refine_prompt = PromptTemplate.from_template(refine_template)
+def load_summary_chain(language: str) -> Runnable:
+    if language == "nl":
+        prompt_template = """Jij bent een deskundige scrijver en een behulpzame onderzoeksassistent. Scrijf een onverzichtelijke, beknopte samenvatting van de volgende tekst:\n{text}\nSAMENVATTING:"""
+        prompt = PromptTemplate.from_template(prompt_template)
+        refine_template = (
+            "Jou taak is om een globale, concluderende samenvatting te schrijven\n"
+            "We hebben een bestaande samenvatting gegeven tot op een bepaald punt: {existing_answer}\n"
+            "We hebben de mogelijkheid om de bestaande samenvatting te verfijnen"
+            "(alleen indien nodig) met hieronder wat meer context.\n"
+            "------------\n"
+            "{text}\n"
+            "------------\n"
+            "De oorspronkelijke samenvatting in het Nederlands verfijnen met het oog op de nieuwe context"
+            "Als de context niet bruikbaar is, retourneer dan de oorspronkelijke samenvatting en vermeld niet dat er niets te verfijnen was"
+        )
+        refine_prompt = PromptTemplate.from_template(refine_template)
+    elif language == "en":
+        prompt_template = """You are a helpful and analytical research assistant. Write a concise, informative summary of the following text:\n{text}\nSUMMARY:"""
+        prompt = PromptTemplate.from_template(prompt_template)
+        refine_template = (
+            "Your task is to write a global, concluding summary\n"
+            "We have given an existing summary up to a certain point: {existing_answer}\n"
+            "We have the ability to refine the existing summary"
+            "(if necessary) with the additional context below.\n"
+            "------------\n"
+            "{text}\n"
+            "------------\n"
+            "Refine the original summary in English in light of the new context"
+            "If the context is not useful, return the original summary and do not mention that there was nothing to refine"
+        )
+        refine_prompt = PromptTemplate.from_template(refine_template)
+    else:
+        raise ValueError(f"Language {language} not supported")
+
     chain = lc_load_summarize_chain(
         llm=chat_llm_small,
         chain_type="refine",
@@ -79,33 +93,39 @@ def load_summary_chain():
     return chain
 
 
-def transform_question_for_global_analysis(document: DocumentModel, question: str):
+def transform_question_for_global_analysis(
+    language: str, document: DocumentModel, question: str
+) -> str:
     title = document.title
     description = document.description
     context = document.context
     session_context = document.session.context
 
-    # prompt = ChatPromptTemplate.from_template(
-    #     "The user asked a global research question that is relevant to a set of documents they uploaded."
-    #     f"\nGlobal context: {session_context}"
-    #     "\nYour task is to transform the question to be relevant to the current document below"
-    #     f"\nDocument title: {title}"
-    #     f"\nDocument description: {description}"
-    #     f"\nDocument context: {context}"
-    #     f"\nHere is the question that you need to transform: {question}"
-    #     f"\nTransformed question:"
-    # )
-    prompt = ChatPromptTemplate.from_template(
-        "Een onderzoeker heeft een onderzoek vraag gesteld die relevant is voor een set van bronnen"
-        f"\nGlobale context: {session_context}"
-        "\nJij bent een zorgvuldige onderzoeker en een deskundige schrijver. Jou taak is om een sub-onderzoeksvraag te formuleren waarvan de antwoord op de vraag alle context geeft om de globale onderzoek vraag doorgronding te beantwoorden als deze vraag aan alle bronnen wordt gevraagd. Hier is de relevante bron:"
-        f"\nBron titel: {title}"
-        f"\Bron omschrijving: {description}"
-        f"\nBron extra context: {context}"
-        f"\nDit is de vraag die de onderzoeker heeft gesteld die zij aan de hand van alle bronnen willen beantwoorden: {question}"
-        "\nAls voorbeeld - een onderzoeker vraagt wat de bronnen gemeen hebben, en waar ze verschillen - dan is het belangrijk dat de geherformuleerde sub-onderzoeksvraag per bron een overzicht maakt van wat de bron probeert te communiceren en hoe, alle sleutel thema's benoemt en omschrijft, de perspectief van de bron vermeld (voor wie, door wie, voor wat). In het kort: Vraag de vraag waarvan de antwoord kan worden gebruikt om de globale onderzoek vraag doorgronding te beantwoorden."
-        f"\nGeherformuleerde onderzoeksvraag voor dit specifieke bron:"
-    )
+    if language == "nl":
+        prompt = ChatPromptTemplate.from_template(
+            "Een onderzoeker heeft een onderzoek vraag gesteld die relevant is voor een set van bronnen"
+            f"\nGlobale context: {session_context}"
+            "\nJij bent een zorgvuldige onderzoeker en een deskundige schrijver. Jou taak is om een sub-onderzoeksvraag te formuleren waarvan de antwoord op de vraag alle context geeft om de globale onderzoek vraag doorgronding te beantwoorden als deze vraag aan alle bronnen wordt gevraagd. Hier is de relevante bron:"
+            f"\nBron titel: {title}"
+            f"\Bron omschrijving: {description}"
+            f"\nBron extra context: {context}"
+            f"\nDit is de vraag die de onderzoeker heeft gesteld die zij aan de hand van alle bronnen willen beantwoorden: {question}"
+            "\nAls voorbeeld - een onderzoeker vraagt wat de bronnen gemeen hebben, en waar ze verschillen - dan is het belangrijk dat de geherformuleerde sub-onderzoeksvraag per bron een overzicht maakt van wat de bron probeert te communiceren en hoe, alle sleutel thema's benoemt en omschrijft, de perspectief van de bron vermeld (voor wie, door wie, voor wat). In het kort: Vraag de vraag waarvan de antwoord kan worden gebruikt om de globale onderzoek vraag doorgronding te beantwoorden."
+            f"\nGeherformuleerde onderzoeksvraag voor dit specifieke bron:"
+        )
+    elif language == "en":
+        prompt = ChatPromptTemplate.from_template(
+            "A researcher has asked a global research question that is relevant to a set of documents they uploaded."
+            f"\nGlobal context: {session_context}"
+            "\nYou are a careful researcher and an expert writer. Your task is to transform the question to be relevant to the current document below"
+            f"\nDocument title: {title}"
+            f"\nDocument description: {description}"
+            f"\nDocument context: {context}"
+            f"\nHere is the question that you need to transform: {question}"
+            f"\nTransformed question:"
+        )
+    else:
+        raise ValueError(f"Language {language} not supported")
 
     chain = prompt | chat_llm_small | StrOutputParser()
 
@@ -115,11 +135,13 @@ def transform_question_for_global_analysis(document: DocumentModel, question: st
 
 
 # Q+A for a document
-async def ask_document(document: DocumentModel, question: str, is_global=False):
+async def ask_document(
+    language: str, document: DocumentModel, question: str, is_global: bool = False
+) -> DocumentMessageModel:
     original_question = question
 
     if is_global:
-        question = transform_question_for_global_analysis(document, question)
+        question = transform_question_for_global_analysis(language, document, question)
 
     logger.info(
         f"Processing document question, document: {document.id}, question: {question}"
@@ -168,29 +190,35 @@ async def ask_document(document: DocumentModel, question: str, is_global=False):
 
     context = [d.page_content for d in retrieved_documents]
 
-    # Add all the relevant context to a mega prompt to return to the user. TODO
-    # prompt = [
-    #     SystemMessage(
-    #         content=(
-    #             "You are a helpful assistant. Given the following text, respond to the user's queries."
-    #             f"\nAbout the document: {document.title}"
-    #             f"\nDocument summary: {document.description}"
-    #             f"\n{document.context if document.context else ''}"
-    #             f"\nAdditional Context: {' '.join(context)}"
-    #         )
-    #     )
-    # ]
-    prompt = [
-        SystemMessage(
-            content=(
-                "Jij bent een zorgvuldige onderzoeker en een deskundige schrijver. Gegeven de volgende tekst, reageer op de vraag van de gebruiker."
-                f"\nOver deze bron: {document.title}"
-                f"\Bron samenvatting: {document.description}"
-                f"\n{document.context if document.context else ''}"
-                f"\nExtra context: {' '.join(context)}"
+    prompt: List[BaseMessage]
+    if language == "nl":
+        prompt = [
+            SystemMessage(
+                content=(
+                    "Jij bent een zorgvuldige onderzoeker en een deskundige schrijver. Gegeven de volgende tekst, reageer op de vraag van de gebruiker."
+                    f"\nOver deze bron: {document.title}"
+                    f"\Bron samenvatting: {document.description}"
+                    f"\n{document.context if document.context else ''}"
+                    f"\nExtra context: {' '.join(context)}"
+                )
             )
-        )
-    ]
+        ]
+
+    elif language == "en":
+        prompt = [
+            SystemMessage(
+                content=(
+                    "You are a helpful assistant. Given the following text, respond to the user's queries."
+                    f"\nAbout the document: {document.title}"
+                    f"\nDocument summary: {document.description}"
+                    f"\n{document.context if document.context else ''}"
+                    f"\nAdditional Context: {' '.join(context)}"
+                )
+            )
+        ]
+
+    else:
+        raise ValueError(f"Language {language} not supported")
 
     chat_history = memory.load_memory_variables({})
 
@@ -223,9 +251,10 @@ async def ask_document(document: DocumentModel, question: str, is_global=False):
     return ai_response
 
 
-async def ask_global(session: SessionModel, question: str):
+async def ask_global(session: SessionModel, question: str) -> DocumentMessageModel:
     logger.info(f"Processing global question, question: {question}")
     try:
+        language = session.language
         documents = session.documents
 
         logger.info(f"Loaded {len(documents)} documents from session {session.id}")
@@ -250,7 +279,14 @@ async def ask_global(session: SessionModel, question: str):
         ai_response_futures = []
 
         for document in documents:
-            ai_response_futures.append(ask_document(document, question, is_global=True))
+            ai_response_futures.append(
+                ask_document(
+                    language=language,
+                    document=document,
+                    question=question,
+                    is_global=True,
+                )
+            )
 
         ai_responses: List[DocumentMessageModel] = await asyncio.gather(
             *ai_response_futures
@@ -277,16 +313,14 @@ async def ask_global(session: SessionModel, question: str):
         # No vectorstore for global questions because each individual doc is allready vector store queried. We are just summarising.
 
         # No filter on this
-        # retriever = vectorstore.as_retriever(
-        #     search_kwargs={"k": 3}
-        # )
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
-        # retrieved_documents = retriever.get_relevant_documents(question)
+        retrieved_documents = retriever.get_relevant_documents(question)
 
-        # logger.info(f"Retrieved {len(retrieved_documents)} documents")
-        # logger.info(f"Retrieved documents: {retrieved_documents}")
+        logger.info(f"Retrieved {len(retrieved_documents)} documents")
+        logger.info(f"Retrieved documents: {retrieved_documents}")
 
-        # context = [d.page_content for d in retrieved_documents]
+        global_retrieved_context = [d.page_content for d in retrieved_documents]
 
         prompt_per_document = []
 
@@ -302,31 +336,39 @@ async def ask_global(session: SessionModel, question: str):
                 ]
             )
 
-        # Big prompt, TODO consolidate and summarise
-        # prompt = [
-        #     SystemMessage(
-        #         content=(
-        #             "You are a helpful and analytical research assistant. Given the following text, respond to the user's research question."
-        #             + f"\nAdditional Context: {session.context}"
-        #             + "The user has asked a question that is relevant to the following documents, and the following was found"
-        #             + "\nResponses per document:"
-        #             + "\n".join(prompt_per_document)
-        #             + "Please consolidate these findings and provide an in-depth and detailed response to the user answering all of their questions systematically."
-        #         )
-        #     )
-        # ]
-        prompt = [
-            SystemMessage(
-                content=(
-                    "Jij bent een zorgvuldige onderzoeker en een deskundige schrijver. Gegeven de volgende tekst, reageer op de vraag van de gebruiker."
-                    + f"\Aditionele context: {session.context}"
-                    + "De gebruiker heeft een vraag gesteld die relevant is voor de volgende bronnen, en het volgende is gevonden"
-                    + "\nAntwoorden per bron:"
-                    + "\n".join(prompt_per_document)
-                    + "Consolideer deze bevindingen en geef een diepgaand en gedetailleerd antwoord aan de gebruiker in markdown formaat waarin alle vragen systematisch worden beantwoord."
+        prompt: List[BaseMessage]
+        if language == "nl":
+            prompt = [
+                SystemMessage(
+                    content=(
+                        "Jij bent een zorgvuldige onderzoeker en een deskundige schrijver. Gegeven de volgende tekst, reageer op de vraag van de gebruiker."
+                        + f"\n\nAditionele context: {session.context}"
+                        + "\nDe gebruiker heeft een vraag gesteld die relevant is voor de volgende bronnen, en het volgende is gevonden"
+                        + "\n\nEnkele geselecteerde bronnen:"
+                        + "\n".join(global_retrieved_context)
+                        + "\n\nAntwoorden per bron:"
+                        + "\n".join(prompt_per_document)
+                        + "\n\nConsolideer deze bevindingen en geef een diepgaand en gedetailleerd antwoord aan de gebruiker in markdown formaat waarin alle vragen systematisch worden beantwoord."
+                    )
                 )
-            )
-        ]
+            ]
+        elif language == "en":
+            prompt = [
+                SystemMessage(
+                    content=(
+                        "You are a helpful and analytical research assistant. Given the following text, respond to the user's research question."
+                        + f"\n\nAdditional Context: {session.context}"
+                        + "\nThe user has asked a question that is relevant to the following documents, and the following was found"
+                        + "\n\nSome select source documents:"
+                        + "\n".join(global_retrieved_context)
+                        + "\n\nResponses per document:"
+                        + "\n".join(prompt_per_document)
+                        + "\n\nPlease consolidate these findings and provide an in-depth and detailed response to the user answering all of their questions systematically."
+                    )
+                )
+            ]
+        else:
+            raise ValueError(f"Language {language} not supported")
 
         chat_history = memory.load_memory_variables({})
 
@@ -366,19 +408,4 @@ async def ask_global(session: SessionModel, question: str):
 
 
 if __name__ == "__main__":
-    # document = db.query(DocumentModel).first()
-    # question = "what was my last question about?"
-    # response = ask_document(document, question)
-    # print("Done")
-
-    # print(vectorstore.similarity_search("XYZ Shareholder"))
-    document = (
-        db.query(DocumentModel)
-        .filter(DocumentModel.id == "73c6f810-f386-4651-a5f8-9df71748834c")
-        .first()
-    )
-    print(
-        transform_question_for_global_analysis(
-            document, "what is common about these documents?"
-        )
-    )
+    pass

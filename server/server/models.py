@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Set
+from typing import List, Set, Any
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -11,8 +11,13 @@ from sqlalchemy import (
     DateTime,
     func,
 )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, mapped_column, Mapped, relationship
+from sqlalchemy.orm import (
+    sessionmaker,
+    mapped_column,
+    Mapped,
+    relationship,
+    declarative_base,
+)
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from server.config import DATABASE_URL
@@ -25,7 +30,7 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 # Define your models as subclasses of the base class
-Base = declarative_base()
+Base: Any = declarative_base()
 
 
 session_message_document_association_table = Table(
@@ -47,6 +52,7 @@ class SessionModel(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
     name: Mapped[str] = mapped_column(String, nullable=True)
+    language: Mapped[str] = mapped_column(String, default="en")
     context: Mapped[str] = mapped_column(Text, nullable=True)
     documents: Mapped[List["DocumentModel"]] = relationship(
         "DocumentModel", back_populates="session"
@@ -54,8 +60,7 @@ class SessionModel(Base):
     messages: Mapped[List["SessionMessageModel"]] = relationship(
         "SessionMessageModel", back_populates="session"
     )
-
-    processing_since: Mapped[datetime] = mapped_column(
+    processing_since: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 
@@ -80,7 +85,7 @@ class SessionMessageModel(Base):
         back_populates="session_messages",
     )
 
-    def get_lc_message(self):
+    def get_lc_message(self) -> AIMessage | HumanMessage | SystemMessage:
         if self.from_user:
             return HumanMessage(content=self.text)
         else:
@@ -101,6 +106,7 @@ class DocumentModel(Base):
     session: Mapped["SessionModel"] = relationship(
         "SessionModel", back_populates="documents"
     )
+    original_filename: Mapped[str] = mapped_column(String, default="")
     path: Mapped[str] = mapped_column(String)
     title: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=True)
@@ -136,7 +142,7 @@ class DocumentMessageModel(Base):
     )
 
     # possibly overengineered
-    def get_lc_message(self):
+    def get_lc_message(self) -> AIMessage | HumanMessage | SystemMessage:
         if self.from_user:
             return HumanMessage(content=self.text)
         else:
@@ -145,7 +151,6 @@ class DocumentMessageModel(Base):
             return AIMessage(content=self.text)
 
 
-# TODO: add db migrations
 Base.metadata.create_all(engine)
 
 db = Session()

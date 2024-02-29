@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/universal
 {
-	"name": "pdf-pilot",
+	"name": "dembrane/pilot",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
 	// Features to add to the dev container. More info: https://containers.dev/features.
@@ -25,7 +25,8 @@
 				"bradlc.vscode-tailwindcss",
 				"ms-python.black-formatter",
 				"ms-python.python",
-				"alexcvzz.vscode-sqlite"
+				"alexcvzz.vscode-sqlite",
+				"ms-azuretools.vscode-docker"
 			]
 		}
 	}

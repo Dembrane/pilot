@@ -194,6 +194,7 @@ async def upload_document(
                     original_filename=original_filename,
                 )
                 db.add(document)
+                db.commit()
                 documents.append(document)
 
             except Exception as e:
@@ -201,9 +202,7 @@ async def upload_document(
                 raise HTTPException(status_code=500, detail="Failed to save the file")
 
             process_document_queue.add_task(
-                ProcessDocumentTaskQueueItem(
-                    document=document, language=session.language
-                )
+                ProcessDocumentTaskQueueItem(document=document)
             )
 
     db.commit()

@@ -137,12 +137,16 @@ def transform_question_for_global_analysis(
 
 # Q+A for a document
 async def ask_document(
-    document: DocumentModel, question: str, is_global: bool = False
+    document: DocumentModel,
+    question: str,
+    is_global: bool = False,
+    use_transform_question: bool = False,
+    use_chat_history: bool = True,
 ) -> DocumentMessageModel:
     original_question = question
     language = document.session.language
 
-    if is_global:
+    if is_global and use_transform_question:
         question = transform_question_for_global_analysis(document, question)
 
     logger.info(
@@ -151,8 +155,8 @@ async def ask_document(
 
     user_question = (
         original_question
-        if not is_global
-        else original_question + f"\n\n(in de context van deze bron: {question})"
+        # if not is_global
+        # else original_question + f"\n\n(in de context van deze bron: {question})"
     )
 
     user_message = DocumentMessageModel(
@@ -183,7 +187,7 @@ async def ask_document(
     # A single pdf is split into multiple langchain documents here, doc.id refers to the PDF, but k=2 says slice the 2 most relevant chunks from the PDF.
     #  Play around with number of chunks (in process.py) and chunk length to get the best results TODO
     retriever = vectorstore.as_retriever(
-        search_kwargs={"k": 2, "filter": {"document_id": document.id}}
+        search_kwargs={"filter": {"document_id": document.id}}
     )
 
     retrieved_documents = retriever.get_relevant_documents(question)
@@ -228,7 +232,7 @@ async def ask_document(
         logger.info(f"Generated messages summary: {summary_message.content}")
         prompt.append(summary_message)
 
-    if len(chat_history) > 0:
+    if len(chat_history) > 0 and use_chat_history:
         prompt.extend(chat_history["history"])
 
     prompt.append(HumanMessage(content=question))
@@ -286,6 +290,8 @@ async def ask_global(session: SessionModel, question: str) -> DocumentMessageMod
                     document=document,
                     question=question,
                     is_global=True,
+                    use_transform_question=False,
+                    use_chat_history=False,
                 )
             )
 
@@ -295,26 +301,28 @@ async def ask_global(session: SessionModel, question: str) -> DocumentMessageMod
 
         # ai_responses are already added to db, so we can continue
 
-        message_history = session.messages
-        message_history.sort(key=lambda x: x.created_at)
-        logger.info(f"Loaded {len(message_history)} messages from session {session.id}")
+        # message_history = session.messages
+        # message_history.sort(key=lambda x: x.created_at)
+        # logger.info(f"Loaded {len(message_history)} messages from session {session.id}")
 
-        memory = ConversationSummaryBufferMemory(
-            llm=chat_llm_small, return_messages=True
-        )
+        # memory = ConversationSummaryBufferMemory(
+        #     llm=chat_llm_small, return_messages=True
+        # )
 
-        for message in message_history:
-            memory.chat_memory.add_message(message.get_lc_message())
+        # for message in message_history:
+        #     memory.chat_memory.add_message(message.get_lc_message())
 
         # generate summary if needed
-        memory.prune()
+        # memory.prune()
 
-        summary_message = SystemMessage(content=memory.moving_summary_buffer)
+        # summary_message = SystemMessage(content=memory.moving_summary_buffer)
 
         # No vectorstore for global questions because each individual doc is allready vector store queried. We are just summarising.
 
         # No filter on this
-        retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+        retriever = vectorstore.as_retriever(
+            search_kwargs={"filter": {"session_id": session.id}}
+        )
 
         retrieved_documents = retriever.get_relevant_documents(question)
 
@@ -371,14 +379,14 @@ async def ask_global(session: SessionModel, question: str) -> DocumentMessageMod
         else:
             raise ValueError(f"Language {language} not supported")
 
-        chat_history = memory.load_memory_variables({})
+        # chat_history = memory.load_memory_variables({})
 
-        if summary_message.content != "":
-            logger.info(f"Generated messages summary: {summary_message.content}")
-            prompt.append(summary_message)
+        # if summary_message.content != "":
+        #     logger.info(f"Generated messages summary: {summary_message.content}")
+        #     prompt.append(summary_message)
 
-        if len(chat_history) > 0:
-            prompt.extend(chat_history["history"])
+        # if len(chat_history) > 0:
+        #     prompt.extend(chat_history["history"])
 
         prompt.append(HumanMessage(content=question))
 
@@ -386,10 +394,18 @@ async def ask_global(session: SessionModel, question: str) -> DocumentMessageMod
 
         prediction = chat_llm_large.invoke([*prompt])
 
+        # concatenate all the per doc responses
+        global_response_return = (
+            "\n\n".join([f"#### {r.document.title}\n\n{r.text}" for r in ai_responses])
+            + "\n\n"
+            + "#### Summary\n\n"
+            + str(prediction.content)
+        )
+
         global_response = SessionMessageModel(
             id=str(uuid4()),
             session_id=session.id,
-            text=prediction.content,
+            text=global_response_return,
             from_user=False,
             documents_used=set(documents),
         )

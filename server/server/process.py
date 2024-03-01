@@ -144,7 +144,7 @@ class ProcessDocumentTaskQueue(Queue):
     def worker(self) -> None:
         while True:
             item: ProcessDocumentTaskQueueItem = self.get()
-            logger.info(f"Document {item.document.id} picked up by worker")
+            self.logger.info(f"Document {item.document.id} picked up by worker")
             try:
                 item()
             except Exception as e:
@@ -162,10 +162,8 @@ class ProcessDocumentTaskQueue(Queue):
                         }
                     )
                     db.commit()
-                    self.task_done()
-                    return
 
-                if item.retry_left <= 0:
+                elif item.retry_left == 0:
                     self.logger.error(
                         f"Failed to process document {item.document.id} after retries"
                     )
@@ -174,15 +172,13 @@ class ProcessDocumentTaskQueue(Queue):
                         DocumentModel.id == item.document.id
                     ).update(values={"processing_error": "Failed to process document"})
                     db.commit()
-                    self.task_done()
-                    return
 
-                logger.error(f"Failed to process document: {e}")
-                item.retry_left -= 1
-                self.put(item)
-
-            self.task_done()
-            return
+                else:
+                    self.logger.error(f"Failed to process document: {e}")
+                    item.retry_left -= 1
+                    self.put(item)
+            finally:
+                self.task_done()
 
 
 process_document_queue = ProcessDocumentTaskQueue(num_workers=3)

@@ -94,12 +94,13 @@ def load_summary_chain(language: str) -> Runnable:
 
 
 def transform_question_for_global_analysis(
-    language: str, document: DocumentModel, question: str
+    document: DocumentModel, question: str
 ) -> str:
     title = document.title
     description = document.description
     context = document.context
     session_context = document.session.context
+    language = document.session.language
 
     if language == "nl":
         prompt = ChatPromptTemplate.from_template(
@@ -136,12 +137,13 @@ def transform_question_for_global_analysis(
 
 # Q+A for a document
 async def ask_document(
-    language: str, document: DocumentModel, question: str, is_global: bool = False
+    document: DocumentModel, question: str, is_global: bool = False
 ) -> DocumentMessageModel:
     original_question = question
+    language = document.session.language
 
     if is_global:
-        question = transform_question_for_global_analysis(language, document, question)
+        question = transform_question_for_global_analysis(document, question)
 
     logger.info(
         f"Processing document question, document: {document.id}, question: {question}"
@@ -281,7 +283,6 @@ async def ask_global(session: SessionModel, question: str) -> DocumentMessageMod
         for document in documents:
             ai_response_futures.append(
                 ask_document(
-                    language=language,
                     document=document,
                     question=question,
                     is_global=True,

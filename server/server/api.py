@@ -150,7 +150,6 @@ class DocumentSchema(BaseModel):
     original_filename: str
 
 
-@api.post("/upload-documents", response_model=List[DocumentSchema], tags=["document"])
 @api.post("/document/upload", response_model=List[DocumentSchema], tags=["document"])
 async def upload_document(
     files: List[UploadFile], session: SessionModel = Depends(require_session)
@@ -333,22 +332,7 @@ async def chat_with_document_by_id(
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
 
-    ai_response = await ask_document(
-        language=session.language, document=document, question=body.message
-    )
-
-    # time.sleep(4)
-    # ai_response = DocumentMessageModel(
-    #     id=str(uuid4()),
-    #     document_id=document.id,
-    #     created_at=datetime.now(),
-    #     text="echo" + body.message,
-    #     from_user=False,
-    #     is_global=False,
-    # )
-
-    # db.add(ai_response)
-    # db.commit()
+    ai_response = await ask_document(document=document, question=body.message)
 
     return ai_response
 

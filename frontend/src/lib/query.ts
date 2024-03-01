@@ -94,8 +94,8 @@ const uploadDocument = async (files: File[]) => {
     formData.append("files", file);
   });
 
-  return api.post<unknown, TDocument[]>("/upload-documents", formData, {
-    timeout: 15000,
+  return api.post<unknown, TDocument[]>("/document/upload", formData, {
+    timeout: 20000,
     headers: {
       "Content-Type": "multipart/form-data",
     },

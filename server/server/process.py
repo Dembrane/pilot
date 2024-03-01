@@ -5,7 +5,7 @@ import threading
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
 
-from server.models import DocumentModel, db
+from server.models import DocumentModel, SessionModel, db
 from server.chains import load_title_chain, load_summary_chain
 from server.config import FAISS_INDEX_PATH
 from server.vectorstore import vectorstore
@@ -14,7 +14,7 @@ logger = getLogger("process")
 
 lc_text_splitter = CharacterTextSplitter(
     separator="\n\n",
-    chunk_size=900,
+    chunk_size=33000,
     chunk_overlap=100,
     length_function=len,
     is_separator_regex=False,
@@ -29,7 +29,10 @@ class EmptyDocumentException(Exception):
 # sets is_processed to True
 # adds title and description
 # adds to vectorstore
-def process_document(language: str, document: DocumentModel) -> DocumentModel:
+def process_document(document: DocumentModel) -> DocumentModel:
+    session = document.session
+    language = session.language
+
     if document is None:
         logger.info("Document is None")
         return None
@@ -48,9 +51,13 @@ def process_document(language: str, document: DocumentModel) -> DocumentModel:
     if len(lc_documents) == 0:
         raise EmptyDocumentException
 
+    first = lc_documents[0]
+    mid = lc_documents[len(lc_documents) // 2]
+    last = lc_documents[-1]
+
     # summarize
     lc_summarize_chain = load_summary_chain(language=language)
-    summary_result = lc_summarize_chain.invoke({"documents": lc_documents}).get(
+    summary_result = lc_summarize_chain.invoke({"documents": [first, mid, last]}).get(
         "output_text"
     )
 
@@ -60,6 +67,7 @@ def process_document(language: str, document: DocumentModel) -> DocumentModel:
 
     # add metadata
     for lc_doc in lc_documents:
+        lc_doc.metadata["session_id"] = session.id
         lc_doc.metadata["document_id"] = document.id
         lc_doc.metadata["document_title"] = title
         lc_doc.metadata["document_summary"] = summary_result
@@ -95,26 +103,25 @@ def run_with_timeout(func, args=(), kwargs={}, timeout_sec: int = 60):  # type: 
 
 
 def process_document_with_timeout(
-    language: str, document: DocumentModel, timeout_sec: int
+    document: DocumentModel, timeout_sec: int
 ) -> DocumentModel:
-    return run_with_timeout(
-        process_document, args=[language, document], timeout_sec=timeout_sec
-    )
+    return run_with_timeout(process_document, args=[document], timeout_sec=timeout_sec)
 
 
 class ProcessDocumentTaskQueueItem:
     logger = getLogger("ProcessDocumentTaskQueueItem")
 
     def __init__(
-        self, document: DocumentModel, language: str, retry_left: int = 3
+        self,
+        document: DocumentModel,
+        retry_left: int = 3,
     ) -> None:
         self.document = document
-        self.language = language
         self.retry_left = retry_left
 
     def __call__(self) -> None:
         logger.info(f"Processing document {self.document.id}")
-        process_document_with_timeout(self.language, self.document, 60)
+        process_document_with_timeout(self.document, 60)
         logger.info(f"Document {self.document.id} processed successfully")
 
 
@@ -178,7 +185,7 @@ class ProcessDocumentTaskQueue(Queue):
             return
 
 
-process_document_queue = ProcessDocumentTaskQueue(num_workers=2)
+process_document_queue = ProcessDocumentTaskQueue(num_workers=3)
 
 
 # init the queue with documents that don't have title and desc
@@ -193,12 +200,7 @@ def seed_process_document_queue() -> None:
         f"Seeding process document queue with {len(documents)} pending documents"
     )
     for document in documents:
-        # get language
-        session = document.session
-        language = session.language
-        process_document_queue.add_task(
-            ProcessDocumentTaskQueueItem(document=document, language=language)
-        )
+        process_document_queue.add_task(ProcessDocumentTaskQueueItem(document=document))
 
 
 if __name__ == "__main__":

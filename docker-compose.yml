@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  api-server:
+    build: ./server
+    env_file:
+      - server/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./server/db.sqlite3:/code/db.sqlite3
+      - ./server/uploads:/code/uploads
+      - ./server/faiss_index:/code/faiss_index
+      - ./server/embeddings_cache:/code/embeddings_cache
+  

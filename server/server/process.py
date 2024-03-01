@@ -181,7 +181,7 @@ class ProcessDocumentTaskQueue(Queue):
                 self.task_done()
 
 
-process_document_queue = ProcessDocumentTaskQueue(num_workers=3)
+process_document_queue = ProcessDocumentTaskQueue(num_workers=6)
 
 
 # init the queue with documents that don't have title and desc

@@ -182,7 +182,7 @@ async def ask_document(
         search_kwargs={"filter": {"document_id": document.id}}
     )
 
-    retrieved_documents = retriever.get_relevant_documents(question)
+    retrieved_documents = await retriever.aget_relevant_documents(question)
     logger.info(f"Retrieved {len(retrieved_documents)} documents")
     logger.info(f"Retrieved documents: {retrieved_documents}")
 
@@ -231,7 +231,7 @@ async def ask_document(
 
     logger.info(f"Generated prompt: {prompt}")
 
-    prediction = chat_llm_large.invoke([*prompt])
+    prediction = await chat_llm_large.ainvoke([*prompt])
 
     ai_response = DocumentMessageModel(
         id=str(uuid4()),
@@ -316,7 +316,7 @@ async def ask_global(session: SessionModel, question: str) -> DocumentMessageMod
             search_kwargs={"filter": {"session_id": session.id}}
         )
 
-        retrieved_documents = retriever.get_relevant_documents(question)
+        retrieved_documents = await retriever.aget_relevant_documents(question)
 
         logger.info(f"Retrieved {len(retrieved_documents)} documents")
         logger.info(f"Retrieved documents: {retrieved_documents}")
@@ -384,7 +384,7 @@ async def ask_global(session: SessionModel, question: str) -> DocumentMessageMod
 
         logger.info(f"Generated prompt: {prompt}")
 
-        prediction = chat_llm_large.invoke([*prompt])
+        prediction = await chat_llm_large.ainvoke([*prompt])
 
         # concatenate all the per doc responses
         global_response_return = (

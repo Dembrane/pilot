@@ -52,30 +52,22 @@ def load_summary_chain(language: str) -> Runnable:
         prompt_template = """Jij bent een deskundige scrijver en een behulpzame onderzoeksassistent. Scrijf een onverzichtelijke, beknopte samenvatting van de volgende tekst:\n{text}\nSAMENVATTING:"""
         prompt = PromptTemplate.from_template(prompt_template)
         refine_template = (
-            "Jou taak is om een globale, concluderende samenvatting te schrijven. Zorg ervoor dat de samenvatting binnen de 80-100 woorden valt\n"
-            "We hebben een bestaande samenvatting gegeven tot op een bepaald punt: {existing_answer}\n"
-            "We hebben de mogelijkheid om de bestaande samenvatting te verfijnen"
-            "(alleen indien nodig) met hieronder wat meer context.\n"
+            "Je bent een behulpzame en analytische onderzoeksassistent. Het is jouw taak om een korte samenvatting te schrijven voor de volgende tekst. Zorg ervoor dat de samenvatting maximaal 80-100 woorden bevat\n"
             "------------\n"
+            "{existing_answer}\n"
             "{text}\n"
             "------------\n"
-            "De oorspronkelijke samenvatting in het Nederlands verfijnen met het oog op de nieuwe context"
-            "Als de context niet bruikbaar is, retourneer dan de oorspronkelijke samenvatting en vermeld niet dat er niets te verfijnen was"
         )
         refine_prompt = PromptTemplate.from_template(refine_template)
     elif language == "en":
         prompt_template = """You are a helpful and analytical research assistant. Write a concise, informative summary of the following text:\n{text}\nSUMMARY:"""
         prompt = PromptTemplate.from_template(prompt_template)
         refine_template = (
-            "Your task is to write a global, concluding summary. Ensure the summary is within 80-100 words\n"
-            "We have given an existing summary up to a certain point: {existing_answer}\n"
-            "We have the ability to refine the existing summary"
-            "(if necessary) with the additional context below.\n"
+            "You are a helpful and analytical research assistant. Your task is to write a short executive summary for the following text. Ensure the summary is within 80-100 words\n"
             "------------\n"
+            "{existing_answer}\n"
             "{text}\n"
             "------------\n"
-            "Refine the original summary in English in light of the new context"
-            "If the context is not useful, return the original summary and do not mention that there was nothing to refine"
         )
         refine_prompt = PromptTemplate.from_template(refine_template)
     else:
@@ -239,7 +231,7 @@ async def ask_document(
 
     logger.info(f"Generated prompt: {prompt}")
 
-    prediction = chat_llm_small.invoke([*prompt])
+    prediction = chat_llm_large.invoke([*prompt])
 
     ai_response = DocumentMessageModel(
         id=str(uuid4()),

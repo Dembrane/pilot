@@ -1,0 +1,26 @@
+from fastapi import HTTPException
+
+
+SessionInvalidException = HTTPException(status_code=401, detail="Invalid session")
+SessionNotFoundException = HTTPException(status_code=404, detail="Session not found")
+
+ProjectNotFoundException = HTTPException(status_code=404, detail="Project not found")
+ProjectLanguageNotSupportedException = HTTPException(
+    status_code=400, detail="Language not supported"
+)
+
+ResourceInvalidFileFormatException = HTTPException(
+    status_code=400, detail="Invalid file format. Only .pdf files are supported."
+)
+ResourceFailedToSaveFileException = HTTPException(
+    status_code=500, detail="Failed to save the file"
+)
+ResourceNotFoundException = HTTPException(status_code=404, detail="Resource not found")
+ResourceContentNotFoundException = HTTPException(
+    status_code=500, detail="Resource content not found (Server Error)"
+)
+
+ConversationNotFoundException = HTTPException(
+    status_code=404, detail="Conversation not found"
+)
+ConversationInvalidPinException = HTTPException(status_code=400, detail="Invalid pin")

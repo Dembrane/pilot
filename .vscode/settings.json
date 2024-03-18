@@ -1,3 +1,14 @@
 {
-    "mypy.configFile": "server/pyproject.toml"
+    "mypy.configFile": "server/pyproject.toml",
+    "mypy-type-checker.cwd": "${workspaceFolder}/server",
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.useTabStops": true,
+        "editor.tabSize": 2
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.useTabStops": true,
+        "editor.tabSize": 2
+    }
 }

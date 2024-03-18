@@ -14,21 +14,22 @@ i18n.load({
 });
 
 i18n.activate(defaultLocale);
+console.log("Activated", defaultLocale);
 
 export const I18nProvider = ({ children }: PropsWithChildren) => {
   const session = useCurrentSession();
 
   useEffect(() => {
     if (session.data) {
-      i18n.activate(session.data.language);
+      // i18n.activate(session.data.language);
     } else {
       i18n.activate(defaultLocale);
     }
   }, [session.data]);
 
-  if (session.isLoading) {
-    return <LoadingOverlay visible />;
-  }
+  // if (session.isLoading) {
+  //   return <LoadingOverlay visible />;
+  // }
 
   return <I18nP i18n={i18n}>{children}</I18nP>;
 };

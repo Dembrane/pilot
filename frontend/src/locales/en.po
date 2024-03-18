@@ -17,7 +17,7 @@ msgstr ""
 msgid "Add context to document"
 msgstr ""
 
-#: src/components/Documents.tsx:146
+#: src/components/Documents.tsx:144
 msgid "Added context"
 msgstr ""
 
@@ -29,7 +29,7 @@ msgstr ""
 msgid "All documents are uploaded and ready now. What research question are you interested in asking? Optionally, you can now open an individual analysis chat for each document."
 msgstr ""
 
-#: src/components/Layout.tsx:19
+#: src/components/Layout.tsx:26
 #: src/routes/GlobalAnalysis.tsx:26
 msgid "Analysis"
 msgstr ""
@@ -38,7 +38,7 @@ msgstr ""
 msgid "Analyze!"
 msgstr ""
 
-#: src/components/Documents.tsx:199
+#: src/components/Documents.tsx:197
 msgid "Are you sure you want to delete this document?"
 msgstr ""
 
@@ -62,15 +62,15 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: src/routes/SelectSession.tsx:97
+#: src/routes/SelectSession.tsx:99
 msgid "Create a new session"
 msgstr ""
 
-#: src/components/Documents.tsx:210
+#: src/components/Documents.tsx:208
 msgid "Delete document"
 msgstr ""
 
-#: src/components/Documents.tsx:243
+#: src/components/Documents.tsx:241
 msgid "Description"
 msgstr ""
 
@@ -78,11 +78,11 @@ msgstr ""
 msgid "Document AI Assistant"
 msgstr ""
 
-#: src/components/Documents.tsx:226
+#: src/components/Documents.tsx:224
 msgid "Document is being processed"
 msgstr ""
 
-#: src/components/Documents.tsx:201
+#: src/components/Documents.tsx:199
 msgid "Document was deleted"
 msgstr ""
 
@@ -115,19 +115,24 @@ msgstr ""
 #~ msgid "Hello, I'm your research assistant today. To get started, upload the documents you want to analyze."
 #~ msgstr ""
 
+#: src/components/Layout.tsx:19
+#: src/routes/SelectSession.tsx:97
+msgid "Home"
+msgstr ""
+
 #: src/components/Message.tsx:212
 msgid "Input global context"
 msgstr ""
 
-#: src/components/Documents.tsx:262
+#: src/components/Documents.tsx:260
 msgid "No documents uploaded yet"
 msgstr ""
 
-#: src/components/Documents.tsx:128
+#: src/components/Documents.tsx:126
 msgid "Open Document Chat ✨"
 msgstr ""
 
-#: src/components/Documents.tsx:235
+#: src/components/Documents.tsx:233
 msgid "Original filename"
 msgstr ""
 
@@ -141,8 +146,8 @@ msgstr ""
 
 #: src/components/Layout.tsx:26
 #: src/routes/SelectSession.tsx:95
-msgid "Select Session"
-msgstr ""
+#~ msgid "Select Session"
+#~ msgstr ""
 
 #: src/components/Message.tsx:242
 msgid "Thank you! In the meantime, click individual documents to add context to each file that I will take into account for further analysis."

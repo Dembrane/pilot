@@ -14,6 +14,14 @@ UPLOADS_DIR = os.path.join(BASE_DIR, "uploads")
 if not os.path.exists(UPLOADS_DIR):
     os.makedirs(UPLOADS_DIR)
 
+RESOURCE_UPLOADS_DIR = os.path.join(UPLOADS_DIR, "resources")
+if not os.path.exists(RESOURCE_UPLOADS_DIR):
+    os.makedirs(RESOURCE_UPLOADS_DIR)
+
+AUDIO_CHUNKS_DIR = os.path.join(UPLOADS_DIR, "audio_chunks")
+if not os.path.exists(AUDIO_CHUNKS_DIR):
+    os.makedirs(AUDIO_CHUNKS_DIR)
+
 EMBEDDINGS_CACHE_DIR = os.path.join(BASE_DIR, "embeddings_cache")
 FAISS_INDEX_PATH = os.path.join(BASE_DIR, "faiss_index")
 

@@ -7,6 +7,7 @@ import axios, {
 
 export const apiCommonConfig: CreateAxiosDefaults = {
   baseURL: API_BASE_URL,
+  withCredentials: true,
 };
 
 export const apiNoAuth = axios.create(apiCommonConfig);

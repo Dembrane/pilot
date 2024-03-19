@@ -13,130 +13,204 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/routes/project/ProjectOverview.tsx:302
+msgid "Access Code"
+msgstr ""
+
+#: src/routes/project/ProjectOverview.tsx:241
+msgid "Active"
+msgstr ""
+
 #: src/components/Documents.tsx:90
-msgid "Add context to document"
-msgstr "Voeg context toe aan document"
+#~ msgid "Add context to document"
+#~ msgstr "Voeg context toe aan document"
 
 #: src/components/Documents.tsx:144
-msgid "Added context"
-msgstr "Context toegevoegd"
+#~ msgid "Added context"
+#~ msgstr "Context toegevoegd"
 
 #: src/components/Message.tsx:58
-msgid "AI Assistant"
-msgstr "AI Assistent"
+#~ msgid "AI Assistant"
+#~ msgstr "AI Assistent"
 
 #: src/components/Message.tsx:340
-msgid "All documents are uploaded and ready now. What research question are you interested in asking? Optionally, you can now open an individual analysis chat for each document."
-msgstr "Alle documenten zijn geüpload en zijn nu klaar. Welke onderzoeksvraag wil je stellen? Optioneel kunt u nu voor elk document een individuele analysechat openen."
+#~ msgid "All documents are uploaded and ready now. What research question are you interested in asking? Optionally, you can now open an individual analysis chat for each document."
+#~ msgstr "Alle documenten zijn geüpload en zijn nu klaar. Welke onderzoeksvraag wil je stellen? Optioneel kunt u nu voor elk document een individuele analysechat openen."
 
-#: src/components/Layout.tsx:26
-#: src/routes/GlobalAnalysis.tsx:26
+#: src/components/layout/ProjectConversationLayout.tsx:61
+#: src/components/layout/ProjectResourceLayout.tsx:55
 msgid "Analysis"
 msgstr "Analyse"
 
 #: src/components/Message.tsx:313
-msgid "Analyze!"
-msgstr "Analyseer!"
+#~ msgid "Analyze!"
+#~ msgstr "Analyseer!"
 
 #: src/components/Documents.tsx:197
-msgid "Are you sure you want to delete this document?"
-msgstr "Weet je zeker dat je dit document wilt verwijderen?"
+#~ msgid "Are you sure you want to delete this document?"
+#~ msgstr "Weet je zeker dat je dit document wilt verwijderen?"
 
 #: src/components/Message.tsx:303
-msgid "Ask a global research question"
-msgstr "Stel een algemene onderzoeksvraag"
+#~ msgid "Ask a global research question"
+#~ msgstr "Stel een algemene onderzoeksvraag"
 
 #: src/components/Message.tsx:493
-msgid "Ask a question..."
-msgstr "Stel een vraag..."
+#~ msgid "Ask a question..."
+#~ msgstr "Stel een vraag..."
+
+#: src/components/layout/ProjectSidebar.tsx:382
+msgid "Ask AI"
+msgstr ""
 
 #: src/components/Message.tsx:498
-msgid "Ask Question"
-msgstr "Stel Vraag"
+#~ msgid "Ask Question"
+#~ msgstr "Stel Vraag"
 
 #: src/components/Message.tsx:193
-msgid "Attach as many documents as you like to analyse"
-msgstr "Voeg zoveel documenten toe als je wilt analyseren"
+#~ msgid "Attach as many documents as you like to analyse"
+#~ msgstr "Voeg zoveel documenten toe als je wilt analyseren"
 
-#: src/components/Documents.tsx:106
+#: src/routes/project/ProjectConversationOverview.tsx:152
+#: src/routes/project/ProjectOverview.tsx:193
+#: src/routes/project/ProjectResourceOverview.tsx:163
 msgid "Cancel"
 msgstr "Annuleren"
 
-#: src/routes/SelectSession.tsx:99
+#: src/components/layout/ProjectSidebar.tsx:291
+msgid "Conversations"
+msgstr ""
+
+#: src/components/session/SelectSession.tsx:89
 msgid "Create a new session"
 msgstr "Maak een nieuwe sessie aan"
 
-#: src/components/Documents.tsx:208
-msgid "Delete document"
-msgstr "Verwijder document"
+#: src/components/layout/ProjectSidebar.tsx:104
+#: src/components/layout/ProjectSidebar.tsx:170
+msgid "Created on"
+msgstr ""
 
-#: src/components/Documents.tsx:241
+#: src/components/Documents.tsx:208
+#~ msgid "Delete document"
+#~ msgstr "Verwijder document"
+
+#: src/components/layout/ProjectSidebar.tsx:111
+#: src/components/layout/ProjectSidebar.tsx:185
 msgid "Description"
 msgstr "Beschrijving"
 
 #: src/components/Message.tsx:82
-msgid "Document AI Assistant"
-msgstr "Document AI Assistent"
+#~ msgid "Document AI Assistant"
+#~ msgstr "Document AI Assistent"
 
-#: src/components/Documents.tsx:224
+#: src/components/layout/ProjectSidebar.tsx:71
 msgid "Document is being processed"
 msgstr "Document wordt verwerkt"
 
 #: src/components/Documents.tsx:199
-msgid "Document was deleted"
-msgstr "Document is verwijderd"
+#~ msgid "Document was deleted"
+#~ msgstr "Document is verwijderd"
 
 #: src/components/Documents.tsx:48
-msgid "Documents"
-msgstr "Documenten"
+#~ msgid "Documents"
+#~ msgstr "Documenten"
 
 #: src/components/Message.tsx:190
-msgid "Drag documents here or select files"
-msgstr "Sleep documenten hierheen of selecteer bestanden"
+#~ msgid "Drag documents here or select files"
+#~ msgstr "Sleep documenten hierheen of selecteer bestanden"
+
+#: src/routes/project/ProjectConversationOverview.tsx:107
+msgid "Edit Conversation"
+msgstr ""
+
+#: src/routes/project/ProjectOverview.tsx:110
+msgid "Edit Project"
+msgstr ""
+
+#: src/routes/project/ProjectResourceOverview.tsx:125
+msgid "Edit Resource"
+msgstr ""
 
 #: src/components/Layout.tsx:32
-msgid "Export"
-msgstr "Exporteer"
+#~ msgid "Export"
+#~ msgstr "Exporteer"
 
 #: src/components/Message.tsx:401
 #: src/components/Message.tsx:419
-msgid "Global Research Question"
-msgstr "Algemene Onderzoeksvraag"
+#~ msgid "Global Research Question"
+#~ msgstr "Algemene Onderzoeksvraag"
 
 #: src/routes/GlobalAnalysis.tsx:47
-msgid "Great! Your documents are now being uploaded. While the documents are being processed, can you tell me what this analysis is about?"
-msgstr "Geweldig! Uw documenten worden nu geüpload. Terwijl de documenten worden verwerkt, kunt u mij vertellen waar deze analyse over gaat?"
+#~ msgid "Great! Your documents are now being uploaded. While the documents are being processed, can you tell me what this analysis is about?"
+#~ msgstr "Geweldig! Uw documenten worden nu geüpload. Terwijl de documenten worden verwerkt, kunt u mij vertellen waar deze analyse over gaat?"
 
 #: src/routes/GlobalAnalysis.tsx:41
-msgid "Hello, I will be your research assistant today. To get started please upload the documents you want to analyse."
-msgstr "Hallo, ik ben vandaag je onderzoeksassistent. Om te beginnen upload je de documenten die je wilt analyseren."
+#~ msgid "Hello, I will be your research assistant today. To get started please upload the documents you want to analyse."
+#~ msgstr "Hallo, ik ben vandaag je onderzoeksassistent. Om te beginnen upload je de documenten die je wilt analyseren."
 
 #: src/components/Layout.tsx:19
 #: src/routes/SelectSession.tsx:97
-msgid "Home"
+#~ msgid "Home"
+#~ msgstr ""
+
+#: src/routes/project/ProjectOverview.tsx:248
+msgid "Inactive"
 msgstr ""
 
 #: src/components/Message.tsx:212
-msgid "Input global context"
-msgstr "Voer algemene context in"
+#~ msgid "Input global context"
+#~ msgstr "Voer algemene context in"
+
+#: src/components/session/SelectSession.tsx:87
+msgid "Login with Session"
+msgstr ""
+
+#: src/components/layout/ProjectSidebar.tsx:302
+msgid "No conversations found. Start a conversation using the participation invite link from the <0><1>project overview.</1></0>"
+msgstr ""
 
 #: src/components/Documents.tsx:260
-msgid "No documents uploaded yet"
-msgstr "Nog geen documenten geüpload"
+#~ msgid "No documents uploaded yet"
+#~ msgstr "Nog geen documenten geüpload"
+
+#: src/components/layout/ProjectSidebar.tsx:255
+msgid "No resources found. Add resources using the button above."
+msgstr ""
+
+#: src/components/layout/ProjectSidebar.tsx:120
+#: src/components/layout/ProjectSidebar.tsx:194
+msgid "Open"
+msgstr ""
 
 #: src/components/Documents.tsx:126
-msgid "Open Document Chat ✨"
-msgstr "Open Document Chat ✨"
+#~ msgid "Open Document Chat ✨"
+#~ msgstr "Open Document Chat ✨"
 
 #: src/components/Documents.tsx:233
-msgid "Original filename"
-msgstr "Originele bestandsnaam"
+#~ msgid "Original filename"
+#~ msgstr "Originele bestandsnaam"
+
+#: src/components/layout/ProjectConversationLayout.tsx:55
+#: src/components/layout/ProjectResourceLayout.tsx:52
+#: src/routes/project/ProjectOverview.tsx:226
+msgid "Overview"
+msgstr ""
+
+#: src/routes/project/ProjectOverview.tsx:273
+#: src/routes/project/ProjectOverview.tsx:283
+msgid "Participation"
+msgstr ""
 
 #: src/components/Message.tsx:449
-msgid "Please enter a message"
-msgstr "Voer een bericht in"
+#~ msgid "Please enter a message"
+#~ msgstr "Voer een bericht in"
 
-#: src/components/Documents.tsx:103
+#: src/components/layout/ProjectSidebar.tsx:362
+msgid "Project Overview"
+msgstr ""
+
+#: src/routes/project/ProjectConversationOverview.tsx:144
+#: src/routes/project/ProjectOverview.tsx:185
+#: src/routes/project/ProjectResourceOverview.tsx:155
 msgid "Save"
 msgstr "Opslaan"
 
@@ -145,27 +219,53 @@ msgstr "Opslaan"
 #~ msgid "Select Session"
 #~ msgstr "Selecteer Sessie"
 
+#: src/routes/project/ProjectOverview.tsx:276
+msgid "Settings"
+msgstr ""
+
 #: src/components/Message.tsx:242
-msgid "Thank you! In the meantime, click individual documents to add context to each file that I will take into account for further analysis."
-msgstr "Bedankt! Klik ondertussen op individuele documenten om context toe te voegen aan elk bestand dat ik zal meenemen voor verdere analyse."
+#~ msgid "Thank you! In the meantime, click individual documents to add context to each file that I will take into account for further analysis."
+#~ msgstr "Bedankt! Klik ondertussen op individuele documenten om context toe te voegen aan elk bestand dat ik zal meenemen voor verdere analyse."
+
+#: src/components/layout/ProjectSidebar.tsx:178
+msgid "Title"
+msgstr ""
+
+#: src/components/layout/ProjectConversationLayout.tsx:58
+msgid "Transcript"
+msgstr ""
 
 #: src/components/Message.tsx:308
-msgid "Type a question here..."
-msgstr "Typ hier een vraag..."
+#~ msgid "Type a question here..."
+#~ msgstr "Typ hier een vraag..."
 
 #: src/components/Documents.tsx:99
 #: src/components/Message.tsx:217
-msgid "Type context here..."
-msgstr "Typ hier de context..."
+#~ msgid "Type context here..."
+#~ msgstr "Typ hier de context..."
+
+#: src/routes/project/ProjectConversationOverview.tsx:109
+#: src/routes/project/ProjectOverview.tsx:112
+#: src/routes/project/ProjectResourceOverview.tsx:127
+msgid "Unsaved changes"
+msgstr ""
 
 #: src/components/Documents.tsx:50
-msgid "Upload documents"
-msgstr "Upload documenten"
+#~ msgid "Upload documents"
+#~ msgstr "Upload documenten"
+
+#: src/components/layout/ProjectSidebar.tsx:239
+msgid "Upload resources"
+msgstr ""
 
 #: src/components/Message.tsx:393
-msgid "What kind of question do you want to ask for this document?"
-msgstr "Wat voor soort vraag wil je stellen voor dit document?"
+#~ msgid "What kind of question do you want to ask for this document?"
+#~ msgstr "Wat voor soort vraag wil je stellen voor dit document?"
 
-#: src/components/Message.tsx:115
+#: src/components/BaseMessage.tsx:31
 msgid "You"
 msgstr "Jij"
+
+#: src/routes/project/ProjectOverview.tsx:305
+msgid "Your code is"
+msgstr ""

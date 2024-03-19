@@ -7,18 +7,16 @@ from fastapi import (
     FastAPI,
     HTTPException,
     Request,
-    Response,
 )
 from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.utils import get_openapi
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from server.config import (
-    ALLOW_LOCALHOST_CORS,
     FAISS_INDEX_PATH,
     FRONTEND_DIST_DIR,
-    RESOURCE_UPLOADS_DIR,
     SERVE_FRONTEND,
+    SERVE_SWAGGER_UI,
 )
 from server.api.api import api
 from server.vectorstore import vectorstore
@@ -42,7 +40,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     vectorstore.save_local(FAISS_INDEX_PATH)
 
 
-app = FastAPI(lifespan=lifespan)
+docs_url = "/docs" if SERVE_SWAGGER_UI else None
+
+app = FastAPI(lifespan=lifespan, docs_url=docs_url, redoc_url=None)
 
 origins = [
     "https://admin.findcommonground.app",

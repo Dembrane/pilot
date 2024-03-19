@@ -1,4 +1,7 @@
 api.findcommonground.app {
+    basicauth {
+		dembrane $2a$14$CUBGav0EbkCzwTlffbvyU.KdGgZ2SVN4tEAuLOfn1/N6dRJKAhDxm
+	}
     reverse_proxy api-server:8000
 }
 
@@ -10,5 +13,8 @@ admin.findcommonground.app {
 }
 
 participant.findcommonground.app {
+    basicauth {
+		dembrane $2a$14$CUBGav0EbkCzwTlffbvyU.KdGgZ2SVN4tEAuLOfn1/N6dRJKAhDxm
+	}
     reverse_proxy participant-frontend:5173
 }

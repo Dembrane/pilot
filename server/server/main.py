@@ -44,19 +44,6 @@ docs_url = "/docs" if SERVE_SWAGGER_UI else None
 
 app = FastAPI(lifespan=lifespan, docs_url=docs_url, redoc_url=None)
 
-origins = [
-    "https://admin.findcommonground.app",
-    "https://participant.findcommonground.app",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
-    allow_headers=["*"],
-)
-
 
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):  # type: ignore
@@ -106,3 +93,17 @@ def custom_openapi() -> Any:
 
 
 app.openapi = custom_openapi  # type: ignore
+
+# need to be added at the end
+origins = [
+    "https://admin.findcommonground.app",
+    "https://participant.findcommonground.app",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+    allow_headers=["*"],
+)

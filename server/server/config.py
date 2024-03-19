@@ -32,4 +32,4 @@ assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is not set"
 
 FRONTEND_DIST_DIR = os.path.join(BASE_DIR, "frontend_dist")
 
-SERVE_FRONTEND = os.environ.get("SERVE_FRONTEND", "true").lower() in ["true", "1"]
+SERVE_FRONTEND = os.environ.get("SERVE_FRONTEND", "false").lower() in ["true", "1"]

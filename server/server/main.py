@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 import time
 from logging import getLogger
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware import Middleware
 from typing import Any, AsyncGenerator
 from fastapi import (
     FastAPI,
@@ -42,7 +43,26 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 docs_url = "/docs" if SERVE_SWAGGER_UI else None
 
-app = FastAPI(lifespan=lifespan, docs_url=docs_url, redoc_url=None)
+# need to be added at the end
+origins = [
+    "https://admin.findcommonground.app",
+    "https://participant.findcommonground.app",
+    "http://localhost:4173",
+]
+
+middleware = [
+    Middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+        allow_headers=["Content-Type", "Authorization"],
+    )
+]
+
+app = FastAPI(
+    lifespan=lifespan, docs_url=docs_url, redoc_url=None, middleware=middleware
+)
 
 
 @app.middleware("http")
@@ -93,17 +113,3 @@ def custom_openapi() -> Any:
 
 
 app.openapi = custom_openapi  # type: ignore
-
-# need to be added at the end
-origins = [
-    "https://admin.findcommonground.app",
-    "https://participant.findcommonground.app",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
-    allow_headers=["*"],
-)

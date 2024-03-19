@@ -6,15 +6,9 @@ api.findcommonground.app {
 }
 
 admin.findcommonground.app {
-    basicauth {
-		dembrane $2a$14$CUBGav0EbkCzwTlffbvyU.KdGgZ2SVN4tEAuLOfn1/N6dRJKAhDxm
-	}
     reverse_proxy dashboard-frontend:5173
 }
 
 participant.findcommonground.app {
-    basicauth {
-		dembrane $2a$14$CUBGav0EbkCzwTlffbvyU.KdGgZ2SVN4tEAuLOfn1/N6dRJKAhDxm
-	}
     reverse_proxy participant-frontend:5173
 }

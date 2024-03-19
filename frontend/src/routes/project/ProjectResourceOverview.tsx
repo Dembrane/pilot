@@ -25,12 +25,21 @@ import {
   Text,
   Tooltip,
   rem,
+  Anchor,
+  ActionIcon,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
-import { IconCheck, IconCopy, IconTrash } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconCopy,
+  IconDownload,
+  IconExternalLink,
+  IconTrash,
+} from "@tabler/icons-react";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
+import { apiCommonConfig } from "@/lib/api";
 
 const ResourceDangerZone = ({ resource }: { resource: TResource }) => {
   const deleteResourceByIdMutation = useDeleteResourceByIdMutation();
@@ -167,6 +176,32 @@ export const ProjectResourceOverviewRoute = () => {
   return (
     <Stack className="relative">
       <LoadingOverlay visible={resourceQuery.isLoading} />
+      <Box>
+        <Text size="md">Original File</Text>
+        <Group>
+          <Text size="sm">{resourceQuery.data?.original_filename}</Text>
+          <Tooltip label="Open in new tab">
+            <a
+              href={
+                apiCommonConfig.baseURL +
+                "/resources/" +
+                resourceQuery.data?.id +
+                "/content"
+              }
+              target="_blank"
+            >
+              <ActionIcon color="gray" variant="subtle" size="md">
+                <IconExternalLink />
+              </ActionIcon>
+            </a>
+          </Tooltip>
+        </Group>
+      </Box>
+      <Box>
+        <Text size="md">Created on</Text>
+        <Text size="sm">{resourceQuery.data?.created_at.toLocaleString()}</Text>
+      </Box>
+      <Divider />
       {resourceQuery.data && (
         <>
           <ResourceEdit resource={resourceQuery.data} />

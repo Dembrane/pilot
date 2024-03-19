@@ -1,5 +1,6 @@
 import { Logo } from "@/components/Logo";
 import {
+  Alert,
   Box,
   Button,
   Group,
@@ -14,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useInitiateConversationMutation } from "@/lib/query";
+import { AxiosError } from "axios";
 
 const FormSchema = z.object({
   email: z.string().email("Must be a valid email address."),
@@ -58,7 +60,7 @@ export const ParticipantLoginRoute = () => {
     if (isSuccess) {
       if (initiateConversationMutation.data?.id) {
         navigate(
-          `/participant/${projectId}/conversation/${initiateConversationMutation.data?.id}`,
+          `/${projectId}/conversation/${initiateConversationMutation.data?.id}`,
         );
       } else {
         reset();
@@ -79,6 +81,15 @@ export const ParticipantLoginRoute = () => {
       </Group>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack className="relative">
+          {initiateConversationMutation.error && (
+            <Box>
+              <Alert color="red" variant="light">
+                {(initiateConversationMutation.error instanceof AxiosError &&
+                  initiateConversationMutation.error.response?.data.detail) ??
+                  "Something went wrong"}
+              </Alert>
+            </Box>
+          )}
           <TextInput
             autoFocus
             {...register("email")}

@@ -224,6 +224,12 @@ const useAudioRecorder = ({
 }: UseAudioRecorderOptions): UseAudioRecorderResult => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [userPaused, setUserPaused] = useState(false);
+
+  const isRecordingRef = useRef(isRecording);
+  const isPausedRef = useRef(isPaused);
+  const userPausedRef = useRef(userPaused);
+
   const [recordingTime, setRecordingTime] = useState(0);
   const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -231,13 +237,71 @@ const useAudioRecorder = ({
   const startTimeRef = useRef<number | null>(null);
   const startRecordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioProcessorRef = useRef<AudioWorkletNode | null>(null);
+
+  useEffect(() => {
+    isRecordingRef.current = isRecording;
+    isPausedRef.current = isPaused;
+    userPausedRef.current = userPaused;
+  }, [isRecording, isPaused, userPaused]);
+
   useEffect(() => {
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
     };
   }, []);
+
+  const handleAudioProcessorMessages = (event: MessageEvent) => {
+    console.log("Received audio processor message", event.data);
+    const { action } = event.data;
+
+    // Use the current state from refs
+    const currentIsRecording = isRecordingRef.current;
+    const currentIsPaused = isPausedRef.current;
+    const currentUserPaused = userPausedRef.current;
+
+    if (action === "pause" && isRecordingRef.current && !isPausedRef.current) {
+      console.log("System-initiated pause");
+      pauseRecording();
+    } else if (
+      action === "resume" &&
+      isPausedRef.current &&
+      !userPausedRef.current
+    ) {
+      console.log("System-initiated resume");
+      resumeRecording();
+    } else {
+      console.log("Unhandled audio processor message", {
+        action,
+        currentIsRecording,
+        currentIsPaused,
+        currentUserPaused,
+      });
+
+      // Detailed logging for unhandled cases
+      if (action === "pause") {
+        console.log(
+          "unhandled because action is pause, isRecording, isPaused, userPaused",
+          currentIsRecording,
+          currentIsPaused,
+          currentUserPaused,
+        );
+      } else if (action === "resume") {
+        console.log(
+          "unhandled because action is resume, isRecording, isPaused, userPaused",
+          currentIsRecording,
+          currentIsPaused,
+          currentUserPaused,
+        );
+      }
+    }
+  };
 
   const updateRecordingTime = () => {
     if (startTimeRef.current) {
@@ -298,10 +362,33 @@ const useAudioRecorder = ({
 
   const startRecording = async () => {
     try {
+      console.log("Requesting access to the microphone...");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
+      console.log("Access to microphone granted.", { stream });
+
+      // Setup audio context and processor for silence detection
+      audioContextRef.current = new AudioContext();
+      console.log("Loading audio worklet module...");
+      await audioContextRef.current.audioWorklet.addModule("/processor.js"); // Your worklet processor file
+      audioProcessorRef.current = new AudioWorkletNode(
+        audioContextRef.current,
+        "silence-detector",
+      );
+      console.log("Audio worklet module loaded", audioProcessorRef.current);
+      audioProcessorRef.current.port.onmessage = handleAudioProcessorMessages;
+
+      // Connect the stream to the audio context
+      console.log("Connecting audio stream to audio processor");
+      const source = audioContextRef.current.createMediaStreamSource(stream);
+      source.connect(audioProcessorRef.current);
+      audioProcessorRef.current.connect(audioContextRef.current.destination);
+
+      console.log("Creating MediaRecorder instance");
+
       setIsRecording(true);
       setIsPaused(false);
+      setUserPaused(false);
       startRecordingChunk();
 
       // allow to restart recording chunk
@@ -339,9 +426,17 @@ const useAudioRecorder = ({
       mediaRecorderRef.current.stop();
     }
     setIsRecording(false);
+    setIsPaused(false);
+    setUserPaused(false);
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (startRecordingIntervalRef.current)
       clearInterval(startRecordingIntervalRef.current);
+    // remove the worker
+    audioProcessorRef.current?.disconnect();
+    audioProcessorRef.current = null;
+    // close the audio context
+    audioContextRef.current?.close();
+    audioContextRef.current = null;
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
   };
@@ -352,8 +447,16 @@ const useAudioRecorder = ({
       mediaRecorderRef.current.state === "recording"
     ) {
       mediaRecorderRef.current.pause();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
       setIsPaused(true);
     }
+  };
+
+  const userPauseRecording = () => {
+    pauseRecording();
+    setUserPaused(true);
   };
 
   const resumeRecording = () => {
@@ -362,15 +465,22 @@ const useAudioRecorder = ({
       mediaRecorderRef.current.state === "paused"
     ) {
       mediaRecorderRef.current.resume();
+      intervalRef.current = setInterval(updateRecordingTime, 1000);
       setIsPaused(false);
+      setUserPaused(false);
     }
+  };
+
+  const userResumeRecording = () => {
+    resumeRecording();
+    setUserPaused(false);
   };
 
   return {
     startRecording,
     stopRecording,
-    pauseRecording,
-    resumeRecording,
+    pauseRecording: userPauseRecording,
+    resumeRecording: userResumeRecording,
     isRecording,
     isPaused,
     recordingTime,
@@ -445,7 +555,7 @@ export const ParticipantConversationRoute = () => {
       </Box>
       <Box className="px-4 py-8 sticky bottom-0 bg-white">
         <Group justify="center w-full">
-          {!isRecording && !isPaused && (
+          {!isRecording && (
             <Button
               fullWidth
               size="xl"

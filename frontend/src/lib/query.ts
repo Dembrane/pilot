@@ -336,9 +336,16 @@ export const useConversationChunks = (conversationId: string) => {
   return useQuery({
     queryKey: ["conversation", conversationId, "chunks"],
     queryFn: () => getConversationChunks(conversationId),
-    refetchInterval: 8000,
+    refetchInterval: 3000,
   });
 };
+
+// export const useConversationDuration = (conversationId: string) => {
+//   return useQuery({
+//     queryKey: ["conversation", conversationId, "duration"],
+//     queryFn: () => getConversationDuration(conversationId),
+//   });
+// };
 
 // // const getSessionById = async (sessionId: string) => {
 // //   return api.get<unknown, TSession>(`/session/${sessionId}`);

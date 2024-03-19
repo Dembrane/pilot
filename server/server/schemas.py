@@ -18,6 +18,11 @@ class ProjectSchema(BaseModel):
     name: Optional[str] = None
     context: Optional[str] = None
 
+    is_conversation_allowed: bool
+    default_conversation_title: Optional[str] = None
+    default_conversation_description: Optional[str] = None
+    default_conversation_context: Optional[str] = None
+
 
 class ResourceSchema(BaseModel):
     id: str

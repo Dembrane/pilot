@@ -51,7 +51,7 @@ export const ProjectResourceLayout = () => {
           <Tabs.Tab value="overview">
             <Trans>Overview</Trans>
           </Tabs.Tab>
-          <Tabs.Tab value="chat">
+          <Tabs.Tab value="chat" disabled>
             <Trans>Analysis</Trans>
           </Tabs.Tab>
         </Tabs.List>

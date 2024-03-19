@@ -14,6 +14,8 @@ import { ParticipantConversationRoute } from "./routes/participant/Conversation"
 import { ProjectConversationLayout } from "./components/layout/ProjectConversationLayout";
 import { ProjectConversationOverviewRoute } from "./routes/project/ProjectConversationOverview";
 import { ProjectConversationTranscript } from "./routes/project/ProjectConversationTranscript";
+import { ProjectConversationAnalysis } from "./routes/project/ProjectConversationAnalysis";
+import { NotFoundRoute } from "./routes/404";
 
 // export const _router = createBrowserRouter([
 //   {
@@ -68,26 +70,14 @@ import { ProjectConversationTranscript } from "./routes/project/ProjectConversat
  * Use <></> for boilerplate
  */
 
-export const primaryRouter = createBrowserRouter([
+export const mainRouter = createBrowserRouter([
   {
     index: true,
     path: "/",
     element: <Navigate to="/projects/home" />,
+    errorElement: <Navigate to="/projects/home" />,
   },
-  {
-    path: "/participant/:projectId",
-    element: <ParticipantLayout />,
-    children: [
-      {
-        path: "login",
-        element: <ParticipantLoginRoute />,
-      },
-      {
-        path: "conversation/:conversationId",
-        element: <ParticipantConversationRoute />,
-      },
-    ],
-  },
+
   {
     path: "/login",
     element: (
@@ -136,10 +126,10 @@ export const primaryRouter = createBrowserRouter([
                 path: "chat",
                 element: <ProjectResourceAnalysisRoute />,
               },
-              {
-                path: "chat/:chatId",
-                element: <>Not Implemented</>,
-              },
+              // {
+              //   path: "chat/:chatId",
+              //   element: <>Not Implemented</>,
+              // },
             ],
           },
           {
@@ -154,10 +144,10 @@ export const primaryRouter = createBrowserRouter([
                 path: "transcript",
                 element: <ProjectConversationTranscript />,
               },
-              {
-                path: "chat/:chatId",
-                element: <></>,
-              },
+              // {
+              //   path: "chat",
+              //   element: <ProjectConversationAnalysis />,
+              // },
             ],
           },
           {
@@ -165,6 +155,24 @@ export const primaryRouter = createBrowserRouter([
             element: <></>,
           },
         ],
+      },
+    ],
+  },
+]);
+
+export const participantRouter = createBrowserRouter([
+  {
+    path: "/:projectId",
+    element: <ParticipantLayout />,
+    errorElement: <NotFoundRoute />,
+    children: [
+      {
+        path: "login",
+        element: <ParticipantLoginRoute />,
+      },
+      {
+        path: "conversation/:conversationId",
+        element: <ParticipantConversationRoute />,
       },
     ],
   },

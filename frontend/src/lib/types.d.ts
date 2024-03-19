@@ -44,6 +44,10 @@ type TProject = {
   pin: string;
   name?: string;
   context?: string;
+  is_conversation_allowed?: boolean;
+  default_conversation_title?: string;
+  default_conversation_description?: string;
+  default_conversation_context?: string;
 };
 
 type TSession = {

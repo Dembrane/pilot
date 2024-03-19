@@ -6,8 +6,9 @@ import { MantineProvider, createTheme } from "@mantine/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
 import { I18nProvider } from "./components/I18nProvider";
-import { primaryRouter } from "./Router";
+import { mainRouter, participantRouter } from "./Router";
 import { IconChevronRight } from "@tabler/icons-react";
+import { USE_PARTICIPANT_ROUTER } from "./config";
 
 const theme = createTheme({
   fontFamily: "'Space Grotesk Variable', sans-serif",
@@ -60,12 +61,14 @@ const theme = createTheme({
 
 const queryClient = new QueryClient();
 
+const router = USE_PARTICIPANT_ROUTER ? participantRouter : mainRouter;
+
 export const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <MantineProvider theme={theme}>
         <I18nProvider>
-          <RouterProvider router={primaryRouter} />
+          <RouterProvider router={router} />
         </I18nProvider>
       </MantineProvider>
     </QueryClientProvider>

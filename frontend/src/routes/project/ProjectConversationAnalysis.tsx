@@ -1,4 +1,4 @@
-export const ProjectResourceAnalysisRoute = () => {
+export const ProjectConversationAnalysis = () => {
   // iframe to https://quick-report-roer.vercel.app/
   return (
     <iframe

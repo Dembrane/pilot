@@ -25,18 +25,14 @@ import {
   Tooltip,
   rem,
   Tabs,
+  Checkbox,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
 import { IconCheck, IconCopy, IconTrash } from "@tabler/icons-react";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
-
-type ProjectEditFormValues = {
-  name: string;
-  context: string;
-  language: "en" | "nl";
-};
+import { PARTICIPANT_BASE_URL } from "@/config";
 
 const ProjectDangerZone = ({ project }: { project: TProject }) => {
   const deleteProjectByIdMutation = useDeleteProjectByIdMutation();
@@ -66,11 +62,24 @@ const ProjectDangerZone = ({ project }: { project: TProject }) => {
   );
 };
 
+type ProjectEditFormValues = {
+  name: string;
+  context: string;
+  language: "en" | "nl";
+  default_conversation_title?: string;
+  default_conversation_description?: string;
+  default_conversation_context?: string;
+};
+
 const ProjectEdit = ({ project }: { project: TProject }) => {
   const defaultValues: ProjectEditFormValues = {
     name: project.name ?? "",
     context: project.context ?? "",
     language: (project.language as ProjectEditFormValues["language"]) ?? "en",
+    default_conversation_title: project.default_conversation_title ?? "",
+    default_conversation_description:
+      project.default_conversation_description ?? "",
+    default_conversation_context: project.default_conversation_context ?? "",
   };
 
   const { register, handleSubmit, formState, reset } =
@@ -114,6 +123,7 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
             rows={5}
             {...register("context")}
             defaultValue={project.context}
+            placeholder="Additional Context"
           />
           <NativeSelect
             label="Language"
@@ -128,6 +138,42 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
                 value: "nl",
               },
             ]}
+          />
+
+          <Divider />
+
+          <Box>
+            <Title order={3}>Conversation Defaults</Title>
+            <Text>
+              The following settings will be used as defaults for new
+              conversations
+            </Text>
+          </Box>
+
+          <TextInput
+            label="Title"
+            description="This will be shown to participants when they start a new conversation."
+            {...register("default_conversation_title")}
+            defaultValue={project.default_conversation_title}
+            placeholder="Conversation Title"
+          />
+
+          <Textarea
+            label="Description"
+            description="This will be shown to participants when they start a new conversation. Markdown is allowed here."
+            rows={5}
+            {...register("default_conversation_description")}
+            defaultValue={project.default_conversation_description}
+            placeholder="Conversation Description"
+          />
+
+          <Textarea
+            label="Context"
+            description="This will not be shown to participants, but will be available to you in the dashboard."
+            rows={5}
+            {...register("default_conversation_context")}
+            defaultValue={project.default_conversation_context}
+            placeholder="Conversation Additional Context"
           />
 
           <Group>
@@ -158,9 +204,20 @@ export const ProjectOverviewRoute = () => {
   const projectQuery = useProjectById(projectId ?? "");
   const resourcesQuery = useResourcesByProjectId(projectId ?? "");
   const conversationsQuery = useConversationsByProjectId(projectId ?? "");
+  const updateProjectMutation = useUpdateProjectByIdMutation();
 
-  const baseUrl = window.location.origin;
-  const sharingLink = `${baseUrl}/participant/${projectId}/login?pin=${projectQuery.data?.pin}`;
+  const sharingLink = `${PARTICIPANT_BASE_URL}/${projectId}/login?pin=${projectQuery.data?.pin}`;
+
+  const handleOpenForParticipationCheckboxChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    updateProjectMutation.mutate({
+      id: projectId ?? "",
+      update: {
+        is_conversation_allowed: e.target.checked,
+      },
+    });
+  };
 
   return (
     <Stack className="py-6 px-2">
@@ -169,13 +226,30 @@ export const ProjectOverviewRoute = () => {
         <Trans>Overview</Trans>
       </Title>
       <Divider />
-      {/* Status */}
       <SimpleGrid
         cols={{
           sm: 1,
           md: 3,
         }}
       >
+        <Paper p="md" shadow="0">
+          <LoadingOverlay visible={projectQuery.isLoading} />
+          {projectQuery.data?.is_conversation_allowed ? (
+            <Stack>
+              <Icons.Signal fill="green" />
+              <span>
+                <Trans>Active</Trans>
+              </span>
+            </Stack>
+          ) : (
+            <Stack>
+              <Icons.Signal fill="gray" />
+              <span>
+                <Trans>Inactive</Trans>
+              </span>
+            </Stack>
+          )}
+        </Paper>
         <Paper p="md" shadow="0" className="relative">
           <LoadingOverlay visible={resourcesQuery.isLoading} />
           <Stack>
@@ -187,14 +261,6 @@ export const ProjectOverviewRoute = () => {
           <Stack>
             <Icons.Phone />
             <span>{conversationsQuery.data?.length ?? 0} Conversation(s)</span>
-          </Stack>
-        </Paper>
-        <Paper p="md" shadow="0">
-          <Stack>
-            <Icons.Signal />
-            <span>
-              <Trans>Inactive</Trans>
-            </span>
           </Stack>
         </Paper>
       </SimpleGrid>
@@ -217,53 +283,74 @@ export const ProjectOverviewRoute = () => {
               <Trans>Participation</Trans>
             </Title>
             <Box>
-              <Title order={3}>
-                <Trans>Access Code</Trans>
-              </Title>
-              <Text size="lg">
-                <Trans>Your code is</Trans>{" "}
-                <strong>{projectQuery.data?.pin}</strong>
+              <Checkbox
+                label="Open for participation"
+                description="Allow participants using the link to start new conversations"
+                checked={projectQuery.data?.is_conversation_allowed}
+                disabled={
+                  updateProjectMutation.isPending || projectQuery.isFetching
+                }
+                onChange={handleOpenForParticipationCheckboxChange}
+              />
+            </Box>
+            <Divider />
+            <Title order={2}> Sharing</Title>
+            {projectQuery.data?.is_conversation_allowed ? (
+              <>
+                <Box>
+                  <Text size="md">
+                    <Trans>Access Code</Trans>
+                  </Text>
+                  <Text size="sm">
+                    <Trans>Your code is</Trans>{" "}
+                    <strong>{projectQuery.data?.pin}</strong>
+                  </Text>
+                </Box>
+                <Box>
+                  <Text size="md">Invite Link</Text>
+                  <Group>
+                    <TextInput
+                      className="flex-1"
+                      size="sm"
+                      value={sharingLink}
+                      readOnly
+                    />
+                    <CopyButton value={sharingLink} timeout={2000}>
+                      {({ copied, copy }) => (
+                        <Tooltip
+                          label={copied ? "Copied" : "Copy"}
+                          withArrow
+                          position="right"
+                        >
+                          <Button
+                            onClick={copy}
+                            rightSection={
+                              copied ? (
+                                <IconCheck style={{ width: rem(16) }} />
+                              ) : (
+                                <IconCopy style={{ width: rem(16) }} />
+                              )
+                            }
+                          >
+                            {copied ? "Copied" : "Copy link"}
+                          </Button>
+                        </Tooltip>
+                      )}
+                    </CopyButton>
+                  </Group>
+                </Box>{" "}
+                <Box>
+                  <Text size="md">QR Code</Text>
+                  <Box className="h-auto max-w-32 w-full">
+                    <QRCode value={sharingLink} className="h-full w-full" />
+                  </Box>
+                </Box>{" "}
+              </>
+            ) : (
+              <Text size="sm">
+                Please enable participation to generate a sharing link
               </Text>
-            </Box>
-            <Box>
-              <Text size="md">Invite Link</Text>
-              <Group>
-                <TextInput
-                  className="flex-1"
-                  size="sm"
-                  value={sharingLink}
-                  readOnly
-                />
-                <CopyButton value={sharingLink} timeout={2000}>
-                  {({ copied, copy }) => (
-                    <Tooltip
-                      label={copied ? "Copied" : "Copy"}
-                      withArrow
-                      position="right"
-                    >
-                      <Button
-                        onClick={copy}
-                        rightSection={
-                          copied ? (
-                            <IconCheck style={{ width: rem(16) }} />
-                          ) : (
-                            <IconCopy style={{ width: rem(16) }} />
-                          )
-                        }
-                      >
-                        {copied ? "Copied" : "Copy link"}
-                      </Button>
-                    </Tooltip>
-                  )}
-                </CopyButton>
-              </Group>
-            </Box>{" "}
-            <Box>
-              <Text size="md">QR Code</Text>
-              <Box className="h-auto max-w-32 w-full">
-                <QRCode value={sharingLink} className="h-full w-full" />
-              </Box>
-            </Box>
+            )}
           </Stack>
         </Tabs.Panel>
 

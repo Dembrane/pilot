@@ -13,7 +13,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.utils import get_openapi
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from server.config import FAISS_INDEX_PATH, FRONTEND_DIST_DIR, RESOURCE_UPLOADS_DIR
+from server.config import (
+    FAISS_INDEX_PATH,
+    FRONTEND_DIST_DIR,
+    RESOURCE_UPLOADS_DIR,
+    SERVE_FRONTEND,
+)
 from server.api.api import api
 from server.vectorstore import vectorstore
 from server.process_conversation_chunk import seed_process_conversation_chunk_queue
@@ -40,6 +45,10 @@ app = FastAPI(lifespan=lifespan)
 
 origins = [
     "http://localhost:5173",
+    "pdf-pilot.findcommonground.online",
+    "pilot.findcommonground.online",
+    "participant-portal.findcommonground.online",
+    "participant-admin.findcommonground.online",
 ]
 
 app.add_middleware(
@@ -64,23 +73,25 @@ logger.info("mounting api on /api")
 app.include_router(api, prefix="/api")
 
 
-# class SPAStaticFiles(StaticFiles):
-#     async def get_response(self, path: str, scope):  # type: ignore
-#         try:
-#             return await super().get_response(path, scope)
-#         except (HTTPException, StarletteHTTPException) as ex:
-#             if ex.status_code == 404:
-#                 return await super().get_response("index.html", scope)
-#             else:
-#                 raise ex
+class SPAStaticFiles(StaticFiles):
+    async def get_response(self, path: str, scope):  # type: ignore
+        try:
+            return await super().get_response(path, scope)
+        except (HTTPException, StarletteHTTPException) as ex:
+            if ex.status_code == 404:
+                return await super().get_response("index.html", scope)
+            else:
+                raise ex
 
 
-# logger.info("mounting frontend on /")
-# app.mount(
-#     "/",
-#     SPAStaticFiles(directory=FRONTEND_DIST_DIR, html=True),
-#     name="spa-static-files",
-# )
+if SERVE_FRONTEND:
+    logger.info("mounting frontend on /")
+
+    app.mount(
+        "/",
+        SPAStaticFiles(directory=FRONTEND_DIST_DIR, html=True),
+        name="spa-static-files",
+    )
 
 
 def custom_openapi() -> Any:

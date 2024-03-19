@@ -2,31 +2,28 @@ import { Trans } from "@lingui/macro";
 import {
   Box,
   Button,
-  CopyButton,
   Divider,
   Group,
   LoadingOverlay,
-  NativeSelect,
-  Paper,
-  SimpleGrid,
   Stack,
   TextInput,
   Textarea,
   Title,
   Text,
   Tooltip,
-  rem,
+  ActionIcon,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
-import QRCode from "react-qr-code";
-import { IconCheck, IconCopy, IconTrash } from "@tabler/icons-react";
+import { IconDownload, IconTrash } from "@tabler/icons-react";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   useConversationById,
+  useConversationChunks,
   useDeleteConversationByIdMutation,
   useUpdateConversationByIdMutation,
 } from "@/lib/query";
+import { apiCommonConfig } from "@/lib/api";
 
 const ConversationDangerZone = ({
   conversation,
@@ -164,10 +161,50 @@ const ConversationEdit = ({
 export const ProjectConversationOverviewRoute = () => {
   const { conversationId } = useParams();
   const conversationQuery = useConversationById(conversationId ?? "");
+  const conversationChunksQuery = useConversationChunks(conversationId ?? "");
+  // const durationQuery = useConversationDuration(conversationId ?? "");
 
   return (
     <Stack className="relative">
       <LoadingOverlay visible={conversationQuery.isLoading} />
+      {conversationChunksQuery.data &&
+        conversationChunksQuery.data?.length > 0 && (
+          <Stack>
+            <Group>
+              <Title order={2}>Audio Recording</Title>
+              <Tooltip label="Download audio">
+                <a
+                  href={
+                    apiCommonConfig.baseURL +
+                    "/conversations/" +
+                    conversationId +
+                    "/content"
+                  }
+                  download={
+                    conversationQuery.data?.title ?? "Conversation" + ".webm"
+                  }
+                >
+                  <ActionIcon size="md" variant="subtle" color="gray">
+                    <IconDownload size={48} />
+                  </ActionIcon>
+                </a>
+              </Tooltip>
+            </Group>
+            <audio
+              className="w-full"
+              src={
+                apiCommonConfig.baseURL +
+                "/conversations/" +
+                conversationId +
+                "/content"
+              }
+              controls
+              crossOrigin="anonymous"
+              preload="metadata"
+            />
+          </Stack>
+        )}
+      <Divider />
       <Box>
         <Text size="md">Email</Text>
         <Text size="sm">{conversationQuery.data?.participant_email}</Text>

@@ -24,3 +24,7 @@ ConversationNotFoundException = HTTPException(
     status_code=404, detail="Conversation not found"
 )
 ConversationInvalidPinException = HTTPException(status_code=400, detail="Invalid pin")
+ConversationNotOpenForParticipationException = HTTPException(
+    status_code=400,
+    detail="This conversation is not open for participation at this time",
+)

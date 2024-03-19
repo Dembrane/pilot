@@ -7,6 +7,7 @@ from server.database import ConversationModel, ProjectModel, ResourceModel, db
 from server.schemas import ConversationSchema, ProjectSchema, ResourceSchema
 from server.api.exceptions import (
     ConversationInvalidPinException,
+    ConversationNotOpenForParticipationException,
     ProjectLanguageNotSupportedException,
     ProjectNotFoundException,
     ResourceFailedToSaveFileException,
@@ -39,6 +40,10 @@ class PostProjectRequestSchema(BaseModel):
     name: Optional[str] = None
     context: Optional[str] = None
     language: Optional[str] = None
+    is_conversation_allowed: Optional[bool] = None
+    default_conversation_title: Optional[str] = None
+    default_conversation_description: Optional[str] = None
+    default_conversation_context: Optional[str] = None
 
 
 @ProjectRouter.post("", response_model=ProjectSchema)
@@ -102,6 +107,20 @@ async def update_project(
     project.context = body.context or project.context
     project.language = body.language or project.language
 
+    if body.is_conversation_allowed is not None:
+        project.is_conversation_allowed = body.is_conversation_allowed
+
+    project.default_conversation_title = (
+        body.default_conversation_title or project.default_conversation_title
+    )
+    project.default_conversation_description = (
+        body.default_conversation_description
+        or project.default_conversation_description
+    )
+    project.default_conversation_context = (
+        body.default_conversation_context or project.default_conversation_context
+    )
+
     db.commit()
     return project
 
@@ -159,6 +178,9 @@ async def initiate_conversation(
     if not project or project.pin != body.pin:
         raise ConversationInvalidPinException
 
+    if project.is_conversation_allowed is False:
+        raise ConversationNotOpenForParticipationException
+
     conversation = (
         db.query(ConversationModel)
         .filter(
@@ -172,7 +194,12 @@ async def initiate_conversation(
         return conversation
 
     new_conversation = ConversationModel(
-        id=generate_uuid(), project_id=project.id, participant_email=body.email
+        id=generate_uuid(),
+        project_id=project.id,
+        participant_email=body.email,
+        title=project.default_conversation_title,
+        description=project.default_conversation_description,
+        context=project.default_conversation_context,
     )
 
     db.add(new_conversation)

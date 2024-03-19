@@ -20,5 +20,9 @@ alembic~=1.13.1
 # Config
 python-dotenv~=1.0.1
 
+# Other
+aiofiles~=23.2.1
+types-aiofiles~=23.2.0
+
 # Tools
 mypy

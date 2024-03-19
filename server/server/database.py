@@ -10,6 +10,7 @@ from sqlalchemy import (
     String,
     Text,
     Integer,
+    Boolean,
     DateTime as _DateTime,
     func,
 )
@@ -113,6 +114,11 @@ class ProjectModel(Base):
     conversations: Mapped[List["ConversationModel"]] = relationship(
         "ConversationModel", back_populates="project", cascade="all, delete-orphan"
     )
+
+    is_conversation_allowed: Mapped[bool] = mapped_column(Boolean, default=True)
+    default_conversation_title: Mapped[str] = mapped_column(String, nullable=True)
+    default_conversation_description: Mapped[str] = mapped_column(Text, nullable=True)
+    default_conversation_context: Mapped[str] = mapped_column(Text, nullable=True)
 
     chats: Mapped[List["ChatModel"]] = relationship(
         "ChatModel", back_populates="project", cascade="all, delete-orphan"
@@ -222,7 +228,7 @@ class ResourceModel(Base):
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     context: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    is_processed: Mapped[bool] = mapped_column(Integer, default=False)
+    is_processed: Mapped[bool] = mapped_column(Boolean, default=False)
     processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     chats = relationship(
@@ -284,7 +290,7 @@ class ConversationChunkModel(Base):
     )
 
     path: Mapped[str] = mapped_column(String)
-    is_processed: Mapped[bool] = mapped_column(Integer, default=False)
+    is_processed: Mapped[bool] = mapped_column(Boolean, default=False)
     processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True))

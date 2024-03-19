@@ -1,14 +1,15 @@
+import { API_BASE_URL, USE_PARTICIPANT_ROUTER } from "@/config";
 import axios, {
   AxiosError,
   AxiosRequestConfig,
   CreateAxiosDefaults,
 } from "axios";
 
-const commonConfig: CreateAxiosDefaults = {
-  baseURL: "/api",
+export const apiCommonConfig: CreateAxiosDefaults = {
+  baseURL: API_BASE_URL,
 };
 
-export const apiNoAuth = axios.create(commonConfig);
+export const apiNoAuth = axios.create(apiCommonConfig);
 
 apiNoAuth.interceptors.response.use(
   (response) => response.data,
@@ -18,7 +19,7 @@ apiNoAuth.interceptors.response.use(
   },
 );
 
-export const api = axios.create(commonConfig);
+export const api = axios.create(apiCommonConfig);
 
 export const doInitiateSession = async (sessionId?: number | "new") => {
   const url = sessionId
@@ -44,9 +45,10 @@ api.interceptors.response.use(
     ) {
       (config as CustomAxiosRequestConfig)._retry = true;
       try {
-        // await doInitiateSession();
-        // go to /login
-        window.location.assign("/login");
+        if (!USE_PARTICIPANT_ROUTER) {
+          // go to /login
+          window.location.assign("/login");
+        }
         return api(config);
       } catch (e) {
         console.error("init session error", e);
@@ -129,6 +131,7 @@ export const updateProjectById = async (payload: {
   update: Partial<TProject>;
   id: string;
 }) => {
+  console.log("updateProjectById", payload);
   return api.put<unknown, TProject>(`/projects/${payload.id}`, payload.update);
 };
 
@@ -234,3 +237,16 @@ export const getConversationChunks = async (conversationId: string) => {
     `/conversations/${conversationId}/chunks`,
   );
 };
+
+export const getConversationContentLink = (conversationId: string) =>
+  `${apiCommonConfig.baseURL}/conversations/${conversationId}/content`;
+
+export const getConversationChunkContent = (
+  conversationId: string,
+  chunkId: string,
+) =>
+  `${apiCommonConfig.baseURL}/conversations/${conversationId}/chunks/${chunkId}/content`;
+
+// export const getConversationDuration = async (conversationId: string) => {
+//   return api.get<unknown, number>(`/conversations/${conversationId}/duration`);
+// };

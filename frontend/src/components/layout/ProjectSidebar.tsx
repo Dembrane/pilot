@@ -24,6 +24,8 @@ import {
 import { PropsWithChildren } from "react";
 import { Link, useParams } from "react-router-dom";
 import { UploadResourceDropzone } from "../resource/UploadResourceDropzone";
+import { apiCommonConfig } from "@/lib/api";
+import { IconExternalLink } from "@tabler/icons-react";
 
 const ResourceAccordionLabelIcon = ({ resource }: { resource: TResource }) => {
   if (resource.is_processed) {
@@ -76,10 +78,25 @@ const ResourceAccordionDetail = ({
       )}
       {resource.title !== resource.original_filename && (
         <Box>
-          <Text size="sm">
-            <Trans>Original filename</Trans>
-          </Text>
-          <Text size="xs">{resource.original_filename}</Text>
+          <Text size="sm">Original File</Text>
+          <Group gap="xs">
+            <Text size="xs">{resource.original_filename}</Text>
+            <Tooltip label="Open in new tab">
+              <a
+                href={
+                  apiCommonConfig.baseURL +
+                  "/resources/" +
+                  resource.id +
+                  "/content"
+                }
+                target="_blank"
+              >
+                <ActionIcon color="gray" variant="subtle" size="sm">
+                  <IconExternalLink />
+                </ActionIcon>
+              </a>
+            </Tooltip>
+          </Group>
         </Box>
       )}
       <Box>
@@ -118,7 +135,7 @@ const ConversationAccordionLabel = ({
 
       <Box>
         <Title order={4} className="font-normal text-sm">
-          {conversation.title ? conversation.title : "Conversation"}
+          {conversation.participant_email}
         </Title>
       </Box>
     </Group>
@@ -150,17 +167,17 @@ const ConversationAccordionDetail = ({
       )} */}
       <Box>
         <Text size="sm">
-          <Trans>Email</Trans>
-        </Text>
-        <Text size="xs">{conversation.participant_email}</Text>
-      </Box>
-      <Box>
-        <Text size="sm">
           <Trans>Created on</Trans>
         </Text>
         <Text size="xs">
           {new Date(conversation.created_at).toLocaleString()}
         </Text>
+      </Box>
+      <Box>
+        <Text size="sm">
+          <Trans>Title</Trans>
+        </Text>
+        <Text size="xs">{conversation.title}</Text>
       </Box>
       {conversation.description && (
         <Box>

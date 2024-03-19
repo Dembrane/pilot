@@ -17,7 +17,7 @@ msgstr ""
 msgid "Add context to document"
 msgstr "Voeg context toe aan document"
 
-#: src/components/Documents.tsx:146
+#: src/components/Documents.tsx:144
 msgid "Added context"
 msgstr "Context toegevoegd"
 
@@ -29,7 +29,7 @@ msgstr "AI Assistent"
 msgid "All documents are uploaded and ready now. What research question are you interested in asking? Optionally, you can now open an individual analysis chat for each document."
 msgstr "Alle documenten zijn geüpload en zijn nu klaar. Welke onderzoeksvraag wil je stellen? Optioneel kunt u nu voor elk document een individuele analysechat openen."
 
-#: src/components/Layout.tsx:19
+#: src/components/Layout.tsx:26
 #: src/routes/GlobalAnalysis.tsx:26
 msgid "Analysis"
 msgstr "Analyse"
@@ -38,7 +38,7 @@ msgstr "Analyse"
 msgid "Analyze!"
 msgstr "Analyseer!"
 
-#: src/components/Documents.tsx:199
+#: src/components/Documents.tsx:197
 msgid "Are you sure you want to delete this document?"
 msgstr "Weet je zeker dat je dit document wilt verwijderen?"
 
@@ -62,15 +62,15 @@ msgstr "Voeg zoveel documenten toe als je wilt analyseren"
 msgid "Cancel"
 msgstr "Annuleren"
 
-#: src/routes/SelectSession.tsx:97
+#: src/routes/SelectSession.tsx:99
 msgid "Create a new session"
 msgstr "Maak een nieuwe sessie aan"
 
-#: src/components/Documents.tsx:210
+#: src/components/Documents.tsx:208
 msgid "Delete document"
 msgstr "Verwijder document"
 
-#: src/components/Documents.tsx:243
+#: src/components/Documents.tsx:241
 msgid "Description"
 msgstr "Beschrijving"
 
@@ -78,11 +78,11 @@ msgstr "Beschrijving"
 msgid "Document AI Assistant"
 msgstr "Document AI Assistent"
 
-#: src/components/Documents.tsx:226
+#: src/components/Documents.tsx:224
 msgid "Document is being processed"
 msgstr "Document wordt verwerkt"
 
-#: src/components/Documents.tsx:201
+#: src/components/Documents.tsx:199
 msgid "Document was deleted"
 msgstr "Document is verwijderd"
 
@@ -111,19 +111,24 @@ msgstr "Geweldig! Uw documenten worden nu geüpload. Terwijl de documenten worde
 msgid "Hello, I will be your research assistant today. To get started please upload the documents you want to analyse."
 msgstr "Hallo, ik ben vandaag je onderzoeksassistent. Om te beginnen upload je de documenten die je wilt analyseren."
 
+#: src/components/Layout.tsx:19
+#: src/routes/SelectSession.tsx:97
+msgid "Home"
+msgstr ""
+
 #: src/components/Message.tsx:212
 msgid "Input global context"
 msgstr "Voer algemene context in"
 
-#: src/components/Documents.tsx:262
+#: src/components/Documents.tsx:260
 msgid "No documents uploaded yet"
 msgstr "Nog geen documenten geüpload"
 
-#: src/components/Documents.tsx:128
+#: src/components/Documents.tsx:126
 msgid "Open Document Chat ✨"
 msgstr "Open Document Chat ✨"
 
-#: src/components/Documents.tsx:235
+#: src/components/Documents.tsx:233
 msgid "Original filename"
 msgstr "Originele bestandsnaam"
 
@@ -137,8 +142,8 @@ msgstr "Opslaan"
 
 #: src/components/Layout.tsx:26
 #: src/routes/SelectSession.tsx:95
-msgid "Select Session"
-msgstr "Selecteer Sessie"
+#~ msgid "Select Session"
+#~ msgstr "Selecteer Sessie"
 
 #: src/components/Message.tsx:242
 msgid "Thank you! In the meantime, click individual documents to add context to each file that I will take into account for further analysis."

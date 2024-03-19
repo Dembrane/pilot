@@ -1,6 +1,8 @@
+from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
 import time
 from logging import getLogger
-from typing import Any
+from typing import Any, AsyncGenerator
 from fastapi import (
     FastAPI,
     HTTPException,
@@ -11,19 +13,51 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.utils import get_openapi
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from server.config import FRONTEND_DIST_DIR
-from server.api import api
-from server.process import (
-    seed_process_document_queue,
+from server.config import (
+    FAISS_INDEX_PATH,
+    FRONTEND_DIST_DIR,
+    RESOURCE_UPLOADS_DIR,
+    SERVE_FRONTEND,
+)
+from server.api.api import api
+from server.vectorstore import vectorstore
+from server.process_conversation_chunk import seed_process_conversation_chunk_queue
+from server.process_resource import (
+    seed_process_resource_queue,
 )
 
 logger = getLogger("server")
 
-# init stuff
-seed_process_document_queue()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    # startup
+    logger.info("starting server")
+    seed_process_resource_queue()
+    seed_process_conversation_chunk_queue()
+    yield
+    # shutdown
+    logger.info("shutting down server")
+    vectorstore.save_local(FAISS_INDEX_PATH)
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
+
+origins = [
+    "http://localhost:5173",
+    "pdf-pilot.findcommonground.online",
+    "pilot.findcommonground.online",
+    "participant-portal.findcommonground.online",
+    "participant-admin.findcommonground.online",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.middleware("http")
@@ -50,12 +84,14 @@ class SPAStaticFiles(StaticFiles):
                 raise ex
 
 
-logger.info("mounting frontend on /")
-app.mount(
-    "/",
-    SPAStaticFiles(directory=FRONTEND_DIST_DIR, html=True),
-    name="spa-static-files",
-)
+if SERVE_FRONTEND:
+    logger.info("mounting frontend on /")
+
+    app.mount(
+        "/",
+        SPAStaticFiles(directory=FRONTEND_DIST_DIR, html=True),
+        name="spa-static-files",
+    )
 
 
 def custom_openapi() -> Any:
@@ -63,7 +99,7 @@ def custom_openapi() -> Any:
         return app.openapi_schema
     openapi_schema = get_openapi(
         title="dembrane/pilot API",
-        version="0.1.0",
+        version="0.2.0",
         routes=app.routes,
     )
     openapi_schema["info"]["x-logo"] = {"url": "/dembrane-logo.png"}

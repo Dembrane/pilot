@@ -6,3 +6,4 @@ faiss_index
 .env
 dist
 .mypy_cache
+.DS_Store

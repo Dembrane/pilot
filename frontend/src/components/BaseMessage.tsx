@@ -1,0 +1,45 @@
+import { Icons } from "@/icons";
+import { t } from "@lingui/macro";
+import { PaperProps, Text, Paper, Group, Box, Stack } from "@mantine/core";
+import React, { PropsWithChildren } from "react";
+
+export const BaseMessage = (
+  props: PropsWithChildren<{
+    text?: string;
+    title?: React.ReactNode;
+    rightSection?: React.ReactNode;
+    bottomSection?: React.ReactNode;
+    paperProps?: PaperProps;
+  }>,
+) => {
+  return (
+    <Paper
+      pos="relative"
+      bg="gray.1"
+      p="sm"
+      className="!bg-opacity-50"
+      {...props.paperProps}
+    >
+      <Stack>
+        <Group align="start" wrap="nowrap">
+          <div className="pt-1">
+            <Icons.Diamond color="black" />
+          </div>
+          <Box flex={1}>
+            <Group align="center" justify="space-between">
+              <Text mb="xs" size="sm">
+                {props.title ?? t`You`}
+              </Text>
+              {props.rightSection}
+            </Group>
+            <div>
+              {props.text && <Text size="sm">{props.text}</Text>}
+              {props.children}
+            </div>
+          </Box>
+        </Group>
+        {props.bottomSection}
+      </Stack>
+    </Paper>
+  );
+};

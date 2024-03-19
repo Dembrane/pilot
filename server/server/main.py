@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
-from fastapi.middleware.cors import CORSMiddleware
 import time
 from logging import getLogger
+from starlette.middleware.cors import CORSMiddleware
 from typing import Any, AsyncGenerator
 from fastapi import (
     FastAPI,

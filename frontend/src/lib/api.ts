@@ -209,16 +209,11 @@ export const uploadConversationChunk = async (payload: {
 }) => {
   const formData = new FormData();
 
-  if (payload.chunk.type.startsWith("audio/")) {
-    const file = new File(
-      [payload.chunk],
-      `chunk.${payload.chunk.type.split("/")[1]}`,
-      {
-        type: payload.chunk.type,
-      },
-    );
-    formData.append("chunk", file);
-  }
+  const fileExtension = payload.chunk.type.split("/")[1].split(";")[0];
+  const file = new File([payload.chunk], `chunk.${fileExtension}`, {
+    type: payload.chunk.type,
+  });
+  formData.append("chunk", file);
   formData.append("timestamp", payload.timestamp.toISOString());
 
   return apiNoAuth.post<unknown, TConversation>(

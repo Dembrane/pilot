@@ -20,7 +20,7 @@ import WelcomeImage from "@/assets/participant-welcome-pattern.png";
 import { Markdown } from "@/components/Markdown";
 import { useState, useRef, useEffect, useCallback } from "react";
 
-const preferredMimeTypes = ["audio/webm", "audio/wav"];
+const preferredMimeTypes = ["audio/webm", "audio/wav", "video/mp4"];
 
 const getSupportedMimeType = () => {
   for (let mimeType of preferredMimeTypes) {

@@ -11,8 +11,6 @@ services:
         - VITE_PARTICIPANT_BASE_URL=https://participant.findcommonground.online
         - VITE_USE_PARTICIPANT_ROUTER=0
     restart: unless-stopped
-    ports:
-      - "5173:5173"
   
   participant-frontend:
     build: 
@@ -23,8 +21,8 @@ services:
         - VITE_PARTICIPANT_BASE_URL=https://participant.findcommonground.online
         - VITE_USE_PARTICIPANT_ROUTER=1
     restart: unless-stopped
-    ports:
-      - "5174:5173" 
+    networks:
+      - default
 
   api-server:
     build: ./server
@@ -32,10 +30,10 @@ services:
     command: /bin/sh /code/server/prod.sh
     env_file:
       - ./server/.env
-    ports:
-      - "8000:8000"
     volumes:
       - ./server:/code/server
+    networks:
+      - default
 
   caddy:
     image: caddy:2
@@ -50,3 +48,9 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./caddy_data:/data
       - ./caddy_config:/config 
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

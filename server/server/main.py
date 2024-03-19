@@ -14,6 +14,7 @@ from fastapi.openapi.utils import get_openapi
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from server.config import (
+    ALLOW_LOCALHOST_CORS,
     FAISS_INDEX_PATH,
     FRONTEND_DIST_DIR,
     RESOURCE_UPLOADS_DIR,
@@ -44,11 +45,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(lifespan=lifespan)
 
 origins = [
-    "http://localhost:5173",
-    "pdf-pilot.findcommonground.online",
-    "pilot.findcommonground.online",
-    "participant-portal.findcommonground.online",
-    "participant-admin.findcommonground.online",
+    "admin.findcommonground.app",
+    "participant.findcommonground.app",
 ]
 
 app.add_middleware(

@@ -45,8 +45,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(lifespan=lifespan)
 
 origins = [
-    "admin.findcommonground.app",
-    "participant.findcommonground.app",
+    "https://admin.findcommonground.app",
+    "https://participant.findcommonground.app",
 ]
 
 app.add_middleware(

@@ -1,5 +1,6 @@
 from logging import getLogger
 from queue import Queue
+import subprocess
 import threading
 
 
@@ -12,10 +13,53 @@ logger = getLogger("process_conversation_chunk")
 client = OpenAI()
 
 
+def convert_mp4_to_mp3(input_file: str, output_file: str) -> bool:
+    command = [
+        "ffmpeg",
+        "-i",
+        input_file,
+        "-vn",
+        "-ab",
+        "128k",
+        "-ar",
+        "44100",
+        "-y",
+        output_file,
+    ]
+
+    try:
+        result = subprocess.run(command, check=True)
+    except subprocess.CalledProcessError as e:
+        logger.error(e)
+        return False
+    except FileNotFoundError:
+        logger.error("FFmpeg is not installed or not found in the system path.")
+        return False
+
+    # Check if the conversion was successful
+    if result.returncode == 0:
+        logger.info("Conversion successful.")
+        return True
+    else:
+        logger.info(f"Conversion failed with return code {result.returncode}.")
+        return False
+
+
 def process_conversation_chunk(
     chunk: ConversationChunkModel,
 ) -> ConversationChunkModel:
     path = chunk.path
+
+    if path.endswith(".mp4"):
+        output_path = path.replace(".mp4", ".mp3")
+        logger.info(f"Converting to mp3: {output_path}")
+        if convert_mp4_to_mp3(path, output_path):
+            logger.info(f"Converted to mp3: {output_path}")
+            chunk.path = output_path
+            path = output_path
+            db.add(chunk)
+            db.commit()
+
     with open(path, "rb") as f:
         transcription = client.audio.transcriptions.create(
             model="whisper-1", file=f, response_format="text"

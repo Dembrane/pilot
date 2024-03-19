@@ -40,7 +40,7 @@ const Chunk = ({ chunk }: { chunk: TConversationChunk }) => {
             src={src}
             className="w-full h-6 p-0"
             crossOrigin="anonymous"
-            preload="auto"
+            preload="metadata"
             controls
           />
         </>

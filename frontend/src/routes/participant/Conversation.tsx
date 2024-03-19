@@ -514,7 +514,7 @@ export const ParticipantConversationRoute = () => {
   }
 
   return (
-    <Stack className="h-full">
+    <Stack className="h-dvh">
       <header className="sticky top-0 py-4 bg-white z-10">
         <Group justify="center" className="px-4 relative">
           <Logo hideTitle className="left-0 pl-4 absolute sm:relative" />
@@ -587,7 +587,6 @@ export const ParticipantConversationRoute = () => {
                 </Button>
               )}
               <Button
-                // className="flex-1"
                 variant="outline"
                 size="xl"
                 rightSection={<IconPlayerStop size={16} />}

@@ -173,12 +173,14 @@ const ConversationAccordionDetail = ({
           {new Date(conversation.created_at).toLocaleString()}
         </Text>
       </Box>
-      <Box>
-        <Text size="sm">
-          <Trans>Title</Trans>
-        </Text>
-        <Text size="xs">{conversation.title}</Text>
-      </Box>
+      {conversation.title && (
+        <Box>
+          <Text size="sm">
+            <Trans>Title</Trans>
+          </Text>
+          <Text size="xs">{conversation.title}</Text>
+        </Box>
+      )}
       {conversation.description && (
         <Box>
           <Text size="sm">

@@ -29,10 +29,16 @@ import {
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
-import { IconCheck, IconCopy, IconTrash } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconCopy,
+  IconDownload,
+  IconTrash,
+} from "@tabler/icons-react";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { PARTICIPANT_BASE_URL } from "@/config";
+import { getProjectTranscriptsLink } from "@/lib/api";
 
 const ProjectDangerZone = ({ project }: { project: TProject }) => {
   const deleteProjectByIdMutation = useDeleteProjectByIdMutation();
@@ -345,6 +351,18 @@ export const ProjectOverviewRoute = () => {
                     <QRCode value={sharingLink} className="h-full w-full" />
                   </Box>
                 </Box>{" "}
+                <Divider />
+                <Title order={2}>Export</Title>
+                <Box>
+                  <Button
+                    component="a"
+                    href={getProjectTranscriptsLink(projectId ?? "")}
+                    download={`${projectQuery.data.name ?? "Project"}-Transcripts.zip`}
+                    rightSection={<IconDownload />}
+                  >
+                    Download All Transcripts
+                  </Button>
+                </Box>
               </>
             ) : (
               <Text size="sm">

@@ -255,6 +255,7 @@ class ConversationModel(Base):
     )
 
     participant_email = mapped_column(String)
+    participant_user_agent: Mapped[str] = mapped_column(String, nullable=True)
 
     title: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=True)

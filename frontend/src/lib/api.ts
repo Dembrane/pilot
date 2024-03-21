@@ -128,6 +128,9 @@ export const getProjectById = async (projectId: string) => {
   return api.get<unknown, TProject>(`/projects/${projectId}`);
 };
 
+export const getProjectTranscriptsLink = (projectId: string) =>
+  `${apiCommonConfig.baseURL}/projects/${projectId}/transcripts`;
+
 export const updateProjectById = async (payload: {
   update: Partial<TProject>;
   id: string;
@@ -172,6 +175,7 @@ export const initiateConversation = async (payload: {
     {
       email: payload.participantEmail,
       pin: payload.pin,
+      user_agent: navigator.userAgent ?? undefined,
     },
   );
 };

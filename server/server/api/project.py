@@ -1,7 +1,10 @@
+import asyncio
 from logging import getLogger
 import os
-from typing import List, Optional
-from fastapi import APIRouter, UploadFile
+import zipfile
+from typing import Generator, List, Optional
+from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from server.database import ConversationModel, ProjectModel, ResourceModel, db
 from server.schemas import ConversationSchema, ProjectSchema, ResourceSchema
@@ -13,12 +16,13 @@ from server.api.exceptions import (
     ResourceFailedToSaveFileException,
     ResourceInvalidFileFormatException,
 )
-from server.config import RESOURCE_UPLOADS_DIR
+from server.config import AUDIO_CHUNKS_DIR, RESOURCE_UPLOADS_DIR
 from server.process_resource import (
     ProcessResourceTaskQueueItem,
     process_resource_queue,
 )
 from server.api.session import DependencyRequireSession
+from server.api.conversation import get_conversation, get_conversation_chunks
 from server.util import generate_4_digit_pin, generate_uuid
 
 logger = getLogger("api.project")
@@ -92,6 +96,85 @@ async def get_project(
     return project
 
 
+async def generate_transcript_file(conversation_id: str) -> Optional[str]:
+    logger.info(f"generating transcript for conversation {conversation_id}")
+    chunks = await get_conversation_chunks(conversation_id)
+
+    if not chunks:
+        return None
+
+    conversation = await get_conversation(conversation_id)
+    email = conversation.participant_email
+
+    conversation_dir = os.path.join(AUDIO_CHUNKS_DIR, conversation_id)
+
+    os.makedirs(conversation_dir, exist_ok=True)
+    file_path = os.path.join(conversation_dir, email + "-transcript.md")
+
+    with open(file_path, "w") as file:
+        for chunk in chunks:
+            try:
+                if chunk.is_processed and chunk.transcript is not None:
+                    file.write(str(chunk.transcript) + "\n")
+            except Exception as e:
+                logger.error(f"Failed to write transcript for chunk {chunk.id}: {e}")
+
+    return file_path
+
+
+async def cleanup_files(zip_file_name: str, filenames: List[str]) -> None:
+    os.remove(zip_file_name)
+    for filename in filenames:
+        os.remove(filename)
+
+
+@ProjectRouter.get("/{project_id}/transcripts")
+async def get_project_transcripts(
+    project_id: str,
+    session: DependencyRequireSession,
+    background_tasks: BackgroundTasks,
+) -> StreamingResponse:
+    project = await get_project(project_id, session)
+
+    conversations = await get_all_conversations_for_project(project_id, session)
+
+    if not conversations:
+        raise HTTPException(
+            status_code=404, detail="No conversations found for this project"
+        )
+
+    filename_futures = [
+        generate_transcript_file(conversation.id) for conversation in conversations
+    ]
+    filenames = await asyncio.gather(*filename_futures)
+
+    filenames = [filename for filename in filenames if filename]
+    if not filenames:
+        raise HTTPException(
+            status_code=404, detail="No transcripts available for this project"
+        )
+
+    zip_file_name = f"{project.name}_transcripts.zip"
+    with zipfile.ZipFile(zip_file_name, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for filename in filenames:
+            arcname = os.path.basename(filename)
+            zipf.write(filename, arcname)
+
+    def iterfile() -> Generator[bytes, None, None]:
+        with open(zip_file_name, "rb") as file:
+            yield from file
+
+    response = StreamingResponse(iterfile(), media_type="application/zip")
+    response.headers["Content-Disposition"] = f"attachment; filename={zip_file_name}"
+    # Schedule cleanup task to run after the response has been sent
+    background_tasks.add_task(
+        cleanup_files,
+        response.headers["Content-Disposition"].split("=")[1],
+        [os.path.join(AUDIO_CHUNKS_DIR, project_id, "transcript.md")],
+    )
+    return response
+
+
 @ProjectRouter.put("/{project_id}", response_model=ProjectSchema)
 async def update_project(
     project_id: str,
@@ -162,6 +245,7 @@ async def get_all_conversations_for_project(
 class InitiateConversationRequestBodySchema(BaseModel):
     email: str
     pin: str
+    user_agent: Optional[str] = None
 
 
 @ProjectRouter.post(
@@ -191,12 +275,18 @@ async def initiate_conversation(
     )
 
     if conversation:
+        logger.info(f"Conversation already exists: {conversation.id}")
+        if body.user_agent:
+            conversation.participant_user_agent = body.user_agent
+            db.commit()
+
         return conversation
 
     new_conversation = ConversationModel(
         id=generate_uuid(),
         project_id=project.id,
         participant_email=body.email,
+        participant_user_agent=body.user_agent,
         title=project.default_conversation_title,
         description=project.default_conversation_description,
         context=project.default_conversation_context,

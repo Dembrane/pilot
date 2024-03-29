@@ -21,6 +21,7 @@ type TConversation = {
   description?: string;
   context?: string;
   participant_email?: string;
+  participant_name: string;
 };
 
 type TConversationChunk = {
@@ -54,14 +55,4 @@ type TSession = {
   id: number;
   created_at: Date;
   updated_at: Date;
-};
-
-type TSessionMessage = {
-  id: string;
-  created_at: Date;
-  session_id: string;
-  text: string;
-  from_user: boolean;
-  // ids of documents used in this message
-  documents_used: string[];
 };

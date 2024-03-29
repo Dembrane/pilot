@@ -12,6 +12,7 @@ import {
   Text,
   Tooltip,
   ActionIcon,
+  Anchor,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import { IconDownload, IconTrash } from "@tabler/icons-react";
@@ -69,8 +70,7 @@ const ConversationEdit = ({
 }: {
   conversation: TConversation;
 }) => {
-  const { isSuccess, ...updateConversationMutation } =
-    useUpdateConversationByIdMutation();
+  const updateConversationMutation = useUpdateConversationByIdMutation();
 
   const defaultValues: ConversationEditFormValues = {
     title: conversation.title ?? "",
@@ -78,20 +78,21 @@ const ConversationEdit = ({
     context: conversation.context ?? "",
   };
 
-  const { register, handleSubmit, formState, reset } =
-    useForm<ConversationEditFormValues>({
-      defaultValues,
-    });
+  const {
+    register,
+    handleSubmit,
+    formState: { isDirty, isSubmitSuccessful },
+    reset,
+    getValues,
+  } = useForm<ConversationEditFormValues>({
+    defaultValues,
+  });
 
   useEffect(() => {
-    if (isSuccess) {
-      reset({
-        title: conversation.title,
-        description: conversation.description,
-        context: conversation.context,
-      });
+    if (isSubmitSuccessful) {
+      reset(getValues());
     }
-  }, [isSuccess, reset]);
+  }, [isSubmitSuccessful, reset]);
 
   const onSubmit = (data: ConversationEditFormValues) => {
     updateConversationMutation.mutate({
@@ -106,40 +107,62 @@ const ConversationEdit = ({
         <Title order={2}>
           <Trans>Edit Conversation</Trans>
         </Title>
-        {formState.isDirty && <Trans>Unsaved changes</Trans>}
+        {isDirty && <Trans>Unsaved changes</Trans>}
       </Group>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack>
           <TextInput
             label="Title"
-            placeholder="Conversation Title"
-            description="This is shown to participants"
             {...register("title")}
-            defaultValue={conversation.title}
-          />
-          <Textarea
-            label="Description"
-            placeholder="Conversation Description"
-            description="This is shown to participants"
-            rows={6}
-            {...register("description")}
-            defaultValue={conversation.description}
-          />
-          <Divider />
-          <Textarea
-            label="Additional Context"
-            description="This is hidden from participants"
-            placeholder="Additional Context for the Conversation"
-            rows={6}
-            {...register("context")}
-            defaultValue={conversation.context}
+            placeholder="Conversation Title"
           />
 
+          <Textarea
+            label="Description"
+            description="Markdown is allowed here."
+            rows={5}
+            {...register("description")}
+            placeholder="Conversation Description"
+          />
+
+          <Divider />
+
+          <Box>
+            <Title order={4}>Advanced Settings</Title>
+            <Text size="sm">
+              These are not exposed to participants but will be used to improve
+              the quality of the transcripts.
+            </Text>
+          </Box>
+
+          <Box>
+            <Textarea
+              label="Context"
+              description={
+                <Text size="xs">
+                  Use this field to add context about the session. You may
+                  choose to include proper nouns, names, or other information
+                  that may be relevant to the conversation. This will be used to
+                  improve the quality of the transcripts.{" "}
+                  <Anchor
+                    href="https://cookbook.openai.com/examples/whisper_prompting_guide"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Link to Prompting Guide
+                  </Anchor>
+                </Text>
+              }
+              rows={5}
+              {...register("context")}
+              placeholder="Conversation Additional Context"
+            />
+          </Box>
           <Group>
             <Button
               type="submit"
               loading={updateConversationMutation.isPending}
-              disabled={!formState.isDirty}
+              disabled={!isDirty}
             >
               <Trans>Save</Trans>
             </Button>
@@ -147,7 +170,7 @@ const ConversationEdit = ({
               type="reset"
               variant="outline"
               onClick={() => reset(defaultValues)}
-              disabled={!formState.isDirty}
+              disabled={!isDirty}
             >
               <Trans>Cancel</Trans>
             </Button>
@@ -162,7 +185,6 @@ export const ProjectConversationOverviewRoute = () => {
   const { conversationId } = useParams();
   const conversationQuery = useConversationById(conversationId ?? "");
   const conversationChunksQuery = useConversationChunks(conversationId ?? "");
-  // const durationQuery = useConversationDuration(conversationId ?? "");
 
   return (
     <Stack className="relative">
@@ -205,14 +227,21 @@ export const ProjectConversationOverviewRoute = () => {
           </Stack>
         )}
       <Divider />
+
       <Box>
-        <Text size="md">Email</Text>
-        <Text size="sm">{conversationQuery.data?.participant_email}</Text>
+        <Text size="md">Name</Text>
+        <Text size="sm">{conversationQuery.data?.participant_name}</Text>
       </Box>
+      {conversationQuery.data?.participant_email && (
+        <Box>
+          <Text size="md">Email</Text>
+          <Text size="sm">{conversationQuery.data?.participant_email}</Text>
+        </Box>
+      )}
       <Box>
         <Text size="md">Created on</Text>
         <Text size="sm">
-          {conversationQuery.data?.created_at.toLocaleString()}
+          {new Date(conversationQuery.data?.created_at ?? 0).toLocaleString()}
         </Text>
       </Box>
       <Divider />

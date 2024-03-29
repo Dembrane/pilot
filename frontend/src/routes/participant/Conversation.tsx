@@ -15,10 +15,19 @@ import {
   IconPlayerPlay,
   IconPlayerStop,
 } from "@tabler/icons-react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import WelcomeImage from "@/assets/participant-welcome-pattern.png";
 import { Markdown } from "@/components/Markdown";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useMicVAD, utils } from "@ricky0123/vad-react";
+import * as ort from "onnxruntime-web";
+
+ort.env.wasm.wasmPaths = {
+  "ort-wasm-simd-threaded.wasm": "/ort-wasm-simd-threaded.wasm",
+  "ort-wasm-simd.wasm": "/ort-wasm-simd.wasm",
+  "ort-wasm.wasm": "/ort-wasm.wasm",
+  "ort-wasm-threaded.wasm": "/ort-wasm-threaded.wasm",
+};
 
 const preferredMimeTypes = ["audio/webm", "audio/wav", "video/mp4"];
 
@@ -33,171 +42,21 @@ const getSupportedMimeType = () => {
 
 const defaultMimeType = getSupportedMimeType();
 
-// interface UseAudioRecorderOptions {
-//   onChunk: (chunk: Blob) => void;
-//   mimeType?: string;
-//   timeslice?: number;
-// }
+// const useSelectAudioDevice = () => {
+//   const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
+//   const [selectedAudioDevice, setSelectedAudioDevice] =
+//     useState<MediaDeviceInfo | null>(null);
 
-// interface UseAudioRecorderResult {
-//   startRecording: () => void;
-//   stopRecording: () => void;
-//   pauseRecording: () => void;
-//   resumeRecording: () => void;
-//   isRecording: boolean;
-//   isPaused: boolean;
-//   recordingTime: number;
-// }
-
-// const useAudioRecorder = ({
-//   onChunk,
-//   mimeType = defaultMimeType,
-//   timeslice = 30000,
-// }: UseAudioRecorderOptions): UseAudioRecorderResult => {
-//   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
-//     null,
-//   );
-//   const [isRecording, setIsRecording] = useState(false);
-//   const [isPaused, setIsPaused] = useState(false);
-//   const audioContextRef = useRef<AudioContext | null>(null);
-//   const workletNodeRef = useRef<AudioWorkletNode | null>(null);
-//   const [recordingTime, setRecordingTime] = useState(0); // Track recording time in seconds
-//   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-//   const startTimeRef = useRef<Date | null>(null);
-
-//   const updateRecordingTime = () => {
-//     if (startTimeRef.current) {
-//       const elapsedTime = (Date.now() - startTimeRef.current.getTime()) / 1000;
-//       setRecordingTime(Math.floor(elapsedTime));
-//     }
-//   };
-
-//   const startRecording = async () => {
-//     try {
-//       console.log("Requesting access to the microphone...");
-//       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-//       console.log("Access to microphone granted.");
-
-//       const audioContext = new AudioContext();
-//       audioContextRef.current = audioContext;
-
-//       console.log("Loading audio worklet module...");
-//       await audioContext.audioWorklet.addModule("/processor.js");
-
-//       const workletNode = new AudioWorkletNode(
-//         audioContext,
-//         "silence-detector",
-//       );
-//       workletNodeRef.current = workletNode;
-
-//       const source = audioContext.createMediaStreamSource(stream);
-//       source.connect(workletNode);
-//       workletNode.connect(audioContext.destination);
-
-//       workletNode.port.onmessage = (event) => {
-//         const { action } = event.data;
-//         if (action === "pause" && mediaRecorder?.state === "recording") {
-//           mediaRecorder.pause();
-//           setIsPaused(true);
-//         } else if (action === "resume" && mediaRecorder?.state === "paused") {
-//           mediaRecorder.resume();
-//           setIsPaused(false);
-//         }
-//       };
-
-//       const recorder = new MediaRecorder(stream, {
-//         mimeType: MediaRecorder.isTypeSupported(mimeType)
-//           ? mimeType
-//           : "audio/webm",
-//       });
-
-//       recorder.ondataavailable = async (event) => {
-//         if (event.data.size > 0) {
-//           // const arrayBuffer = await event.data.arrayBuffer();
-
-//           // const muxer = new Muxer({
-//           //   target: new ArrayBufferTarget(),
-//           //   audio: {
-//           //     codec: "A_OPUS",
-//           //     sampleRate: 48000,
-//           //     numberOfChannels: 2,
-//           //   },
-//           //   firstTimestampBehavior: "permissive",
-//           // });
-
-//           // const raw = new Uint8Array(arrayBuffer);
-//           // console.log("Adding audio chunk to muxer", raw.byteLength, "bytes");
-//           // muxer.addAudioChunkRaw(raw, "key", recordingTime * 1000);
-//           // muxer.finalize();
-
-//           // const { buffer } = muxer.target;
-
-//           // const blob = new Blob([buffer], { type: "audio/webm" });
-//           // console.log("Muxed blob of data", blob.size, "bytes");
-
-//           // onChunk(blob);
-//           onChunk(event.data);
-//         }
-//       };
-
-//       setMediaRecorder(recorder);
-//       recorder.start(timeslice);
-//       setIsRecording(true);
-//       setIsPaused(false);
-
-//       startTimeRef.current = new Date();
-//       intervalRef.current = setInterval(updateRecordingTime, 1000);
-//     } catch (error) {
-//       console.error("Error accessing audio stream", error);
-//     }
-//   };
-
-//   const stopRecording = () => {
-//     mediaRecorder?.stop();
-//     setIsRecording(false);
-//     setIsPaused(false);
-//     audioContextRef.current?.close();
-//     workletNodeRef.current?.disconnect();
-
-//     if (intervalRef.current) {
-//       clearInterval(intervalRef.current);
-//     }
-//     intervalRef.current = null;
-//     startTimeRef.current = null;
-//   };
-
-//   const pauseRecording = () => {
-//     if (mediaRecorder?.state === "recording") {
-//       mediaRecorder.pause();
-//       setIsPaused(true);
-//     }
-
-//     if (intervalRef.current) {
-//       clearInterval(intervalRef.current);
-//     }
-//     intervalRef.current = null;
-//   };
-
-//   const resumeRecording = () => {
-//     if (mediaRecorder?.state === "paused") {
-//       mediaRecorder.resume();
-//       setIsPaused(false);
-//     }
-
-//     if (!intervalRef.current) {
-//       startTimeRef.current = new Date(Date.now() - recordingTime * 1000);
-//       intervalRef.current = setInterval(updateRecordingTime, 1000);
-//     }
-//   };
+//   useEffect(() => {
+//     navigator.mediaDevices.enumerateDevices().then((devices) => {
+//       setAudioDevices(devices.filter((device) => device.kind === "audioinput"));
+//     });
+//   }, []);
 
 //   return {
-//     startRecording,
-//     stopRecording,
-//     pauseRecording,
-//     resumeRecording,
-//     isRecording,
-//     isPaused,
-//     recordingTime,
+//     audioDevices,
+//     selectedAudioDevice,
+//     setSelectedAudioDevice,
 //   };
 // };
 
@@ -215,12 +74,19 @@ interface UseAudioRecorderResult {
   isRecording: boolean;
   isPaused: boolean;
   recordingTime: number;
+  errored:
+    | boolean
+    | {
+        message: string;
+      };
+  loading: boolean;
 }
 
 const useAudioRecorder = ({
   onChunk,
   mimeType = defaultMimeType,
-  timeslice = 30000,
+  // timeslice = 30000, // 30 sec
+  timeslice = 300000, // 5 min
 }: UseAudioRecorderOptions): UseAudioRecorderResult => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -258,6 +124,9 @@ const useAudioRecorder = ({
   }, []);
 
   const handleAudioProcessorMessages = (event: MessageEvent) => {
+    console.log("Not Handled: Received audio processor message", event.data);
+    return;
+
     console.log("Received audio processor message", event.data);
     const { action } = event.data;
 
@@ -484,13 +353,126 @@ const useAudioRecorder = ({
     isRecording,
     isPaused,
     recordingTime,
+    loading: false,
+    errored: false,
   };
 };
 
-export const ParticipantConversationRoute = () => {
+const useVADAudioRecorder = (
+  props: UseAudioRecorderOptions,
+): UseAudioRecorderResult => {
+  const vad = useMicVAD({
+    startOnLoad: false,
+    submitUserSpeechOnPause: true,
+    workletURL: "/vad.worklet.bundle.min.js",
+    modelURL: "/silero_vad.onnx",
+    // additionalAudioConstraints: {
+    //   deviceId: ""
+    // },
+    onVADMisfire: () => {
+      console.log("Vad misfire");
+    },
+    onSpeechStart: () => {
+      console.log("Speech start");
+    },
+    onSpeechEnd: (audio) => {
+      console.log("Speech ended");
+      const buffer = utils.encodeWAV(audio);
+      const blob = new Blob([buffer], { type: "audio/wav" });
+      props.onChunk(blob);
+    },
+  });
+
+  const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const [recordingTime, setRecordingTime] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const updateRecordingTime = useCallback(() => {
+    setRecordingTime((prev) => prev + 1);
+  }, []);
+
+  const startRecording = useCallback(() => {
+    console.log("Starting recording");
+    setIsRecording(true);
+    setIsPaused(false);
+    setRecordingTime(0);
+    vad.start();
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    intervalRef.current = setInterval(updateRecordingTime, 1000);
+  }, [vad, setIsPaused]);
+
+  const stopRecording = useCallback(() => {
+    vad.pause();
+    setIsRecording(false);
+    setIsPaused(false);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    setRecordingTime(0);
+  }, [vad, setIsPaused]);
+
+  const pauseRecording = useCallback(() => {
+    vad.pause();
+    setIsPaused(true);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+  }, [vad, setIsPaused]);
+
+  const resumeRecording = useCallback(() => {
+    vad.start();
+    setIsPaused(false);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    intervalRef.current = setInterval(updateRecordingTime, 1000);
+  }, [vad, setIsPaused]);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
+  return {
+    startRecording,
+    stopRecording,
+    pauseRecording,
+    resumeRecording,
+    isRecording,
+    isPaused,
+    recordingTime,
+    errored: vad.errored,
+    loading: vad.loading,
+  };
+};
+
+export const ParticipantConversationRoute = ({
+  fallback = false,
+}: {
+  fallback?: boolean;
+}) => {
   const { conversationId } = useParams();
   const conversationQuery = useConversationById(conversationId as string);
   const uploadChunkMutation = useUploadConversationChunk();
+
+  const onChunk = (chunk: Blob) => {
+    uploadChunkMutation.mutate({
+      conversationId: conversationId ?? "",
+      chunk,
+      timestamp: new Date(),
+    });
+  };
+
+  const audioRecorder = useVADAudioRecorder({ onChunk });
+  const fallbackAudioRecorder = useAudioRecorder({ onChunk });
+
   const {
     startRecording,
     stopRecording,
@@ -499,17 +481,11 @@ export const ParticipantConversationRoute = () => {
     pauseRecording,
     resumeRecording,
     recordingTime,
-  } = useAudioRecorder({
-    onChunk: (chunk) => {
-      uploadChunkMutation.mutate({
-        conversationId: conversationId ?? "",
-        chunk,
-        timestamp: new Date(),
-      });
-    },
-  });
+    errored,
+    loading,
+  } = fallback ? fallbackAudioRecorder : audioRecorder;
 
-  if (conversationQuery.isLoading) {
+  if (conversationQuery.isLoading || loading) {
     return <LoadingOverlay visible />;
   }
 
@@ -525,7 +501,15 @@ export const ParticipantConversationRoute = () => {
       <Box className="flex-1 px-4 py-8">
         <Stack className="h-full overflow-y-auto">
           {!isRecording ? (
-            <h2 className="text-3xl text-center">Welcome</h2>
+            <>
+              {conversationQuery.data?.participant_name != "" ? (
+                <h2 className="text-3xl text-center">
+                  Welcome, {conversationQuery.data?.participant_name}
+                </h2>
+              ) : (
+                <h2 className="text-3xl text-center">Welcome</h2>
+              )}
+            </>
           ) : (
             <Group justify="center">
               {isPaused ? (
@@ -545,6 +529,7 @@ export const ParticipantConversationRoute = () => {
             className="w-full object-contain animate-pulse duration-1000"
             src={WelcomeImage}
           />
+          {!fallback && errored && <Navigate to="fallback" />}
           <Stack>
             <Title order={3}>{conversationQuery.data?.title}</Title>
             <Text className="text-sm prose">
@@ -553,57 +538,59 @@ export const ParticipantConversationRoute = () => {
           </Stack>
         </Stack>
       </Box>
-      <Box className="px-4 py-8 sticky bottom-0 bg-white">
-        <Group justify="center w-full">
-          {!isRecording && (
-            <Button
-              fullWidth
-              size="xl"
-              rightSection={<IconMicrophone size={16} />}
-              onClick={startRecording}
-            >
-              Start Recording
-            </Button>
-          )}
-          {isRecording && (
-            <>
-              {isPaused ? (
-                <Button
-                  className="flex-1"
-                  size="xl"
-                  rightSection={<IconPlayerPlay size={16} />}
-                  onClick={resumeRecording}
-                >
-                  Resume
-                </Button>
-              ) : (
-                <Button
-                  className="flex-1"
-                  size="xl"
-                  rightSection={<IconPlayerPause size={16} />}
-                  onClick={pauseRecording}
-                >
-                  Pause
-                </Button>
-              )}
+      {!errored && (
+        <Box className="px-4 py-8 sticky bottom-0 bg-white">
+          <Group justify="center w-full">
+            {!isRecording && (
               <Button
-                variant="outline"
+                fullWidth
                 size="xl"
-                rightSection={<IconPlayerStop size={16} />}
-                onClick={() => {
-                  if (
-                    window.confirm("Are you sure you want to stop recording?")
-                  ) {
-                    stopRecording();
-                  }
-                }}
+                rightSection={<IconMicrophone size={16} />}
+                onClick={startRecording}
               >
-                Stop
+                Start Recording
               </Button>
-            </>
-          )}
-        </Group>
-      </Box>
+            )}
+            {isRecording && (
+              <>
+                {isPaused ? (
+                  <Button
+                    className="flex-1"
+                    size="xl"
+                    rightSection={<IconPlayerPlay size={16} />}
+                    onClick={resumeRecording}
+                  >
+                    Resume
+                  </Button>
+                ) : (
+                  <Button
+                    className="flex-1"
+                    size="xl"
+                    rightSection={<IconPlayerPause size={16} />}
+                    onClick={pauseRecording}
+                  >
+                    Pause
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="xl"
+                  rightSection={<IconPlayerStop size={16} />}
+                  onClick={() => {
+                    if (
+                      window.confirm("Are you sure you want to stop recording?")
+                    ) {
+                      stopRecording();
+                    }
+                  }}
+                >
+                  Stop
+                </Button>
+              </>
+            )}
+          </Group>
+        </Box>
+      )}
     </Stack>
   );
 };

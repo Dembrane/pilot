@@ -26,6 +26,7 @@ import {
   rem,
   Tabs,
   Checkbox,
+  Anchor,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
@@ -88,10 +89,15 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
     default_conversation_context: project.default_conversation_context ?? "",
   };
 
-  const { register, handleSubmit, formState, reset } =
-    useForm<ProjectEditFormValues>({
-      defaultValues,
-    });
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitSuccessful, isDirty },
+    reset,
+    getValues,
+  } = useForm<ProjectEditFormValues>({
+    defaultValues,
+  });
 
   const { isSuccess, ...updateProjectMutation } =
     useUpdateProjectByIdMutation();
@@ -104,10 +110,10 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
   };
 
   useEffect(() => {
-    if (isSuccess) {
-      reset();
+    if (isSubmitSuccessful) {
+      reset(getValues());
     }
-  }, [isSuccess, reset]);
+  }, [isSubmitSuccessful, getValues, reset]);
 
   return (
     <Stack>
@@ -115,20 +121,16 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
         <Title order={2}>
           <Trans>Edit Project</Trans>
         </Title>
-        {formState.isDirty && <Trans>Unsaved changes</Trans>}
+        {isDirty && <Trans>Unsaved changes</Trans>}
       </Group>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack>
-          <TextInput
-            label="Title"
-            {...register("name")}
-            defaultValue={project.name}
-          />
+          <TextInput label="Title" {...register("name")} />
+
           <Textarea
             label="Additional Context"
             rows={5}
             {...register("context")}
-            defaultValue={project.context}
             placeholder="Additional Context"
           />
           <NativeSelect
@@ -149,36 +151,57 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
           <Divider />
 
           <Box>
-            <Title order={3}>Conversation Defaults</Title>
-            <Text>
+            <Title order={3}>Default Conversation Settings</Title>
+            <Text size="sm">
               The following settings will be used as defaults for new
-              conversations
+              conversations. These can also be changed per conversation using
+              the conversation settings. These will be exposed to participants.
             </Text>
           </Box>
 
           <TextInput
             label="Title"
-            description="This will be shown to participants when they start a new conversation."
             {...register("default_conversation_title")}
-            defaultValue={project.default_conversation_title}
             placeholder="Conversation Title"
           />
 
           <Textarea
             label="Description"
-            description="This will be shown to participants when they start a new conversation. Markdown is allowed here."
+            description="Markdown is allowed here."
             rows={5}
             {...register("default_conversation_description")}
-            defaultValue={project.default_conversation_description}
             placeholder="Conversation Description"
           />
 
+          <Divider />
+
+          <Box>
+            <Title order={4}>Advanced Settings</Title>
+            <Text size="sm">
+              These are not exposed to participants but will be used to improve
+              the quality of the transcripts.
+            </Text>
+          </Box>
+
           <Textarea
             label="Context"
-            description="This will not be shown to participants, but will be available to you in the dashboard."
+            description={
+              <Text size="xs">
+                Use this field to add context about the session. You may choose
+                to include proper nouns, names, or other information that may be
+                relevant to the conversation. This will be used to improve the
+                quality of the transcripts.{" "}
+                <Anchor
+                  href="https://cookbook.openai.com/examples/whisper_prompting_guide"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Link to Prompting Guide
+                </Anchor>
+              </Text>
+            }
             rows={5}
             {...register("default_conversation_context")}
-            defaultValue={project.default_conversation_context}
             placeholder="Conversation Additional Context"
           />
 
@@ -186,7 +209,7 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
             <Button
               type="submit"
               loading={updateProjectMutation.isPending}
-              disabled={!formState.isDirty}
+              disabled={!isDirty}
             >
               <Trans>Save</Trans>
             </Button>
@@ -194,7 +217,7 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
               type="reset"
               variant="outline"
               onClick={() => reset(defaultValues)}
-              disabled={!formState.isDirty}
+              disabled={!isDirty}
             >
               <Trans>Cancel</Trans>
             </Button>

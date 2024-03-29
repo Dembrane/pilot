@@ -244,9 +244,9 @@ async def update_conversation(
 ) -> ConversationModel:
     conversation = await get_conversation(conversation_id)
 
-    conversation.title = body.title or conversation.title
-    conversation.description = body.description or conversation.description
-    conversation.context = body.context or conversation.context
+    conversation.title = body.title
+    conversation.description = body.description
+    conversation.context = body.context
 
     db.commit()
     return conversation

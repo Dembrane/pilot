@@ -186,23 +186,16 @@ async def update_project(
     if body.language is not None and body.language not in PROJECT_ALLOWED_LANGUAGES:
         raise ProjectLanguageNotSupportedException
 
-    project.name = body.name or project.name
-    project.context = body.context or project.context
     project.language = body.language or project.language
 
     if body.is_conversation_allowed is not None:
         project.is_conversation_allowed = body.is_conversation_allowed
 
-    project.default_conversation_title = (
-        body.default_conversation_title or project.default_conversation_title
-    )
-    project.default_conversation_description = (
-        body.default_conversation_description
-        or project.default_conversation_description
-    )
-    project.default_conversation_context = (
-        body.default_conversation_context or project.default_conversation_context
-    )
+    project.name = body.name
+    project.context = body.context
+    project.default_conversation_title = body.default_conversation_title
+    project.default_conversation_description = body.default_conversation_description
+    project.default_conversation_context = body.default_conversation_context
 
     db.commit()
     return project
@@ -243,8 +236,10 @@ async def get_all_conversations_for_project(
 
 
 class InitiateConversationRequestBodySchema(BaseModel):
-    email: str
+    conversation_id: Optional[str] = None
+    name: str
     pin: str
+    email: Optional[str] = None
     user_agent: Optional[str] = None
 
 
@@ -265,28 +260,34 @@ async def initiate_conversation(
     if project.is_conversation_allowed is False:
         raise ConversationNotOpenForParticipationException
 
-    conversation = (
-        db.query(ConversationModel)
-        .filter(
-            ConversationModel.project_id == project.id,
-            ConversationModel.participant_email == body.email,
+    if body.conversation_id:
+        conversation = (
+            db.query(ConversationModel)
+            .filter(
+                ConversationModel.project_id == project.id,
+                ConversationModel.id == body.conversation_id,
+            )
+            .first()
         )
-        .first()
-    )
 
-    if conversation:
-        logger.info(f"Conversation already exists: {conversation.id}")
-        if body.user_agent:
-            conversation.participant_user_agent = body.user_agent
+        if conversation:
+            logger.info(f"Conversation already exists: {conversation.id}")
+
+            conversation.participant_name = body.name
+            if body.user_agent:
+                conversation.participant_user_agent = body.user_agent
+            if body.email:
+                conversation.participant_email = body.email
+
             db.commit()
-
-        return conversation
+            return conversation
 
     new_conversation = ConversationModel(
         id=generate_uuid(),
         project_id=project.id,
-        participant_email=body.email,
-        participant_user_agent=body.user_agent,
+        participant_name=body.name,
+        participant_email=body.email if body.email else None,
+        participant_user_agent=body.user_agent if body.user_agent else None,
         title=project.default_conversation_title,
         description=project.default_conversation_description,
         context=project.default_conversation_context,

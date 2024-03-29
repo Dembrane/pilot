@@ -18,7 +18,8 @@ import { useInitiateConversationMutation } from "@/lib/query";
 import { AxiosError } from "axios";
 
 const FormSchema = z.object({
-  email: z.string().email("Must be a valid email address."),
+  // email: z.string().email("Must be a valid email address.").optional(),
+  name: z.string(),
   pin: z.string().min(4),
 });
 
@@ -45,7 +46,8 @@ export const ParticipantLoginRoute = () => {
   const onSubmit = (data: FormValues) => {
     initiateConversationMutation.mutate({
       projectId: projectId as string,
-      participantEmail: data.email,
+      // email: data.email,
+      name: data.name,
       pin: data.pin,
     });
   };
@@ -90,26 +92,19 @@ export const ParticipantLoginRoute = () => {
               </Alert>
             </Box>
           )}
+
           <TextInput
             autoFocus
-            {...register("email")}
-            error={errors.email?.message}
+            required
             size="lg"
-            label="Enter e-mail address"
-            placeholder="me@example.com"
+            label="Transcript Name"
+            placeholder="John Doe, Group 1, etc."
+            {...register("name")}
+            error={errors.name?.message}
           />
-          <Box>
-            <InputLabel size="lg">Enter conversation access code</InputLabel>
-            {searchParams.get("pin") ? (
-              <PinInput
-                error={!!errors.pin?.message}
-                defaultValue={searchParams.get("pin") ?? ""}
-                size="lg"
-                inputMode="numeric"
-                length={4}
-                disabled
-              />
-            ) : (
+          {!searchParams.get("pin") && (
+            <Box>
+              <InputLabel size="lg">Enter your access code</InputLabel>
               <PinInput
                 {...register("pin")}
                 error={!!errors.pin?.message}
@@ -120,8 +115,8 @@ export const ParticipantLoginRoute = () => {
                   setValue("pin", value);
                 }}
               />
-            )}
-          </Box>
+            </Box>
+          )}
           <Button
             type="submit"
             size="lg"

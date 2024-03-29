@@ -62,14 +62,6 @@ api.interceptors.response.use(
   },
 );
 
-// const getDocuments = async () => {
-//   return api.get<unknown, TDocument[]>("/document");
-// };
-
-// export const getDocumentById = async (documentId: string) => {
-//   return api.get<unknown, TDocument>(`/document/${documentId}`);
-// };
-
 export const uploadResourceByProjectId = async (payload: {
   projectId: string;
   files: File[];
@@ -91,22 +83,6 @@ export const uploadResourceByProjectId = async (payload: {
     },
   );
 };
-
-// type TUpdateDocumentPayload = {
-//   document: TDocument;
-//   update: Partial<TDocument>;
-// };
-
-// const updateDocument = async (payload: TUpdateDocumentPayload) => {
-//   return api.put<TDocument, TDocument>(
-//     `/document/${payload.document.id}`,
-//     payload.update,
-//   );
-// };
-
-// const deleteDocument = async (document: TDocument) => {
-//   return api.delete(`/document/${document.id}`);
-// };
 
 export const getAllSessions = async () => {
   return apiNoAuth.get<unknown, TSession[]>("/session/all");
@@ -167,13 +143,15 @@ export const deleteResourceById = async (resourceId: string) => {
 
 export const initiateConversation = async (payload: {
   projectId: string;
-  participantEmail: string;
+  email?: string;
+  name: string;
   pin: string;
 }) => {
   return apiNoAuth.post<unknown, TConversation>(
     `/projects/${payload.projectId}/conversations/initiate`,
     {
-      email: payload.participantEmail,
+      email: payload.email ?? undefined,
+      name: payload.name,
       pin: payload.pin,
       user_agent: navigator.userAgent ?? undefined,
     },
@@ -246,7 +224,3 @@ export const getConversationChunkContent = (
   chunkId: string,
 ) =>
   `${apiCommonConfig.baseURL}/conversations/${conversationId}/chunks/${chunkId}/content`;
-
-// export const getConversationDuration = async (conversationId: string) => {
-//   return api.get<unknown, number>(`/conversations/${conversationId}/duration`);
-// };

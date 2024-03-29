@@ -50,7 +50,8 @@ class ConversationSchema(BaseModel):
     description: Optional[str] = None
     context: Optional[str] = None
 
-    participant_email: str
+    participant_email: Optional[str] = None
+    participant_name: Optional[str] = None
 
 
 class ConversationChunkSchema(BaseModel):

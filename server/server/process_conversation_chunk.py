@@ -1,10 +1,11 @@
 from logging import getLogger
+import os
 from queue import Queue
 import subprocess
 import threading
 
 
-from server.database import ConversationChunkModel, ResourceModel, db
+from server.database import ConversationChunkModel, ConversationModel, db
 from server.util import run_with_timeout
 from openai import OpenAI
 
@@ -50,6 +51,9 @@ def process_conversation_chunk(
 ) -> ConversationChunkModel:
     path = chunk.path
 
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"File not found: {path}")
+
     if path.endswith(".mp4"):
         output_path = path.replace(".mp4", ".mp3")
         logger.info(f"Converting to mp3: {output_path}")
@@ -60,15 +64,28 @@ def process_conversation_chunk(
             db.add(chunk)
             db.commit()
 
+    # https://cookbook.openai.com/examples/whisper_prompting_guide
+    prompt = ""
+    conversation = (
+        db.query(ConversationModel)
+        .filter(ConversationModel.id == chunk.conversation_id)
+        .first()
+    )
+    if conversation is not None and conversation.context is not None:
+        prompt = conversation.context
+
+    logger.info(f"using prompt: {prompt}")
+
     with open(path, "rb") as f:
         transcription = client.audio.transcriptions.create(
-            model="whisper-1", file=f, response_format="text"
+            model="whisper-1", file=f, response_format="text", prompt=prompt
         )
 
         logger.info(f"Transcription: {transcription}")
 
     chunk.transcript = str(transcription)
     chunk.is_processed = True
+    chunk.processing_error = None
     db.add(chunk)
     db.commit()
 
@@ -114,6 +131,18 @@ class ProcessConversationChunkTaskQueue(Queue):
             self.logger.info(f"Conversation chunk {item.chunk.id} picked up by worker")
             try:
                 item()
+            except FileNotFoundError as e:
+                self.logger.error(f"Failed to process chunk: {e}")
+
+                db.query(ConversationChunkModel).filter(
+                    ConversationChunkModel.id == item.chunk.id
+                ).update(
+                    values={
+                        "processing_error": "Failed to process resource (File not found)"
+                    }
+                )
+
+                db.commit()
             except Exception as e:
                 if item.retry_left == 0:
                     self.logger.error(f"Failed to process chunk")

@@ -24,7 +24,14 @@ logger.info(f"CacheBackedEmbeddings length: {len(list(store.yield_keys()))}")
 
 if os.path.exists(FAISS_INDEX_PATH):
     logger.info(f"Loading FAISS index from {FAISS_INDEX_PATH}")
-    vectorstore = FAISS.load_local(FAISS_INDEX_PATH, cached_embedder, allow_dangerous_deserialization=True)
+    try:
+        vectorstore = FAISS.load_local(FAISS_INDEX_PATH, cached_embedder)
+    except ValueError as e:
+        logger.error("Failed to load FAISS index", e)
+        vectorstore = FAISS.load_local(
+            FAISS_INDEX_PATH, cached_embedder, allow_dangerous_deserialization=True
+        )
+
 
 _index = faiss.IndexFlatL2(1536)
 vectorstore = FAISS(cached_embedder, _index, InMemoryDocstore(), {})

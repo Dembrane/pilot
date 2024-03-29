@@ -9,9 +9,9 @@
     "messages:extract": "lingui extract",
     "messages:compile": "lingui compile --typescript",
     "build": "tsc && vite build",
+    "participant:build": "tsc && VITE_API_BASE_URL=http://localhost:8000/api VITE_USE_PARTICIPANT_ROUTER=1 vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "build-and-copy": "yarn build && rm -rf ../server/frontend_dist && cp -r dist ../server/frontend_dist"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@fontsource-variable/space-grotesk": "^5.0.16",
@@ -23,6 +23,8 @@
     "@mantine/core": "^7.5.2",
     "@mantine/dropzone": "^7.5.2",
     "@mantine/hooks": "^7.5.2",
+    "@ricky0123/vad-react": "^0.0.22",
+    "@ricky0123/vad-web": "^0.0.16",
     "@tabler/icons-react": "^2.47.0",
     "@tanstack/react-query": "^5.20.5",
     "@vitejs/plugin-react-swc": "^3.6.0",
@@ -46,6 +48,7 @@
     "sort-by": "^1.2.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
+    "vite-plugin-static-copy": "^1.0.2",
     "webm-muxer": "^4.0.1",
     "zod": "^3.22.4"
   },

@@ -1,44 +1,27 @@
-import { Icons } from "@/icons";
 import {
-  useDeleteProjectByIdMutation,
   useDeleteResourceByIdMutation,
-  useProjectById,
   useResourceById,
-  useUpdateProjectByIdMutation,
   useUpdateResourceByIdMutation,
 } from "@/lib/query";
 import { Trans } from "@lingui/macro";
 import {
   Box,
   Button,
-  CopyButton,
   Divider,
   Group,
   LoadingOverlay,
-  NativeSelect,
-  Paper,
-  SimpleGrid,
   Stack,
   TextInput,
   Textarea,
   Title,
   Text,
   Tooltip,
-  rem,
-  Anchor,
   ActionIcon,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
-import QRCode from "react-qr-code";
-import {
-  IconCheck,
-  IconCopy,
-  IconDownload,
-  IconExternalLink,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconExternalLink, IconTrash } from "@tabler/icons-react";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { apiCommonConfig } from "@/lib/api";
 
 const ResourceDangerZone = ({ resource }: { resource: TResource }) => {
@@ -91,8 +74,7 @@ type ResourceEditFormValues = {
 };
 
 const ResourceEdit = ({ resource }: { resource: TResource }) => {
-  const { isSuccess, ...updateResourceMutation } =
-    useUpdateResourceByIdMutation();
+  const updateResourceMutation = useUpdateResourceByIdMutation();
 
   const defaultValues: ResourceEditFormValues = {
     title: resource.title ?? "",
@@ -100,16 +82,21 @@ const ResourceEdit = ({ resource }: { resource: TResource }) => {
     context: resource.context ?? "",
   };
 
-  const { register, handleSubmit, formState, reset } =
-    useForm<ResourceEditFormValues>({
-      defaultValues,
-    });
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitSuccessful, isDirty },
+    getValues,
+    reset,
+  } = useForm<ResourceEditFormValues>({
+    defaultValues,
+  });
 
   useEffect(() => {
-    if (isSuccess) {
-      reset();
+    if (isSubmitSuccessful) {
+      reset(getValues());
     }
-  }, [isSuccess, reset]);
+  }, [isSubmitSuccessful, reset]);
 
   const onSubmit = (data: ResourceEditFormValues) => {
     updateResourceMutation.mutate({
@@ -124,7 +111,7 @@ const ResourceEdit = ({ resource }: { resource: TResource }) => {
         <Title order={2}>
           <Trans>Edit Resource</Trans>
         </Title>
-        {formState.isDirty && <Trans>Unsaved changes</Trans>}
+        {isDirty && <Trans>Unsaved changes</Trans>}
       </Group>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack>
@@ -150,7 +137,7 @@ const ResourceEdit = ({ resource }: { resource: TResource }) => {
             <Button
               type="submit"
               loading={updateResourceMutation.isPending}
-              disabled={!formState.isDirty}
+              disabled={!isDirty}
             >
               <Trans>Save</Trans>
             </Button>
@@ -158,7 +145,7 @@ const ResourceEdit = ({ resource }: { resource: TResource }) => {
               type="reset"
               variant="outline"
               onClick={() => reset(defaultValues)}
-              disabled={!formState.isDirty}
+              disabled={!isDirty}
             >
               <Trans>Cancel</Trans>
             </Button>

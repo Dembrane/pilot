@@ -16,6 +16,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import (
     sessionmaker,
+    scoped_session,
     mapped_column,
     Mapped,
     relationship,
@@ -30,7 +31,8 @@ from server.config import DATABASE_URL
 engine = create_engine(DATABASE_URL)
 
 # Create a session factory
-Session = sessionmaker(bind=engine)
+session_factory = sessionmaker(bind=engine)
+Session = scoped_session(session_factory)
 
 # Define your models as subclasses of the base class
 Base: Any = declarative_base()
@@ -105,8 +107,8 @@ class ProjectModel(Base):
 
     language: Mapped[str] = mapped_column(String, default="en")
 
-    name: Mapped[str] = mapped_column(String, nullable=True)
-    context: Mapped[str] = mapped_column(Text, nullable=True)
+    name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    context: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     resources: Mapped[List["ResourceModel"]] = relationship(
         "ResourceModel", back_populates="project", cascade="all, delete-orphan"
@@ -116,9 +118,15 @@ class ProjectModel(Base):
     )
 
     is_conversation_allowed: Mapped[bool] = mapped_column(Boolean, default=True)
-    default_conversation_title: Mapped[str] = mapped_column(String, nullable=True)
-    default_conversation_description: Mapped[str] = mapped_column(Text, nullable=True)
-    default_conversation_context: Mapped[str] = mapped_column(Text, nullable=True)
+    default_conversation_title: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )
+    default_conversation_description: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )
+    default_conversation_context: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )
 
     chats: Mapped[List["ChatModel"]] = relationship(
         "ChatModel", back_populates="project", cascade="all, delete-orphan"
@@ -254,12 +262,13 @@ class ConversationModel(Base):
         "ProjectModel", back_populates="conversations"
     )
 
-    participant_email = mapped_column(String)
+    participant_name: Mapped[str] = mapped_column(String, default="")
+    participant_email = mapped_column(String, nullable=True)
     participant_user_agent: Mapped[str] = mapped_column(String, nullable=True)
 
-    title: Mapped[str] = mapped_column(String, nullable=True)
-    description: Mapped[str] = mapped_column(Text, nullable=True)
-    context: Mapped[str] = mapped_column(Text, nullable=True)
+    title: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    context: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     chats = relationship(
         "ChatModel",

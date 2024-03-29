@@ -174,6 +174,10 @@ export const participantRouter = createBrowserRouter([
         path: "conversation/:conversationId",
         element: <ParticipantConversationRoute />,
       },
+      {
+        path: "conversation/:conversationId/fallback",
+        element: <ParticipantConversationRoute fallback />,
+      },
     ],
   },
 ]);

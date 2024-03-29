@@ -135,7 +135,7 @@ const ConversationAccordionLabel = ({
 
       <Box>
         <Title order={4} className="font-normal text-sm">
-          {conversation.participant_email}
+          {conversation.participant_email ?? conversation.participant_name}
         </Title>
       </Box>
     </Group>

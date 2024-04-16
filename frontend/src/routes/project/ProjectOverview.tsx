@@ -136,6 +136,7 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
           />
           <NativeSelect
             label="Language"
+            description="Changing this will affect the language of transcripts for new conversations"
             {...register("language")}
             data={[
               {
@@ -178,13 +179,11 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
             placeholder="Conversation Description"
           />
 
-          <Divider />
-
           <Box>
             <Title order={4}>Advanced Settings</Title>
             <Text size="sm">
               These are not exposed to participants but will be used to improve
-              the quality of the transcripts.
+              the quality of the transcripts for new conversations
             </Text>
           </Box>
 

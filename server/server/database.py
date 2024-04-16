@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from enum import Enum
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Generator, Annotated
+from fastapi import Depends
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -21,6 +22,7 @@ from sqlalchemy.orm import (
     Mapped,
     relationship,
     declarative_base,
+    Session as _Session,
 )
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
@@ -110,13 +112,6 @@ class ProjectModel(Base):
     name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     context: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    resources: Mapped[List["ResourceModel"]] = relationship(
-        "ResourceModel", back_populates="project", cascade="all, delete-orphan"
-    )
-    conversations: Mapped[List["ConversationModel"]] = relationship(
-        "ConversationModel", back_populates="project", cascade="all, delete-orphan"
-    )
-
     is_conversation_allowed: Mapped[bool] = mapped_column(Boolean, default=True)
     default_conversation_title: Mapped[Optional[str]] = mapped_column(
         String, nullable=True
@@ -130,6 +125,12 @@ class ProjectModel(Base):
 
     chats: Mapped[List["ChatModel"]] = relationship(
         "ChatModel", back_populates="project", cascade="all, delete-orphan"
+    )
+    resources: Mapped[List["ResourceModel"]] = relationship(
+        "ResourceModel", back_populates="project", cascade="all, delete-orphan"
+    )
+    conversations: Mapped[List["ConversationModel"]] = relationship(
+        "ConversationModel", back_populates="project", cascade="all, delete-orphan"
     )
 
     @staticmethod
@@ -162,12 +163,12 @@ class ChatModel(Base):
         "ProjectModel", back_populates="chats"
     )
 
-    resources = relationship(
+    resources: Mapped[List["ResourceModel"]] = relationship(
         "ResourceModel",
         secondary=chat_resource_association_table,
         back_populates="chats",
     )
-    conversations = relationship(
+    conversations: Mapped[List["ConversationModel"]] = relationship(
         "ConversationModel",
         secondary=chat_conversation_association_table,
         back_populates="chats",
@@ -239,11 +240,19 @@ class ResourceModel(Base):
     is_processed: Mapped[bool] = mapped_column(Boolean, default=False)
     processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    chats = relationship(
+    chats: Mapped[List["ChatModel"]] = relationship(
         "ChatModel",
         secondary=chat_resource_association_table,
         back_populates="resources",
     )
+
+
+conversation_conversation_tag_association_table = Table(
+    "conversation_conversation_tag_association",
+    Base.metadata,
+    Column("conversation_id", ForeignKey("conversation.id"), primary_key=True),
+    Column("conversation_tag_id", ForeignKey("conversation_tag.id"), primary_key=True),
+)
 
 
 class ConversationModel(Base):
@@ -262,9 +271,9 @@ class ConversationModel(Base):
         "ProjectModel", back_populates="conversations"
     )
 
-    participant_name: Mapped[str] = mapped_column(String, default="")
-    participant_email = mapped_column(String, nullable=True)
-    participant_user_agent: Mapped[str] = mapped_column(String, nullable=True)
+    participant_name: Mapped[str] = mapped_column(String, nullable=False, default="")
+    participant_email: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    participant_user_agent: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     title: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -280,6 +289,30 @@ class ConversationModel(Base):
         "ConversationChunkModel",
         back_populates="conversation",
         cascade="all, delete-orphan",
+    )
+
+    tags: Mapped[List["ConversationTagModel"]] = relationship(
+        "ConversationTagModel",
+        secondary=conversation_conversation_tag_association_table,
+        back_populates="conversations",
+    )
+
+    quotes: Mapped[List["QuoteModel"]] = relationship(
+        "QuoteModel", back_populates="conversation"
+    )
+
+
+class ConversationTagModel(Base):
+    __tablename__ = "conversation_tag"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    text: Mapped[str] = mapped_column(String, unique=True)
+    color: Mapped[str] = mapped_column(String, default="#000000")
+
+    conversations: Mapped[List["ConversationModel"]] = relationship(
+        "ConversationModel",
+        secondary=conversation_conversation_tag_association_table,
+        back_populates="tags",
     )
 
 
@@ -306,5 +339,64 @@ class ConversationChunkModel(Base):
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     transcript: Mapped[str] = mapped_column(Text, nullable=True)
 
+    quote_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("quote.id"))
+    quote: Mapped[Optional["QuoteModel"]] = relationship("QuoteModel")
+
+
+class QuoteModel(Base):
+    __tablename__ = "quote"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    text: Mapped[str] = mapped_column(Text)
+
+    conversation_id: Mapped[str] = mapped_column(String, ForeignKey("conversation.id"))
+    conversation: Mapped["ConversationModel"] = relationship("ConversationModel")
+
+    conversation_chunks: Mapped[List["ConversationChunkModel"]] = relationship(
+        "ConversationChunkModel", back_populates="quote"
+    )
+
+    insight_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("insight.id"))
+    insight: Mapped[Optional["InsightModel"]] = relationship(
+        "InsightModel", back_populates="quotes"
+    )
+
+
+class InsightModel(Base):
+    __tablename__ = "insight"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    title: Mapped[str] = mapped_column(Text)
+    summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    quotes: Mapped[List["QuoteModel"]] = relationship(
+        "QuoteModel", back_populates="insight"
+    )
+
 
 db = Session()
+
+
+def get_db() -> Generator[_Session, None, None]:
+    db = Session()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+DependencyInjectDatabase = Annotated[_Session, Depends(get_db, use_cache=False)]

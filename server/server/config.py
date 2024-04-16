@@ -2,35 +2,46 @@ import dotenv
 import os
 import logging
 
+logger = logging.getLogger("config")
 logging.basicConfig(level=logging.INFO)
 
 BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
-
 dotenv_path = os.path.join(BASE_DIR, ".env")
-
+logger.info(f"loading environment variables from {dotenv_path}")
 dotenv.load_dotenv(dotenv_path, verbose=True)
+
+DEBUG_MODE = os.environ.get("DEBUG_MODE", "false").lower() in ["true", "1"]
+logger.info(f"DEBUG_MODE: {DEBUG_MODE}")
+if DEBUG_MODE:
+    logging.basicConfig(level=logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
+
 
 UPLOADS_DIR = os.path.join(BASE_DIR, "uploads")
 if not os.path.exists(UPLOADS_DIR):
     os.makedirs(UPLOADS_DIR)
+logger.debug(f"UPLOADS_DIR: {UPLOADS_DIR}")
 
 RESOURCE_UPLOADS_DIR = os.path.join(UPLOADS_DIR, "resources")
 if not os.path.exists(RESOURCE_UPLOADS_DIR):
     os.makedirs(RESOURCE_UPLOADS_DIR)
+logger.debug(f"RESOURCE_UPLOADS_DIR: {RESOURCE_UPLOADS_DIR}")
 
 AUDIO_CHUNKS_DIR = os.path.join(UPLOADS_DIR, "audio_chunks")
 if not os.path.exists(AUDIO_CHUNKS_DIR):
     os.makedirs(AUDIO_CHUNKS_DIR)
+logger.debug(f"AUDIO_CHUNKS_DIR: {AUDIO_CHUNKS_DIR}")
 
 EMBEDDINGS_CACHE_DIR = os.path.join(BASE_DIR, "embeddings_cache")
+logger.debug(f"EMBEDDINGS_CACHE_DIR: {EMBEDDINGS_CACHE_DIR}")
 FAISS_INDEX_PATH = os.path.join(BASE_DIR, "faiss_index")
+logger.debug(f"FAISS_INDEX_PATH: {FAISS_INDEX_PATH}")
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///db.sqlite3")
+DATABASE_URL = os.environ.get("DATABASE_URL")
+assert DATABASE_URL, "DATABASE_URL environment variable is not set"
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is not set"
 
-FRONTEND_DIST_DIR = os.path.join(BASE_DIR, "frontend_dist")
-
-SERVE_FRONTEND = os.environ.get("SERVE_FRONTEND", "false").lower() in ["true", "1"]
-SERVE_SWAGGER_UI = os.environ.get("SERVE_SWAGGER_UI", "false").lower() in ["true", "1"]
+SERVE_API_DOCS = os.environ.get("SERVE_API_DOCS", "false").lower() in ["true", "1"]
+logging.debug(f"SERVE_API_DOCS: {SERVE_API_DOCS}")

@@ -3,7 +3,10 @@
 {
 	"name": "dembrane/pilot",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+	// "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+	"dockerComposeFile": "docker-compose.yml",
+    "service": "devcontainer",
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
 		// ghcr.io/devcontainers/features/python:1
@@ -12,26 +15,34 @@
 		},
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "18"
-		},
-		"ghcr.io/warrenbuckley/codespace-features/sqlite:latest": {}
+		}
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "cd server && pip install -r requirements.txt && cd ../frontend && yarn",
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"ms-azuretools.vscode-docker",
 				"esbenp.prettier-vscode",
 				"bradlc.vscode-tailwindcss",
-				"ms-python.black-formatter",
 				"ms-python.python",
-				"alexcvzz.vscode-sqlite",
-				"ms-azuretools.vscode-docker",
-				"ms-python.mypy-type-checker",
-				"qwtel.sqlite-viewer",
-				"yy0931.vscode-sqlite3-editor"
+				"charliermarsh.ruff"
 			]
+		}
+	},
+	"portsAttributes": {
+		"5173": {
+			"label": "frontend"
+		},
+		"5174": {
+			"label": "frontend-pp"
+		},
+		"8000": {
+			"label": "backend"
+		},
+		"8080": {
+			"label": "pgadmin"
 		}
 	}
 	// Configure tool-specific properties.

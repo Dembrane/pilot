@@ -2,3 +2,5 @@
 **/.DS_Store
 caddy_data
 caddy_config
+postgres_data
+pgadmin_data

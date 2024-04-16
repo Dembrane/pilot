@@ -72,7 +72,7 @@ const ProjectDangerZone = ({ project }: { project: TProject }) => {
 type ProjectEditFormValues = {
   name: string;
   context: string;
-  language: "en" | "nl";
+  language: "en" | "nl" | "multi";
   default_conversation_title?: string;
   default_conversation_description?: string;
   default_conversation_context?: string;
@@ -144,6 +144,10 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
               {
                 label: "Dutch",
                 value: "nl",
+              },
+              {
+                label: "Multilingual (Experimental)",
+                value: "multi",
               },
             ]}
           />

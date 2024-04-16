@@ -23,6 +23,8 @@ api.include_router(ProjectRouter, prefix="/projects")
 api.include_router(ResourceRouter, prefix="/resources")
 api.include_router(ConversationRouter, prefix="/conversations")
 
+## the code below is from the pdf-pilot - chat usecase
+## ignore for now
 
 # class DocumentSchema(BaseModel):
 #     id: str

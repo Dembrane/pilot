@@ -28,12 +28,26 @@ services:
     build: ./server
     restart: unless-stopped
     command: /bin/sh /code/server/prod.sh
+    environment:
+      - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
     env_file:
       - ./server/.env
     volumes:
       - ./server:/code/server
     networks:
       - default
+  
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    networks:
+      - default
+    environment:
+      POSTGRES_DB: dembrane
+      POSTGRES_USER: dembrane
+      POSTGRES_PASSWORD: dembrane
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
 
   caddy:
     image: caddy:2

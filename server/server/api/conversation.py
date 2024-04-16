@@ -1,12 +1,15 @@
 import os
-import aiofiles
 from datetime import datetime
 from logging import getLogger
-from typing import Annotated, Any, AsyncGenerator, Generator, List, Optional
+from typing import Annotated, Any, AsyncGenerator, List, Optional
 from fastapi import APIRouter, Request, UploadFile, Form
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from server.database import ConversationModel, db, ConversationChunkModel
+from server.database import (
+    ConversationModel,
+    ConversationChunkModel,
+    DependencyInjectDatabase,
+)
 from server.schemas import ConversationChunkSchema, ConversationSchema
 from server.api.session import DependencyRequireSession
 from server.api.exceptions import (
@@ -18,17 +21,15 @@ from server.process_conversation_chunk import (
     ProcessConversationChunkTaskQueueItem,
     process_conversation_chunk_queue,
 )
-import asyncio
-import subprocess
-from asyncio.subprocess import PIPE
-
 
 logger = getLogger("api.conversation")
 ConversationRouter = APIRouter(tags=["conversation"])
 
 
 @ConversationRouter.get("/{conversation_id}", response_model=ConversationSchema)
-async def get_conversation(conversation_id: str) -> ConversationModel:
+async def get_conversation(
+    conversation_id: str, db: DependencyInjectDatabase
+) -> ConversationModel:
     conversation = (
         db.query(ConversationModel)
         .filter(
@@ -44,8 +45,10 @@ async def get_conversation(conversation_id: str) -> ConversationModel:
 @ConversationRouter.get(
     "/{conversation_id}/chunks", response_model=List[ConversationChunkSchema]
 )
-async def get_conversation_chunks(conversation_id: str) -> List[ConversationChunkModel]:
-    conversation = await get_conversation(conversation_id)
+async def get_conversation_chunks(
+    conversation_id: str, db: DependencyInjectDatabase
+) -> List[ConversationChunkModel]:
+    conversation = await get_conversation(conversation_id, db)
 
     chunks = (
         db.query(ConversationChunkModel)
@@ -62,7 +65,6 @@ async def get_conversation_chunks(conversation_id: str) -> List[ConversationChun
 async def stream_audio(
     file_paths: List[str], start: int = 0, end: Optional[int] = None
 ) -> AsyncGenerator[bytes, None]:
-    total_size = sum(os.path.getsize(path) for path in file_paths)
     current_position = 0
 
     for file_path in file_paths:
@@ -97,11 +99,11 @@ async def stream_audio(
 
 @ConversationRouter.get("/{conversation_id}/content")
 async def get_conversation_content(
-    request: Request, conversation_id: str
+    request: Request, conversation_id: str, db: DependencyInjectDatabase
 ) -> StreamingResponse:
     # Example function to get file paths for a conversation
     # Replace this with your actual function to fetch file paths
-    chunks = await get_conversation_chunks(conversation_id)
+    chunks = await get_conversation_chunks(conversation_id, db)
     file_paths = [chunk.path for chunk in chunks]  # Adjust based on actual structure
 
     range_header = request.headers.get("Range")
@@ -130,11 +132,11 @@ async def get_conversation_content(
 
 @ConversationRouter.get("/{conversation_id}/chunks/{chunk_id}/content")
 async def get_conversation_chunk_content(
-    request: Request, conversation_id: str, chunk_id: str
+    request: Request, conversation_id: str, chunk_id: str, db: DependencyInjectDatabase
 ) -> StreamingResponse:
     # Example function to get file paths for a conversation
     # Replace this with your actual function to fetch file paths
-    conversation = await get_conversation(conversation_id)
+    conversation = await get_conversation(conversation_id, db)
 
     chunk = (
         db.query(ConversationChunkModel)
@@ -241,8 +243,9 @@ async def update_conversation(
     conversation_id: str,
     body: PutConversationRequestBodySchema,
     session: DependencyRequireSession,
+    db: DependencyInjectDatabase,
 ) -> ConversationModel:
-    conversation = await get_conversation(conversation_id)
+    conversation = await get_conversation(conversation_id, db)
 
     conversation.title = body.title
     conversation.description = body.description
@@ -256,8 +259,9 @@ async def update_conversation(
 async def delete_conversation(
     conversation_id: str,
     session: DependencyRequireSession,
+    db: DependencyInjectDatabase,
 ) -> ConversationModel:
-    conversation = await get_conversation(conversation_id)
+    conversation = await get_conversation(conversation_id, db)
     db.delete(conversation)
     db.commit()
     return conversation
@@ -271,9 +275,12 @@ class PostConversationRequestBodySchema(BaseModel):
     "/{conversation_id}/upload-chunk", response_model=ConversationChunkSchema
 )
 async def upload_conversation_chunk(
-    conversation_id: str, chunk: UploadFile, timestamp: Annotated[datetime, Form()]
+    conversation_id: str,
+    chunk: UploadFile,
+    timestamp: Annotated[datetime, Form()],
+    db: DependencyInjectDatabase,
 ) -> Any:
-    conversation = await get_conversation(conversation_id)
+    conversation = await get_conversation(conversation_id, db)
 
     if not os.path.exists(os.path.join(AUDIO_CHUNKS_DIR, conversation.id)):
         os.makedirs(os.path.join(AUDIO_CHUNKS_DIR, conversation.id))

@@ -19,7 +19,11 @@ import { Navigate, useParams } from "react-router-dom";
 import WelcomeImage from "@/assets/participant-welcome-pattern.png";
 import { Markdown } from "@/components/Markdown";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useMicVAD, utils } from "@ricky0123/vad-react";
+import {
+  ReactRealTimeVADOptions,
+  useMicVAD,
+  utils,
+} from "@ricky0123/vad-react";
 import * as ort from "onnxruntime-web";
 
 ort.env.wasm.wasmPaths = {
@@ -361,7 +365,9 @@ const useAudioRecorder = ({
 const useVADAudioRecorder = (
   props: UseAudioRecorderOptions,
 ): UseAudioRecorderResult => {
-  const vad = useMicVAD({
+  const vadOptions: Partial<ReactRealTimeVADOptions> = {
+    redemptionFrames: 20,
+    minSpeechFrames: 5,
     startOnLoad: false,
     submitUserSpeechOnPause: true,
     workletURL: "/vad.worklet.bundle.min.js",
@@ -381,7 +387,9 @@ const useVADAudioRecorder = (
       const blob = new Blob([buffer], { type: "audio/wav" });
       props.onChunk(blob);
     },
-  });
+  };
+
+  const vad = useMicVAD(vadOptions);
 
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);

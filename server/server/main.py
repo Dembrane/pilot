@@ -15,9 +15,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from server.config import (
     FAISS_INDEX_PATH,
-    FRONTEND_DIST_DIR,
-    SERVE_FRONTEND,
-    SERVE_SWAGGER_UI,
+    SERVE_API_DOCS,
 )
 from server.api.api import api
 from server.vectorstore import vectorstore
@@ -41,13 +39,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     vectorstore.save_local(FAISS_INDEX_PATH)
 
 
-docs_url = "/docs" if SERVE_SWAGGER_UI else None
+docs_url = "/docs" if SERVE_API_DOCS else None
 
 # need to be added at the end
 origins = [
     "https://admin.findcommonground.app",
     "https://participant.findcommonground.app",
     "http://localhost:4173",
+    "http://localhost:5174",
 ]
 
 middleware = [
@@ -87,16 +86,6 @@ class SPAStaticFiles(StaticFiles):
                 return await super().get_response("index.html", scope)
             else:
                 raise ex
-
-
-if SERVE_FRONTEND:
-    logger.info("mounting frontend on /")
-
-    app.mount(
-        "/",
-        SPAStaticFiles(directory=FRONTEND_DIST_DIR, html=True),
-        name="spa-static-files",
-    )
 
 
 def custom_openapi() -> Any:

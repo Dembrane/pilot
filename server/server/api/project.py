@@ -6,7 +6,12 @@ from typing import Generator, List, Optional
 from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from server.database import ConversationModel, ProjectModel, ResourceModel, db
+from server.database import (
+    ConversationModel,
+    ProjectModel,
+    ResourceModel,
+    DependencyInjectDatabase,
+)
 from server.schemas import ConversationSchema, ProjectSchema, ResourceSchema
 from server.api.exceptions import (
     ConversationInvalidPinException,
@@ -24,6 +29,8 @@ from server.process_resource import (
 from server.api.session import DependencyRequireSession
 from server.api.conversation import get_conversation, get_conversation_chunks
 from server.util import generate_4_digit_pin, generate_uuid
+from sqlalchemy.orm import Session
+
 
 logger = getLogger("api.project")
 
@@ -32,12 +39,12 @@ ProjectRouter = APIRouter(tags=["project"])
 
 @ProjectRouter.get("", response_model=List[ProjectSchema])
 async def get_all_projects(
-    session: DependencyRequireSession,
+    session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> List[ProjectModel]:
     return db.query(ProjectModel).filter(ProjectModel.session_id == session.id).all()
 
 
-PROJECT_ALLOWED_LANGUAGES = ["en", "nl"]
+PROJECT_ALLOWED_LANGUAGES = ["en", "nl", "multi"]
 
 
 class PostProjectRequestSchema(BaseModel):
@@ -52,7 +59,9 @@ class PostProjectRequestSchema(BaseModel):
 
 @ProjectRouter.post("", response_model=ProjectSchema)
 async def create_project(
-    body: PostProjectRequestSchema, session: DependencyRequireSession
+    body: PostProjectRequestSchema,
+    session: DependencyRequireSession,
+    db: DependencyInjectDatabase,
 ) -> ProjectModel:
     if body.language is not None and body.language not in PROJECT_ALLOWED_LANGUAGES:
         raise ProjectLanguageNotSupportedException
@@ -84,7 +93,7 @@ async def create_project(
 
 @ProjectRouter.get("/{project_id}", response_model=ProjectSchema)
 async def get_project(
-    project_id: str, session: DependencyRequireSession
+    project_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> ProjectModel:
     project = (
         db.query(ProjectModel)
@@ -96,14 +105,14 @@ async def get_project(
     return project
 
 
-async def generate_transcript_file(conversation_id: str) -> Optional[str]:
+async def generate_transcript_file(conversation_id: str, db: Session) -> Optional[str]:
     logger.info(f"generating transcript for conversation {conversation_id}")
-    chunks = await get_conversation_chunks(conversation_id)
+    chunks = await get_conversation_chunks(conversation_id, db)
 
     if not chunks:
         return None
 
-    conversation = await get_conversation(conversation_id)
+    conversation = await get_conversation(conversation_id, db)
     email = conversation.participant_email
 
     conversation_dir = os.path.join(AUDIO_CHUNKS_DIR, conversation_id)
@@ -132,11 +141,12 @@ async def cleanup_files(zip_file_name: str, filenames: List[str]) -> None:
 async def get_project_transcripts(
     project_id: str,
     session: DependencyRequireSession,
+    db: DependencyInjectDatabase,
     background_tasks: BackgroundTasks,
 ) -> StreamingResponse:
-    project = await get_project(project_id, session)
+    project = await get_project(project_id, session, db)
 
-    conversations = await get_all_conversations_for_project(project_id, session)
+    conversations = await get_all_conversations_for_project(project_id, session, db)
 
     if not conversations:
         raise HTTPException(
@@ -180,8 +190,9 @@ async def update_project(
     project_id: str,
     body: PostProjectRequestSchema,
     session: DependencyRequireSession,
+    db: DependencyInjectDatabase,
 ) -> ProjectModel:
-    project = await get_project(project_id, session)
+    project = await get_project(project_id, session, db)
 
     if body.language is not None and body.language not in PROJECT_ALLOWED_LANGUAGES:
         raise ProjectLanguageNotSupportedException
@@ -203,7 +214,7 @@ async def update_project(
 
 @ProjectRouter.delete("/{project_id}", response_model=ProjectSchema)
 async def delete_project(
-    project_id: str, session: DependencyRequireSession
+    project_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> ProjectModel:
     project = (
         db.query(ProjectModel)
@@ -223,7 +234,7 @@ async def delete_project(
     tags=["conversation"],
 )
 async def get_all_conversations_for_project(
-    project_id: str, session: DependencyRequireSession
+    project_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> List[ConversationModel]:
     if not ProjectModel.belongs_to_session(project_id, session.id):
         raise ProjectNotFoundException
@@ -251,6 +262,7 @@ class InitiateConversationRequestBodySchema(BaseModel):
 async def initiate_conversation(
     body: InitiateConversationRequestBodySchema,
     project_id: str,
+    db: DependencyInjectDatabase,
 ) -> ConversationModel:
     project = db.query(ProjectModel).filter(ProjectModel.id == project_id).first()
 
@@ -303,8 +315,7 @@ async def initiate_conversation(
     "/{project_id}/resources", response_model=List[ResourceSchema], tags=["resource"]
 )
 async def get_all_resources_for_project(
-    project_id: str,
-    session: DependencyRequireSession,
+    project_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> List[ResourceModel]:
     if not ProjectModel.belongs_to_session(project_id, session.id):
         raise ProjectNotFoundException
@@ -318,12 +329,15 @@ async def get_all_resources_for_project(
     tags=["resource"],
 )
 async def upload_resources(
-    files: List[UploadFile], project_id: str, session: DependencyRequireSession
+    files: List[UploadFile],
+    project_id: str,
+    session: DependencyRequireSession,
+    db: DependencyInjectDatabase,
 ) -> List[ResourceModel]:
     resources = []
 
     for file in files:
-        if not file.filename is None:
+        if not file.filename:
             original_filename = file.filename
 
             if not file.filename.endswith(".pdf"):

@@ -71,17 +71,46 @@ def process_conversation_chunk(
         .filter(ConversationModel.id == chunk.conversation_id)
         .first()
     )
-    if conversation is not None and conversation.context is not None:
-        prompt = conversation.context
 
-    logger.info(f"using prompt: {prompt}")
+    project = conversation.project
+    language = project.language or None
+
+    default_prompts = {
+        "en": "Hi, lets get started. First we’ll have a round of introductions and then we can get into the topic for today.",
+        "nl": "Hallo, laten we beginnen. Eerst even een introductieronde en dan kunnen we aan de slag met de thema van vandaag.",
+    }
+    default_prompt = default_prompts.get(language, "")
+
+    prompt = default_prompt
+
+    if conversation is not None and conversation.context is not None:
+        prompt += " " + str(conversation.context)
+
+    logger.debug(f"using language: {language}")
+    logger.debug(f"using prompt: {prompt}")
 
     with open(path, "rb") as f:
-        transcription = client.audio.transcriptions.create(
-            model="whisper-1", file=f, response_format="text", prompt=prompt
+        options = {
+            "model": "whisper-1",
+            "file": f,
+            "response_format": "text",
+        }
+
+        # dont set language if it is multi
+        do_set_language = (
+            language is not None and language != "" and language != "multi"
         )
 
-        logger.info(f"Transcription: {transcription}")
+        if do_set_language:
+            options["language"] = language
+
+        if prompt != "":
+            options["prompt"] = prompt
+
+        logger.debug(f"Processing chunk with options: {options}")
+
+        transcription = client.audio.transcriptions.create(**options)
+        logger.debug(f"Transcription: {transcription}")
 
     chunk.transcript = str(transcription)
     chunk.is_processed = True
@@ -145,7 +174,7 @@ class ProcessConversationChunkTaskQueue(Queue):
                 db.commit()
             except Exception as e:
                 if item.retry_left == 0:
-                    self.logger.error(f"Failed to process chunk")
+                    self.logger.error("Failed to process chunk")
 
                     db.query(ConversationChunkModel).filter(
                         ConversationChunkModel.id == item.chunk.id
@@ -175,7 +204,7 @@ process_conversation_chunk_queue = ProcessConversationChunkTaskQueue(num_workers
 def seed_process_conversation_chunk_queue() -> None:
     chunks = (
         db.query(ConversationChunkModel)
-        .filter(ConversationChunkModel.is_processed == False)
+        .filter(ConversationChunkModel.is_processed == False)  # noqa: E712
         .all()
     )
     logger.info(

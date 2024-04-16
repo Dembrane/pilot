@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import EditableTextBox from "@/components/EditableTextBox";
 
 type FormValues = {
-  language: "en" | "nl";
+  language: "en" | "nl" | "multi";
   context?: string;
   name?: string;
 };

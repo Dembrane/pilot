@@ -37,9 +37,10 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { PARTICIPANT_BASE_URL } from "@/config";
 import { getProjectTranscriptsLink } from "@/lib/api";
+import { useLanguage } from "@/lib/useLanguage";
 
 const ProjectDangerZone = ({ project }: { project: TProject }) => {
   const deleteProjectByIdMutation = useDeleteProjectByIdMutation();
@@ -239,7 +240,19 @@ export const ProjectOverviewRoute = () => {
   const conversationsQuery = useConversationsByProjectId(projectId ?? "");
   const updateProjectMutation = useUpdateProjectByIdMutation();
 
-  const sharingLink = `${PARTICIPANT_BASE_URL}/${projectId}/login?pin=${projectQuery.data?.pin}`;
+  const [language, setLanguage] = useState("en");
+
+  const [sharingLink, setSharingLink] = useState(
+    `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data?.pin}`,
+  );
+
+  useEffect(() => {
+    if (projectQuery.data) {
+      setSharingLink(
+        `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data.pin}`,
+      );
+    }
+  }, [language, setSharingLink, projectQuery.data, projectId]);
 
   const handleOpenForParticipationCheckboxChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -331,6 +344,24 @@ export const ProjectOverviewRoute = () => {
             {projectQuery.data?.is_conversation_allowed ? (
               <>
                 <Box>
+                  <NativeSelect
+                    size="md"
+                    label="Select Language for Participant Portal"
+                    data={[
+                      {
+                        label: "English",
+                        value: "en",
+                      },
+                      {
+                        label: "Dutch",
+                        value: "nl",
+                      },
+                    ]}
+                    value={language}
+                    onChange={(e) => setLanguage(e.currentTarget.value)}
+                  />
+                </Box>
+                <Box>
                   <Text size="md">
                     <Trans>Access Code</Trans>
                   </Text>
@@ -340,7 +371,9 @@ export const ProjectOverviewRoute = () => {
                   </Text>
                 </Box>
                 <Box>
-                  <Text size="md">Invite Link</Text>
+                  <Text size="md">
+                    <Trans>Invite Link</Trans>
+                  </Text>
                   <Group>
                     <TextInput
                       className="flex-1"

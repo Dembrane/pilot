@@ -25,6 +25,7 @@ import {
   utils,
 } from "@ricky0123/vad-react";
 import * as ort from "onnxruntime-web";
+import { Trans, t } from "@lingui/macro";
 
 ort.env.wasm.wasmPaths = {
   "ort-wasm-simd-threaded.wasm": "/ort-wasm-simd-threaded.wasm",
@@ -512,10 +513,13 @@ export const ParticipantConversationRoute = ({
             <>
               {conversationQuery.data?.participant_name != "" ? (
                 <h2 className="text-3xl text-center">
-                  Welcome, {conversationQuery.data?.participant_name}
+                  <Trans>Welcome</Trans>,{" "}
+                  {conversationQuery.data?.participant_name}
                 </h2>
               ) : (
-                <h2 className="text-3xl text-center">Welcome</h2>
+                <h2 className="text-3xl text-center">
+                  <Trans>Welcome</Trans>
+                </h2>
               )}
             </>
           ) : (
@@ -556,7 +560,7 @@ export const ParticipantConversationRoute = ({
                 rightSection={<IconMicrophone size={16} />}
                 onClick={startRecording}
               >
-                Start Recording
+                <Trans>Start Recording</Trans>
               </Button>
             )}
             {isRecording && (
@@ -568,7 +572,7 @@ export const ParticipantConversationRoute = ({
                     rightSection={<IconPlayerPlay size={16} />}
                     onClick={resumeRecording}
                   >
-                    Resume
+                    <Trans>Resume</Trans>
                   </Button>
                 ) : (
                   <Button
@@ -577,7 +581,7 @@ export const ParticipantConversationRoute = ({
                     rightSection={<IconPlayerPause size={16} />}
                     onClick={pauseRecording}
                   >
-                    Pause
+                    <Trans>Pause</Trans>
                   </Button>
                 )}
                 <Button
@@ -586,13 +590,15 @@ export const ParticipantConversationRoute = ({
                   rightSection={<IconPlayerStop size={16} />}
                   onClick={() => {
                     if (
-                      window.confirm("Are you sure you want to stop recording?")
+                      window.confirm(
+                        t`Are you sure you want to stop recording?`,
+                      )
                     ) {
                       stopRecording();
                     }
                   }}
                 >
-                  Stop
+                  <Trans>Stop</Trans>
                 </Button>
               </>
             )}

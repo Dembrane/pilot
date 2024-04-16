@@ -13,11 +13,11 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/routes/project/ProjectOverview.tsx:302
+#: src/routes/project/ProjectOverview.tsx:335
 msgid "Access Code"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:241
+#: src/routes/project/ProjectOverview.tsx:274
 msgid "Active"
 msgstr ""
 
@@ -50,6 +50,10 @@ msgstr "Analyse"
 #~ msgid "Are you sure you want to delete this document?"
 #~ msgstr "Weet je zeker dat je dit document wilt verwijderen?"
 
+#: src/routes/participant/Conversation.tsx:594
+msgid "Are you sure you want to stop recording?"
+msgstr "Weet je zeker dat je wilt stoppen met opnemen?"
+
 #: src/components/Message.tsx:303
 #~ msgid "Ask a global research question"
 #~ msgstr "Stel een algemene onderzoeksvraag"
@@ -58,7 +62,7 @@ msgstr "Analyse"
 #~ msgid "Ask a question..."
 #~ msgstr "Stel een vraag..."
 
-#: src/components/layout/ProjectSidebar.tsx:382
+#: src/components/layout/ProjectSidebar.tsx:384
 msgid "Ask AI"
 msgstr ""
 
@@ -70,13 +74,13 @@ msgstr ""
 #~ msgid "Attach as many documents as you like to analyse"
 #~ msgstr "Voeg zoveel documenten toe als je wilt analyseren"
 
-#: src/routes/project/ProjectConversationOverview.tsx:152
-#: src/routes/project/ProjectOverview.tsx:193
-#: src/routes/project/ProjectResourceOverview.tsx:163
+#: src/routes/project/ProjectConversationOverview.tsx:175
+#: src/routes/project/ProjectOverview.tsx:226
+#: src/routes/project/ProjectResourceOverview.tsx:150
 msgid "Cancel"
 msgstr "Annuleren"
 
-#: src/components/layout/ProjectSidebar.tsx:291
+#: src/components/layout/ProjectSidebar.tsx:293
 msgid "Conversations"
 msgstr ""
 
@@ -94,7 +98,7 @@ msgstr ""
 #~ msgstr "Verwijder document"
 
 #: src/components/layout/ProjectSidebar.tsx:111
-#: src/components/layout/ProjectSidebar.tsx:185
+#: src/components/layout/ProjectSidebar.tsx:187
 msgid "Description"
 msgstr "Beschrijving"
 
@@ -118,17 +122,21 @@ msgstr "Document wordt verwerkt"
 #~ msgid "Drag documents here or select files"
 #~ msgstr "Sleep documenten hierheen of selecteer bestanden"
 
-#: src/routes/project/ProjectConversationOverview.tsx:107
+#: src/routes/project/ProjectConversationOverview.tsx:108
 msgid "Edit Conversation"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:110
+#: src/routes/project/ProjectOverview.tsx:122
 msgid "Edit Project"
 msgstr ""
 
-#: src/routes/project/ProjectResourceOverview.tsx:125
+#: src/routes/project/ProjectResourceOverview.tsx:112
 msgid "Edit Resource"
 msgstr ""
+
+#: src/routes/participant/Login.tsx:109
+msgid "Enter your access code"
+msgstr "Voer uw toegangscode in"
 
 #: src/components/Layout.tsx:32
 #~ msgid "Export"
@@ -152,7 +160,7 @@ msgstr ""
 #~ msgid "Home"
 #~ msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:248
+#: src/routes/project/ProjectOverview.tsx:281
 msgid "Inactive"
 msgstr ""
 
@@ -160,11 +168,15 @@ msgstr ""
 #~ msgid "Input global context"
 #~ msgstr "Voer algemene context in"
 
+#: src/routes/participant/Login.tsx:128
+msgid "Join"
+msgstr "Aansluiten"
+
 #: src/components/session/SelectSession.tsx:87
 msgid "Login with Session"
 msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:302
+#: src/components/layout/ProjectSidebar.tsx:304
 msgid "No conversations found. Start a conversation using the participation invite link from the <0><1>project overview.</1></0>"
 msgstr ""
 
@@ -172,12 +184,12 @@ msgstr ""
 #~ msgid "No documents uploaded yet"
 #~ msgstr "Nog geen documenten geüpload"
 
-#: src/components/layout/ProjectSidebar.tsx:255
+#: src/components/layout/ProjectSidebar.tsx:257
 msgid "No resources found. Add resources using the button above."
 msgstr ""
 
 #: src/components/layout/ProjectSidebar.tsx:120
-#: src/components/layout/ProjectSidebar.tsx:194
+#: src/components/layout/ProjectSidebar.tsx:196
 msgid "Open"
 msgstr ""
 
@@ -191,26 +203,34 @@ msgstr ""
 
 #: src/components/layout/ProjectConversationLayout.tsx:55
 #: src/components/layout/ProjectResourceLayout.tsx:52
-#: src/routes/project/ProjectOverview.tsx:226
+#: src/routes/project/ProjectOverview.tsx:259
 msgid "Overview"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:273
-#: src/routes/project/ProjectOverview.tsx:283
+#: src/routes/project/ProjectOverview.tsx:306
+#: src/routes/project/ProjectOverview.tsx:316
 msgid "Participation"
 msgstr ""
+
+#: src/routes/participant/Conversation.tsx:584
+msgid "Pause"
+msgstr "Pauze"
 
 #: src/components/Message.tsx:449
 #~ msgid "Please enter a message"
 #~ msgstr "Voer een bericht in"
 
-#: src/components/layout/ProjectSidebar.tsx:362
+#: src/components/layout/ProjectSidebar.tsx:364
 msgid "Project Overview"
 msgstr ""
 
-#: src/routes/project/ProjectConversationOverview.tsx:144
-#: src/routes/project/ProjectOverview.tsx:185
-#: src/routes/project/ProjectResourceOverview.tsx:155
+#: src/routes/participant/Conversation.tsx:575
+msgid "Resume"
+msgstr "Hervatten"
+
+#: src/routes/project/ProjectConversationOverview.tsx:167
+#: src/routes/project/ProjectOverview.tsx:218
+#: src/routes/project/ProjectResourceOverview.tsx:142
 msgid "Save"
 msgstr "Opslaan"
 
@@ -219,21 +239,37 @@ msgstr "Opslaan"
 #~ msgid "Select Session"
 #~ msgstr "Selecteer Sessie"
 
-#: src/routes/project/ProjectOverview.tsx:276
+#: src/routes/project/ProjectOverview.tsx:309
 msgid "Settings"
 msgstr ""
+
+#: src/routes/participant/Login.tsx:92
+msgid "Something went wrong"
+msgstr "Er ging iets mis"
+
+#: src/routes/participant/Conversation.tsx:563
+msgid "Start Recording"
+msgstr "Opname starten"
+
+#: src/routes/participant/Conversation.tsx:601
+msgid "Stop"
+msgstr "Stop"
 
 #: src/components/Message.tsx:242
 #~ msgid "Thank you! In the meantime, click individual documents to add context to each file that I will take into account for further analysis."
 #~ msgstr "Bedankt! Klik ondertussen op individuele documenten om context toe te voegen aan elk bestand dat ik zal meenemen voor verdere analyse."
 
-#: src/components/layout/ProjectSidebar.tsx:178
+#: src/components/layout/ProjectSidebar.tsx:179
 msgid "Title"
 msgstr ""
 
 #: src/components/layout/ProjectConversationLayout.tsx:58
 msgid "Transcript"
 msgstr ""
+
+#: src/routes/participant/Login.tsx:101
+msgid "Transcript Name"
+msgstr "Naam afschrift"
 
 #: src/components/Message.tsx:308
 #~ msgid "Type a question here..."
@@ -244,9 +280,9 @@ msgstr ""
 #~ msgid "Type context here..."
 #~ msgstr "Typ hier de context..."
 
-#: src/routes/project/ProjectConversationOverview.tsx:109
-#: src/routes/project/ProjectOverview.tsx:112
-#: src/routes/project/ProjectResourceOverview.tsx:127
+#: src/routes/project/ProjectConversationOverview.tsx:110
+#: src/routes/project/ProjectOverview.tsx:124
+#: src/routes/project/ProjectResourceOverview.tsx:114
 msgid "Unsaved changes"
 msgstr ""
 
@@ -254,9 +290,14 @@ msgstr ""
 #~ msgid "Upload documents"
 #~ msgstr "Upload documenten"
 
-#: src/components/layout/ProjectSidebar.tsx:239
+#: src/components/layout/ProjectSidebar.tsx:241
 msgid "Upload resources"
 msgstr ""
+
+#: src/routes/participant/Conversation.tsx:516
+#: src/routes/participant/Conversation.tsx:521
+msgid "Welcome"
+msgstr "Welkom"
 
 #: src/components/Message.tsx:393
 #~ msgid "What kind of question do you want to ask for this document?"
@@ -266,6 +307,6 @@ msgstr ""
 msgid "You"
 msgstr "Jij"
 
-#: src/routes/project/ProjectOverview.tsx:305
+#: src/routes/project/ProjectOverview.tsx:338
 msgid "Your code is"
 msgstr ""

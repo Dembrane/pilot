@@ -1,4 +1,4 @@
-import { Navigate, createBrowserRouter } from "react-router-dom";
+import { Navigate, Router, createBrowserRouter } from "react-router-dom";
 import { LoginRoute } from "./routes/Login";
 import { BaseLayout } from "./components/layout/BaseLayout";
 import { ProjectsHomeRoute } from "./routes/project/ProjectsHome";
@@ -16,6 +16,8 @@ import { ProjectConversationOverviewRoute } from "./routes/project/ProjectConver
 import { ProjectConversationTranscript } from "./routes/project/ProjectConversationTranscript";
 import { ProjectConversationAnalysis } from "./routes/project/ProjectConversationAnalysis";
 import { NotFoundRoute } from "./routes/404";
+import { SUPPORTED_LANGUAGES } from "./config";
+import { i18n } from "@lingui/core";
 
 // export const _router = createBrowserRouter([
 //   {
@@ -162,7 +164,7 @@ export const mainRouter = createBrowserRouter([
 
 export const participantRouter = createBrowserRouter([
   {
-    path: "/:projectId",
+    path: "/:language?/:projectId",
     element: <ParticipantLayout />,
     errorElement: <NotFoundRoute />,
     children: [

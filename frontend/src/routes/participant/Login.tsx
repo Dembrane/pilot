@@ -16,6 +16,8 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useInitiateConversationMutation } from "@/lib/query";
 import { AxiosError } from "axios";
+import { Trans, t } from "@lingui/macro";
+import { useLanguage } from "@/lib/useLanguage";
 
 const FormSchema = z.object({
   // email: z.string().email("Must be a valid email address.").optional(),
@@ -52,6 +54,8 @@ export const ParticipantLoginRoute = () => {
     });
   };
 
+  const { language } = useLanguage();
+
   useEffect(() => {
     if (searchParams.get("pin")) {
       setValue("pin", searchParams.get("pin") ?? "");
@@ -62,7 +66,7 @@ export const ParticipantLoginRoute = () => {
     if (isSuccess) {
       if (initiateConversationMutation.data?.id) {
         navigate(
-          `/${projectId}/conversation/${initiateConversationMutation.data?.id}`,
+          `/${language}/${projectId}/conversation/${initiateConversationMutation.data?.id}`,
         );
       } else {
         reset();
@@ -88,7 +92,7 @@ export const ParticipantLoginRoute = () => {
               <Alert color="red" variant="light">
                 {(initiateConversationMutation.error instanceof AxiosError &&
                   initiateConversationMutation.error.response?.data.detail) ??
-                  "Something went wrong"}
+                  t`Something went wrong`}
               </Alert>
             </Box>
           )}
@@ -97,14 +101,16 @@ export const ParticipantLoginRoute = () => {
             autoFocus
             required
             size="lg"
-            label="Transcript Name"
+            label={t`Transcript Name`}
             placeholder="John Doe, Group 1, etc."
             {...register("name")}
             error={errors.name?.message}
           />
           {!searchParams.get("pin") && (
             <Box>
-              <InputLabel size="lg">Enter your access code</InputLabel>
+              <InputLabel size="lg">
+                <Trans>Enter your access code</Trans>
+              </InputLabel>
               <PinInput
                 {...register("pin")}
                 error={!!errors.pin?.message}
@@ -122,7 +128,7 @@ export const ParticipantLoginRoute = () => {
             size="lg"
             loading={initiateConversationMutation.isPending}
           >
-            Join
+            <Trans>Join</Trans>
           </Button>
         </Stack>
       </form>

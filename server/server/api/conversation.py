@@ -22,7 +22,7 @@ from server.api.exceptions import (
     ConversationNotFoundException,
 )
 from server.config import AUDIO_CHUNKS_DIR
-from server.util import generate_uuid
+from server.util import generate_uuid, get_mime_type_from_file_path
 from server.process_conversation_chunk import (
     ProcessConversationChunkTaskQueueItem,
     process_conversation_chunk_queue,
@@ -111,10 +111,9 @@ async def stream_audio(
 async def get_conversation_content(
     request: Request, conversation_id: str, db: DependencyInjectDatabase
 ) -> StreamingResponse:
-    # Example function to get file paths for a conversation
-    # Replace this with your actual function to fetch file paths
+    # ordered by timestamp
     chunks = await get_conversation_chunks(conversation_id, db)
-    file_paths = [chunk.path for chunk in chunks]  # Adjust based on actual structure
+    file_paths = [chunk.path for chunk in chunks]
 
     range_header = request.headers.get("Range")
     if range_header:
@@ -126,9 +125,12 @@ async def get_conversation_content(
         if end is None:
             end = file_size - 1
 
+        # how does this work when there are multiple files with different sizes?
+        mime_type = get_mime_type_from_file_path(file_paths[0])
+
         return StreamingResponse(
             stream_audio(file_paths, start, end),
-            media_type="audio/webm",
+            media_type=mime_type,
             headers={
                 "Content-Range": f"bytes {start}-{end}/{file_size}",
                 "Accept-Ranges": "bytes",
@@ -137,7 +139,7 @@ async def get_conversation_content(
             status_code=206,
         )
 
-    return StreamingResponse(stream_audio(file_paths), media_type="audio/webm")
+    return StreamingResponse(stream_audio(file_paths), media_type=mime_type)
 
 
 @ConversationRouter.get("/{conversation_id}/chunks/{chunk_id}/content")
@@ -172,9 +174,12 @@ async def get_conversation_chunk_content(
         if end is None:
             end = file_size - 1
 
+        mime_type = get_mime_type_from_file_path(file_paths[0])
+        logger.debug(f"mime_type: {mime_type}")
+
         return StreamingResponse(
             stream_audio(file_paths, start, end),
-            media_type="audio/webm",
+            media_type=mime_type,
             headers={
                 "Content-Range": f"bytes {start}-{end}/{file_size}",
                 "Accept-Ranges": "bytes",
@@ -183,7 +188,8 @@ async def get_conversation_chunk_content(
             status_code=206,
         )
 
-    return StreamingResponse(stream_audio(file_paths), media_type="audio/webm")
+    logger.debug(f"mime_type: {mime_type}")
+    return StreamingResponse(stream_audio(file_paths), media_type=mime_type)
 
 
 class PutConversationRequestBodySchema(BaseModel):

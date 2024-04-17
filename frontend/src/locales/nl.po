@@ -13,6 +13,14 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/routes/participant/Login.tsx:123
+msgid "*At Dembrane, privacy is super important! We make sure nothing can be traced back to you, even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]"
+msgstr "*Bij Dembrane staat privacy op een! We zorgen dat niks terug te leiden is naar jou als persoon, ook al zeg je per ongeluk je naam, verwijderen wij deze voordat we alles analyseren. Door deze tool te gebruiken, ga je akkoord met onze privacy voorwaarden. Wil je meer weten? Lees dan onze [privacy verklaring]"
+
+#: src/routes/participant/Login.tsx:126
+msgid "*Oh, we don't have a cookie statement because we don't use cookies! We eat them.*"
+msgstr "*Oh, we hebben geen cookievermelding want we gebruiken geen cookies! We eten ze op.*"
+
 #: src/routes/project/ProjectOverview.tsx:368
 msgid "Access Code"
 msgstr ""
@@ -20,6 +28,10 @@ msgstr ""
 #: src/routes/project/ProjectOverview.tsx:289
 msgid "Active"
 msgstr ""
+
+#: src/routes/participant/Login.tsx:188
+msgid "Add all that apply"
+msgstr "Vink aan wat van toepassing is"
 
 #: src/components/Documents.tsx:90
 #~ msgid "Add context to document"
@@ -37,7 +49,7 @@ msgstr ""
 #~ msgid "All documents are uploaded and ready now. What research question are you interested in asking? Optionally, you can now open an individual analysis chat for each document."
 #~ msgstr "Alle documenten zijn geüpload en zijn nu klaar. Welke onderzoeksvraag wil je stellen? Optioneel kunt u nu voor elk document een individuele analysechat openen."
 
-#: src/components/layout/ProjectConversationLayout.tsx:61
+#: src/components/layout/ProjectConversationLayout.tsx:63
 #: src/components/layout/ProjectResourceLayout.tsx:55
 msgid "Analysis"
 msgstr "Analyse"
@@ -62,7 +74,7 @@ msgstr "Weet je zeker dat je wilt stoppen met opnemen?"
 #~ msgid "Ask a question..."
 #~ msgstr "Stel een vraag..."
 
-#: src/components/layout/ProjectSidebar.tsx:395
+#: src/components/layout/ProjectSidebar.tsx:390
 msgid "Ask AI"
 msgstr ""
 
@@ -80,7 +92,7 @@ msgstr ""
 msgid "Cancel"
 msgstr "Annuleren"
 
-#: src/components/layout/ProjectSidebar.tsx:304
+#: src/components/layout/ProjectSidebar.tsx:299
 msgid "Conversations"
 msgstr ""
 
@@ -89,7 +101,7 @@ msgid "Create a new session"
 msgstr "Maak een nieuwe sessie aan"
 
 #: src/components/layout/ProjectSidebar.tsx:105
-#: src/components/layout/ProjectSidebar.tsx:181
+#: src/components/layout/ProjectSidebar.tsx:176
 msgid "Created on"
 msgstr ""
 
@@ -97,8 +109,12 @@ msgstr ""
 #~ msgid "Delete document"
 #~ msgstr "Verwijder document"
 
+#: src/routes/participant/Login.tsx:120
+msgid "Dembrane is a very simple tool for you to record conversations or stories to make your voice heard in processes where you want to share. First we ask some short questions, and then you can start recording."
+msgstr "Dembrane (\"Dembrein\") is een hele simpele tool waar je gesprekken of verhalen kan opnemen om je stem te laten horen in processen waar je iets wil delen. Eerst vragen we een aantal korte vragen, en dan kan je beginnen met opnemen."
+
 #: src/components/layout/ProjectSidebar.tsx:112
-#: src/components/layout/ProjectSidebar.tsx:198
+#: src/components/layout/ProjectSidebar.tsx:193
 msgid "Description"
 msgstr "Beschrijving"
 
@@ -152,16 +168,16 @@ msgstr "Voer uw toegangscode in"
 #~ msgstr "Geweldig! Uw documenten worden nu geüpload. Terwijl de documenten worden verwerkt, kunt u mij vertellen waar deze analyse over gaat?"
 
 #: src/routes/participant/Login.tsx:187
-msgid "Group"
-msgstr "Groep"
+#~ msgid "Group"
+#~ msgstr "Groep"
 
 #: src/routes/GlobalAnalysis.tsx:41
 #~ msgid "Hello, I will be your research assistant today. To get started please upload the documents you want to analyse."
 #~ msgstr "Hallo, ik ben vandaag je onderzoeksassistent. Om te beginnen upload je de documenten die je wilt analyseren."
 
 #: src/routes/participant/Login.tsx:116
-msgid "Hi! Welcome to Dembrane."
-msgstr "Hi! Dit is Dembrane."
+msgid "Hi, Thanks for sharing!"
+msgstr "Hi, Fijn dat je meedoet!"
 
 #: src/components/Layout.tsx:19
 #: src/routes/SelectSession.tsx:97
@@ -196,7 +212,7 @@ msgstr "Naam"
 msgid "Next"
 msgstr "Volgende"
 
-#: src/components/layout/ProjectSidebar.tsx:315
+#: src/components/layout/ProjectSidebar.tsx:310
 msgid "No conversations found. Start a conversation using the participation invite link from the <0><1>project overview.</1></0>"
 msgstr ""
 
@@ -204,12 +220,12 @@ msgstr ""
 #~ msgid "No documents uploaded yet"
 #~ msgstr "Nog geen documenten geüpload"
 
-#: src/components/layout/ProjectSidebar.tsx:268
+#: src/components/layout/ProjectSidebar.tsx:263
 msgid "No resources found. Add resources using the button above."
 msgstr ""
 
 #: src/components/layout/ProjectSidebar.tsx:121
-#: src/components/layout/ProjectSidebar.tsx:207
+#: src/components/layout/ProjectSidebar.tsx:202
 msgid "Open"
 msgstr ""
 
@@ -221,7 +237,7 @@ msgstr ""
 #~ msgid "Original filename"
 #~ msgstr "Originele bestandsnaam"
 
-#: src/components/layout/ProjectConversationLayout.tsx:55
+#: src/components/layout/ProjectConversationLayout.tsx:57
 #: src/components/layout/ProjectResourceLayout.tsx:52
 #: src/routes/project/ProjectOverview.tsx:274
 msgid "Overview"
@@ -244,13 +260,13 @@ msgstr "Pauze"
 msgid "Privacy Statements"
 msgstr "Privacy verklaring"
 
-#: src/components/layout/ProjectSidebar.tsx:375
+#: src/components/layout/ProjectSidebar.tsx:370
 msgid "Project Overview"
 msgstr ""
 
 #: src/routes/participant/Login.tsx:131
 msgid "Ready!"
-msgstr "Klaar!"
+msgstr "Klaar om te beginnen"
 
 #: src/routes/participant/Conversation.tsx:575
 msgid "Resume"
@@ -268,8 +284,8 @@ msgstr "Opslaan"
 #~ msgstr "Selecteer Sessie"
 
 #: src/routes/participant/Login.tsx:188
-msgid "Select your group"
-msgstr "Selecteer je groep"
+#~ msgid "Select your group"
+#~ msgstr "Selecteer je groep"
 
 #: src/routes/project/ProjectOverview.tsx:324
 msgid "Settings"
@@ -287,27 +303,19 @@ msgstr "Opname starten"
 msgid "Stop"
 msgstr "Stop"
 
+#: src/routes/participant/Login.tsx:187
+msgid "Tags"
+msgstr "Trefwoorden"
+
 #: src/components/Message.tsx:242
 #~ msgid "Thank you! In the meantime, click individual documents to add context to each file that I will take into account for further analysis."
 #~ msgstr "Bedankt! Klik ondertussen op individuele documenten om context toe te voegen aan elk bestand dat ik zal meenemen voor verdere analyse."
 
-#: src/routes/participant/Login.tsx:120
-msgid ""
-"This is a super simple tool for you to record a story or a conversation and share it with the host.\n"
-"We will first ask you some quick questions, then you can get started with recording.\n"
-"<br/><br/>\n"
-"*At Dembrane, privacy is really important. We make sure nothing is traceable to individuals, and even if you might accidentally say someone’s name, we delete this before we analyse the data. By using this tool, you agree to our privacy policy. Do you want to know more? Feel free to read our [privacy statement]"
-msgstr ""
-"Dembrane is een hele simpele tool waar je een gesprek of verhaal kan opnemen om te delen met the host\n"
-"Eerst vragen we een aantal korte vragen, en dan kan je beginnen met opnemen.\n"
-"<br/><br/>\n"
-"*Bij Dembrane staat privacy op een! We zorgen dat niks terug is te leiden naar jou als persoon, ook al zeg je per ongeluk je naam, verwijderen wij deze voordat we alles analyseren. Door deze tool te gebruiken, ga je akkoord met onze privacy voorwaarden. Wil je meer weten? Lees dan onze [privacy verklaring]"
-
-#: src/components/layout/ProjectSidebar.tsx:190
+#: src/components/layout/ProjectSidebar.tsx:185
 msgid "Title"
 msgstr ""
 
-#: src/components/layout/ProjectConversationLayout.tsx:58
+#: src/components/layout/ProjectConversationLayout.tsx:60
 msgid "Transcript"
 msgstr ""
 
@@ -334,13 +342,9 @@ msgstr ""
 #~ msgid "Upload documents"
 #~ msgstr "Upload documenten"
 
-#: src/components/layout/ProjectSidebar.tsx:252
+#: src/components/layout/ProjectSidebar.tsx:247
 msgid "Upload resources"
 msgstr ""
-
-#: src/routes/participant/Login.tsx:126
-msgid "We don't have a cookie banner because we don't use cookies! We just eat them."
-msgstr "We hebben geen cookie vermelding want we gebruiken geen cookies! We eten ze op."
 
 #: src/routes/participant/Conversation.tsx:516
 #: src/routes/participant/Conversation.tsx:521
@@ -354,6 +358,10 @@ msgstr "Welkom"
 #: src/components/BaseMessage.tsx:31
 msgid "You"
 msgstr "Jij"
+
+#: src/routes/participant/Login.tsx:122
+msgid "You can use this by yourself to share your own story, or you can record a conversation between several people, which can often be fun and insightful! Are you ready? Then press \"Ready!\""
+msgstr "Je kan dit alleen gebruiken om je eigen verhaal te delen, of je kan een gesprek opnemen tussen meerdere mensen, wat vaak leuk en inzichtelijk kan zijn! Ben je er klaar voor? Druk dan op \"Klaar om te beginnen.\""
 
 #: src/routes/project/ProjectOverview.tsx:371
 msgid "Your code is"

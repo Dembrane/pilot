@@ -129,17 +129,12 @@ const ConversationAccordionLabel = ({
   conversation,
 }: PropsWithChildren<{ conversation: TConversation }>) => {
   return (
-    <Group wrap="nowrap" align="center" justify="between" className="w-full">
-      {/* <Box>
-        <ResourceAccordionLabelIcon conversation={conversation} />
-      </Box> */}
-
-      <Box className="flex-grow">
+    <Stack gap="xs">
+      <Group wrap="nowrap" align="center" justify="between" className="w-full">
         <Title order={4} className="font-normal text-sm">
           {conversation.participant_email ?? conversation.participant_name}
         </Title>
-      </Box>
-
+      </Group>
       <Group gap="sm" pr="sm">
         {conversation.tags &&
           conversation.tags.length > 0 &&
@@ -149,7 +144,7 @@ const ConversationAccordionLabel = ({
             </Pill>
           ))}
       </Group>
-    </Group>
+    </Stack>
   );
 };
 

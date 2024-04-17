@@ -113,18 +113,19 @@ export const ParticipantLoginRoute = () => {
             </Group>
             <Stack mx="auto">
               <Title order={1}>
-                <Trans>Hi! Welcome to Dembrane.</Trans>
+                <Trans>Hi, Thanks for sharing!</Trans>
               </Title>
               <Markdown
                 content={
-                  t`This is a super simple tool for you to record a story or a conversation and share it with the host.
-We will first ask you some quick questions, then you can get started with recording.
-<br/><br/>
-*At Dembrane, privacy is really important. We make sure nothing is traceable to individuals, and even if you might accidentally say someone’s name, we delete this before we analyse the data. By using this tool, you agree to our privacy policy. Do you want to know more? Feel free to read our [privacy statement]` +
+                  t`Dembrane is a very simple tool for you to record conversations or stories to make your voice heard in processes where you want to share. First we ask some short questions, and then you can start recording.` +
+                  `<br/><br/>` +
+                  t`You can use this by yourself to share your own story, or you can record a conversation between several people, which can often be fun and insightful! Are you ready? Then press "Ready!"` +
+                  "<br/><br/>" +
+                  t`*At Dembrane, privacy is super important! We make sure nothing can be traced back to you, even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]` +
                   `(${PRIVACY_POLICY_URL}).*` +
                   "<br/><br/>" +
-                  t`We don't have a cookie banner because we don't use cookies! We just eat them.` +
-                  `🍪`
+                  t`*Oh, we don't have a cookie statement because we don't use cookies! We eat them.*` +
+                  ` 🍪`
                 }
               />
               <Button onClick={close} size="xl">
@@ -182,10 +183,10 @@ We will first ask you some quick questions, then you can get started with record
               )}
               <Box className="relative">
                 {tagsQuery.isLoading && <LoadingOverlay />}
-                {tagsQuery.data && (
+                {tagsQuery.data && tagsQuery.data.length > 0 && (
                   <MultiSelect
-                    label={t`Group`}
-                    placeholder={t`Select your group`}
+                    label={t`Tags`}
+                    placeholder={t`Add all that apply`}
                     size="lg"
                     data={tagsQuery.data.map((tag) => ({
                       value: tag.id,

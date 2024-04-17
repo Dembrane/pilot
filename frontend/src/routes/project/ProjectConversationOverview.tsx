@@ -223,7 +223,6 @@ export const ProjectConversationOverviewRoute = () => {
               }
               controls
               crossOrigin="anonymous"
-              preload="metadata"
             />
           </Stack>
         )}

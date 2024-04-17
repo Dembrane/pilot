@@ -14,7 +14,6 @@ i18n.load({
 });
 
 i18n.activate(defaultLanguage);
-console.log("Activated", defaultLanguage);
 
 export const useLanguage = () => {
   const params = useParams();

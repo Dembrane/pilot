@@ -23,6 +23,24 @@ def iter_file_content(file_path: str) -> Generator[bytes, None, None]:
     with open(file_path, mode="rb") as file_like:
         yield from file_like
 
+def get_mime_type_from_file_path(file_path: str) -> str:
+    if file_path.endswith(".wav"):
+        return "audio/wav"
+    elif file_path.endswith(".mp3"):
+        return "audio/mp3"
+    elif file_path.endswith(".ogg"):
+        return "audio/ogg"
+    elif file_path.endswith(".flac"):
+        return "audio/flac"
+    elif file_path.endswith(".webm"):
+        return "audio/webm"
+    elif file_path.endswith(".opus"):
+        return "audio/opus"
+    elif file_path.endswith(".mp4"):
+        return "video/mp4"
+    else:
+        raise ValueError(f"Unsupported file type: {file_path}")
+
 
 def run_with_timeout(func, args=(), kwargs={}, timeout_sec: int = 1000):  # type: ignore
     def timeout_handler() -> None:

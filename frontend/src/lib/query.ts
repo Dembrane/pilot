@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createProject,
+  createProjectTag,
   deleteConversationById,
   deleteProjectById,
   deleteResourceById,
+  deleteTagById,
   doInitiateSession,
   getAllProjects,
   getAllSessions,
@@ -14,6 +16,7 @@ import {
   getProjectById,
   getResourceById,
   getResourcesByProjectId,
+  getTagsByProjectId,
   initiateConversation,
   updateConversationById,
   updateProjectById,
@@ -337,6 +340,39 @@ export const useConversationChunks = (conversationId: string) => {
     queryKey: ["conversation", conversationId, "chunks"],
     queryFn: () => getConversationChunks(conversationId),
     refetchInterval: 3000,
+  });
+};
+
+export const useDeleteTagByIdMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteTagById,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["project"],
+      });
+      toast.success("Tag deleted successfully");
+    },
+  });
+};
+
+export const useCreateProjectTagMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createProjectTag,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["project"],
+      });
+      toast.success("Tag created successfully");
+    },
+  });
+};
+
+export const useProjectTags = (projectId: string) => {
+  return useQuery({
+    queryKey: ["project", projectId, "tags"],
+    queryFn: () => getTagsByProjectId(projectId),
   });
 };
 

@@ -13,6 +13,7 @@ import {
   Tooltip,
   ActionIcon,
   Anchor,
+  Pill,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import { IconDownload, IconTrash } from "@tabler/icons-react";
@@ -238,12 +239,28 @@ export const ProjectConversationOverviewRoute = () => {
           <Text size="sm">{conversationQuery.data?.participant_email}</Text>
         </Box>
       )}
+
       <Box>
         <Text size="md">Created on</Text>
         <Text size="sm">
           {new Date(conversationQuery.data?.created_at ?? 0).toLocaleString()}
         </Text>
       </Box>
+      {conversationQuery.data?.tags &&
+        conversationQuery.data.tags.length > 0 && (
+          <Box>
+            <Text size="md">Tags</Text>
+            <Group gap="sm" pr="sm">
+              {conversationQuery.data?.tags &&
+                conversationQuery.data?.tags.length > 0 &&
+                conversationQuery.data?.tags.map((tag) => (
+                  <Pill key={tag.id} size="sm">
+                    {tag.text}
+                  </Pill>
+                ))}
+            </Group>
+          </Box>
+        )}
       <Divider />
       {conversationQuery.data && (
         <>

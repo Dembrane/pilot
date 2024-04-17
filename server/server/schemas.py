@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -9,6 +9,15 @@ class SessionSchema(BaseModel):
     updated_at: datetime
 
 
+class ProjectTagSchema(BaseModel):
+    id: str
+    created_at: datetime
+    updated_at: datetime
+    project_id: str
+
+    text: str
+
+
 class ProjectSchema(BaseModel):
     id: str
     created_at: datetime
@@ -17,6 +26,8 @@ class ProjectSchema(BaseModel):
     pin: str
     name: Optional[str] = None
     context: Optional[str] = None
+
+    tags: Optional[List[ProjectTagSchema]] = []
 
     is_conversation_allowed: bool
     default_conversation_title: Optional[str] = None
@@ -52,6 +63,8 @@ class ConversationSchema(BaseModel):
 
     participant_email: Optional[str] = None
     participant_name: Optional[str] = None
+
+    tags: Optional[List[ProjectTagSchema]] = []
 
 
 class ConversationChunkSchema(BaseModel):

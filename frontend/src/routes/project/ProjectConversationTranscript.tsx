@@ -1,5 +1,5 @@
 import { BaseMessage } from "@/components/BaseMessage";
-import { apiCommonConfig, getConversationChunkContent } from "@/lib/api";
+import { apiCommonConfig, getConversationChunkContentLink } from "@/lib/api";
 import { useConversationById, useConversationChunks } from "@/lib/query";
 import {
   ActionIcon,
@@ -24,7 +24,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 const Chunk = ({ chunk }: { chunk: TConversationChunk }) => {
-  const src = getConversationChunkContent(chunk.conversation_id, chunk.id);
+  const src = getConversationChunkContentLink(chunk.conversation_id, chunk.id);
   return (
     <BaseMessage
       title={"Speaker"}

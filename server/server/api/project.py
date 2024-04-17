@@ -11,15 +11,23 @@ from server.database import (
     ProjectModel,
     ResourceModel,
     DependencyInjectDatabase,
+    ProjectTagModel,
 )
-from server.schemas import ConversationSchema, ProjectSchema, ResourceSchema
+from server.schemas import (
+    ConversationSchema,
+    ProjectSchema,
+    ProjectTagSchema,
+    ResourceSchema,
+)
 from server.api.exceptions import (
     ConversationInvalidPinException,
     ConversationNotOpenForParticipationException,
     ProjectLanguageNotSupportedException,
     ProjectNotFoundException,
+    ProjectTagNotFoundException,
     ResourceFailedToSaveFileException,
     ResourceInvalidFileFormatException,
+    InternalServerException,
 )
 from server.config import AUDIO_CHUNKS_DIR, RESOURCE_UPLOADS_DIR
 from server.process_resource import (
@@ -28,8 +36,8 @@ from server.process_resource import (
 )
 from server.api.session import DependencyRequireSession
 from server.api.conversation import get_conversation, get_conversation_chunks
-from server.util import generate_4_digit_pin, generate_uuid
-from sqlalchemy.orm import Session
+from server.util import generate_4_digit_pin, generate_6_digit_pin, generate_uuid
+from sqlalchemy.orm import Session, joinedload
 
 
 logger = getLogger("api.project")
@@ -41,7 +49,14 @@ ProjectRouter = APIRouter(tags=["project"])
 async def get_all_projects(
     session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> List[ProjectModel]:
-    return db.query(ProjectModel).filter(ProjectModel.session_id == session.id).all()
+    projects = (
+        db.query(ProjectModel)
+        .options(joinedload(ProjectModel.tags))
+        .filter(ProjectModel.session_id == session.id)
+        .all()
+    )
+
+    return projects
 
 
 PROJECT_ALLOWED_LANGUAGES = ["en", "nl", "multi"]
@@ -70,13 +85,27 @@ async def create_project(
     language = body.language or "en"
 
     # unique pin generation
-    retry_left = 5
+    pin = None
+    retry_left = 3
     while retry_left > 0:
         pin = generate_4_digit_pin()
         if not db.query(ProjectModel).filter(ProjectModel.pin == pin).first():
             break
         logger.info(f"Pin {pin} already exists. Generating a new pin")
         retry_left -= 1
+
+    if not pin:
+        retry_left = 5
+        while retry_left > 0:
+            pin = generate_6_digit_pin()
+            if not db.query(ProjectModel).filter(ProjectModel.pin == pin).first():
+                break
+            logger.info(f"Pin {pin} already exists. Generating a new 6 digit pin")
+            retry_left -= 1
+
+    if not pin:
+        logger.error("Failed to generate a unique pin")
+        raise InternalServerException
 
     project = ProjectModel(
         id=generate_uuid(),
@@ -97,6 +126,7 @@ async def get_project(
 ) -> ProjectModel:
     project = (
         db.query(ProjectModel)
+        .options(joinedload(ProjectModel.tags))
         .filter(ProjectModel.id == project_id, ProjectModel.session_id == session.id)
         .first()
     )
@@ -241,17 +271,19 @@ async def get_all_conversations_for_project(
 
     return (
         db.query(ConversationModel)
+        .options(joinedload(ConversationModel.tags))
         .filter(ConversationModel.project_id == project_id)
         .all()
     )
 
 
 class InitiateConversationRequestBodySchema(BaseModel):
-    conversation_id: Optional[str] = None
     name: str
     pin: str
+    conversation_id: Optional[str] = None
     email: Optional[str] = None
     user_agent: Optional[str] = None
+    tag_id_list: Optional[List[str]] = []
 
 
 @ProjectRouter.post(
@@ -282,6 +314,7 @@ async def initiate_conversation(
             .first()
         )
 
+        # Rejoin a conversation
         if conversation:
             logger.info(f"Conversation already exists: {conversation.id}")
 
@@ -291,9 +324,18 @@ async def initiate_conversation(
             if body.email:
                 conversation.participant_email = body.email
 
+            if body.tag_id_list is not None and len(body.tag_id_list) > 0:
+                tags = (
+                    db.query(ProjectTagModel)
+                    .filter(ProjectTagModel.id.in_(body.tag_id_list))
+                    .all()
+                )
+                conversation.tags = tags
+
             db.commit()
             return conversation
 
+    # Create a new conversation
     new_conversation = ConversationModel(
         id=generate_uuid(),
         project_id=project.id,
@@ -304,6 +346,14 @@ async def initiate_conversation(
         description=project.default_conversation_description,
         context=project.default_conversation_context,
     )
+
+    if body.tag_id_list is not None and len(body.tag_id_list) > 0:
+        tags = (
+            db.query(ProjectTagModel)
+            .filter(ProjectTagModel.id.in_(body.tag_id_list))
+            .all()
+        )
+        new_conversation.tags = tags
 
     db.add(new_conversation)
     db.commit()
@@ -384,3 +434,88 @@ async def upload_resources(
 
     db.commit()
     return resources
+
+
+@ProjectRouter.get("/{project_id}/tag", response_model=List[ProjectTagSchema])
+async def get_project_tags(
+    project_id: str, db: DependencyInjectDatabase
+) -> List[ProjectTagModel]:
+    tags = (
+        db.query(ProjectTagModel).filter(ProjectTagModel.project_id == project_id).all()
+    )
+
+    return tags
+
+
+class CreateProjectTagRequestBodySchema(BaseModel):
+    text: str
+
+
+@ProjectRouter.post("/{project_id}/tag", response_model=ProjectTagSchema)
+async def create_project_tag(
+    body: CreateProjectTagRequestBodySchema,
+    project_id: str,
+    session: DependencyRequireSession,
+    db: DependencyInjectDatabase,
+) -> ProjectTagModel:
+    if not ProjectModel.belongs_to_session(project_id, session.id):
+        raise ProjectNotFoundException
+
+    tag = ProjectTagModel(id=generate_uuid(), project_id=project_id, text=body.text)
+
+    db.add(tag)
+    db.commit()
+
+    return tag
+
+
+@ProjectRouter.put("/{project_id}/tag/{tag_id}", response_model=ProjectTagSchema)
+async def update_project_tag(
+    project_id: str,
+    tag_id: str,
+    body: CreateProjectTagRequestBodySchema,
+    session: DependencyRequireSession,
+    db: DependencyInjectDatabase,
+) -> ProjectTagModel:
+    if not ProjectModel.belongs_to_session(project_id, session.id):
+        raise ProjectNotFoundException
+
+    tag = (
+        db.query(ProjectTagModel)
+        .filter(ProjectTagModel.project_id == project_id, ProjectTagModel.id == tag_id)
+        .first()
+    )
+
+    if not tag:
+        raise ProjectTagNotFoundException
+
+    tag.text = body.text
+
+    db.commit()
+
+    return tag
+
+
+@ProjectRouter.delete("/{project_id}/tag/{tag_id}", response_model=ProjectTagSchema)
+async def delete_project_tag(
+    project_id: str,
+    tag_id: str,
+    session: DependencyRequireSession,
+    db: DependencyInjectDatabase,
+) -> ProjectTagModel:
+    if not ProjectModel.belongs_to_session(project_id, session.id):
+        raise ProjectNotFoundException
+
+    tag = (
+        db.query(ProjectTagModel)
+        .filter(ProjectTagModel.project_id == project_id, ProjectTagModel.id == tag_id)
+        .first()
+    )
+
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+
+    db.delete(tag)
+    db.commit()
+
+    return tag

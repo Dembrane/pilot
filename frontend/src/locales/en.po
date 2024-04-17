@@ -13,11 +13,11 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/routes/project/ProjectOverview.tsx:335
+#: src/routes/project/ProjectOverview.tsx:368
 msgid "Access Code"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:274
+#: src/routes/project/ProjectOverview.tsx:289
 msgid "Active"
 msgstr ""
 
@@ -62,7 +62,7 @@ msgstr ""
 #~ msgid "Ask a question..."
 #~ msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:384
+#: src/components/layout/ProjectSidebar.tsx:395
 msgid "Ask AI"
 msgstr ""
 
@@ -74,13 +74,13 @@ msgstr ""
 #~ msgid "Attach as many documents as you like to analyse"
 #~ msgstr ""
 
-#: src/routes/project/ProjectConversationOverview.tsx:175
-#: src/routes/project/ProjectOverview.tsx:226
+#: src/routes/project/ProjectConversationOverview.tsx:176
+#: src/routes/project/ProjectOverview.tsx:229
 #: src/routes/project/ProjectResourceOverview.tsx:150
 msgid "Cancel"
 msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:293
+#: src/components/layout/ProjectSidebar.tsx:304
 msgid "Conversations"
 msgstr ""
 
@@ -88,8 +88,8 @@ msgstr ""
 msgid "Create a new session"
 msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:104
-#: src/components/layout/ProjectSidebar.tsx:170
+#: src/components/layout/ProjectSidebar.tsx:105
+#: src/components/layout/ProjectSidebar.tsx:181
 msgid "Created on"
 msgstr ""
 
@@ -97,8 +97,8 @@ msgstr ""
 #~ msgid "Delete document"
 #~ msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:111
-#: src/components/layout/ProjectSidebar.tsx:187
+#: src/components/layout/ProjectSidebar.tsx:112
+#: src/components/layout/ProjectSidebar.tsx:198
 msgid "Description"
 msgstr ""
 
@@ -106,7 +106,7 @@ msgstr ""
 #~ msgid "Document AI Assistant"
 #~ msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:71
+#: src/components/layout/ProjectSidebar.tsx:72
 msgid "Document is being processed"
 msgstr ""
 
@@ -122,11 +122,11 @@ msgstr ""
 #~ msgid "Drag documents here or select files"
 #~ msgstr ""
 
-#: src/routes/project/ProjectConversationOverview.tsx:108
+#: src/routes/project/ProjectConversationOverview.tsx:109
 msgid "Edit Conversation"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:122
+#: src/routes/project/ProjectOverview.tsx:124
 msgid "Edit Project"
 msgstr ""
 
@@ -134,7 +134,7 @@ msgstr ""
 msgid "Edit Resource"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:109
+#: src/routes/participant/Login.tsx:169
 msgid "Enter your access code"
 msgstr ""
 
@@ -151,6 +151,10 @@ msgstr ""
 #~ msgid "Great! Your documents are now being uploaded. While the documents are being processed, can you tell me what this analysis is about?"
 #~ msgstr ""
 
+#: src/routes/participant/Login.tsx:187
+msgid "Group"
+msgstr ""
+
 #: src/routes/GlobalAnalysis.tsx:41
 #~ msgid "Hello, I will be your research assistant today. To get started please upload the documents you want to analyse."
 #~ msgstr ""
@@ -159,12 +163,16 @@ msgstr ""
 #~ msgid "Hello, I'm your research assistant today. To get started, upload the documents you want to analyze."
 #~ msgstr ""
 
+#: src/routes/participant/Login.tsx:116
+msgid "Hi! Welcome to Dembrane."
+msgstr ""
+
 #: src/components/Layout.tsx:19
 #: src/routes/SelectSession.tsx:97
 #~ msgid "Home"
 #~ msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:281
+#: src/routes/project/ProjectOverview.tsx:296
 msgid "Inactive"
 msgstr ""
 
@@ -172,15 +180,27 @@ msgstr ""
 #~ msgid "Input global context"
 #~ msgstr ""
 
-#: src/routes/participant/Login.tsx:128
-msgid "Join"
+#: src/routes/project/ProjectOverview.tsx:377
+msgid "Invite Link"
 msgstr ""
+
+#: src/routes/participant/Login.tsx:128
+#~ msgid "Join"
+#~ msgstr ""
 
 #: src/components/session/SelectSession.tsx:87
 msgid "Login with Session"
 msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:304
+#: src/routes/participant/Login.tsx:161
+msgid "Name"
+msgstr ""
+
+#: src/routes/participant/Login.tsx:205
+msgid "Next"
+msgstr ""
+
+#: src/components/layout/ProjectSidebar.tsx:315
 msgid "No conversations found. Start a conversation using the participation invite link from the <0><1>project overview.</1></0>"
 msgstr ""
 
@@ -188,12 +208,12 @@ msgstr ""
 #~ msgid "No documents uploaded yet"
 #~ msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:257
+#: src/components/layout/ProjectSidebar.tsx:268
 msgid "No resources found. Add resources using the button above."
 msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:120
-#: src/components/layout/ProjectSidebar.tsx:196
+#: src/components/layout/ProjectSidebar.tsx:121
+#: src/components/layout/ProjectSidebar.tsx:207
 msgid "Open"
 msgstr ""
 
@@ -207,12 +227,12 @@ msgstr ""
 
 #: src/components/layout/ProjectConversationLayout.tsx:55
 #: src/components/layout/ProjectResourceLayout.tsx:52
-#: src/routes/project/ProjectOverview.tsx:259
+#: src/routes/project/ProjectOverview.tsx:274
 msgid "Overview"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:306
-#: src/routes/project/ProjectOverview.tsx:316
+#: src/routes/project/ProjectOverview.tsx:321
+#: src/routes/project/ProjectOverview.tsx:331
 msgid "Participation"
 msgstr ""
 
@@ -224,16 +244,24 @@ msgstr ""
 #~ msgid "Please enter a message"
 #~ msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:364
+#: src/routes/participant/Login.tsx:214
+msgid "Privacy Statements"
+msgstr ""
+
+#: src/components/layout/ProjectSidebar.tsx:375
 msgid "Project Overview"
+msgstr ""
+
+#: src/routes/participant/Login.tsx:131
+msgid "Ready!"
 msgstr ""
 
 #: src/routes/participant/Conversation.tsx:575
 msgid "Resume"
 msgstr ""
 
-#: src/routes/project/ProjectConversationOverview.tsx:167
-#: src/routes/project/ProjectOverview.tsx:218
+#: src/routes/project/ProjectConversationOverview.tsx:168
+#: src/routes/project/ProjectOverview.tsx:221
 #: src/routes/project/ProjectResourceOverview.tsx:142
 msgid "Save"
 msgstr ""
@@ -243,11 +271,15 @@ msgstr ""
 #~ msgid "Select Session"
 #~ msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:309
+#: src/routes/participant/Login.tsx:188
+msgid "Select your group"
+msgstr ""
+
+#: src/routes/project/ProjectOverview.tsx:324
 msgid "Settings"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:92
+#: src/routes/participant/Login.tsx:152
 msgid "Something went wrong"
 msgstr ""
 
@@ -263,7 +295,15 @@ msgstr ""
 #~ msgid "Thank you! In the meantime, click individual documents to add context to each file that I will take into account for further analysis."
 #~ msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:179
+#: src/routes/participant/Login.tsx:120
+msgid ""
+"This is a super simple tool for you to record a story or a conversation and share it with the host.\n"
+"We will first ask you some quick questions, then you can get started with recording.\n"
+"<br/><br/>\n"
+"*At Dembrane, privacy is really important. We make sure nothing is traceable to individuals, and even if you might accidentally say someone’s name, we delete this before we analyse the data. By using this tool, you agree to our privacy policy. Do you want to know more? Feel free to read our [privacy statement]"
+msgstr ""
+
+#: src/components/layout/ProjectSidebar.tsx:190
 msgid "Title"
 msgstr ""
 
@@ -272,8 +312,8 @@ msgid "Transcript"
 msgstr ""
 
 #: src/routes/participant/Login.tsx:101
-msgid "Transcript Name"
-msgstr ""
+#~ msgid "Transcript Name"
+#~ msgstr ""
 
 #: src/components/Message.tsx:308
 #~ msgid "Type a question here..."
@@ -284,8 +324,8 @@ msgstr ""
 #~ msgid "Type context here..."
 #~ msgstr ""
 
-#: src/routes/project/ProjectConversationOverview.tsx:110
-#: src/routes/project/ProjectOverview.tsx:124
+#: src/routes/project/ProjectConversationOverview.tsx:111
+#: src/routes/project/ProjectOverview.tsx:126
 #: src/routes/project/ProjectResourceOverview.tsx:114
 msgid "Unsaved changes"
 msgstr ""
@@ -294,8 +334,16 @@ msgstr ""
 #~ msgid "Upload documents"
 #~ msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:241
+#: src/components/layout/ProjectSidebar.tsx:252
 msgid "Upload resources"
+msgstr ""
+
+#: src/routes/participant/Login.tsx:126
+#~ msgid "We don't have a cookie banner because we don't use cookies! We just eat them 🍪."
+#~ msgstr ""
+
+#: src/routes/participant/Login.tsx:126
+msgid "We don't have a cookie banner because we don't use cookies! We just eat them."
 msgstr ""
 
 #: src/routes/participant/Conversation.tsx:516
@@ -311,6 +359,6 @@ msgstr ""
 msgid "You"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:338
+#: src/routes/project/ProjectOverview.tsx:371
 msgid "Your code is"
 msgstr ""

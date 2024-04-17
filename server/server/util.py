@@ -1,7 +1,10 @@
 import uuid
+import time
 import random
 import threading
 from typing import Generator
+
+random.seed(time.time())
 
 
 def generate_uuid() -> str:
@@ -10,6 +13,10 @@ def generate_uuid() -> str:
 
 def generate_4_digit_pin() -> str:
     return str(random.randint(1000, 9999))[:4]
+
+
+def generate_6_digit_pin() -> str:
+    return str(random.randint(100000, 999999))[:6]
 
 
 def iter_file_content(file_path: str) -> Generator[bytes, None, None]:

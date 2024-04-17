@@ -7,6 +7,7 @@ from server.api.session import SessionRouter
 from server.api.project import ProjectRouter
 from server.api.resource import ResourceRouter
 from server.api.conversation import ConversationRouter
+from server.api.tag import TagRouter
 
 logger = getLogger("api")
 
@@ -22,6 +23,7 @@ api.include_router(SessionRouter, prefix="/session")
 api.include_router(ProjectRouter, prefix="/projects")
 api.include_router(ResourceRouter, prefix="/resources")
 api.include_router(ConversationRouter, prefix="/conversations")
+api.include_router(TagRouter, prefix="/tag")
 
 ## the code below is from the pdf-pilot - chat usecase
 ## ignore for now

@@ -8,9 +8,15 @@ from pydantic import BaseModel
 from server.database import (
     ConversationModel,
     ConversationChunkModel,
+    ProjectTagModel,
     DependencyInjectDatabase,
 )
-from server.schemas import ConversationChunkSchema, ConversationSchema
+from server.schemas import (
+    ConversationChunkSchema,
+    ConversationSchema,
+    ProjectTagSchema,
+)
+
 from server.api.session import DependencyRequireSession
 from server.api.exceptions import (
     ConversationNotFoundException,
@@ -21,6 +27,7 @@ from server.process_conversation_chunk import (
     ProcessConversationChunkTaskQueueItem,
     process_conversation_chunk_queue,
 )
+from sqlalchemy.orm import joinedload
 
 logger = getLogger("api.conversation")
 ConversationRouter = APIRouter(tags=["conversation"])
@@ -32,6 +39,9 @@ async def get_conversation(
 ) -> ConversationModel:
     conversation = (
         db.query(ConversationModel)
+        .options(
+            joinedload(ConversationModel.tags),
+        )
         .filter(
             ConversationModel.id == conversation_id,
         )
@@ -174,62 +184,6 @@ async def get_conversation_chunk_content(
         )
 
     return StreamingResponse(stream_audio(file_paths), media_type="audio/webm")
-
-
-# async def get_duration(file_path: str) -> float:
-#     # This command gets the duration using ffprobe, which is part of ffmpeg
-#     cmd = [
-#         "ffprobe",
-#         "-v",
-#         "error",
-#         "-show_entries",
-#         "format=duration",
-#         "-of",
-#         "default=noprint_wrappers=1:nokey=1",
-#         file_path,
-#     ]
-
-#     try:
-#         # Run the command asynchronously
-#         proc = await asyncio.create_subprocess_exec(*cmd, stdout=PIPE, stderr=PIPE)
-#         stdout, stderr = await proc.communicate()
-
-#         logger.debug(f"Duration for {file_path}: {stdout.decode().strip()}")
-
-#         if proc.returncode != 0:
-#             # Handle non-zero exit codes (errors during execution of ffprobe)
-#             raise Exception(f"ffprobe error for {file_path}: {stderr.decode().strip()}")
-
-#         # Convert the duration to float and return
-#         return float(stdout.decode().strip())
-#     except Exception as e:
-#         # Log the error, return 0 or re-raise the exception depending on how you want to handle it
-#         print(f"Error getting duration for {file_path}: {e}")
-#         return 0.0  # Return zero if you want to continue processing other files, or you could re-raise the exception
-
-
-# async def get_audio_total_duration(file_paths: List[str]) -> float:
-#     total_duration = 0.0
-
-#     # Gather the durations of all files asynchronously, with error handling for each file
-#     durations = await asyncio.gather(
-#         *(get_duration(fp) for fp in file_paths), return_exceptions=True
-#     )
-
-#     # Filter out exceptions and sum the durations to get the total duration
-#     total_duration = sum(d for d in durations if isinstance(d, float))
-
-#     return total_duration
-
-
-# @ConversationRouter.get("/{conversation_id}/duration")
-# async def get_conversation_duration(conversation_id: str) -> float:
-#     chunks = await get_conversation_chunks(conversation_id)
-#     file_paths = [chunk.path for chunk in chunks]
-
-#     total_duration = await get_audio_total_duration(file_paths)
-
-#     return total_duration
 
 
 class PutConversationRequestBodySchema(BaseModel):

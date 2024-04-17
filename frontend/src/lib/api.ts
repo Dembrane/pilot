@@ -146,6 +146,7 @@ export const initiateConversation = async (payload: {
   email?: string;
   name: string;
   pin: string;
+  tagIdList: string[];
 }) => {
   return apiNoAuth.post<unknown, TConversation>(
     `/projects/${payload.projectId}/conversations/initiate`,
@@ -153,6 +154,7 @@ export const initiateConversation = async (payload: {
       email: payload.email ?? undefined,
       name: payload.name,
       pin: payload.pin,
+      tag_id_list: payload.tagIdList,
       user_agent: navigator.userAgent ?? undefined,
     },
   );
@@ -219,8 +221,25 @@ export const getConversationChunks = async (conversationId: string) => {
 export const getConversationContentLink = (conversationId: string) =>
   `${apiCommonConfig.baseURL}/conversations/${conversationId}/content`;
 
-export const getConversationChunkContent = (
+export const getConversationChunkContentLink = (
   conversationId: string,
   chunkId: string,
 ) =>
   `${apiCommonConfig.baseURL}/conversations/${conversationId}/chunks/${chunkId}/content`;
+
+export const getTagsByProjectId = async (projectId: string) => {
+  return apiNoAuth.get<unknown, TProjectTag[]>(`/projects/${projectId}/tag`);
+};
+
+export const deleteTagById = async (tagId: string) => {
+  return api.delete(`/tag/${tagId}`);
+};
+
+export const createProjectTag = async (payload: {
+  projectId: string;
+  text: string;
+}) => {
+  return api.post<unknown, TProjectTag>(`/projects/${payload.projectId}/tag`, {
+    text: payload.text,
+  });
+};

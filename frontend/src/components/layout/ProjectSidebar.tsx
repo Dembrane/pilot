@@ -20,6 +20,7 @@ import {
   Loader,
   Tooltip,
   Anchor,
+  Pill,
 } from "@mantine/core";
 import { PropsWithChildren } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -128,16 +129,26 @@ const ConversationAccordionLabel = ({
   conversation,
 }: PropsWithChildren<{ conversation: TConversation }>) => {
   return (
-    <Group wrap="nowrap" align="center">
+    <Group wrap="nowrap" align="center" justify="between" className="w-full">
       {/* <Box>
         <ResourceAccordionLabelIcon conversation={conversation} />
       </Box> */}
 
-      <Box>
+      <Box className="flex-grow">
         <Title order={4} className="font-normal text-sm">
           {conversation.participant_email ?? conversation.participant_name}
         </Title>
       </Box>
+
+      <Group gap="sm" pr="sm">
+        {conversation.tags &&
+          conversation.tags.length > 0 &&
+          conversation.tags.map((tag) => (
+            <Pill key={tag.id} size="sm">
+              {tag.text}
+            </Pill>
+          ))}
+      </Group>
     </Group>
   );
 };

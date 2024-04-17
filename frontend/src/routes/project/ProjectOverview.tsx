@@ -41,6 +41,7 @@ import { useEffect, useState } from "react";
 import { PARTICIPANT_BASE_URL } from "@/config";
 import { getProjectTranscriptsLink } from "@/lib/api";
 import { useLanguage } from "@/lib/useLanguage";
+import { ProjectTagsInput } from "@/components/project/ProjectTagsInput";
 
 const ProjectDangerZone = ({ project }: { project: TProject }) => {
   const deleteProjectByIdMutation = useDeleteProjectByIdMutation();
@@ -178,6 +179,8 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
             {...register("default_conversation_description")}
             placeholder="Conversation Description"
           />
+
+          <ProjectTagsInput projectId={project.id} />
 
           <Box>
             <Title order={4}>Advanced Settings</Title>

@@ -133,6 +133,12 @@ class ProjectModel(Base):
         "ConversationModel", back_populates="project", cascade="all, delete-orphan"
     )
 
+    tags: Mapped[List["ProjectTagModel"]] = relationship(
+        "ProjectTagModel",
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+
     @staticmethod
     def belongs_to_session(project_id: str, session_id: int) -> bool:
         return (
@@ -143,6 +149,43 @@ class ProjectModel(Base):
             .first()
             is not None
         )
+
+
+project_conversation_tag_association_table = Table(
+    "project_conversation_tag_association",
+    Base.metadata,
+    Column("conversation_id", ForeignKey("conversation.id"), primary_key=True),
+    Column(
+        "project_tag",
+        ForeignKey("project_tag.id"),
+        primary_key=True,
+    ),
+)
+
+
+class ProjectTagModel(Base):
+    __tablename__ = "project_tag"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    project_id: Mapped[str] = mapped_column(String, ForeignKey("project.id"))
+    project: Mapped["ProjectModel"] = relationship(
+        "ProjectModel", back_populates="tags"
+    )
+
+    conversations: Mapped[List["ConversationModel"]] = relationship(
+        "ConversationModel",
+        secondary=project_conversation_tag_association_table,
+        back_populates="tags",
+    )
+
+    text: Mapped[str] = mapped_column(String)
 
 
 class ChatModel(Base):
@@ -247,14 +290,6 @@ class ResourceModel(Base):
     )
 
 
-conversation_conversation_tag_association_table = Table(
-    "conversation_conversation_tag_association",
-    Base.metadata,
-    Column("conversation_id", ForeignKey("conversation.id"), primary_key=True),
-    Column("conversation_tag_id", ForeignKey("conversation_tag.id"), primary_key=True),
-)
-
-
 class ConversationModel(Base):
     __tablename__ = "conversation"
 
@@ -291,28 +326,14 @@ class ConversationModel(Base):
         cascade="all, delete-orphan",
     )
 
-    tags: Mapped[List["ConversationTagModel"]] = relationship(
-        "ConversationTagModel",
-        secondary=conversation_conversation_tag_association_table,
+    tags: Mapped[List["ProjectTagModel"]] = relationship(
+        "ProjectTagModel",
+        secondary=project_conversation_tag_association_table,
         back_populates="conversations",
     )
 
     quotes: Mapped[List["QuoteModel"]] = relationship(
         "QuoteModel", back_populates="conversation"
-    )
-
-
-class ConversationTagModel(Base):
-    __tablename__ = "conversation_tag"
-
-    id: Mapped[str] = mapped_column(String, primary_key=True)
-    text: Mapped[str] = mapped_column(String, unique=True)
-    color: Mapped[str] = mapped_column(String, default="#000000")
-
-    conversations: Mapped[List["ConversationModel"]] = relationship(
-        "ConversationModel",
-        secondary=conversation_conversation_tag_association_table,
-        back_populates="tags",
     )
 
 

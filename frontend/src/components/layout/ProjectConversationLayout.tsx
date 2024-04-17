@@ -47,7 +47,9 @@ export const ProjectConversationLayout = () => {
   return (
     <Stack className="relative py-4 px-2">
       <LoadingOverlay visible={conversationQuery.isLoading} />
-      <Title order={1}>{conversationQuery.data?.title ?? "Conversation"}</Title>
+      <Title order={1}>
+        {conversationQuery.data?.participant_name ?? "Conversation"}
+      </Title>
 
       <Tabs value={activeTab} onChange={handleTabChange} variant="default">
         <Tabs.List grow justify="space-between">

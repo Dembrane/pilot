@@ -12,6 +12,13 @@ type TResource = {
   processing_error?: string;
 };
 
+type TProjectTag = {
+  id: string;
+  created_at: Date;
+  updated_at: Date;
+  text: string;
+};
+
 type TConversation = {
   id: string;
   created_at: Date;
@@ -22,6 +29,7 @@ type TConversation = {
   context?: string;
   participant_email?: string;
   participant_name: string;
+  tags: TProjectTag[];
 };
 
 type TConversationChunk = {
@@ -49,6 +57,7 @@ type TProject = {
   default_conversation_title?: string;
   default_conversation_description?: string;
   default_conversation_context?: string;
+  tags: TProjectTag[];
 };
 
 type TSession = {

@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 
+InternalServerException = HTTPException(status_code=500, detail="Something went wrong")
 
 SessionInvalidException = HTTPException(status_code=401, detail="Invalid session")
 SessionNotFoundException = HTTPException(status_code=404, detail="Session not found")
@@ -8,6 +9,7 @@ ProjectNotFoundException = HTTPException(status_code=404, detail="Project not fo
 ProjectLanguageNotSupportedException = HTTPException(
     status_code=400, detail="Language not supported"
 )
+ProjectTagNotFoundException = HTTPException(status_code=404, detail="Tag not found")
 
 ResourceInvalidFileFormatException = HTTPException(
     status_code=400, detail="Invalid file format. Only .pdf files are supported."

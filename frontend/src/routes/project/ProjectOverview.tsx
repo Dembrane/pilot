@@ -1,3 +1,4 @@
+import useSessionStorageState from "use-session-storage-state";
 import { Icons } from "@/icons";
 import {
   useConversationsByProjectId,
@@ -242,7 +243,12 @@ export const ProjectOverviewRoute = () => {
   const conversationsQuery = useConversationsByProjectId(projectId ?? "");
   const updateProjectMutation = useUpdateProjectByIdMutation();
 
-  const [language, setLanguage] = useState("en");
+  const [language, setLanguage] = useSessionStorageState<string>(
+    `sharing-link-language-${projectId}`,
+    {
+      defaultValue: "en",
+    },
+  );
 
   const [sharingLink, setSharingLink] = useState(
     `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data?.pin}`,

@@ -26,6 +26,7 @@ import {
 } from "@ricky0123/vad-react";
 import * as ort from "onnxruntime-web";
 import { Trans, t } from "@lingui/macro";
+import { useWakeLock } from "@/lib/useWakeLock";
 
 ort.env.wasm.wasmPaths = {
   "ort-wasm-simd-threaded.wasm": "/ort-wasm-simd-threaded.wasm",
@@ -90,8 +91,8 @@ interface UseAudioRecorderResult {
 const useAudioRecorder = ({
   onChunk,
   mimeType = defaultMimeType,
-  // timeslice = 30000, // 30 sec
-  timeslice = 300000, // 5 min
+  timeslice = 30000, // 30 sec
+  // timeslice = 300000, // 5 min
 }: UseAudioRecorderOptions): UseAudioRecorderResult => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -105,13 +106,13 @@ const useAudioRecorder = ({
   const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<number | null>(null);
   const startRecordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioProcessorRef = useRef<AudioWorkletNode | null>(null);
 
   useEffect(() => {
+    // for syncing
     isRecordingRef.current = isRecording;
     isPausedRef.current = isPaused;
     userPausedRef.current = userPaused;
@@ -129,7 +130,7 @@ const useAudioRecorder = ({
   }, []);
 
   const handleAudioProcessorMessages = (event: MessageEvent) => {
-    console.log("Not Handled: Received audio processor message", event.data);
+    // console.log("Not Handled: Received audio processor message", event.data);
     return;
 
     console.log("Received audio processor message", event.data);
@@ -177,12 +178,9 @@ const useAudioRecorder = ({
     }
   };
 
-  const updateRecordingTime = () => {
-    if (startTimeRef.current) {
-      const elapsedTime = Date.now() - startTimeRef.current;
-      setRecordingTime(Math.floor(elapsedTime / 1000));
-    }
-  };
+  const updateRecordingTime = useCallback(() => {
+    setRecordingTime((prev) => prev + 1);
+  }, []);
 
   let chunkBufferRef = useRef<Blob[]>([]);
 
@@ -242,21 +240,21 @@ const useAudioRecorder = ({
       console.log("Access to microphone granted.", { stream });
 
       // Setup audio context and processor for silence detection
-      audioContextRef.current = new AudioContext();
-      console.log("Loading audio worklet module...");
-      await audioContextRef.current.audioWorklet.addModule("/processor.js"); // Your worklet processor file
-      audioProcessorRef.current = new AudioWorkletNode(
-        audioContextRef.current,
-        "silence-detector",
-      );
-      console.log("Audio worklet module loaded", audioProcessorRef.current);
-      audioProcessorRef.current.port.onmessage = handleAudioProcessorMessages;
+      // audioContextRef.current = new AudioContext();
+      // console.log("Loading audio worklet module...");
+      // await audioContextRef.current.audioWorklet.addModule("/processor.js"); // Your worklet processor file
+      // audioProcessorRef.current = new AudioWorkletNode(
+      //   audioContextRef.current,
+      //   "silence-detector",
+      // );
+      // console.log("Audio worklet module loaded", audioProcessorRef.current);
+      // audioProcessorRef.current.port.onmessage = handleAudioProcessorMessages;
 
       // Connect the stream to the audio context
-      console.log("Connecting audio stream to audio processor");
-      const source = audioContextRef.current.createMediaStreamSource(stream);
-      source.connect(audioProcessorRef.current);
-      audioProcessorRef.current.connect(audioContextRef.current.destination);
+      // console.log("Connecting audio stream to audio processor");
+      // const source = audioContextRef.current.createMediaStreamSource(stream);
+      // source.connect(audioProcessorRef.current);
+      // audioProcessorRef.current.connect(audioContextRef.current.destination);
 
       console.log("Creating MediaRecorder instance");
 
@@ -284,7 +282,9 @@ const useAudioRecorder = ({
         }
       }, timeslice);
 
-      startTimeRef.current = Date.now();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
       intervalRef.current = setInterval(updateRecordingTime, 1000);
     } catch (error) {
       console.error("Error accessing audio stream", error);
@@ -302,7 +302,10 @@ const useAudioRecorder = ({
     setIsRecording(false);
     setIsPaused(false);
     setUserPaused(false);
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    setRecordingTime(0);
     if (startRecordingIntervalRef.current)
       clearInterval(startRecordingIntervalRef.current);
     // remove the worker
@@ -321,10 +324,10 @@ const useAudioRecorder = ({
       mediaRecorderRef.current.state === "recording"
     ) {
       mediaRecorderRef.current.pause();
+      setIsPaused(true);
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
-      setIsPaused(true);
     }
   };
 
@@ -339,6 +342,9 @@ const useAudioRecorder = ({
       mediaRecorderRef.current.state === "paused"
     ) {
       mediaRecorderRef.current.resume();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
       intervalRef.current = setInterval(updateRecordingTime, 1000);
       setIsPaused(false);
       setUserPaused(false);
@@ -481,6 +487,8 @@ export const ParticipantConversationRoute = ({
 
   const audioRecorder = useVADAudioRecorder({ onChunk });
   const fallbackAudioRecorder = useAudioRecorder({ onChunk });
+
+  useWakeLock({ obtainWakeLockOnMount: true });
 
   const {
     startRecording,

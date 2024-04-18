@@ -28,3 +28,4 @@ types-aiofiles==23.2.*
 
 # Tools
 mypy
+sentry-sdk[fastapi]

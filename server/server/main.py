@@ -23,6 +23,20 @@ from server.process_conversation_chunk import seed_process_conversation_chunk_qu
 from server.process_resource import (
     seed_process_resource_queue,
 )
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://0037fa05e4f0e472dffaecbb7d25be3a@o4507107162652672.ingest.de.sentry.io/4507107472703568",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+    enable_tracing=True,
+)
+
 
 logger = getLogger("server")
 

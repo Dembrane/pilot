@@ -331,7 +331,7 @@ export const useConversationsByProjectId = (projectId: string) => {
 export const useUploadConversationChunk = () => {
   return useMutation({
     mutationFn: uploadConversationChunk,
-    retry: 3,
+    retry: 10,
   });
 };
 

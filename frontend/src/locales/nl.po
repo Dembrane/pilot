@@ -13,23 +13,27 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/routes/participant/Login.tsx:123
-msgid "*At Dembrane, privacy is super important! We make sure nothing can be traced back to you, even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]"
-msgstr "*Bij Dembrane staat privacy op een! We zorgen dat niks terug te leiden is naar jou als persoon, ook al zeg je per ongeluk je naam, verwijderen wij deze voordat we alles analyseren. Door deze tool te gebruiken, ga je akkoord met onze privacy voorwaarden. Wil je meer weten? Lees dan onze [privacy verklaring]"
+#: src/routes/participant/Login.tsx:134
+msgid "*At Dembrane, privacy is super important!*"
+msgstr "*Bij Dembrane staat privacy op een!*"
 
-#: src/routes/participant/Login.tsx:126
+#: src/routes/participant/Login.tsx:139
 msgid "*Oh, we don't have a cookie statement because we don't use cookies! We eat them.*"
 msgstr "*Oh, we hebben geen cookievermelding want we gebruiken geen cookies! We eten ze op.*"
 
-#: src/routes/project/ProjectOverview.tsx:368
+#: src/routes/participant/Login.tsx:136
+msgid "*We make sure nothing can be traced back to you, and even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]"
+msgstr "*We zorgen dat niks terug te leiden is naar jou als persoon, ook al zeg je per ongeluk je naam, verwijderen wij deze voordat we alles analyseren. Door deze tool te gebruiken, ga je akkoord met onze privacy voorwaarden. Wil je meer weten? Lees dan onze [privacy verklaring]"
+
+#: src/routes/project/ProjectOverview.tsx:374
 msgid "Access Code"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:289
+#: src/routes/project/ProjectOverview.tsx:295
 msgid "Active"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:188
+#: src/routes/participant/Login.tsx:198
 msgid "Add all that apply"
 msgstr "Vink aan wat van toepassing is"
 
@@ -58,11 +62,15 @@ msgstr "Analyse"
 #~ msgid "Analyze!"
 #~ msgstr "Analyseer!"
 
+#: src/routes/participant/Login.tsx:126
+msgid "Are you ready? Then press \"Ready!\""
+msgstr "Ben je er klaar voor? Druk dan op \"Klaar om te beginnen\"."
+
 #: src/components/Documents.tsx:197
 #~ msgid "Are you sure you want to delete this document?"
 #~ msgstr "Weet je zeker dat je dit document wilt verwijderen?"
 
-#: src/routes/participant/Conversation.tsx:594
+#: src/routes/participant/Conversation.tsx:602
 msgid "Are you sure you want to stop recording?"
 msgstr "Weet je zeker dat je wilt stoppen met opnemen?"
 
@@ -87,7 +95,7 @@ msgstr ""
 #~ msgstr "Voeg zoveel documenten toe als je wilt analyseren"
 
 #: src/routes/project/ProjectConversationOverview.tsx:176
-#: src/routes/project/ProjectOverview.tsx:229
+#: src/routes/project/ProjectOverview.tsx:230
 #: src/routes/project/ProjectResourceOverview.tsx:150
 msgid "Cancel"
 msgstr "Annuleren"
@@ -108,10 +116,6 @@ msgstr ""
 #: src/components/Documents.tsx:208
 #~ msgid "Delete document"
 #~ msgstr "Verwijder document"
-
-#: src/routes/participant/Login.tsx:120
-msgid "Dembrane is a very simple tool for you to record conversations or stories to make your voice heard in processes where you want to share. First we ask some short questions, and then you can start recording."
-msgstr "Dembrane (\"Dembrein\") is een hele simpele tool waar je gesprekken of verhalen kan opnemen om je stem te laten horen in processen waar je iets wil delen. Eerst vragen we een aantal korte vragen, en dan kan je beginnen met opnemen."
 
 #: src/components/layout/ProjectSidebar.tsx:112
 #: src/components/layout/ProjectSidebar.tsx:193
@@ -142,7 +146,7 @@ msgstr "Document wordt verwerkt"
 msgid "Edit Conversation"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:124
+#: src/routes/project/ProjectOverview.tsx:125
 msgid "Edit Project"
 msgstr ""
 
@@ -150,13 +154,17 @@ msgstr ""
 msgid "Edit Resource"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:169
+#: src/routes/participant/Login.tsx:179
 msgid "Enter your access code"
 msgstr "Voer uw toegangscode in"
 
 #: src/components/Layout.tsx:32
 #~ msgid "Export"
 #~ msgstr "Exporteer"
+
+#: src/routes/participant/Login.tsx:122
+msgid "First we ask some short questions, and then you can start recording."
+msgstr "Eerst vragen we een aantal korte vragen, en dan kan je beginnen met opnemen."
 
 #: src/components/Message.tsx:401
 #: src/components/Message.tsx:419
@@ -166,10 +174,6 @@ msgstr "Voer uw toegangscode in"
 #: src/routes/GlobalAnalysis.tsx:47
 #~ msgid "Great! Your documents are now being uploaded. While the documents are being processed, can you tell me what this analysis is about?"
 #~ msgstr "Geweldig! Uw documenten worden nu geüpload. Terwijl de documenten worden verwerkt, kunt u mij vertellen waar deze analyse over gaat?"
-
-#: src/routes/participant/Login.tsx:187
-#~ msgid "Group"
-#~ msgstr "Groep"
 
 #: src/routes/GlobalAnalysis.tsx:41
 #~ msgid "Hello, I will be your research assistant today. To get started please upload the documents you want to analyse."
@@ -184,7 +188,7 @@ msgstr "Hi, Fijn dat je meedoet!"
 #~ msgid "Home"
 #~ msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:296
+#: src/routes/project/ProjectOverview.tsx:302
 msgid "Inactive"
 msgstr ""
 
@@ -192,7 +196,7 @@ msgstr ""
 #~ msgid "Input global context"
 #~ msgstr "Voer algemene context in"
 
-#: src/routes/project/ProjectOverview.tsx:377
+#: src/routes/project/ProjectOverview.tsx:383
 msgid "Invite Link"
 msgstr ""
 
@@ -204,11 +208,11 @@ msgstr ""
 msgid "Login with Session"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:161
+#: src/routes/participant/Login.tsx:171
 msgid "Name"
 msgstr "Naam"
 
-#: src/routes/participant/Login.tsx:205
+#: src/routes/participant/Login.tsx:215
 msgid "Next"
 msgstr "Volgende"
 
@@ -239,16 +243,16 @@ msgstr ""
 
 #: src/components/layout/ProjectConversationLayout.tsx:57
 #: src/components/layout/ProjectResourceLayout.tsx:52
-#: src/routes/project/ProjectOverview.tsx:274
+#: src/routes/project/ProjectOverview.tsx:280
 msgid "Overview"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:321
-#: src/routes/project/ProjectOverview.tsx:331
+#: src/routes/project/ProjectOverview.tsx:327
+#: src/routes/project/ProjectOverview.tsx:337
 msgid "Participation"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:584
+#: src/routes/participant/Conversation.tsx:592
 msgid "Pause"
 msgstr "Pauze"
 
@@ -256,7 +260,7 @@ msgstr "Pauze"
 #~ msgid "Please enter a message"
 #~ msgstr "Voer een bericht in"
 
-#: src/routes/participant/Login.tsx:214
+#: src/routes/participant/Login.tsx:224
 msgid "Privacy Statements"
 msgstr "Privacy verklaring"
 
@@ -264,16 +268,16 @@ msgstr "Privacy verklaring"
 msgid "Project Overview"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:131
+#: src/routes/participant/Login.tsx:130
 msgid "Ready!"
 msgstr "Klaar om te beginnen"
 
-#: src/routes/participant/Conversation.tsx:575
+#: src/routes/participant/Conversation.tsx:583
 msgid "Resume"
 msgstr "Hervatten"
 
 #: src/routes/project/ProjectConversationOverview.tsx:168
-#: src/routes/project/ProjectOverview.tsx:221
+#: src/routes/project/ProjectOverview.tsx:222
 #: src/routes/project/ProjectResourceOverview.tsx:142
 msgid "Save"
 msgstr "Opslaan"
@@ -287,29 +291,33 @@ msgstr "Opslaan"
 #~ msgid "Select your group"
 #~ msgstr "Selecteer je groep"
 
-#: src/routes/project/ProjectOverview.tsx:324
+#: src/routes/project/ProjectOverview.tsx:330
 msgid "Settings"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:152
+#: src/routes/participant/Login.tsx:162
 msgid "Something went wrong"
 msgstr "Er ging iets mis"
 
-#: src/routes/participant/Conversation.tsx:563
+#: src/routes/participant/Conversation.tsx:571
 msgid "Start Recording"
 msgstr "Opname starten"
 
-#: src/routes/participant/Conversation.tsx:601
+#: src/routes/participant/Conversation.tsx:609
 msgid "Stop"
 msgstr "Stop"
 
-#: src/routes/participant/Login.tsx:187
+#: src/routes/participant/Login.tsx:197
 msgid "Tags"
 msgstr "Trefwoorden"
 
 #: src/components/Message.tsx:242
 #~ msgid "Thank you! In the meantime, click individual documents to add context to each file that I will take into account for further analysis."
 #~ msgstr "Bedankt! Klik ondertussen op individuele documenten om context toe te voegen aan elk bestand dat ik zal meenemen voor verdere analyse."
+
+#: src/routes/participant/Login.tsx:120
+msgid "This is a very simple tool where you can record conversations or stories to make your voice heard."
+msgstr "Met deze tool kan je gesprekken of verhalen opnemen om je stem te laten horen."
 
 #: src/components/layout/ProjectSidebar.tsx:185
 msgid "Title"
@@ -333,7 +341,7 @@ msgstr ""
 #~ msgstr "Typ hier de context..."
 
 #: src/routes/project/ProjectConversationOverview.tsx:111
-#: src/routes/project/ProjectOverview.tsx:126
+#: src/routes/project/ProjectOverview.tsx:127
 #: src/routes/project/ProjectResourceOverview.tsx:114
 msgid "Unsaved changes"
 msgstr ""
@@ -346,8 +354,8 @@ msgstr ""
 msgid "Upload resources"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:516
-#: src/routes/participant/Conversation.tsx:521
+#: src/routes/participant/Conversation.tsx:524
+#: src/routes/participant/Conversation.tsx:529
 msgid "Welcome"
 msgstr "Welkom"
 
@@ -359,10 +367,10 @@ msgstr "Welkom"
 msgid "You"
 msgstr "Jij"
 
-#: src/routes/participant/Login.tsx:122
-msgid "You can use this by yourself to share your own story, or you can record a conversation between several people, which can often be fun and insightful! Are you ready? Then press \"Ready!\""
-msgstr "Je kan dit alleen gebruiken om je eigen verhaal te delen, of je kan een gesprek opnemen tussen meerdere mensen, wat vaak leuk en inzichtelijk kan zijn! Ben je er klaar voor? Druk dan op \"Klaar om te beginnen.\""
+#: src/routes/participant/Login.tsx:124
+msgid "You can use this by yourself to share your own story, or you can record a conversation between several people, which can often be fun and insightful!"
+msgstr "Je kan dit in je eentje gebruiken om je eigen verhaal te delen, of je kan een gesprek opnemen tussen meerdere mensen, wat vaak leuk en inzichtelijk kan zijn!"
 
-#: src/routes/project/ProjectOverview.tsx:371
+#: src/routes/project/ProjectOverview.tsx:377
 msgid "Your code is"
 msgstr ""

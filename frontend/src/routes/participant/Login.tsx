@@ -117,20 +117,29 @@ export const ParticipantLoginRoute = () => {
               </Title>
               <Markdown
                 content={
-                  t`Dembrane is a very simple tool for you to record conversations or stories to make your voice heard in processes where you want to share. First we ask some short questions, and then you can start recording.` +
+                  t`This is a very simple tool where you can record conversations or stories to make your voice heard.` +
                   `<br/><br/>` +
-                  t`You can use this by yourself to share your own story, or you can record a conversation between several people, which can often be fun and insightful! Are you ready? Then press "Ready!"` +
+                  t`First we ask some short questions, and then you can start recording.` +
                   "<br/><br/>" +
-                  t`*At Dembrane, privacy is super important! We make sure nothing can be traced back to you, even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]` +
+                  t`You can use this by yourself to share your own story, or you can record a conversation between several people, which can often be fun and insightful!` +
+                  "<br/><br/>" +
+                  t`Are you ready? Then press "Ready!"`
+                }
+              />
+              <Button onClick={close} size="xl">
+                <Trans>Ready!</Trans>
+              </Button>
+              <Markdown
+                content={
+                  t`*At Dembrane, privacy is super important!*` +
+                  "<br/><br/>" +
+                  t`*We make sure nothing can be traced back to you, and even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]` +
                   `(${PRIVACY_POLICY_URL}).*` +
                   "<br/><br/>" +
                   t`*Oh, we don't have a cookie statement because we don't use cookies! We eat them.*` +
                   ` 🍪`
                 }
               />
-              <Button onClick={close} size="xl">
-                <Trans>Ready!</Trans>
-              </Button>
             </Stack>
           </Stack>
         </Stack>

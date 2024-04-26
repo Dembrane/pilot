@@ -213,7 +213,11 @@ export const uploadConversationChunk = async (payload: {
     `/conversations/${payload.conversationId}/upload-chunk`,
     formData,
     {
-      timeout: 10000,
+      // 10 min
+      timeout: 600000,
+      // 25 mB
+      maxBodyLength: 25 * 1024 * 1024,
+      maxContentLength: 25 * 1024 * 1024,
       headers: {
         "Content-Type": "multipart/form-data",
       },

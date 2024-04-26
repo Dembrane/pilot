@@ -26,10 +26,11 @@ import {
 } from "@mantine/core";
 import { PropsWithChildren } from "react";
 import { Link, useParams } from "react-router-dom";
-import { UploadResourceDropzone } from "../resource/UploadResourceDropzone";
+import { UploadResourceDropzone } from "../dropzone/UploadResourceDropzone";
 import { apiCommonConfig } from "@/lib/api";
 import { IconExternalLink } from "@tabler/icons-react";
 import { ENABLE_EXPERIMENTAL_FEATURES } from "@/config";
+import { UploadConversationDropzone } from "../dropzone/UploadConversationDropzone";
 
 const ResourceAccordionLabelIcon = ({ resource }: { resource: TResource }) => {
   if (resource.is_processed) {
@@ -301,6 +302,14 @@ const ProjectAccordion = ({ projectId }: { projectId: string }) => {
             <Title order={3}>
               <Trans>Conversations</Trans>
             </Title>
+
+            <Tooltip label={t`Upload conversations`}>
+              <div>
+                <UploadConversationDropzone projectId={projectId}>
+                  <Icons.Plus stroke="black" fill="black" />
+                </UploadConversationDropzone>
+              </div>
+            </Tooltip>
           </Group>
         </Accordion.Control>
 
@@ -342,25 +351,25 @@ const ProjectAccordion = ({ projectId }: { projectId: string }) => {
 };
 
 type ProjectSidebarButtonProps = {
-  icon?: React.ReactNode
-} & UnstyledButtonProps
+  icon?: React.ReactNode;
+} & UnstyledButtonProps;
 
-export const ProjectSidebarButton = ({ children, icon, ...props }: PropsWithChildren<ProjectSidebarButtonProps>) => {
-  return <UnstyledButton
-    component="a"
-    className="shadow-md"
-    {...props}
-  >
-    <Group className="w-full justify-between px-4 py-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
-      <Text size="lg" className="font-semibold">
-        {children}
-      </Text>
-      {
-        !!icon && icon
-      }
-    </Group>
-  </UnstyledButton>
-}
+export const ProjectSidebarButton = ({
+  children,
+  icon,
+  ...props
+}: PropsWithChildren<ProjectSidebarButtonProps>) => {
+  return (
+    <UnstyledButton component="a" className="shadow-md" {...props}>
+      <Group className="w-full justify-between px-4 py-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+        <Text size="lg" className="font-semibold">
+          {children}
+        </Text>
+        {!!icon && icon}
+      </Group>
+    </UnstyledButton>
+  );
+};
 
 export const ProjectSidebar = () => {
   const projectId = useParams().projectId;
@@ -408,14 +417,13 @@ export const ProjectSidebar = () => {
           Analysis
         </ProjectSidebarButton>
       </Link>
-      {
-        ENABLE_EXPERIMENTAL_FEATURES &&
+      {ENABLE_EXPERIMENTAL_FEATURES && (
         <Link to={`/projects/${projectId}/library`}>
           <ProjectSidebarButton icon={<Icons.LightBulb />}>
             Library
           </ProjectSidebarButton>
         </Link>
-      }
+      )}
       <ProjectAccordion projectId={projectId} />
     </Stack>
   );

@@ -19,6 +19,7 @@ import {
   getResourceById,
   getResourcesByProjectId,
   getTagsByProjectId,
+  initiateAndUploadConversationChunk,
   initiateConversation,
   requestProjectAnalysis,
   updateConversationById,
@@ -348,6 +349,20 @@ export const useConversationsByProjectId = (projectId: string) => {
 export const useUploadConversationChunk = () => {
   return useMutation({
     mutationFn: uploadConversationChunk,
+    retry: 10,
+  });
+};
+
+export const useUploadConversation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: initiateAndUploadConversationChunk,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["conversation"],
+      });
+      toast.success("Conversation(s) uploaded successfully");
+    },
     retry: 10,
   });
 };

@@ -1,3 +1,4 @@
+import { toast } from "@/components/Toaster";
 import { API_BASE_URL, USE_PARTICIPANT_ROUTER } from "@/config";
 import axios, {
   AxiosError,
@@ -218,6 +219,66 @@ export const uploadConversationChunk = async (payload: {
       },
     },
   );
+};
+
+export const initiateAndUploadConversationChunk = async (payload: {
+  projectId: string;
+  pin: string;
+  namePrefix: string;
+  tagIdList: string[];
+  chunks: Blob[];
+  timestamps: Date[];
+  email?: string;
+}) => {
+  const promises = [];
+  for (let i = 0; i < payload.chunks.length; i++) {
+    try {
+      toast(
+        `Uploading conversation '${(payload.chunks[i] as unknown as any).name}'`,
+      );
+    } catch (e) {
+      console.error(e);
+    }
+
+    let blob: Blob = payload.chunks[i];
+    let name = "";
+
+    if (payload.namePrefix) {
+      name = `${payload.namePrefix}`;
+    }
+
+    if (blob instanceof File) {
+      console.log("Blob is actually File");
+      name += blob.name;
+
+      const isxm4a = blob.type === "audio/x-m4a";
+      if (isxm4a) {
+        console.log("Converting xm4a to audio/m4a");
+        blob = new Blob([await blob.arrayBuffer()], { type: "audio/m4a" });
+      }
+    } else {
+      console.log("Blob is not a File");
+      name += `chunk-${i}`;
+    }
+
+    const conversation = await initiateConversation({
+      projectId: payload.projectId,
+      email: payload.email,
+      name: `${name}`,
+      pin: payload.pin,
+      tagIdList: payload.tagIdList,
+    });
+
+    promises.push(
+      uploadConversationChunk({
+        conversationId: conversation.id,
+        chunk: blob,
+        timestamp: payload.timestamps.at(i) ?? new Date(),
+      }),
+    );
+  }
+
+  return Promise.all(promises);
 };
 
 export const getConversationChunks = async (conversationId: string) => {

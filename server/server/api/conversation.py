@@ -226,10 +226,6 @@ async def delete_conversation(
     return conversation
 
 
-class PostConversationRequestBodySchema(BaseModel):
-    timestamp: datetime
-
-
 @ConversationRouter.post(
     "/{conversation_id}/upload-chunk", response_model=ConversationChunkSchema
 )

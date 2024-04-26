@@ -17,6 +17,8 @@ def get_mime_type_from_file_path(file_path: str) -> str:
         return "audio/webm"
     elif file_path.endswith(".opus"):
         return "audio/opus"
+    elif file_path.endswith(".m4a"):
+        return "audio/m4a"
     elif file_path.endswith(".mp4"):
         return "video/mp4"
     else:

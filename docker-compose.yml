@@ -46,7 +46,7 @@ services:
     command: /bin/sh /code/server/prod.sh
     environment:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
-      - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
     env_file:
       - ./server/.env
     volumes:
@@ -64,7 +64,7 @@ services:
     command: /bin/sh /code/server/prod-worker.sh
     environment:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
-      - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
     env_file:
       - ./server/.env
     volumes:

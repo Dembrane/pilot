@@ -48,12 +48,10 @@ const Chunk = ({ chunk }: { chunk: TConversationChunk }) => {
     >
       {chunk.processing_error ? (
         <p className="text-red-500">Transcription error</p>
-      ) : chunk.is_processed ? (
-        <Stack>
-          <Text>{chunk.transcript}</Text>
-        </Stack>
-      ) : (
+      ) : chunk.processing_status === "PROCESSING" ? (
         <LoadingOverlay visible />
+      ) : (
+        <Text>{chunk.transcript}</Text>
       )}
     </BaseMessage>
   );

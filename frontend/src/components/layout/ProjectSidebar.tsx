@@ -21,12 +21,15 @@ import {
   Tooltip,
   Anchor,
   Pill,
+  UnstyledButton,
+  UnstyledButtonProps,
 } from "@mantine/core";
 import { PropsWithChildren } from "react";
 import { Link, useParams } from "react-router-dom";
 import { UploadResourceDropzone } from "../resource/UploadResourceDropzone";
 import { apiCommonConfig } from "@/lib/api";
 import { IconExternalLink } from "@tabler/icons-react";
+import { ENABLE_EXPERIMENTAL_FEATURES } from "@/config";
 
 const ResourceAccordionLabelIcon = ({ resource }: { resource: TResource }) => {
   if (resource.is_processed) {
@@ -338,6 +341,27 @@ const ProjectAccordion = ({ projectId }: { projectId: string }) => {
   );
 };
 
+type ProjectSidebarButtonProps = {
+  icon?: React.ReactNode
+} & UnstyledButtonProps
+
+export const ProjectSidebarButton = ({ children, icon, ...props }: PropsWithChildren<ProjectSidebarButtonProps>) => {
+  return <UnstyledButton
+    component="a"
+    className="shadow-md"
+    {...props}
+  >
+    <Group className="w-full justify-between px-4 py-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+      <Text size="lg" className="font-semibold">
+        {children}
+      </Text>
+      {
+        !!icon && icon
+      }
+    </Group>
+  </UnstyledButton>
+}
+
 export const ProjectSidebar = () => {
   const projectId = useParams().projectId;
 
@@ -380,16 +404,18 @@ export const ProjectSidebar = () => {
         </Tooltip>
       </Group>
       <Link to="#">
-        <Button
-          fullWidth
-          component="a"
-          // color="gray.2"
-          autoContrast
-          rightSection={<Icons.Stars className="fill-white" />}
-        >
-          <Trans>Ask AI</Trans>
-        </Button>
+        <ProjectSidebarButton icon={<Icons.Stars className="fill-black" />}>
+          Analysis
+        </ProjectSidebarButton>
       </Link>
+      {
+        ENABLE_EXPERIMENTAL_FEATURES &&
+        <Link to={`/projects/${projectId}/library`}>
+          <ProjectSidebarButton icon={<Icons.LightBulb />}>
+            Library
+          </ProjectSidebarButton>
+        </Link>
+      }
       <ProjectAccordion projectId={projectId} />
     </Stack>
   );

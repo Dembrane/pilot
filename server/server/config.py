@@ -40,8 +40,14 @@ logger.debug(f"FAISS_INDEX_PATH: {FAISS_INDEX_PATH}")
 DATABASE_URL = os.environ.get("DATABASE_URL")
 assert DATABASE_URL, "DATABASE_URL environment variable is not set"
 
+RABBITMQ_URL = os.environ.get("RABBITMQ_URL")
+assert RABBITMQ_URL, "RABBITMQ_URL environment variable is not set"
+
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is not set"
 
 SERVE_API_DOCS = os.environ.get("SERVE_API_DOCS", "false").lower() in ["true", "1"]
 logging.debug(f"SERVE_API_DOCS: {SERVE_API_DOCS}")
+
+DISABLE_SENTRY = os.environ.get("DISABLE_SENTRY", "false").lower() in ["true", "1"]
+logging.debug(f"DISABLE_SENTRY: {DISABLE_SENTRY}")

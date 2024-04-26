@@ -1,3 +1,4 @@
+import { ENABLE_EXPERIMENTAL_FEATURES } from "@/config";
 import { useConversationById, useResourceById } from "@/lib/query";
 import { Trans } from "@lingui/macro";
 import {
@@ -25,8 +26,8 @@ export const ProjectConversationLayout = () => {
     if (location.pathname.includes(`/transcript`)) {
       return "transcript";
     }
-    if (location.pathname.includes(`/chat`)) {
-      return "chat";
+    if (location.pathname.includes(`/analysis`)) {
+      return "analysis";
     }
     return "overview";
   };
@@ -59,7 +60,7 @@ export const ProjectConversationLayout = () => {
           <Tabs.Tab value="transcript">
             <Trans>Transcript</Trans>
           </Tabs.Tab>
-          <Tabs.Tab value="chat" disabled>
+          <Tabs.Tab value="analysis" disabled={!ENABLE_EXPERIMENTAL_FEATURES}>
             <Trans>Analysis</Trans>
           </Tabs.Tab>
         </Tabs.List>

@@ -2,6 +2,8 @@ from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
 
+from server.database import ProcessingStatusEnum
+
 
 class SessionSchema(BaseModel):
     id: int
@@ -73,8 +75,10 @@ class ConversationChunkSchema(BaseModel):
     updated_at: datetime
     conversation_id: str
 
-    is_processed: bool
+    processing_status: ProcessingStatusEnum
     processing_error: Optional[str] = None
+    processing_started_at: Optional[datetime] = None
+    processing_completed_at: Optional[datetime] = None
 
     transcript: Optional[str] = None
     timestamp: datetime
@@ -99,3 +103,49 @@ class ChatSchema(BaseModel):
     resources: Optional[list[ResourceSchema]] = []
     conversations: Optional[list[ConversationSchema]] = []
     messages: Optional[list[ChatMessageSchema]] = []
+
+
+class QuoteSchema(BaseModel):
+    id: str
+    created_at: datetime
+    updated_at: datetime
+
+    project_analysis_run_id: str
+    conversation_id: str
+
+    conversation_chunks: Optional[List[ConversationChunkSchema]] = []
+
+    text: str
+
+
+class InsightSchema(BaseModel):
+    id: str
+    created_at: datetime
+    updated_at: datetime
+
+    project_analysis_run_id: str
+
+    title: str
+    summary: Optional[str] = None
+
+    quotes: Optional[List[QuoteSchema]] = []
+
+
+class ProjectAnalysisRunSchema(BaseModel):
+    id: str
+    created_at: datetime
+    updated_at: datetime
+
+    project_id: str
+
+    quotes: Optional[List[QuoteSchema]] = []
+
+    processing_status: ProcessingStatusEnum
+    processing_error: Optional[str] = None
+    processing_started_at: Optional[datetime] = None
+    processing_completed_at: Optional[datetime] = None
+
+
+class TaskSchema(BaseModel):
+    id: str
+    status: str

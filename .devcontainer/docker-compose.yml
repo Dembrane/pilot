@@ -1,16 +1,7 @@
 version: '3.8'
 services:
-  devcontainer:
-    image: mcr.microsoft.com/devcontainers/base:ubuntu
-    environment:
-      - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
-    volumes:
-      - ../..:/workspaces:cached
-    network_mode: service:postgres
-    command: sleep infinity
-
   postgres:
-    image: postgres:15
+    image: pgvector/pgvector:0.6.2-pg16
     restart: unless-stopped
     environment:
       POSTGRES_DB: dembrane
@@ -19,6 +10,15 @@ services:
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
 
+  rabbitmq:
+    image: rabbitmq:3.13
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=dembrane
+      - RABBITMQ_DEFAULT_PASS=dembrane
+    volumes:
+      - ./rabbitmq_data:/var/lib/rabbitmq
+      
   pgadmin:
     image: dpage/pgadmin4
     restart: unless-stopped
@@ -29,3 +29,19 @@ services:
       PGADMIN_DEFAULT_PASSWORD: password
     volumes:
       - ./pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+
+  devcontainer:
+    image: mcr.microsoft.com/devcontainers/base:ubuntu
+    environment:
+      - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
+    volumes:
+      - ../..:/workspaces:cached
+    network_mode: service:postgres
+    command: sleep infinity
+    depends_on:
+      - rabbitmq
+      - postgres
+
+

@@ -1,54 +1,6 @@
 version: '3'
 
 services:
-
-  dashboard-frontend:
-    build: 
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        - VITE_API_BASE_URL=https://api.findcommonground.app/api
-        - VITE_PARTICIPANT_BASE_URL=https://participant.findcommonground.app
-        - VITE_USE_PARTICIPANT_ROUTER=0
-    restart: unless-stopped
-  
-  participant-frontend:
-    build: 
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        - VITE_API_BASE_URL=https://api.findcommonground.app/api
-        - VITE_PARTICIPANT_BASE_URL=https://participant.findcommonground.app
-        - VITE_USE_PARTICIPANT_ROUTER=1
-    restart: unless-stopped
-    networks:
-      - default
-
-  api-server:
-    build: ./server
-    restart: unless-stopped
-    command: /bin/sh /code/server/prod.sh
-    environment:
-      - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
-    env_file:
-      - ./server/.env
-    volumes:
-      - ./server:/code/server
-    networks:
-      - default
-  
-  postgres:
-    image: postgres:15
-    restart: unless-stopped
-    networks:
-      - default
-    environment:
-      POSTGRES_DB: dembrane
-      POSTGRES_USER: dembrane
-      POSTGRES_PASSWORD: dembrane
-    volumes:
-      - ./postgres_data:/var/lib/postgresql/data
-
   caddy:
     image: caddy:2
     restart: unless-stopped
@@ -64,6 +16,92 @@ services:
       - ./caddy_config:/config 
     networks:
       - default
+
+  postgres:
+    image: pgvector/pgvector:0.6.2-pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dembrane
+      POSTGRES_USER: dembrane
+      POSTGRES_PASSWORD: dembrane
+    networks:
+      - default
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3.13
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=dembrane
+      - RABBITMQ_DEFAULT_PASS=dembrane
+    networks:
+      - default
+    volumes:
+      - ./rabbitmq_data:/var/lib/rabbitmq
+
+  api-server:
+    build: ./server
+    restart: unless-stopped
+    command: /bin/sh /code/server/prod.sh
+    environment:
+      - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
+      - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672/
+    env_file:
+      - ./server/.env
+    volumes:
+      - ./server:/code/server
+    networks:
+      - default
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  worker:
+    build: 
+      context: ./server
+      dockerfile: Dockerfile
+    command: /bin/sh /code/server/prod-worker.sh
+    environment:
+      - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
+      - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672/
+    env_file:
+      - ./server/.env
+    volumes:
+      - ./server:/code/server
+    networks:
+      - default
+    depends_on:
+      - api-server
+    
+    
+
+  dashboard-frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=https://api.findcommonground.app/api
+        - VITE_PARTICIPANT_BASE_URL=https://participant.findcommonground.app
+        - VITE_USE_PARTICIPANT_ROUTER=0
+    restart: unless-stopped
+    depends_on:
+      - api-server
+  
+  participant-frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=https://api.findcommonground.app/api
+        - VITE_PARTICIPANT_BASE_URL=https://participant.findcommonground.app
+        - VITE_USE_PARTICIPANT_ROUTER=1
+    restart: unless-stopped
+    networks:
+      - default
+    depends_on:
+      - dashboard-frontend
+
 
 networks:
   default:

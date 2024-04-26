@@ -1,6 +1,6 @@
 import { Icons } from "@/icons";
 import { t } from "@lingui/macro";
-import { PaperProps, Text, Paper, Group, Box, Stack } from "@mantine/core";
+import { PaperProps, Text, Paper, Group, Box, Stack, LoadingOverlay } from "@mantine/core";
 import React, { PropsWithChildren } from "react";
 
 export const BaseMessage = (
@@ -10,6 +10,7 @@ export const BaseMessage = (
     rightSection?: React.ReactNode;
     bottomSection?: React.ReactNode;
     paperProps?: PaperProps;
+    loading?: boolean;
   }>,
 ) => {
   return (
@@ -33,6 +34,7 @@ export const BaseMessage = (
               {props.rightSection}
             </Group>
             <div>
+              <LoadingOverlay visible={props.loading} />
               {props.text && <Text size="sm">{props.text}</Text>}
               {props.children}
             </div>

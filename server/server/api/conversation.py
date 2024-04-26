@@ -5,16 +5,18 @@ from typing import Annotated, Any, AsyncGenerator, List, Optional
 from fastapi import APIRouter, Request, UploadFile, Form
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from sqlalchemy.orm import joinedload
 from server.database import (
     ConversationModel,
     ConversationChunkModel,
-    ProjectTagModel,
     DependencyInjectDatabase,
+    ProjectAnalysisRunModel,
+    QuoteModel,
 )
 from server.schemas import (
     ConversationChunkSchema,
     ConversationSchema,
-    ProjectTagSchema,
+    QuoteSchema,
 )
 
 from server.api.session import DependencyRequireSession
@@ -22,12 +24,9 @@ from server.api.exceptions import (
     ConversationNotFoundException,
 )
 from server.config import AUDIO_CHUNKS_DIR
-from server.util import generate_uuid, get_mime_type_from_file_path
-from server.process_conversation_chunk import (
-    ProcessConversationChunkTaskQueueItem,
-    process_conversation_chunk_queue,
-)
-from sqlalchemy.orm import joinedload
+from server.audio_utils import get_mime_type_from_file_path
+from server.tasks import process_conversation_chunk
+from server.utils import generate_uuid
 
 logger = getLogger("api.conversation")
 ConversationRouter = APIRouter(tags=["conversation"])
@@ -253,6 +252,7 @@ async def upload_conversation_chunk(
     file_path = file_path.split(";")[0]
 
     with open(file_path, "wb") as f:
+        logger.info(f"Saving the file to {file_path}")
         f.write(chunk.file.read())
 
     chunk = ConversationChunkModel(
@@ -265,10 +265,47 @@ async def upload_conversation_chunk(
     db.add(chunk)
     db.commit()
 
-    process_conversation_chunk_queue.add_task(
-        ProcessConversationChunkTaskQueueItem(chunk=chunk)
-    )
-
-    logger.info(f"Saving the file to {file_path}")
+    logger.info(f"Add to processing queue: ConversationChunk@{chunk.id}")
+    process_conversation_chunk.delay(chunk.id)
 
     return chunk
+
+
+@ConversationRouter.get("/{conversation_id}/quotes", response_model=List[QuoteSchema])
+async def get_conversation_quotes(
+    conversation_id: str,
+    db: DependencyInjectDatabase,
+    session: DependencyRequireSession,
+) -> List[QuoteModel]:
+    conversation = await get_conversation(conversation_id, db)
+
+    project_id = conversation.project_id
+
+    latest_project_analysis = (
+        db.query(ProjectAnalysisRunModel)
+        .filter(ProjectAnalysisRunModel.project_id == project_id)
+        .order_by(ProjectAnalysisRunModel.created_at.desc())
+        .first()
+    )
+
+    if not latest_project_analysis:
+        return []
+
+    quotes = (
+        db.query(QuoteModel)
+        .options(joinedload(QuoteModel.conversation_chunks))
+        .filter(
+            QuoteModel.conversation_id == conversation_id,
+            QuoteModel.project_analysis_run_id == latest_project_analysis.id,
+        )
+        .order_by(QuoteModel.created_at.asc())
+        .all()
+    )
+
+    quotes.sort(
+        key=lambda quote: quote.conversation_chunks[0].timestamp
+        if quote.conversation_chunks
+        else quote.created_at()
+    )
+
+    return quotes

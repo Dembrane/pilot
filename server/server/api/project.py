@@ -1,4 +1,5 @@
 import asyncio
+from http import HTTPStatus
 from logging import getLogger
 import os
 import zipfile
@@ -8,16 +9,21 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from server.database import (
     ConversationModel,
+    InsightModel,
+    ProjectAnalysisRunModel,
     ProjectModel,
+    QuoteModel,
     ResourceModel,
     DependencyInjectDatabase,
     ProjectTagModel,
 )
 from server.schemas import (
     ConversationSchema,
+    InsightSchema,
     ProjectSchema,
     ProjectTagSchema,
     ResourceSchema,
+    TaskSchema,
 )
 from server.api.exceptions import (
     ConversationInvalidPinException,
@@ -30,13 +36,15 @@ from server.api.exceptions import (
     InternalServerException,
 )
 from server.config import AUDIO_CHUNKS_DIR, RESOURCE_UPLOADS_DIR
-from server.process_resource import (
-    ProcessResourceTaskQueueItem,
-    process_resource_queue,
-)
+
+# from server.process_resource import (
+#     ProcessResourceTaskQueueItem,
+#     process_resource_queue,
+# )
 from server.api.session import DependencyRequireSession
 from server.api.conversation import get_conversation, get_conversation_chunks
-from server.util import generate_4_digit_pin, generate_6_digit_pin, generate_uuid
+from server.tasks import process_project
+from server.utils import generate_4_digit_pin, generate_6_digit_pin, generate_uuid
 from sqlalchemy.orm import Session, joinedload
 
 
@@ -144,11 +152,18 @@ async def generate_transcript_file(conversation_id: str, db: Session) -> Optiona
 
     conversation = await get_conversation(conversation_id, db)
     email = conversation.participant_email
+    name = conversation.participant_name
+
+    name_for_file = ""
+    if name:
+        name_for_file += name.replace(" ", "_")
+    if email:
+        name_for_file += f"_{email}"
 
     conversation_dir = os.path.join(AUDIO_CHUNKS_DIR, conversation_id)
 
     os.makedirs(conversation_dir, exist_ok=True)
-    file_path = os.path.join(conversation_dir, email + "-transcript.md")
+    file_path = os.path.join(conversation_dir, name_for_file + "-transcript.md")
 
     with open(file_path, "w") as file:
         for chunk in chunks:
@@ -184,7 +199,7 @@ async def get_project_transcripts(
         )
 
     filename_futures = [
-        generate_transcript_file(conversation.id) for conversation in conversations
+        generate_transcript_file(conversation.id, db) for conversation in conversations
     ]
     filenames = await asyncio.gather(*filename_futures)
 
@@ -424,9 +439,9 @@ async def upload_resources(
                 db.commit()
                 resources.append(resource)
 
-                process_resource_queue.add_task(
-                    ProcessResourceTaskQueueItem(resource=resource)
-                )
+                # process_resource_queue.add_task(
+                #     ProcessResourceTaskQueueItem(resource=resource)
+                # )
 
             except Exception as e:
                 logger.error(f"Failed to save the file: {e}")
@@ -519,3 +534,62 @@ async def delete_project_tag(
     db.commit()
 
     return tag
+
+
+@ProjectRouter.post(
+    "/{project_id}/request-analysis",
+    response_model=TaskSchema,
+    status_code=HTTPStatus.ACCEPTED,
+)
+async def request_project_analysis(
+    project_id: str,
+    session: DependencyRequireSession,
+    db: DependencyInjectDatabase,
+):
+    project = await get_project(
+        db=db,
+        session=session,
+        project_id=project_id,
+    )
+
+    task = process_project.si(project.id).delay()
+
+    logger.info(f"Task {task.id} created for project {project.id}")
+
+    # TODO: add a result backend and task ID checks
+    return TaskSchema(
+        id=task.id,
+        status="PENDING",
+    )
+
+
+def get_latest_project_analysis_run(db: DependencyInjectDatabase, project_id: str):
+    return (
+        db.query(ProjectAnalysisRunModel)
+        .filter(ProjectAnalysisRunModel.project_id == project_id)
+        .order_by(ProjectAnalysisRunModel.created_at.desc())
+        .first()
+    )
+
+
+@ProjectRouter.get("/{project_id}/insights", response_model=List[InsightSchema])
+async def get_project_insights(
+    project_id: str,
+    db: DependencyInjectDatabase,
+    session: DependencyRequireSession,
+) -> List[InsightModel]:
+    project = await get_project(project_id, session, db)
+
+    latest_project_analysis = get_latest_project_analysis_run(db, project.id)
+
+    if not latest_project_analysis:
+        return []
+
+    insights = (
+        db.query(InsightModel)
+        .options(joinedload(InsightModel.quotes))
+        .filter(InsightModel.project_analysis_run_id == latest_project_analysis.id)
+        .all()
+    )
+
+    return insights

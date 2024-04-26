@@ -237,6 +237,45 @@ const Signal = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+const LightBulb = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={22}
+    height={22}
+    fill="none"
+    {...props}
+  >
+    <g fill="#000" clipPath="url(#a)">
+      <path d="M18.26 21.08H3.774A2.85 2.85 0 0 1 .917 18.23V3.765A2.85 2.85 0 0 1 3.774.915H18.26c1.547 0 2.824 1.274 2.824 2.85v14.463c0 1.579-1.277 2.853-2.824 2.853M3.774 2.928a.83.83 0 0 0-.84.839v14.462c0 .47.37.84.84.84H18.26a.83.83 0 0 0 .84-.839V3.765c-.033-.47-.402-.839-.84-.839z" />
+      <path d="M11 6a3.497 3.497 0 0 0-2 6.37v1.13c0 .275.225.5.5.5h3c.275 0 .5-.225.5-.5v-1.13A3.498 3.498 0 0 0 11 6m-1.5 9.5c0 .275.225.5.5.5h2c.275 0 .5-.225.5-.5V15h-3z" />
+    </g>
+    <defs>
+      <clipPath id="a">
+        <path fill="#fff" d="M0 0h22v22H0z" />
+      </clipPath>
+    </defs>
+  </svg>
+);
+
+const Sidebar = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={20}
+    height={20}
+    fill="none"
+    {...props}
+  >
+    <path
+      fill="#000"
+      fillRule="evenodd"
+      stroke="#000"
+      strokeWidth={0.5}
+      d="M3.431 19.163h13.17c1.405 0 2.566-1.158 2.566-2.593V3.423c0-1.434-1.16-2.593-2.567-2.593H3.431A2.59 2.59 0 0 0 .834 3.422V16.57a2.593 2.593 0 0 0 2.597 2.592ZM3.138 2.716a.8.8 0 0 1 .293-.056h3.626v14.673H3.43a.756.756 0 0 1-.764-.763V3.423a.76.76 0 0 1 .47-.707Zm6.169 14.617H16.6a.756.756 0 0 0 .764-.762V3.42c-.03-.426-.366-.762-.764-.762H9.307z"
+      clipRule="evenodd"
+    />
+  </svg>
+);
+
 export const Icons = {
   Home,
   Calendar,
@@ -254,4 +293,6 @@ export const Icons = {
   Diamond,
   Dots,
   Pencil,
+  LightBulb,
+  Sidebar
 };

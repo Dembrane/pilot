@@ -16,8 +16,10 @@ import { ProjectConversationOverviewRoute } from "./routes/project/ProjectConver
 import { ProjectConversationTranscript } from "./routes/project/ProjectConversationTranscript";
 import { ProjectConversationAnalysis } from "./routes/project/ProjectConversationAnalysis";
 import { NotFoundRoute } from "./routes/404";
-import { SUPPORTED_LANGUAGES } from "./config";
+import { ENABLE_EXPERIMENTAL_FEATURES, SUPPORTED_LANGUAGES } from "./config";
 import { i18n } from "@lingui/core";
+import { ProjectLibrary } from "./routes/project/ProjectLibrary";
+import { ProjectLibraryInsight } from "./routes/project/ProjectLibraryInsight";
 
 // export const _router = createBrowserRouter([
 //   {
@@ -114,6 +116,18 @@ export const mainRouter = createBrowserRouter([
             path: "chat",
             element: <></>,
           },
+          ...(ENABLE_EXPERIMENTAL_FEATURES
+            ? [
+                {
+                  path: "library",
+                  element: <ProjectLibrary />,
+                },
+                {
+                  path: "library/insights/:insightId",
+                  element: <ProjectLibraryInsight />,
+                },
+              ]
+            : []),
           {
             path: "resources/:resourceId",
             element: <ProjectResourceLayout />,
@@ -146,10 +160,14 @@ export const mainRouter = createBrowserRouter([
                 path: "transcript",
                 element: <ProjectConversationTranscript />,
               },
-              // {
-              //   path: "chat",
-              //   element: <ProjectConversationAnalysis />,
-              // },
+              ...(ENABLE_EXPERIMENTAL_FEATURES
+                ? [
+                    {
+                      path: "analysis",
+                      element: <ProjectConversationAnalysis />,
+                    },
+                  ]
+                : []),
             ],
           },
           {

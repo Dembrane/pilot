@@ -19,7 +19,7 @@
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "cd server && pip install -r requirements.txt && cd ../frontend && yarn",
+	"postCreateCommand": "/bin/sh setup.sh",
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -27,7 +27,8 @@
 				"esbenp.prettier-vscode",
 				"bradlc.vscode-tailwindcss",
 				"ms-python.python",
-				"charliermarsh.ruff"
+				"charliermarsh.ruff",
+				"jebbs.plantuml"
 			]
 		}
 	},
@@ -36,7 +37,7 @@
 			"label": "frontend"
 		},
 		"5174": {
-			"label": "frontend-pp"
+			"label": "frontend-participant"
 		},
 		"8000": {
 			"label": "backend"

@@ -15,42 +15,45 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from server.config import (
     FAISS_INDEX_PATH,
+    DISABLE_SENTRY,
     SERVE_API_DOCS,
 )
 from server.api.api import api
-from server.vectorstore import vectorstore
-from server.process_conversation_chunk import seed_process_conversation_chunk_queue
-from server.process_resource import (
-    seed_process_resource_queue,
-)
+
+# from server.vectorstore import vectorstore
+# from server.process_resource import (
+#     seed_process_resource_queue,
+# )
 import sentry_sdk
 
-sentry_sdk.init(
-    dsn="https://0037fa05e4f0e472dffaecbb7d25be3a@o4507107162652672.ingest.de.sentry.io/4507107472703568",
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    traces_sample_rate=1.0,
-    # Set profiles_sample_rate to 1.0 to profile 100%
-    # of sampled transactions.
-    # We recommend adjusting this value in production.
-    profiles_sample_rate=1.0,
-    enable_tracing=True,
-)
-
-
 logger = getLogger("server")
+
+if not DISABLE_SENTRY:
+    logger.info("initializing sentry")
+    sentry_sdk.init(
+        dsn="https://0037fa05e4f0e472dffaecbb7d25be3a@o4507107162652672.ingest.de.sentry.io/4507107472703568",
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        traces_sample_rate=1.0,
+        # Set profiles_sample_rate to 1.0 to profile 100%
+        # of sampled transactions.
+        # We recommend adjusting this value in production.
+        profiles_sample_rate=1.0,
+        enable_tracing=True,
+    )
+else:
+    logger.info("sentry is disabled by DISABLE_SENTRY")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # startup
     logger.info("starting server")
-    seed_process_resource_queue()
-    seed_process_conversation_chunk_queue()
+    # seed_process_resource_queue()
     yield
     # shutdown
     logger.info("shutting down server")
-    vectorstore.save_local(FAISS_INDEX_PATH)
+    # vectorstore.save_local(FAISS_INDEX_PATH)
 
 
 docs_url = "/docs" if SERVE_API_DOCS else None

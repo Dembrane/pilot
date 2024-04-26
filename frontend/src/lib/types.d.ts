@@ -32,6 +32,28 @@ type TConversation = {
   tags: TProjectTag[];
 };
 
+type TProcessingStatus = "PENDING" | "PROCESSING" | "ERROR" | "DONE";
+
+type TQuote = {
+  id: string;
+  created_at: Date;
+  updated_at: Date;
+  project_analysis_run_id: string;
+  conversation_id: string;
+  conversation_chunks: TConversationChunk[];
+  text: string;
+};
+
+type TInsight = {
+  id: string;
+  created_at: Date;
+  updated_at: Date;
+  project_analysis_run_id: string;
+  title: string;
+  summary: string;
+  quotes: TQuote[];
+};
+
 type TConversationChunk = {
   id: string;
   created_at: Date;
@@ -41,8 +63,10 @@ type TConversationChunk = {
   transcript: string;
   timestamp: Date;
 
-  is_processed: boolean;
+  processing_status?: TProcessingStatus;
   processing_error?: string;
+  processing_started_at?: Date;
+  processing_completed_at?: Date;
 };
 
 type TProject = {

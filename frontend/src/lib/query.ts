@@ -11,13 +11,16 @@ import {
   getAllSessions,
   getConversationById,
   getConversationChunks,
+  getConversationQuotes,
   getConversationsByProjectId,
   getCurrentSession,
   getProjectById,
+  getProjectInsights,
   getResourceById,
   getResourcesByProjectId,
   getTagsByProjectId,
   initiateConversation,
+  requestProjectAnalysis,
   updateConversationById,
   updateProjectById,
   updateResourceById,
@@ -167,6 +170,13 @@ export const useProjectById = (projectId: string) => {
   });
 };
 
+export const useProjectInsights = (projectId: string) => {
+  return useQuery({
+    queryKey: ["project", projectId, "insights"],
+    queryFn: () => getProjectInsights(projectId),
+  });
+};
+
 export const useUpdateProjectByIdMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -276,6 +286,13 @@ export const useConversationById = (conversationId: string) => {
   });
 };
 
+export const useConversationQuotes = (conversationId: string) => {
+  return useQuery({
+    queryKey: ["conversation", conversationId, "quotes"],
+    queryFn: () => getConversationQuotes(conversationId),
+  });
+};
+
 export const useUpdateConversationByIdMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -339,7 +356,7 @@ export const useConversationChunks = (conversationId: string) => {
   return useQuery({
     queryKey: ["conversation", conversationId, "chunks"],
     queryFn: () => getConversationChunks(conversationId),
-    refetchInterval: 3000,
+    refetchInterval: 5000,
   });
 };
 
@@ -373,6 +390,15 @@ export const useProjectTags = (projectId: string) => {
   return useQuery({
     queryKey: ["project", projectId, "tags"],
     queryFn: () => getTagsByProjectId(projectId),
+  });
+};
+
+export const useRequestProjectAnalysisMutation = () => {
+  return useMutation({
+    mutationFn: requestProjectAnalysis,
+    onSuccess: () => {
+      toast.success("Analysis requested successfully");
+    },
   });
 };
 

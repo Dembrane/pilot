@@ -1,14 +1,32 @@
 api.findcommonground.app {
     reverse_proxy api-server:8000
+    header Strict-Transport-Security "max-age=300"
+    header X-Frame-Options "SAMEORIGIN"
+    header X-Content-Type-Options "nosniff"
+    header Content-Security-Policy "default-src 'none'; script-src 'none'; style-src 'none'; img-src 'none'; connect-src 'self';"
+    header Referrer-Policy "no-referrer-when-downgrade"
+    header -Server
 }
 
 admin.findcommonground.app {
+    reverse_proxy dashboard-frontend:5173
     basicauth {
 		dembrane $2a$14$CUBGav0EbkCzwTlffbvyU.KdGgZ2SVN4tEAuLOfn1/N6dRJKAhDxm
 	}
-    reverse_proxy dashboard-frontend:5173
+    header Strict-Transport-Security "max-age=300"
+    header X-Frame-Options "SAMEORIGIN"
+    header X-Content-Type-Options "nosniff"
+    header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' browser.sentry-cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' api.findcommonground.app sentry.io;"
+    header Referrer-Policy "no-referrer-when-downgrade"
+    header -Server
 }
 
 participant.findcommonground.app {
     reverse_proxy participant-frontend:5173
+    header Strict-Transport-Security "max-age=300"
+    header X-Frame-Options "SAMEORIGIN"
+    header X-Content-Type-Options "nosniff"
+    header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' browser.sentry-cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' api.findcommonground.app sentry.io;"
+    header Referrer-Policy "no-referrer-when-downgrade"
+    header -Server
 }

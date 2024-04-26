@@ -104,6 +104,10 @@ export const getProjectById = async (projectId: string) => {
   return api.get<unknown, TProject>(`/projects/${projectId}`);
 };
 
+export const getProjectInsights = async (projectId: string) => {
+  return api.get<unknown, TInsight[]>(`/projects/${projectId}/insights`);
+};
+
 export const getProjectTranscriptsLink = (projectId: string) =>
   `${apiCommonConfig.baseURL}/projects/${projectId}/transcripts`;
 
@@ -164,6 +168,10 @@ export const getConversationById = async (conversationId: string) => {
   return apiNoAuth.get<unknown, TConversation>(
     `/conversations/${conversationId}`,
   );
+};
+
+export const getConversationQuotes = async (conversationId: string) => {
+  return api.get<unknown, TQuote[]>(`/conversations/${conversationId}/quotes`);
 };
 
 export const updateConversationById = async (payload: {
@@ -242,4 +250,12 @@ export const createProjectTag = async (payload: {
   return api.post<unknown, TProjectTag>(`/projects/${payload.projectId}/tag`, {
     text: payload.text,
   });
+};
+
+export const requestProjectAnalysis = async (payload: {
+  projectId: string;
+}) => {
+  return api.post<unknown, unknown>(
+    `/projects/${payload.projectId}/request-analysis`,
+  );
 };

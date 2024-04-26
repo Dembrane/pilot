@@ -12,7 +12,7 @@ from server.api.exceptions import (
     ResourceInvalidFileFormatException,
     ResourceNotFoundException,
 )
-from server.util import iter_file_content
+from server.utils import iter_file_content
 
 logger = getLogger("api.resource")
 

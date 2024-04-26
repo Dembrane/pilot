@@ -1,10 +1,13 @@
 from datetime import datetime, timezone
 from enum import Enum
+from logging import getLogger
 from typing import List, Optional, Any, Generator, Annotated
 from fastapi import Depends
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     Column,
     ForeignKey,
+    LargeBinary,
     Table,
     TypeDecorator,
     create_engine,
@@ -24,10 +27,13 @@ from sqlalchemy.orm import (
     declarative_base,
     Session as _Session,
 )
+from sqlalchemy.dialects import postgresql
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from server.config import DATABASE_URL
+from server.embedding import EMBEDDING_DIM
 
+logger = getLogger("database")
 
 # Create the engine and connect to the SQLite database file
 engine = create_engine(DATABASE_URL)
@@ -35,6 +41,8 @@ engine = create_engine(DATABASE_URL)
 # Create a session factory
 session_factory = sessionmaker(bind=engine)
 Session = scoped_session(session_factory)
+# Alias
+DatabaseSession = Session
 
 # Define your models as subclasses of the base class
 Base: Any = declarative_base()
@@ -73,6 +81,39 @@ class DateTime(TypeDecorator[_DateTime]):
             return value.replace(tzinfo=timezone.utc)
 
         return value.astimezone(timezone.utc) if value else None
+
+
+class CeleryTaskSetMetaModel(Base):
+    __tablename__ = "celery_tasksetmeta"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    taskset_id: Mapped[str] = mapped_column(String(155), nullable=True, unique=True)
+    result: Mapped[bytes] = mapped_column(LargeBinary, nullable=True)
+    date_done: Mapped[datetime] = mapped_column(postgresql.TIMESTAMP(), nullable=True)
+
+
+class CeleryTaskMetaModel(Base):
+    __tablename__ = "celery_taskmeta"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    task_id: Mapped[str] = mapped_column(String(155), unique=True, nullable=True)
+    status: Mapped[str] = mapped_column(String(50), nullable=True)
+    result: Mapped[bytes] = mapped_column(LargeBinary, nullable=True)
+    date_done: Mapped[datetime] = mapped_column(postgresql.TIMESTAMP(), nullable=True)
+    traceback: Mapped[str] = mapped_column(Text, nullable=True)
+    name: Mapped[str] = mapped_column(String(155), nullable=True)
+    args: Mapped[bytes] = mapped_column(LargeBinary, nullable=True)
+    kwargs: Mapped[bytes] = mapped_column(LargeBinary, nullable=True)
+    worker: Mapped[str] = mapped_column(String(155), nullable=True)
+    retries: Mapped[int] = mapped_column(Integer, nullable=True)
+    queue: Mapped[str] = mapped_column(String(155), nullable=True)
+
+
+class ProcessingStatusEnum(Enum):
+    PENDING = "PENDING"
+    PROCESSING = "PROCESSING"
+    DONE = "DONE"
+    ERROR = "ERROR"
 
 
 class SessionModel(Base):
@@ -139,6 +180,12 @@ class ProjectModel(Base):
         cascade="all, delete-orphan",
     )
 
+    project_analysis_runs: Mapped[List["ProjectAnalysisRunModel"]] = relationship(
+        "ProjectAnalysisRunModel",
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+
     @staticmethod
     def belongs_to_session(project_id: str, session_id: int) -> bool:
         return (
@@ -149,6 +196,41 @@ class ProjectModel(Base):
             .first()
             is not None
         )
+
+
+class ProjectAnalysisRunModel(Base):
+    __tablename__ = "project_analysis_run"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    project_id: Mapped[str] = mapped_column(String, ForeignKey("project.id"))
+    project: Mapped["ProjectModel"] = relationship(
+        "ProjectModel", back_populates="project_analysis_runs"
+    )
+
+    quotes: Mapped[List["QuoteModel"]] = relationship(
+        "QuoteModel", back_populates="project_analysis_run"
+    )
+    insights: Mapped[List["InsightModel"]] = relationship(
+        "InsightModel", back_populates="project_analysis_run"
+    )
+
+    processing_status: Mapped[ProcessingStatusEnum] = mapped_column(
+        String, default="PENDING"
+    )
+    processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    processing_started_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
 
 project_conversation_tag_association_table = Table(
@@ -314,6 +396,17 @@ class ConversationModel(Base):
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     context: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    processing_status: Mapped[ProcessingStatusEnum] = mapped_column(
+        String, default="PENDING"
+    )
+    processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    processing_started_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
     chats = relationship(
         "ChatModel",
         secondary=chat_conversation_association_table,
@@ -337,6 +430,16 @@ class ConversationModel(Base):
     )
 
 
+conversation_chunk_quote_association_table = Table(
+    "conversation_chunk_quote_association",
+    Base.metadata,
+    Column(
+        "conversation_chunk_id", ForeignKey("conversation_chunk.id"), primary_key=True
+    ),
+    Column("quote_id", ForeignKey("quote.id"), primary_key=True),
+)
+
+
 class ConversationChunkModel(Base):
     __tablename__ = "conversation_chunk"
 
@@ -354,14 +457,26 @@ class ConversationChunkModel(Base):
     )
 
     path: Mapped[str] = mapped_column(String)
-    is_processed: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    processing_status: Mapped[ProcessingStatusEnum] = mapped_column(
+        String, default="PENDING"
+    )
     processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    processing_started_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     transcript: Mapped[str] = mapped_column(Text, nullable=True)
 
-    quote_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("quote.id"))
-    quote: Mapped[Optional["QuoteModel"]] = relationship("QuoteModel")
+    quotes: Mapped[List["QuoteModel"]] = relationship(
+        "QuoteModel",
+        secondary=conversation_chunk_quote_association_table,
+        back_populates="conversation_chunks",
+    )
 
 
 class QuoteModel(Base):
@@ -376,17 +491,27 @@ class QuoteModel(Base):
     )
 
     text: Mapped[str] = mapped_column(Text)
+    embedding: Mapped[List[float]] = mapped_column(Vector(EMBEDDING_DIM))
 
     conversation_id: Mapped[str] = mapped_column(String, ForeignKey("conversation.id"))
     conversation: Mapped["ConversationModel"] = relationship("ConversationModel")
 
     conversation_chunks: Mapped[List["ConversationChunkModel"]] = relationship(
-        "ConversationChunkModel", back_populates="quote"
+        "ConversationChunkModel",
+        secondary=conversation_chunk_quote_association_table,
+        back_populates="quotes",
     )
 
     insight_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("insight.id"))
     insight: Mapped[Optional["InsightModel"]] = relationship(
         "InsightModel", back_populates="quotes"
+    )
+
+    project_analysis_run_id: Mapped[Optional[str]] = mapped_column(
+        String, ForeignKey("project_analysis_run.id")
+    )
+    project_analysis_run: Mapped[Optional["ProjectAnalysisRunModel"]] = relationship(
+        ProjectAnalysisRunModel, back_populates="quotes"
     )
 
 
@@ -408,15 +533,33 @@ class InsightModel(Base):
         "QuoteModel", back_populates="insight"
     )
 
+    project_analysis_run_id: Mapped[Optional[str]] = mapped_column(
+        String, ForeignKey("project_analysis_run.id")
+    )
+    project_analysis_run: Mapped[Optional["ProjectAnalysisRunModel"]] = relationship(
+        ProjectAnalysisRunModel, back_populates="insights"
+    )
 
+
+### DO NOT USE
 db = Session()
+"""
+use this instead:
+```
+with Session() as db:
+    ...
+```
+# this will automatically close the session after the block
+"""
 
 
 def get_db() -> Generator[_Session, None, None]:
+    logger.debug("Opening database connection")
     db = Session()
     try:
         yield db
     finally:
+        logger.debug("Closing database connection")
         db.close()
 
 

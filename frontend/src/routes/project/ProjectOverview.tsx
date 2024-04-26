@@ -4,6 +4,7 @@ import {
   useConversationsByProjectId,
   useDeleteProjectByIdMutation,
   useProjectById,
+  useRequestProjectAnalysisMutation,
   useResourcesByProjectId,
   useUpdateProjectByIdMutation,
 } from "@/lib/query";
@@ -39,7 +40,7 @@ import {
 } from "@tabler/icons-react";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { PARTICIPANT_BASE_URL } from "@/config";
+import { ENABLE_EXPERIMENTAL_FEATURES, PARTICIPANT_BASE_URL } from "@/config";
 import { getProjectTranscriptsLink } from "@/lib/api";
 import { useLanguage } from "@/lib/useLanguage";
 import { ProjectTagsInput } from "@/components/project/ProjectTagsInput";
@@ -242,6 +243,7 @@ export const ProjectOverviewRoute = () => {
   const resourcesQuery = useResourcesByProjectId(projectId ?? "");
   const conversationsQuery = useConversationsByProjectId(projectId ?? "");
   const updateProjectMutation = useUpdateProjectByIdMutation();
+  const requestProjectAnalysisMutation = useRequestProjectAnalysisMutation();
 
   const [language, setLanguage] = useSessionStorageState<string>(
     `sharing-link-language-${projectId}`,

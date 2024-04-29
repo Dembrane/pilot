@@ -51,3 +51,6 @@ logging.debug(f"SERVE_API_DOCS: {SERVE_API_DOCS}")
 
 DISABLE_SENTRY = os.environ.get("DISABLE_SENTRY", "false").lower() in ["true", "1"]
 logging.debug(f"DISABLE_SENTRY: {DISABLE_SENTRY}")
+
+BUILD_VERSION = os.environ.get("BUILD_VERSION", "dev")
+logging.debug(f"BUILD_VERSION: {BUILD_VERSION}")

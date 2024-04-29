@@ -1,32 +1,47 @@
 api.findcommonground.app {
+    tls {
+        protocols tls1.2 tls1.3
+        ciphers ECDHE-ECDSA-AES256-GCM-SHA384 ECDHE-RSA-AES256-GCM-SHA384 ECDHE-ECDSA-CHACHA20-POLY1305 ECDHE-RSA-CHACHA20-POLY1305 ECDHE-ECDSA-AES128-GCM-SHA256 ECDHE-RSA-AES128-GCM-SHA256 ECDHE-ECDSA-AES256-SHA384 ECDHE-RSA-AES256-SHA384 ECDHE-ECDSA-AES128-SHA256 ECDHE-RSA-AES128-SHA256 DHE-RSA-AES256-GCM-SHA384 DHE-RSA-CHACHA20-POLY1305 DHE-RSA-AES128-GCM-SHA256
+        curves x25519 secp256r1 secp384r1 x448
+    }
     reverse_proxy api-server:8000
-    header Strict-Transport-Security "max-age=300"
+    header Strict-Transport-Security "max-age=31536000"
     header X-Frame-Options "SAMEORIGIN"
     header X-Content-Type-Options "nosniff"
-    header Content-Security-Policy "default-src 'none'; script-src 'none'; style-src 'none'; img-src 'none'; connect-src 'self';"
-    header Referrer-Policy "no-referrer-when-downgrade"
+    header Content-Security-Policy "default-src 'none'; script-src 'none'; style-src 'none'; img-src 'none'; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+    header Referrer-Policy "same-origin"
     header -Server
 }
 
 admin.findcommonground.app {
-    reverse_proxy dashboard-frontend:5173
+    tls {
+        protocols tls1.2 tls1.3
+        ciphers ECDHE-ECDSA-AES256-GCM-SHA384 ECDHE-RSA-AES256-GCM-SHA384 ECDHE-ECDSA-CHACHA20-POLY1305 ECDHE-RSA-CHACHA20-POLY1305 ECDHE-ECDSA-AES128-GCM-SHA256 ECDHE-RSA-AES128-GCM-SHA256 ECDHE-ECDSA-AES256-SHA384 ECDHE-RSA-AES256-SHA384 ECDHE-ECDSA-AES128-SHA256 ECDHE-RSA-AES128-SHA256 DHE-RSA-AES256-GCM-SHA384 DHE-RSA-CHACHA20-POLY1305 DHE-RSA-AES128-GCM-SHA256
+        curves x25519 secp256r1 secp384r1 x448
+    }
     basicauth {
 		dembrane $2a$14$CUBGav0EbkCzwTlffbvyU.KdGgZ2SVN4tEAuLOfn1/N6dRJKAhDxm
 	}
-    header Strict-Transport-Security "max-age=300"
+    reverse_proxy dashboard-frontend:5173
+    header Strict-Transport-Security "max-age=31536000"
     header X-Frame-Options "SAMEORIGIN"
     header X-Content-Type-Options "nosniff"
-    header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' browser.sentry-cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' api.findcommonground.app sentry.io;"
-    header Referrer-Policy "no-referrer-when-downgrade"
+    header Content-Security-Policy "default-src 'self'; script-src 'self' https://*.sentry-cdn.com https://*.ingest.sentry.io; style-src 'self'; img-src 'self'; connect-src 'self' https://api.findcommonground.app https://*.sentry-cdn.com https://*.ingest.sentry.io; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:"
+    header Referrer-Policy "same-origin"
     header -Server
 }
 
 participant.findcommonground.app {
+    tls {
+        protocols tls1.2 tls1.3
+        ciphers ECDHE-ECDSA-AES256-GCM-SHA384 ECDHE-RSA-AES256-GCM-SHA384 ECDHE-ECDSA-CHACHA20-POLY1305 ECDHE-RSA-CHACHA20-POLY1305 ECDHE-ECDSA-AES128-GCM-SHA256 ECDHE-RSA-AES128-GCM-SHA256 ECDHE-ECDSA-AES256-SHA384 ECDHE-RSA-AES256-SHA384 ECDHE-ECDSA-AES128-SHA256 ECDHE-RSA-AES128-SHA256 DHE-RSA-AES256-GCM-SHA384 DHE-RSA-CHACHA20-POLY1305 DHE-RSA-AES128-GCM-SHA256
+        curves x25519 secp256r1 secp384r1 x448
+    }
     reverse_proxy participant-frontend:5173
-    header Strict-Transport-Security "max-age=300"
+    header Strict-Transport-Security "max-age=31536000"
     header X-Frame-Options "SAMEORIGIN"
     header X-Content-Type-Options "nosniff"
-    header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' browser.sentry-cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' api.findcommonground.app sentry.io;"
-    header Referrer-Policy "no-referrer-when-downgrade"
+    header Content-Security-Policy "default-src 'self'; script-src 'self' https://*.sentry-cdn.com https://*.ingest.sentry.io; style-src 'self'; img-src 'self'; connect-src 'self' https://api.findcommonground.app https://*.sentry-cdn.com https://*.ingest.sentry.io; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:"
+    header Referrer-Policy "same-origin"
     header -Server
 }

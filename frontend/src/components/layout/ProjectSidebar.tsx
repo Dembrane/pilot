@@ -303,7 +303,7 @@ const ProjectAccordion = ({ projectId }: { projectId: string }) => {
               <Trans>Conversations</Trans>
             </Title>
 
-            <Tooltip label={t`Upload conversations`}>
+            <Tooltip label={`Upload conversations`}>
               <div>
                 <UploadConversationDropzone projectId={projectId}>
                   <Icons.Plus stroke="black" fill="black" />

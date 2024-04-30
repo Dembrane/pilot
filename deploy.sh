@@ -7,7 +7,8 @@ BUILD_VERSION=$(git rev-parse --short HEAD)
 echo "$(date --utc +%FT%TZ): Deploying new version: $BUILD_VERSION"
 
 echo "$(date --utc +%FT%TZ): Building"
-docker compose up -e BUILD_VERSION=$BUILD_VERSION --build -d
+export BUILD_VERSION=$BUILD_VERSION
+docker compose up --build -d
 
 CADDY_CONTAINER=$(docker ps -aqf "name=caddy")
 echo "$(date --utc +%FT%TZ): reloading CADDY_CONTAINER: $CADDY_CONTAINER"

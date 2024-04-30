@@ -1,3 +1,4 @@
 Contact: mailto:info@dembrane.com
-Expires: 2024-12-12T00:00:00Z
+Encryption: https://participant.findcommonground.app/publickey.asc
+Expires: 2034-12-12T00:00:00Z
 Canonical: https://participant.findcommonground.app/.well-known/security.txt

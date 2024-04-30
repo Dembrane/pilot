@@ -26,7 +26,7 @@ admin.findcommonground.app {
     header Strict-Transport-Security "max-age=31536000"
     header X-Frame-Options "SAMEORIGIN"
     header X-Content-Type-Options "nosniff"
-    header Content-Security-Policy "default-src 'self'; script-src 'self' https://*.sentry-cdn.com https://*.ingest.sentry.io; style-src 'self'; img-src 'self'; connect-src 'self' https://api.findcommonground.app https://*.sentry-cdn.com https://*.ingest.sentry.io; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:"
+    header Content-Security-Policy "default-src 'self'; script-src 'self' https://*.sentry-cdn.com https://*.ingest.de.sentry.io; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' https://api.findcommonground.app https://*.sentry-cdn.com https://*.ingest.de.sentry.io; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:"
     header Referrer-Policy "same-origin"
     header -Server
 }
@@ -41,7 +41,7 @@ participant.findcommonground.app {
     header Strict-Transport-Security "max-age=31536000"
     header X-Frame-Options "SAMEORIGIN"
     header X-Content-Type-Options "nosniff"
-    header Content-Security-Policy "default-src 'self'; script-src 'self' https://*.sentry-cdn.com https://*.ingest.sentry.io; style-src 'self'; img-src 'self'; connect-src 'self' https://api.findcommonground.app https://*.sentry-cdn.com https://*.ingest.sentry.io; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:"
+    header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-eval' https://*.sentry-cdn.com https://*.ingest.de.sentry.io; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' https://api.findcommonground.app https://*.sentry-cdn.com https://*.ingest.de.sentry.io; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:"
     header Referrer-Policy "same-origin"
     header -Server
 }

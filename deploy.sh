@@ -4,15 +4,13 @@ echo "$(date --utc +%FT%TZ): Pulling latest changes"
 git pull
 
 BUILD_VERSION=$(git rev-parse --short HEAD)
-echo "Using BUILD_VERSION: $BUILD_VERSION"
+echo "$(date --utc +%FT%TZ): Deploying new version: $BUILD_VERSION"
 
-echo "$(date --utc +%FT%TZ): Releasing new server version. $BUILD_VERSION"
+echo "$(date --utc +%FT%TZ): Building"
+docker compose up -e BUILD_VERSION=$BUILD_VERSION --build -d
 
-echo "$(date --utc +%FT%TZ): Running build"
-BUILD_VERSION=$BUILD_VERSION docker compose up -d --build
-
-echo "$(date --utc +%FT%TZ): Reloading caddy..."
-CADDY_CONTAINER=$(docker ps -aqf "name=caddy" )
+CADDY_CONTAINER=$(docker ps -aqf "name=caddy")
+echo "$(date --utc +%FT%TZ): reloading CADDY_CONTAINER: $CADDY_CONTAINER"
 docker exec $CADDY_CONTAINER caddy reload -c /etc/caddy/Caddyfile
 
 # Use later for zero downtime deployment

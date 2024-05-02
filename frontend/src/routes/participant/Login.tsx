@@ -97,136 +97,138 @@ export const ParticipantLoginRoute = () => {
   }, []);
 
   return (
-    <>
-      <Modal
-        withCloseButton={false}
-        opened={opened}
-        onClose={close}
-        bg="white"
-        fullScreen
-        radius={0}
-      >
+    <main className="relative h-screen overflow-y-auto">
+      <div className="container mx-auto h-full max-w-lg">
+        <Modal
+          withCloseButton={false}
+          opened={opened}
+          onClose={close}
+          bg="white"
+          fullScreen
+          radius={0}
+        >
+          <Stack className="h-full" p="md">
+            <Stack className="flex-grow" p="md" justify="center">
+              <Group justify="center" className="pb-8">
+                <Logo hideTitle h="64px" />
+              </Group>
+              <Stack mx="auto">
+                <Title order={1}>
+                  <Trans>Hi, Thanks for sharing!</Trans>
+                </Title>
+                <Markdown
+                  content={
+                    t`This is a very simple tool where you can record conversations or stories to make your voice heard.` +
+                    `<br/><br/>` +
+                    t`First we ask some short questions, and then you can start recording.` +
+                    "<br/><br/>" +
+                    t`You can use this by yourself to share your own story, or you can record a conversation between several people, which can often be fun and insightful!` +
+                    "<br/><br/>" +
+                    t`Are you ready? Then press "Ready!"`
+                  }
+                />
+                <Button onClick={close} size="xl">
+                  <Trans>Ready!</Trans>
+                </Button>
+                <Markdown
+                  content={
+                    t`*At Dembrane, privacy is super important!*` +
+                    "<br/><br/>" +
+                    t`*We make sure nothing can be traced back to you, and even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]` +
+                    `(${PRIVACY_POLICY_URL}).*` +
+                    "<br/><br/>" +
+                    t`*Oh, we don't have a cookie statement because we don't use cookies! We eat them.*` +
+                    ` 🍪`
+                  }
+                />
+              </Stack>
+            </Stack>
+          </Stack>
+        </Modal>
+
         <Stack className="h-full" p="md">
           <Stack className="flex-grow" p="md" justify="center">
             <Group justify="center" className="pb-8">
               <Logo hideTitle h="64px" />
             </Group>
-            <Stack mx="auto">
-              <Title order={1}>
-                <Trans>Hi, Thanks for sharing!</Trans>
-              </Title>
-              <Markdown
-                content={
-                  t`This is a very simple tool where you can record conversations or stories to make your voice heard.` +
-                  `<br/><br/>` +
-                  t`First we ask some short questions, and then you can start recording.` +
-                  "<br/><br/>" +
-                  t`You can use this by yourself to share your own story, or you can record a conversation between several people, which can often be fun and insightful!` +
-                  "<br/><br/>" +
-                  t`Are you ready? Then press "Ready!"`
-                }
-              />
-              <Button onClick={close} size="xl">
-                <Trans>Ready!</Trans>
-              </Button>
-              <Markdown
-                content={
-                  t`*At Dembrane, privacy is super important!*` +
-                  "<br/><br/>" +
-                  t`*We make sure nothing can be traced back to you, and even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]` +
-                  `(${PRIVACY_POLICY_URL}).*` +
-                  "<br/><br/>" +
-                  t`*Oh, we don't have a cookie statement because we don't use cookies! We eat them.*` +
-                  ` 🍪`
-                }
-              />
-            </Stack>
-          </Stack>
-        </Stack>
-      </Modal>
-
-      <Stack className="h-full" p="md">
-        <Stack className="flex-grow" p="md" justify="center">
-          <Group justify="center" className="pb-8">
-            <Logo hideTitle h="64px" />
-          </Group>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Stack className="relative">
-              {initiateConversationMutation.error && (
-                <Box>
-                  <Alert color="red" variant="light">
-                    {(initiateConversationMutation.error instanceof
-                      AxiosError &&
-                      initiateConversationMutation.error.response?.data
-                        .detail) ??
-                      t`Something went wrong`}
-                  </Alert>
-                </Box>
-              )}
-
-              <TextInput
-                autoFocus
-                required
-                size="lg"
-                label={t`Name`}
-                placeholder="John Doe, Group 1, etc."
-                {...register("name")}
-                error={errors.name?.message}
-              />
-              {!searchParams.get("pin") && (
-                <Box>
-                  <InputLabel size="lg">
-                    <Trans>Enter your access code</Trans>
-                  </InputLabel>
-                  <PinInput
-                    {...register("pin")}
-                    error={!!errors.pin?.message}
-                    size="lg"
-                    inputMode="numeric"
-                    length={4}
-                    onChange={(value: string) => {
-                      setValue("pin", value);
-                    }}
-                  />
-                </Box>
-              )}
-              <Box className="relative">
-                {tagsQuery.isLoading && <LoadingOverlay />}
-                {tagsQuery.data && tagsQuery.data.length > 0 && (
-                  <MultiSelect
-                    label={t`Tags`}
-                    placeholder={t`Add all that apply`}
-                    size="lg"
-                    data={tagsQuery.data.map((tag) => ({
-                      value: tag.id,
-                      label: tag.text,
-                    }))}
-                    onChange={(value) => {
-                      setValue("tagIdList", value);
-                    }}
-                  />
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Stack className="relative">
+                {initiateConversationMutation.error && (
+                  <Box>
+                    <Alert color="red" variant="light">
+                      {(initiateConversationMutation.error instanceof
+                        AxiosError &&
+                        initiateConversationMutation.error.response?.data
+                          .detail) ??
+                        t`Something went wrong`}
+                    </Alert>
+                  </Box>
                 )}
-              </Box>
-              <Button
-                type="submit"
-                size="lg"
-                loading={initiateConversationMutation.isPending}
-              >
-                <Trans>Next</Trans>
-              </Button>
+
+                <TextInput
+                  autoFocus
+                  required
+                  size="lg"
+                  label={t`Name`}
+                  placeholder="John Doe, Group 1, etc."
+                  {...register("name")}
+                  error={errors.name?.message}
+                />
+                {!searchParams.get("pin") && (
+                  <Box>
+                    <InputLabel size="lg">
+                      <Trans>Enter your access code</Trans>
+                    </InputLabel>
+                    <PinInput
+                      {...register("pin")}
+                      error={!!errors.pin?.message}
+                      size="lg"
+                      inputMode="numeric"
+                      length={4}
+                      onChange={(value: string) => {
+                        setValue("pin", value);
+                      }}
+                    />
+                  </Box>
+                )}
+                <Box className="relative">
+                  {tagsQuery.isLoading && <LoadingOverlay />}
+                  {tagsQuery.data && tagsQuery.data.length > 0 && (
+                    <MultiSelect
+                      label={t`Tags`}
+                      placeholder={t`Add all that apply`}
+                      size="lg"
+                      data={tagsQuery.data.map((tag) => ({
+                        value: tag.id,
+                        label: tag.text,
+                      }))}
+                      onChange={(value) => {
+                        setValue("tagIdList", value);
+                      }}
+                    />
+                  )}
+                </Box>
+                <Button
+                  type="submit"
+                  size="lg"
+                  loading={initiateConversationMutation.isPending}
+                >
+                  <Trans>Next</Trans>
+                </Button>
+              </Stack>
+            </form>
+          </Stack>
+          <Stack>
+            <Divider />
+            <Stack gap="xs" justify="center" align="center">
+              <Anchor size="sm" target="_blank" href={PRIVACY_POLICY_URL}>
+                <Trans>Privacy Statements</Trans>
+              </Anchor>
+              <Text size="sm">Dembrane B.V. 2024, all rights reserved.</Text>
             </Stack>
-          </form>
-        </Stack>
-        <Stack>
-          <Divider />
-          <Stack gap="xs" justify="center" align="center">
-            <Anchor size="sm" target="_blank" href={PRIVACY_POLICY_URL}>
-              <Trans>Privacy Statements</Trans>
-            </Anchor>
-            <Text size="sm">Dembrane B.V. 2024, all rights reserved.</Text>
           </Stack>
         </Stack>
-      </Stack>
-    </>
+      </div>
+    </main>
   );
 };

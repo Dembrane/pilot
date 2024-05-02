@@ -5,6 +5,7 @@ import { useLanguage } from "@/lib/useLanguage";
 import { Trans } from "@lingui/macro";
 import {
   Anchor,
+  Box,
   Group,
   LoadingOverlay,
   Stack,
@@ -32,7 +33,6 @@ export const ParticipantPostConversation = () => {
         </Group>
       </header>
       <Stack className="mt-[64px] py-8 px-4 relative">
-        <LoadingOverlay visible={project.isLoading} />
         <Title order={2}>
           <Trans>Thank you for participating!</Trans>
         </Title>
@@ -40,11 +40,16 @@ export const ParticipantPostConversation = () => {
           <Trans>
             Your response has been recorded. You may now close this tab.
           </Trans>{" "}
-          <Link to={initiateLink}>
-            <Anchor>
-              <Trans>You may also choose to record another conversation.</Trans>
-            </Anchor>
-          </Link>
+          <Box className="relative">
+            <LoadingOverlay visible={project.isLoading} />
+            <Link to={initiateLink}>
+              <Anchor>
+                <Trans>
+                  You may also choose to record another conversation.
+                </Trans>
+              </Anchor>
+            </Link>
+          </Box>
         </Text>
       </Stack>
     </div>

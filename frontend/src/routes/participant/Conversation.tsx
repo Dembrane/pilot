@@ -567,7 +567,7 @@ export const ParticipantConversationRoute = () =>
     }
 
     return (
-      <div className="h-dvh container max-w-2xl">
+      <div className="min-h-dvh flex flex-col container max-w-2xl mx-auto">
         {/* modal for permissions error */}
         <Modal
           opened={!!permissionError}
@@ -620,22 +620,21 @@ export const ParticipantConversationRoute = () =>
           </div>
         </Modal>
 
-        <header className="fixed left-0 w-full top-0 h-[64px] border-b border-slate-300 py-4 bg-white z-10">
+        <header className="w-full h-[64px] sticky top-0 border-b border-slate-300 py-4 bg-white z-10 shadow-sm">
+          {/* <header className="sticky left-0 w-full top-0 h-[64px] border-b border-slate-300 py-4 bg-white z-10"> */}
           <Group justify="center" align="center" className="px-4 relative">
             <Logo hideTitle className="left-0 pl-4 absolute sm:relative" />
             <h1 className="text-xl">Dembrane</h1>
           </Group>
         </header>
 
-        {permissionError && <>JSON.stringify(permissionError)</>}
-
         <Box
           className={clsx(
-            "flex-1 h-full px-4 py-4 relative transition-all mt-[64px]",
+            "flex-grow px-4 py-4 relative transition-all",
             // isRecording ? "mt-[128px] pt-6" : "mt-[64px]",
           )}
         >
-          <Stack className="overflow-y-auto">
+          <Stack className="max-h-full overflow-y-auto">
             {conversationQuery.data?.participant_name != "" ? (
               <h2 className="text-3xl text-center">
                 <Trans>Welcome</Trans>,{" "}
@@ -661,10 +660,10 @@ export const ParticipantConversationRoute = () =>
         </Box>
 
         {!errored && (
-          <Box className="px-4 pt-4 pb-8 sticky bottom-0 border-t border-slate-300 bg-white">
+          <Box className="sticky bottom-0 z-10 p-4 w-full border-t border-slate-300 bg-white shadow-sm">
+            {/* Recording time indicator */}
             {isRecording && (
-              // <div className="fixed w-full top-[64px] h-[64px] bg-white z-10 py-4 border-b border-slate-300">
-              <div className="w-full bg-white border-slate-300 py-4">
+              <div className="w-full bg-white border-slate-300 pt-2 pb-4">
                 <Group justify="center" align="center">
                   {isPaused ? (
                     <IconPlayerPause />
@@ -680,6 +679,7 @@ export const ParticipantConversationRoute = () =>
                 </Group>
               </div>
             )}
+
             <Group justify="center w-full">
               {!isRecording && (
                 <Button

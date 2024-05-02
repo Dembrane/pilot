@@ -10,9 +10,9 @@ echo "$(date --utc +%FT%TZ): Building"
 export BUILD_VERSION=$BUILD_VERSION
 docker compose up --build -d
 
-CADDY_CONTAINER=$(docker ps -aqf "name=caddy")
-echo "$(date --utc +%FT%TZ): reloading CADDY_CONTAINER: $CADDY_CONTAINER"
-docker exec $CADDY_CONTAINER caddy reload -c /etc/caddy/Caddyfile
+
+echo "$(date --utc +%FT%TZ): reloading CADDY_CONTAINER"
+docker compose restart caddy
 
 # Use later for zero downtime deployment
 

@@ -1,6 +1,4 @@
 {
-    "mypy.configFile": "server/pyproject.toml",
-    "mypy-type-checker.cwd": "${workspaceFolder}/server",
     "[typescript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.useTabStops": true,
@@ -10,5 +8,35 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.useTabStops": true,
         "editor.tabSize": 2
-    }
+    },
+    "restoreTerminals.terminals": [
+        {
+          "splitTerminals": [
+            {
+              "name": "server",
+              "commands": ["cd server", "./run.sh"]
+            },
+          ]
+        },
+        {
+          "splitTerminals": [
+            {
+              "name": "worker",
+              "commands": ["cd server", "./run-worker.sh"]
+            },
+          ]
+        },
+        {
+          "splitTerminals": [
+            {
+              "name": "admin-dashboard",
+              "commands": ["cd frontend", "yarn dev"]
+            },
+            {
+              "name": "participant-portal",
+              "commands": ["cd frontend", "yarn participant:dev"]
+            },
+          ]
+        }
+      ],
 }

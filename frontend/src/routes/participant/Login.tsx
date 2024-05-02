@@ -70,7 +70,7 @@ export const ParticipantLoginRoute = () => {
     });
   };
 
-  const { language } = useLanguage();
+  const { language, i18n } = useLanguage();
 
   useEffect(() => {
     if (searchParams.get("pin")) {

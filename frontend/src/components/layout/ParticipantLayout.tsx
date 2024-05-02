@@ -1,4 +1,3 @@
-import { useLanguage } from "@/lib/useLanguage";
 import { Outlet } from "react-router-dom";
 import { I18nProvider } from "../I18nProvider";
 

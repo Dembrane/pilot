@@ -28,7 +28,8 @@
 				"bradlc.vscode-tailwindcss",
 				"ms-python.python",
 				"charliermarsh.ruff",
-				"jebbs.plantuml"
+				"jebbs.plantuml",
+				"EthanSK.restore-terminals"
 			]
 		}
 	},

@@ -20,6 +20,7 @@ import { ENABLE_EXPERIMENTAL_FEATURES, SUPPORTED_LANGUAGES } from "./config";
 import { i18n } from "@lingui/core";
 import { ProjectLibrary } from "./routes/project/ProjectLibrary";
 import { ProjectLibraryInsight } from "./routes/project/ProjectLibraryInsight";
+import { ParticipantPostConversation } from "./routes/participant/PostConversation";
 
 // export const _router = createBrowserRouter([
 //   {
@@ -192,16 +193,20 @@ export const participantRouter = createBrowserRouter([
       },
       {
         path: "conversation/:conversationId",
-        element: <ParticipantConversationRoute fallback />,
-      },
-      {
-        path: "conversation/:conversationId/vad",
         element: <ParticipantConversationRoute />,
       },
       {
-        path: "conversation/:conversationId/fallback",
-        element: <ParticipantConversationRoute fallback />,
+        path: "finish",
+        element: <ParticipantPostConversation />,
       },
+      // {
+      //   path: "conversation/:conversationId/vad",
+      //   element: <ParticipantConversationRoute />,
+      // },
+      // {
+      //   path: "conversation/:conversationId/fallback",
+      //   element: <ParticipantConversationRoute fallback />,
+      // },
     ],
   },
 ]);

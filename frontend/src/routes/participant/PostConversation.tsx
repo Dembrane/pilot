@@ -6,6 +6,7 @@ import { Trans } from "@lingui/macro";
 import {
   Anchor,
   Box,
+  Button,
   Group,
   LoadingOverlay,
   Stack,
@@ -25,7 +26,7 @@ export const ParticipantPostConversation = () => {
     `/${language}/${projectId}/login?pin=${project?.data?.pin}`;
 
   return (
-    <div className="h-dvh min-h-[100vh] container max-w-2xl">
+    <div className="h-dvh min-h-[100vh] container max-w-2xl mx-auto">
       <header className="fixed left-0 w-full top-0 h-[64px] border-b border-slate-300 py-4 bg-white z-10">
         <Group justify="center" align="center" className="px-4 relative">
           <Logo hideTitle className="left-0 pl-4 absolute sm:relative" />
@@ -40,17 +41,16 @@ export const ParticipantPostConversation = () => {
           <Trans>
             Your response has been recorded. You may now close this tab.
           </Trans>{" "}
-          <Box className="relative">
-            <LoadingOverlay visible={project.isLoading} />
-            <Link to={initiateLink}>
-              <Anchor>
-                <Trans>
-                  You may also choose to record another conversation.
-                </Trans>
-              </Anchor>
-            </Link>
-          </Box>
+          <Trans>You may also choose to record another conversation.</Trans>
         </Text>
+        <Box className="relative">
+          <LoadingOverlay visible={project.isLoading} />
+          <Link to={initiateLink}>
+            <Button component="a" size="md" variant="outline">
+              <Trans>Record another conversation</Trans>
+            </Button>
+          </Link>
+        </Box>
       </Stack>
     </div>
   );

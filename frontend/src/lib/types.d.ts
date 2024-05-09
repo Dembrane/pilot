@@ -30,6 +30,7 @@ type TConversation = {
   participant_email?: string;
   participant_name: string;
   tags: TProjectTag[];
+  chunks?: TConversationChunk[];
 };
 
 type TProcessingStatus = "PENDING" | "PROCESSING" | "ERROR" | "DONE";

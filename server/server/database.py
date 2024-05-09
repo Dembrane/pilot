@@ -456,7 +456,7 @@ class ConversationChunkModel(Base):
         "ConversationModel", back_populates="chunks"
     )
 
-    path: Mapped[str] = mapped_column(String)
+    path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     processing_status: Mapped[ProcessingStatusEnum] = mapped_column(
         String, default="PENDING"

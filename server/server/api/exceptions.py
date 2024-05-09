@@ -30,3 +30,5 @@ ConversationNotOpenForParticipationException = HTTPException(
     status_code=400,
     detail="This conversation is not open for participation at this time",
 )
+
+NoContentFoundException = HTTPException(status_code=404, detail="No content found")

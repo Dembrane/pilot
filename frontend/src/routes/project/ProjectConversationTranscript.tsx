@@ -1,12 +1,10 @@
 import { BaseMessage } from "@/components/BaseMessage";
-import { apiCommonConfig, getConversationChunkContentLink } from "@/lib/api";
+import { getConversationChunkContentLink } from "@/lib/api";
 import { useConversationById, useConversationChunks } from "@/lib/query";
 import {
   ActionIcon,
-  Box,
   Group,
   LoadingOverlay,
-  Paper,
   Text,
   Stack,
   Tooltip,
@@ -158,6 +156,11 @@ export const ProjectConversationTranscript = () => {
           </Modal>
         </Group>
         <Stack>
+          {sorted?.length === 0 && (
+            <Text size="md">
+              No transcript available for this conversation.
+            </Text>
+          )}
           {sorted?.map((chunk) => {
             return <Chunk key={chunk.id} chunk={chunk} />;
           })}

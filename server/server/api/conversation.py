@@ -22,6 +22,7 @@ from server.schemas import (
 from server.api.session import DependencyRequireSession
 from server.api.exceptions import (
     ConversationNotFoundException,
+    NoContentFoundException,
 )
 from server.config import AUDIO_CHUNKS_DIR
 from server.audio_utils import get_mime_type_from_file_path
@@ -40,6 +41,7 @@ async def get_conversation(
         db.query(ConversationModel)
         .options(
             joinedload(ConversationModel.tags),
+            joinedload(ConversationModel.chunks),
         )
         .filter(
             ConversationModel.id == conversation_id,
@@ -112,7 +114,10 @@ async def get_conversation_content(
 ) -> StreamingResponse:
     # ordered by timestamp
     chunks = await get_conversation_chunks(conversation_id, db)
-    file_paths = [chunk.path for chunk in chunks]
+    file_paths = [chunk.path for chunk in chunks if chunk.path]
+
+    # how does this work when there are multiple files with different types?
+    mime_type = get_mime_type_from_file_path(file_paths[0])
 
     range_header = request.headers.get("Range")
     if range_header:
@@ -123,9 +128,6 @@ async def get_conversation_content(
         file_size = sum(os.path.getsize(path) for path in file_paths)
         if end is None:
             end = file_size - 1
-
-        # how does this work when there are multiple files with different sizes?
-        mime_type = get_mime_type_from_file_path(file_paths[0])
 
         return StreamingResponse(
             stream_audio(file_paths, start, end),
@@ -161,7 +163,11 @@ async def get_conversation_chunk_content(
     if not chunk:
         raise ConversationNotFoundException
 
+    if not chunk.path:
+        raise NoContentFoundException
+
     file_paths = [chunk.path]
+    mime_type = get_mime_type_from_file_path(file_paths[0])
 
     range_header = request.headers.get("Range")
     if range_header:
@@ -173,7 +179,6 @@ async def get_conversation_chunk_content(
         if end is None:
             end = file_size - 1
 
-        mime_type = get_mime_type_from_file_path(file_paths[0])
         logger.debug(f"mime_type: {mime_type}")
 
         return StreamingResponse(
@@ -224,6 +229,35 @@ async def delete_conversation(
     db.delete(conversation)
     db.commit()
     return conversation
+
+
+class UploadConversationBodySchema(BaseModel):
+    timestamp: datetime
+    content: str
+
+
+@ConversationRouter.post(
+    "/{conversation_id}/upload-text", response_model=ConversationChunkSchema
+)
+async def upload_conversation_text(
+    conversation_id: str,
+    body: UploadConversationBodySchema,
+    db: DependencyInjectDatabase,
+) -> ConversationChunkModel:
+    conversation = await get_conversation(conversation_id, db)
+
+    chunk = ConversationChunkModel(
+        id=generate_uuid(),
+        conversation_id=conversation.id,
+        timestamp=body.timestamp,
+        transcript=body.content,
+        path=None,
+    )
+
+    db.add(chunk)
+    db.commit()
+
+    return chunk
 
 
 @ConversationRouter.post(

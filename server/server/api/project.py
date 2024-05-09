@@ -12,7 +12,6 @@ from server.database import (
     InsightModel,
     ProjectAnalysisRunModel,
     ProjectModel,
-    QuoteModel,
     ResourceModel,
     DependencyInjectDatabase,
     ProjectTagModel,
@@ -198,6 +197,12 @@ async def get_project_transcripts(
             status_code=404, detail="No conversations found for this project"
         )
 
+    conversations = [
+        c
+        for c in conversations
+        if c.chunks and any(ch.transcript is not None for ch in c.chunks)
+    ]
+
     filename_futures = [
         generate_transcript_file(conversation.id, db) for conversation in conversations
     ]
@@ -286,7 +291,9 @@ async def get_all_conversations_for_project(
 
     return (
         db.query(ConversationModel)
-        .options(joinedload(ConversationModel.tags))
+        .options(
+            joinedload(ConversationModel.tags), joinedload(ConversationModel.chunks)
+        )
         .filter(ConversationModel.project_id == project_id)
         .all()
     )

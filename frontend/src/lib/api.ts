@@ -189,6 +189,10 @@ export const deleteConversationById = async (conversationId: string) => {
   return api.delete(`/conversations/${conversationId}`);
 };
 
+export const deleteConversationChunkById = async (chunkId: string) => {
+  return api.delete(`/conversation-chunks/${chunkId}`);
+};
+
 export const getConversationsByProjectId = async (projectId: string) => {
   return api.get<unknown, TConversation[]>(
     `/projects/${projectId}/conversations`,
@@ -197,10 +201,14 @@ export const getConversationsByProjectId = async (projectId: string) => {
 
 export const uploadConversationChunk = async (payload: {
   conversationId: string;
-  chunk: Blob;
+  chunk?: Blob;
   timestamp: Date;
 }) => {
   const formData = new FormData();
+
+  if (!payload.chunk) {
+    throw new Error("No chunk provided");
+  }
 
   const fileExtension = payload.chunk.type.split("/")[1].split(";")[0];
   const file = new File([payload.chunk], `chunk.${fileExtension}`, {
@@ -221,6 +229,20 @@ export const uploadConversationChunk = async (payload: {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+    },
+  );
+};
+
+export const uploadConversationText = async (payload: {
+  conversationId: string;
+  content: string;
+  timestamp: Date;
+}) => {
+  return apiNoAuth.post<unknown, TConversationChunk>(
+    `/conversations/${payload.conversationId}/upload-text`,
+    {
+      content: payload.content,
+      timestamp: payload.timestamp.toISOString(),
     },
   );
 };

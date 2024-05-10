@@ -163,6 +163,9 @@ class ProjectModel(Base):
     default_conversation_context: Mapped[Optional[str]] = mapped_column(
         Text, nullable=True
     )
+    default_conversation_finish_text: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )
 
     chats: Mapped[List["ChatModel"]] = relationship(
         "ChatModel", back_populates="project", cascade="all, delete-orphan"

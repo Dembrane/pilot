@@ -3,6 +3,7 @@ import {
   createProject,
   createProjectTag,
   deleteConversationById,
+  deleteConversationChunkById,
   deleteProjectById,
   deleteResourceById,
   deleteTagById,
@@ -26,6 +27,7 @@ import {
   updateProjectById,
   updateResourceById,
   uploadConversationChunk,
+  uploadConversationText,
   uploadResourceByProjectId,
 } from "./api";
 import { toast } from "@/components/Toaster";
@@ -338,6 +340,18 @@ export const useDeleteConversationByIdMutation = () => {
   });
 };
 
+export const useDeleteConversationChunkByIdMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteConversationChunkById,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["conversation"],
+      });
+    },
+  });
+};
+
 export const useConversationsByProjectId = (projectId: string) => {
   return useQuery({
     queryKey: ["conversation", "all", projectId],
@@ -347,9 +361,28 @@ export const useConversationsByProjectId = (projectId: string) => {
 };
 
 export const useUploadConversationChunk = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: uploadConversationChunk,
     retry: 10,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["conversation"],
+      });
+    },
+  });
+};
+
+export const useUploadConversationTextChunk = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: uploadConversationText,
+    retry: 10,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["conversation"],
+      });
+    },
   });
 };
 

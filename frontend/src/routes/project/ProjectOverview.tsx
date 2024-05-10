@@ -80,6 +80,7 @@ type ProjectEditFormValues = {
   default_conversation_title?: string;
   default_conversation_description?: string;
   default_conversation_context?: string;
+  default_conversation_finish_text?: string;
 };
 
 const ProjectEdit = ({ project }: { project: TProject }) => {
@@ -91,6 +92,8 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
     default_conversation_description:
       project.default_conversation_description ?? "",
     default_conversation_context: project.default_conversation_context ?? "",
+    default_conversation_finish_text:
+      project.default_conversation_finish_text ?? "",
   };
 
   const {
@@ -168,6 +171,8 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
             </Text>
           </Box>
 
+          <ProjectTagsInput projectId={project.id} />
+
           <TextInput
             label="Title"
             {...register("default_conversation_title")}
@@ -182,7 +187,13 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
             placeholder="Conversation Description"
           />
 
-          <ProjectTagsInput projectId={project.id} />
+          <Textarea
+            label="Post Conversation Text"
+            description="This will be shown to participants after they finish a conversation. Markdown is allowed here. The following variables are supported. {{CONVERSATION_ID}}, {{PROJECT_ID}}"
+            rows={5}
+            {...register("default_conversation_finish_text")}
+            placeholder="Post Conversation Text"
+          />
 
           <Box>
             <Title order={4}>Advanced Settings</Title>

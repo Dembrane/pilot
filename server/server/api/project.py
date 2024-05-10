@@ -77,6 +77,7 @@ class PostProjectRequestSchema(BaseModel):
     default_conversation_title: Optional[str] = None
     default_conversation_description: Optional[str] = None
     default_conversation_context: Optional[str] = None
+    default_conversation_finish_text: Optional[str] = None
 
 
 @ProjectRouter.post("", response_model=ProjectSchema)
@@ -244,19 +245,11 @@ async def update_project(
 ) -> ProjectModel:
     project = await get_project(project_id, session, db)
 
-    if body.language is not None and body.language not in PROJECT_ALLOWED_LANGUAGES:
-        raise ProjectLanguageNotSupportedException
-
-    project.language = body.language or project.language
-
-    if body.is_conversation_allowed is not None:
-        project.is_conversation_allowed = body.is_conversation_allowed
-
-    project.name = body.name
-    project.context = body.context
-    project.default_conversation_title = body.default_conversation_title
-    project.default_conversation_description = body.default_conversation_description
-    project.default_conversation_context = body.default_conversation_context
+    for field, value in body.model_dump(exclude_unset=True, exclude_none=False).items():
+        if field == "language" and value not in PROJECT_ALLOWED_LANGUAGES:
+            raise HTTPException(status_code=400, detail="Unsupported language")
+        logger.info(f"Setting {field} to {value}")
+        setattr(project, field, value)
 
     db.commit()
     return project

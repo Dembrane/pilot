@@ -56,6 +56,11 @@ const theme = createTheme({
         variant: "filled",
       },
     },
+    Textarea: {
+      defaultProps: {
+        resize: "vertical",
+      },
+    },
   },
 });
 

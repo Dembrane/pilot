@@ -82,6 +82,7 @@ type TProject = {
   default_conversation_title?: string;
   default_conversation_description?: string;
   default_conversation_context?: string;
+  default_conversation_finish_text?: string;
   tags: TProjectTag[];
 };
 

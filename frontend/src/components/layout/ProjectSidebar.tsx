@@ -192,14 +192,14 @@ const ConversationAccordionDetail = ({
           <Text size="xs">{conversation.title}</Text>
         </Box>
       )}
-      {conversation.description && (
+      {/* {conversation.description && (
         <Box>
           <Text size="sm">
             <Trans>Description</Trans>
           </Text>
           <Text size="xs">{conversation.description}</Text>
         </Box>
-      )}
+      )} */}
       <Link
         to={`/projects/${conversation.project_id}/conversation/${conversation.id}/overview`}
       >

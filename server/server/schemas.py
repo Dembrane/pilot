@@ -35,6 +35,7 @@ class ProjectSchema(BaseModel):
     default_conversation_title: Optional[str] = None
     default_conversation_description: Optional[str] = None
     default_conversation_context: Optional[str] = None
+    default_conversation_finish_text: Optional[str] = None
 
 
 class ResourceSchema(BaseModel):

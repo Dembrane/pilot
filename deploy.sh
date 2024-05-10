@@ -14,16 +14,17 @@ BUILD_VERSION=$(git rev-parse --short HEAD)
 echo "$(date --utc +%FT%TZ): Deploying new version: $BUILD_VERSION"
 
 echo "$(date --utc +%FT%TZ): Building"
-export BUILD_VERSION=$BUILD_VERSION
 
 if [[ $ENV == "prod" ]]; then
     echo "Using production settings"
+    export BUILD_VERSION=$BUILD_VERSION
     export API_BASE_URL="api.findcommonground.app"
     export ADMIN_BASE_URL="admin.findcommonground.app"
     export PARTICIPANT_BASE_URL="participant.findcommonground.app"
     docker compose up --build -d
 else
     echo "Using test settings"
+    export BUILD_VERSION="test-$BUILD_VERSION"
     export API_BASE_URL="api-test.findcommonground.app"
     export ADMIN_BASE_URL="admin-test.findcommonground.app"
     export PARTICIPANT_BASE_URL="participant-test.findcommonground.app"

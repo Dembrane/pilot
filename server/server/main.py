@@ -14,8 +14,10 @@ from fastapi.openapi.utils import get_openapi
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from server.config import (
+    ADMIN_BASE_URL,
     BUILD_VERSION,
     DISABLE_SENTRY,
+    PARTICIPANT_BASE_URL,
     SERVE_API_DOCS,
 )
 from server.api.api import api
@@ -61,8 +63,8 @@ docs_url = "/docs" if SERVE_API_DOCS else None
 
 # need to be added at the end
 origins = [
-    "https://admin.findcommonground.app",
-    "https://participant.findcommonground.app",
+    ADMIN_BASE_URL,
+    PARTICIPANT_BASE_URL,
 ]
 
 middleware = [

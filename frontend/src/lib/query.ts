@@ -365,9 +365,32 @@ export const useUploadConversationChunk = () => {
   return useMutation({
     mutationFn: uploadConversationChunk,
     retry: 10,
-    onSuccess: () => {
+    onMutate: (variables) => {
+      setTimeout(() => {
+        queryClient.setQueryData(
+          ["conversation", variables.conversationId, "chunks"],
+          (oldData: TConversationChunk[] | undefined) => {
+            return oldData
+              ? [
+                  ...oldData,
+                  {
+                    id: "optimistic-" + Date.now(),
+                    conversation_id: variables.conversationId,
+                    created_at: new Date(),
+                    timestamp: new Date(),
+                    updated_at: new Date(),
+                    transcript: undefined,
+                  } as TConversationChunk,
+                ]
+              : [];
+          },
+        );
+      }, 300); // delays the optimistic update to smooth out the UI change
+    },
+    onSuccess: (_, variables) => {
+      // then invalidate the query to refetch the new data
       queryClient.invalidateQueries({
-        queryKey: ["conversation"],
+        queryKey: ["conversation", variables.conversationId, "chunks"],
       });
     },
   });
@@ -378,9 +401,31 @@ export const useUploadConversationTextChunk = () => {
   return useMutation({
     mutationFn: uploadConversationText,
     retry: 10,
-    onSuccess: () => {
+    onMutate: (variables) => {
+      setTimeout(() => {
+        queryClient.setQueryData(
+          ["conversation", variables.conversationId, "chunks"],
+          (oldData: TConversationChunk[] | undefined) => {
+            return oldData
+              ? [
+                  ...oldData,
+                  {
+                    id: "optimistic-" + Date.now(),
+                    conversation_id: variables.conversationId,
+                    created_at: new Date(),
+                    timestamp: new Date(),
+                    updated_at: new Date(),
+                    transcript: variables.content,
+                  } as TConversationChunk,
+                ]
+              : [];
+          },
+        );
+      }, 300);
+    },
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["conversation"],
+        queryKey: ["conversation", variables.conversationId, "chunks"],
       });
     },
   });
@@ -400,11 +445,14 @@ export const useUploadConversation = () => {
   });
 };
 
-export const useConversationChunks = (conversationId: string) => {
+export const useConversationChunks = (
+  conversationId: string,
+  refetchInterval: number = 5000,
+) => {
   return useQuery({
     queryKey: ["conversation", conversationId, "chunks"],
     queryFn: () => getConversationChunks(conversationId),
-    refetchInterval: 5000,
+    refetchInterval,
   });
 };
 

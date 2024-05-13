@@ -1139,7 +1139,7 @@ export const ParticipantConversationAudioRoute = () =>
       }
     };
 
-    const chunks = useConversationChunks(conversationId as string);
+    const chunks = useConversationChunks(conversationId as string, 10000);
 
     if (conversationQuery.isLoading || loading) {
       return <LoadingOverlay visible />;
@@ -1255,6 +1255,22 @@ export const ParticipantConversationAudioRoute = () =>
                           <IconTextCaption />
                         </ActionIcon>
                       </Link>
+
+                      {!isRecording &&
+                        !preview &&
+                        !blob.current &&
+                        chunks?.data &&
+                        chunks.data.length > 0 && (
+                          <Button
+                            size="xl"
+                            onClick={handleFinish}
+                            component="a"
+                            variant="light"
+                            rightSection={<IconCheck />}
+                          >
+                            Finish
+                          </Button>
+                        )}
                     </Group>
                   ) : (
                     <Stack className="w-full">
@@ -1338,24 +1354,6 @@ export const ParticipantConversationAudioRoute = () =>
                 </>
               )}
             </Group>
-
-            {!isRecording &&
-              !preview &&
-              !blob.current &&
-              chunks?.data &&
-              chunks.data.length > 0 && (
-                <Group justify="end" className="w-full">
-                  <Button
-                    size="lg"
-                    onClick={handleFinish}
-                    component="a"
-                    variant="light"
-                    rightSection={<IconCheck />}
-                  >
-                    Finish
-                  </Button>
-                </Group>
-              )}
           </Stack>
         )}
       </div>
@@ -1388,7 +1386,7 @@ export const ParticipantConversationTextRoute = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
 
-  const chunks = useConversationChunks(conversationId as string);
+  const chunks = useConversationChunks(conversationId as string, 10000);
 
   const audioModeUrl = `/${language}/${projectId}/conversation/${conversationId}`;
   const finishUrl = `/${language}/${projectId}/conversation/${conversationId}/finish`;
@@ -1412,34 +1410,29 @@ export const ParticipantConversationTextRoute = () => {
       </Box>
 
       <Stack className="sticky bottom-0 z-10 p-4 w-full border-t border-slate-300 bg-white shadow-sm">
-        <Group justify="center w-full">
-          <textarea
-            ref={ref}
-            className="w-full h-32 p-4 border border-slate-300 rounded-md"
-            placeholder={t`Type your response here`}
-          ></textarea>
-          <Group className="w-full">
+        <textarea
+          ref={ref}
+          className="w-full h-32 p-4 border border-slate-300 rounded-md"
+          placeholder={t`Type your response here`}
+        ></textarea>
+        <Group className="w-full">
+          <Button
+            size="xl"
+            rightSection={<IconUpload />}
+            onClick={onChunk}
+            loading={uploadChunkMutation.isPending}
+            className="flex-grow"
+          >
+            <Trans>Submit</Trans>
+          </Button>
+          <Link to={audioModeUrl}>
+            <ActionIcon component="a" variant="outline" size="60">
+              <IconMicrophone />
+            </ActionIcon>
+          </Link>
+          {chunks?.data && chunks.data.length > 0 && (
             <Button
               size="xl"
-              rightSection={<IconUpload />}
-              onClick={onChunk}
-              loading={uploadChunkMutation.isPending}
-              className="flex-grow"
-            >
-              <Trans>Submit</Trans>
-            </Button>
-            <Link to={audioModeUrl}>
-              <ActionIcon component="a" variant="outline" size="60">
-                <IconMicrophone />
-              </ActionIcon>
-            </Link>
-          </Group>
-        </Group>
-
-        {chunks?.data && chunks.data.length > 0 && (
-          <Group justify="end" className="w-full">
-            <Button
-              size="lg"
               onClick={handleFinish}
               component="a"
               variant="light"
@@ -1447,8 +1440,8 @@ export const ParticipantConversationTextRoute = () => {
             >
               Finish
             </Button>
-          </Group>
-        )}
+          )}
+        </Group>
       </Stack>
     </div>
   );

@@ -61,7 +61,7 @@ type TConversationChunk = {
   updated_at: Date;
   conversation_id: string;
 
-  transcript: string;
+  transcript?: string;
   timestamp: Date;
 
   processing_status?: TProcessingStatus;

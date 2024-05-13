@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from logging import getLogger
-from typing import Annotated, Any, AsyncGenerator, List, Optional
+from typing import Annotated, AsyncGenerator, List, Optional
 from fastapi import APIRouter, Request, UploadFile, Form
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -268,7 +268,7 @@ async def upload_conversation_chunk(
     chunk: UploadFile,
     timestamp: Annotated[datetime, Form()],
     db: DependencyInjectDatabase,
-) -> Any:
+) -> ConversationChunkModel:
     conversation = await get_conversation(conversation_id, db)
 
     if not os.path.exists(os.path.join(AUDIO_CHUNKS_DIR, conversation.id)):

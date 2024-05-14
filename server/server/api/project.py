@@ -130,12 +130,17 @@ async def create_project(
 
 @ProjectRouter.get("/{project_id}", response_model=ProjectSchema)
 async def get_project(
-    project_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
+    project_id: str,
+    # session: DependencyRequireSession,
+    db: DependencyInjectDatabase,
 ) -> ProjectModel:
     project = (
         db.query(ProjectModel)
         .options(joinedload(ProjectModel.tags))
-        .filter(ProjectModel.id == project_id, ProjectModel.session_id == session.id)
+        .filter(
+            ProjectModel.id == project_id,
+            # ProjectModel.session_id == session.id
+        )
         .first()
     )
     if not project:

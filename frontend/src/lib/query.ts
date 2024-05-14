@@ -362,33 +362,58 @@ export const useConversationsByProjectId = (projectId: string) => {
 
 export const useUploadConversationChunk = () => {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: uploadConversationChunk,
     retry: 10,
-    onMutate: (variables) => {
-      setTimeout(() => {
-        queryClient.setQueryData(
-          ["conversation", variables.conversationId, "chunks"],
-          (oldData: TConversationChunk[] | undefined) => {
-            return oldData
-              ? [
-                  ...oldData,
-                  {
-                    id: "optimistic-" + Date.now(),
-                    conversation_id: variables.conversationId,
-                    created_at: new Date(),
-                    timestamp: new Date(),
-                    updated_at: new Date(),
-                    transcript: undefined,
-                  } as TConversationChunk,
-                ]
-              : [];
-          },
-        );
-      }, 300); // delays the optimistic update to smooth out the UI change
+    // When mutate is called:
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches
+      // (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({
+        queryKey: ["conversation", variables.conversationId, "chunks"],
+      });
+
+      // Snapshot the previous value
+      const previousChunks = queryClient.getQueryData([
+        "conversation",
+        variables.conversationId,
+        "chunks",
+      ]);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(
+        ["conversation", variables.conversationId, "chunks"],
+        (oldData: TConversationChunk[] | undefined) => {
+          return oldData
+            ? [
+                ...oldData,
+                {
+                  id: "optimistic-" + Date.now(),
+                  conversation_id: variables.conversationId,
+                  created_at: new Date(),
+                  timestamp: new Date(),
+                  updated_at: new Date(),
+                  transcript: undefined,
+                } as TConversationChunk,
+              ]
+            : [];
+        },
+      );
+
+      // Return a context object with the snapshotted value
+      return { previousChunks };
     },
-    onSuccess: (_, variables) => {
-      // then invalidate the query to refetch the new data
+    // If the mutation fails,
+    // use the context returned from onMutate to roll back
+    onError: (_err, variables, context) => {
+      queryClient.setQueryData(
+        ["conversation", variables.conversationId, "chunks"],
+        context?.previousChunks,
+      );
+    },
+    // Always refetch after error or success:
+    onSettled: (_data, _error, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["conversation", variables.conversationId, "chunks"],
       });
@@ -398,32 +423,58 @@ export const useUploadConversationChunk = () => {
 
 export const useUploadConversationTextChunk = () => {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: uploadConversationText,
     retry: 10,
-    onMutate: (variables) => {
-      setTimeout(() => {
-        queryClient.setQueryData(
-          ["conversation", variables.conversationId, "chunks"],
-          (oldData: TConversationChunk[] | undefined) => {
-            return oldData
-              ? [
-                  ...oldData,
-                  {
-                    id: "optimistic-" + Date.now(),
-                    conversation_id: variables.conversationId,
-                    created_at: new Date(),
-                    timestamp: new Date(),
-                    updated_at: new Date(),
-                    transcript: variables.content,
-                  } as TConversationChunk,
-                ]
-              : [];
-          },
-        );
-      }, 300);
+    // When mutate is called:
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches
+      // (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({
+        queryKey: ["conversation", variables.conversationId, "chunks"],
+      });
+
+      // Snapshot the previous value
+      const previousChunks = queryClient.getQueryData([
+        "conversation",
+        variables.conversationId,
+        "chunks",
+      ]);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(
+        ["conversation", variables.conversationId, "chunks"],
+        (oldData: TConversationChunk[] | undefined) => {
+          return oldData
+            ? [
+                ...oldData,
+                {
+                  id: "optimistic-" + Date.now(),
+                  conversation_id: variables.conversationId,
+                  created_at: new Date(),
+                  timestamp: new Date(),
+                  updated_at: new Date(),
+                  transcript: variables.content,
+                } as TConversationChunk,
+              ]
+            : [];
+        },
+      );
+
+      // Return a context object with the snapshotted value
+      return { previousChunks };
     },
-    onSuccess: (_, variables) => {
+    // If the mutation fails,
+    // use the context returned from onMutate to roll back
+    onError: (_err, variables, context) => {
+      queryClient.setQueryData(
+        ["conversation", variables.conversationId, "chunks"],
+        context?.previousChunks,
+      );
+    },
+    // Always refetch after error or success:
+    onSettled: (_data, _error, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["conversation", variables.conversationId, "chunks"],
       });

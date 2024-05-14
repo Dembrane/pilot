@@ -25,9 +25,13 @@ msgstr ""
 msgid "*Oh, we don't have a cookie statement because we don't use cookies! We eat them.*"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:767
-msgid "*Transcribing*"
+#: src/routes/participant/Conversation.tsx:770
+msgid "*Thanks for submitting this audio! Transcription in progess.*"
 msgstr ""
+
+#: src/routes/participant/Conversation.tsx:767
+#~ msgid "*Transcribing*"
+#~ msgstr ""
 
 #: src/routes/participant/Login.tsx:137
 msgid "*We make sure nothing can be traced back to you, and even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]"
@@ -78,16 +82,16 @@ msgstr ""
 #~ msgid "Are you sure you want to delete this document?"
 #~ msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1270
+#: src/routes/participant/Conversation.tsx:1291
 msgid "Are you sure you want to delete this recording?"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1152
-#: src/routes/participant/Conversation.tsx:1397
+#: src/routes/participant/Conversation.tsx:1157
+#: src/routes/participant/Conversation.tsx:1409
 msgid "Are you sure you want to finish?"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1058
+#: src/routes/participant/Conversation.tsx:1063
 msgid "Are you sure you want to stop recording?"
 msgstr ""
 
@@ -117,8 +121,8 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:971
-#: src/routes/participant/Conversation.tsx:1200
+#: src/routes/participant/Conversation.tsx:976
+#: src/routes/participant/Conversation.tsx:1205
 msgid "Check microphone access"
 msgstr ""
 
@@ -245,8 +249,8 @@ msgstr ""
 msgid "Login with Session"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:917
-#: src/routes/participant/Conversation.tsx:1137
+#: src/routes/participant/Conversation.tsx:922
+#: src/routes/participant/Conversation.tsx:1142
 msgid "Microphone access is still denied. Please check your settings and try again."
 msgstr ""
 
@@ -270,8 +274,8 @@ msgstr ""
 msgid "No resources found. Add resources using the button above."
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:944
-#: src/routes/participant/Conversation.tsx:1173
+#: src/routes/participant/Conversation.tsx:949
+#: src/routes/participant/Conversation.tsx:1178
 msgid "Oops! It looks like microphone access was denied. No worries, though! We've got a handy troubleshooting guide for you. Feel free to check it out. Once you've resolved the issue, come back and visit this page again to check if your microphone is ready."
 msgstr ""
 
@@ -284,8 +288,8 @@ msgstr ""
 #~ msgid "Open Document Chat ✨"
 #~ msgstr ""
 
-#: src/routes/participant/Conversation.tsx:962
-#: src/routes/participant/Conversation.tsx:1191
+#: src/routes/participant/Conversation.tsx:967
+#: src/routes/participant/Conversation.tsx:1196
 msgid "Open troubleshooting guide"
 msgstr ""
 
@@ -304,8 +308,8 @@ msgstr ""
 msgid "Participation"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1048
-#: src/routes/participant/Conversation.tsx:1325
+#: src/routes/participant/Conversation.tsx:1053
+#: src/routes/participant/Conversation.tsx:1346
 msgid "Pause"
 msgstr ""
 
@@ -313,8 +317,8 @@ msgstr ""
 #~ msgid "Please enter a message"
 #~ msgstr ""
 
-#: src/routes/participant/Conversation.tsx:983
-#: src/routes/participant/Conversation.tsx:1212
+#: src/routes/participant/Conversation.tsx:988
+#: src/routes/participant/Conversation.tsx:1217
 msgid "Please record your response to the prompt by clicking the \"Start Recording\" button below. You may also choose to respond in text by clicking the text icon."
 msgstr ""
 
@@ -334,8 +338,8 @@ msgstr ""
 msgid "Record another conversation"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1039
-#: src/routes/participant/Conversation.tsx:1316
+#: src/routes/participant/Conversation.tsx:1044
+#: src/routes/participant/Conversation.tsx:1337
 msgid "Resume"
 msgstr ""
 
@@ -362,21 +366,21 @@ msgstr ""
 msgid "Something went wrong"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1285
+#: src/routes/participant/Conversation.tsx:1306
 msgid "Something went wrong. Please try again."
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1019
-#: src/routes/participant/Conversation.tsx:1250
+#: src/routes/participant/Conversation.tsx:1024
+#: src/routes/participant/Conversation.tsx:1255
 msgid "Start Recording"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1066
-#: src/routes/participant/Conversation.tsx:1336
+#: src/routes/participant/Conversation.tsx:1071
+#: src/routes/participant/Conversation.tsx:1357
 msgid "Stop"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1429
+#: src/routes/participant/Conversation.tsx:1440
 msgid "Submit"
 msgstr ""
 
@@ -425,7 +429,7 @@ msgstr ""
 #~ msgid "Type context here..."
 #~ msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1419
+#: src/routes/participant/Conversation.tsx:1429
 msgid "Type your response here"
 msgstr ""
 
@@ -451,8 +455,8 @@ msgstr ""
 #~ msgid "We don't have a cookie banner because we don't use cookies! We just eat them."
 #~ msgstr ""
 
-#: src/routes/participant/Conversation.tsx:823
-#: src/routes/participant/Conversation.tsx:827
+#: src/routes/participant/Conversation.tsx:828
+#: src/routes/participant/Conversation.tsx:832
 msgid "Welcome"
 msgstr ""
 

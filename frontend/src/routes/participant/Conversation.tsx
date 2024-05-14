@@ -764,7 +764,11 @@ const UserChunkMessage = ({ chunk }: { chunk?: TConversationChunk }) => {
       </div>
       <Paper className="rounded-t-xl rounded-bl-xl shadow-sm p-4">
         <Text className="text-sm prose">
-          {chunk.transcript == null && <Markdown content={t`*Transcribing*`} />}
+          {chunk.transcript == null && (
+            <Markdown
+              content={t`*Thanks for submitting this audio! Transcription in progess.*`}
+            />
+          )}
           <Markdown content={chunk.transcript ?? ""} />
         </Text>
       </Paper>
@@ -1365,14 +1369,12 @@ export const ParticipantConversationTextRoute = () => {
   const conversationQuery = useConversationById(conversationId as string);
   const uploadChunkMutation = useUploadConversationTextChunk();
 
-  const ref = useRef<HTMLTextAreaElement>(null);
+  const [text, setText] = useState("");
 
   const onChunk = () => {
-    if (!ref.current) {
+    if (!text || text.trim() === "") {
       return;
     }
-
-    const text = ref.current.value;
 
     uploadChunkMutation.mutate({
       conversationId: conversationId ?? "",
@@ -1380,7 +1382,7 @@ export const ParticipantConversationTextRoute = () => {
       content: text.trim(),
     });
 
-    ref.current.value = "";
+    setText("");
   };
 
   const navigate = useNavigate();
@@ -1406,15 +1408,20 @@ export const ParticipantConversationTextRoute = () => {
       <ParticipantHeader />
 
       <Box className={clsx("flex-grow px-4 py-4 relative transition-all")}>
-        <ParticipantBody conversation={conversationQuery.data} />
+        <ParticipantBody conversation={conversationQuery.data}>
+          <SystemMessage
+            markdown={t`Please record your response to the prompt by clicking the "Start Recording" button below. You may also choose to respond in text by clicking the text icon.`}
+          />
+        </ParticipantBody>
       </Box>
 
       <Stack className="sticky bottom-0 z-10 p-4 w-full border-t border-slate-300 bg-white shadow-sm">
         <textarea
-          ref={ref}
           className="w-full h-32 p-4 border border-slate-300 rounded-md"
           placeholder={t`Type your response here`}
-        ></textarea>
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
         <Group className="w-full">
           <Button
             size="xl"
@@ -1430,7 +1437,7 @@ export const ParticipantConversationTextRoute = () => {
               <IconMicrophone />
             </ActionIcon>
           </Link>
-          {chunks?.data && chunks.data.length > 0 && (
+          {text.trim() != "" && chunks.data && chunks.data.length > 0 && (
             <Button
               size="xl"
               onClick={handleFinish}

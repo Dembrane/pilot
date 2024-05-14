@@ -21,9 +21,13 @@ msgstr "*Bij Dembrane staat privacy op een!*"
 msgid "*Oh, we don't have a cookie statement because we don't use cookies! We eat them.*"
 msgstr "*Oh, we hebben geen cookievermelding want we gebruiken geen cookies! We eten ze op.*"
 
+#: src/routes/participant/Conversation.tsx:770
+msgid "*Thanks for submitting this audio! Transcription in progess.*"
+msgstr "*Bedankt voor het insturen van deze audio! Transcriptie in volle gang.*"
+
 #: src/routes/participant/Conversation.tsx:767
-msgid "*Transcribing*"
-msgstr "*Transcriberen*"
+#~ msgid "*Transcribing*"
+#~ msgstr "*Transcriberen*"
 
 #: src/routes/participant/Login.tsx:137
 msgid "*We make sure nothing can be traced back to you, and even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]"
@@ -74,16 +78,16 @@ msgstr "Ben je er klaar voor? Druk dan op \"Klaar om te beginnen\"."
 #~ msgid "Are you sure you want to delete this document?"
 #~ msgstr "Weet je zeker dat je dit document wilt verwijderen?"
 
-#: src/routes/participant/Conversation.tsx:1270
+#: src/routes/participant/Conversation.tsx:1291
 msgid "Are you sure you want to delete this recording?"
 msgstr "Weet je zeker dat je deze opname wilt verwijderen?"
 
-#: src/routes/participant/Conversation.tsx:1152
-#: src/routes/participant/Conversation.tsx:1397
+#: src/routes/participant/Conversation.tsx:1157
+#: src/routes/participant/Conversation.tsx:1409
 msgid "Are you sure you want to finish?"
 msgstr "Weet je zeker dat je het wilt afmaken?"
 
-#: src/routes/participant/Conversation.tsx:1058
+#: src/routes/participant/Conversation.tsx:1063
 msgid "Are you sure you want to stop recording?"
 msgstr "Weet je zeker dat je wilt stoppen met opnemen?"
 
@@ -113,8 +117,8 @@ msgstr "Weet je zeker dat je wilt stoppen met opnemen?"
 msgid "Cancel"
 msgstr "Annuleren"
 
-#: src/routes/participant/Conversation.tsx:971
-#: src/routes/participant/Conversation.tsx:1200
+#: src/routes/participant/Conversation.tsx:976
+#: src/routes/participant/Conversation.tsx:1205
 msgid "Check microphone access"
 msgstr "Controleer microfoontoegang"
 
@@ -225,8 +229,8 @@ msgstr ""
 msgid "Login with Session"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:917
-#: src/routes/participant/Conversation.tsx:1137
+#: src/routes/participant/Conversation.tsx:922
+#: src/routes/participant/Conversation.tsx:1142
 msgid "Microphone access is still denied. Please check your settings and try again."
 msgstr "Toegang tot de microfoon wordt nog steeds geweigerd. Controleer uw instellingen en probeer het opnieuw."
 
@@ -250,8 +254,8 @@ msgstr ""
 msgid "No resources found. Add resources using the button above."
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:944
-#: src/routes/participant/Conversation.tsx:1173
+#: src/routes/participant/Conversation.tsx:949
+#: src/routes/participant/Conversation.tsx:1178
 msgid "Oops! It looks like microphone access was denied. No worries, though! We've got a handy troubleshooting guide for you. Feel free to check it out. Once you've resolved the issue, come back and visit this page again to check if your microphone is ready."
 msgstr "Oeps! Het lijkt erop dat toegang tot de microfoon geweigerd is. Geen zorgen, we hebben een handige probleemoplossingsgids voor je. Voel je vrij om deze te bekijken. Zodra je het probleem hebt opgelost, kom dan terug naar deze pagina om te controleren of je microfoon klaar is voor gebruik."
 
@@ -264,8 +268,8 @@ msgstr ""
 #~ msgid "Open Document Chat ✨"
 #~ msgstr "Open Document Chat ✨"
 
-#: src/routes/participant/Conversation.tsx:962
-#: src/routes/participant/Conversation.tsx:1191
+#: src/routes/participant/Conversation.tsx:967
+#: src/routes/participant/Conversation.tsx:1196
 msgid "Open troubleshooting guide"
 msgstr "Open de probleemoplossingsgids"
 
@@ -284,8 +288,8 @@ msgstr ""
 msgid "Participation"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1048
-#: src/routes/participant/Conversation.tsx:1325
+#: src/routes/participant/Conversation.tsx:1053
+#: src/routes/participant/Conversation.tsx:1346
 msgid "Pause"
 msgstr "Pauze"
 
@@ -293,8 +297,8 @@ msgstr "Pauze"
 #~ msgid "Please enter a message"
 #~ msgstr "Voer een bericht in"
 
-#: src/routes/participant/Conversation.tsx:983
-#: src/routes/participant/Conversation.tsx:1212
+#: src/routes/participant/Conversation.tsx:988
+#: src/routes/participant/Conversation.tsx:1217
 msgid "Please record your response to the prompt by clicking the \"Start Recording\" button below. You may also choose to respond in text by clicking the text icon."
 msgstr "Noteer je antwoord op de vraag via de knop hieronder. Je kunt er ook voor kiezen om in tekst te reageren door op het teksticoon te klikken."
 
@@ -314,8 +318,8 @@ msgstr "Klaar om te beginnen"
 msgid "Record another conversation"
 msgstr "Neem nog een gesprek op"
 
-#: src/routes/participant/Conversation.tsx:1039
-#: src/routes/participant/Conversation.tsx:1316
+#: src/routes/participant/Conversation.tsx:1044
+#: src/routes/participant/Conversation.tsx:1337
 msgid "Resume"
 msgstr "Hervatten"
 
@@ -342,21 +346,21 @@ msgstr ""
 msgid "Something went wrong"
 msgstr "Er ging iets mis"
 
-#: src/routes/participant/Conversation.tsx:1285
+#: src/routes/participant/Conversation.tsx:1306
 msgid "Something went wrong. Please try again."
 msgstr "Er is iets misgegaan. Probeer het opnieuw."
 
-#: src/routes/participant/Conversation.tsx:1019
-#: src/routes/participant/Conversation.tsx:1250
+#: src/routes/participant/Conversation.tsx:1024
+#: src/routes/participant/Conversation.tsx:1255
 msgid "Start Recording"
 msgstr "Opname starten"
 
-#: src/routes/participant/Conversation.tsx:1066
-#: src/routes/participant/Conversation.tsx:1336
+#: src/routes/participant/Conversation.tsx:1071
+#: src/routes/participant/Conversation.tsx:1357
 msgid "Stop"
 msgstr "Stop"
 
-#: src/routes/participant/Conversation.tsx:1429
+#: src/routes/participant/Conversation.tsx:1440
 msgid "Submit"
 msgstr "Stuur in"
 
@@ -397,7 +401,7 @@ msgstr ""
 #~ msgid "Type context here..."
 #~ msgstr "Typ hier de context..."
 
-#: src/routes/participant/Conversation.tsx:1419
+#: src/routes/participant/Conversation.tsx:1429
 msgid "Type your response here"
 msgstr "Typ hier je reactie"
 
@@ -415,8 +419,8 @@ msgstr ""
 msgid "Upload resources"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:823
-#: src/routes/participant/Conversation.tsx:827
+#: src/routes/participant/Conversation.tsx:828
+#: src/routes/participant/Conversation.tsx:832
 msgid "Welcome"
 msgstr "Welkom"
 

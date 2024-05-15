@@ -1437,7 +1437,7 @@ export const ParticipantConversationTextRoute = () => {
               <IconMicrophone />
             </ActionIcon>
           </Link>
-          {text.trim() != "" && chunks.data && chunks.data.length > 0 && (
+          {text.trim() == "" && chunks.data && chunks.data.length > 0 && (
             <Button
               size="xl"
               onClick={handleFinish}

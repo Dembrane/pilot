@@ -131,7 +131,6 @@ async def create_project(
 @ProjectRouter.get("/{project_id}", response_model=ProjectSchema)
 async def get_project(
     project_id: str,
-    # session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> ProjectModel:
     project = (
@@ -139,7 +138,6 @@ async def get_project(
         .options(joinedload(ProjectModel.tags))
         .filter(
             ProjectModel.id == project_id,
-            # ProjectModel.session_id == session.id
         )
         .first()
     )
@@ -194,7 +192,7 @@ async def get_project_transcripts(
     db: DependencyInjectDatabase,
     background_tasks: BackgroundTasks,
 ) -> StreamingResponse:
-    project = await get_project(project_id, session, db)
+    project = await get_project(project_id, db)
 
     conversations = await get_all_conversations_for_project(project_id, session, db)
 
@@ -248,7 +246,7 @@ async def update_project(
     session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> ProjectModel:
-    project = await get_project(project_id, session, db)
+    project = await get_project(project_id, db)
 
     for field, value in body.model_dump(exclude_unset=True, exclude_none=False).items():
         if field == "language" and value not in PROJECT_ALLOWED_LANGUAGES:
@@ -553,7 +551,6 @@ async def request_project_analysis(
 ):
     project = await get_project(
         db=db,
-        session=session,
         project_id=project_id,
     )
 
@@ -583,7 +580,7 @@ async def get_project_insights(
     db: DependencyInjectDatabase,
     session: DependencyRequireSession,
 ) -> List[InsightModel]:
-    project = await get_project(project_id, session, db)
+    project = await get_project(project_id, db)
 
     latest_project_analysis = get_latest_project_analysis_run(db, project.id)
 

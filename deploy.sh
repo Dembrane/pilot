@@ -28,6 +28,9 @@ else
     export API_BASE_URL="api-test.findcommonground.app"
     export ADMIN_BASE_URL="admin-test.findcommonground.app"
     export PARTICIPANT_BASE_URL="participant-test.findcommonground.app"
+    # docker compose down
+    # docker builder prune
+    # docker system prune
     docker compose up --build -d
 fi
 

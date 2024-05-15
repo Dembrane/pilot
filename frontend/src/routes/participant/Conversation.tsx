@@ -766,7 +766,7 @@ const UserChunkMessage = ({ chunk }: { chunk?: TConversationChunk }) => {
         <Text className="text-sm prose">
           {chunk.transcript == null && (
             <Markdown
-              content={t`*Thanks for submitting this audio! Transcription in progess.*`}
+              content={t`*Thanks for submitting this audio! Transcription in progress.*`}
             />
           )}
           <Markdown content={chunk.transcript ?? ""} />

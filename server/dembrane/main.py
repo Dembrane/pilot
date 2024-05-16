@@ -13,17 +13,17 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.utils import get_openapi
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from server.config import (
+from dembrane.config import (
     ADMIN_BASE_URL,
     BUILD_VERSION,
     DISABLE_SENTRY,
     PARTICIPANT_BASE_URL,
     SERVE_API_DOCS,
 )
-from server.api.api import api
+from dembrane.api.api import api
 
-# from server.vectorstore import vectorstore
-# from server.process_resource import (
+# from dembrane.vectorstore import vectorstore
+# from dembrane.process_resource import (
 #     seed_process_resource_queue,
 # )
 import sentry_sdk

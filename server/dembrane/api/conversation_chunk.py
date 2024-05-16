@@ -1,13 +1,13 @@
 from fastapi import APIRouter
-from server.database import (
+from dembrane.database import (
     ConversationChunkModel,
     DependencyInjectDatabase,
 )
-from server.schemas import (
+from dembrane.schemas import (
     ConversationChunkSchema,
 )
 
-from server.api.session import DependencyRequireSession
+from dembrane.api.session import DependencyRequireSession
 
 ConversationChunkRouter = APIRouter()
 

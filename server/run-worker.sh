@@ -1,3 +1,3 @@
 #!/bin/sh
 
-celery -A server.tasks worker --loglevel=info 
+celery -A dembrane.tasks worker --loglevel=debug 

@@ -4,15 +4,15 @@ from typing import Optional
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from server.api.session import DependencyRequireSession
-from server.database import ResourceModel, DependencyInjectDatabase
-from server.schemas import ResourceSchema
-from server.api.exceptions import (
+from dembrane.api.session import DependencyRequireSession
+from dembrane.database import ResourceModel, DependencyInjectDatabase
+from dembrane.schemas import ResourceSchema
+from dembrane.api.exceptions import (
     ResourceContentNotFoundException,
     ResourceInvalidFileFormatException,
     ResourceNotFoundException,
 )
-from server.utils import iter_file_content
+from dembrane.utils import iter_file_content
 
 logger = getLogger("api.resource")
 

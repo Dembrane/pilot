@@ -2,7 +2,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
 
-from server.database import ProcessingStatusEnum
+from dembrane.database import ProcessingStatusEnum
 
 
 class SessionSchema(BaseModel):

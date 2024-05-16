@@ -1,9 +1,9 @@
-from datetime import datetime, timezone
-import uuid
 import time
+import uuid
 import random
 import threading
 from typing import Generator
+from datetime import datetime, timezone
 
 random.seed(time.time())
 
@@ -41,5 +41,5 @@ def run_with_timeout(func, args=(), kwargs={}, timeout_sec: int = 1000):  # type
         raise e
 
 
-def get_utc_timestamp():
+def get_utc_timestamp() -> datetime:
     return datetime.now(tz=timezone.utc)

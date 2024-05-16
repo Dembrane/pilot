@@ -1,6 +1,63 @@
+[project]
+name = "Dembrane"
+version = "1.1.0"
+description = "Python project for the Dembrane API"
+requires-python = ">= 3.11"
+dependencies = [
+    # API server
+    "fastapi==0.109.*",
+    "uvicorn[standard]==0.27.*",
+    "python-multipart==0.0.*",
+    "celery==5.4.*",
+    # Langchain
+    "langchain==0.1.*",
+    "langchain-community==0.0.*",
+    "langchain-experimental==0.0.57",
+    "langchain-openai==0.0.*",
+    "faiss-cpu==1.7.*",
+    "pypdf==4.0.*",
+    # OpenAI
+    "openai==1.30.*",
+    # Data
+    "pandas==2.2.*",
+    "numpy==1.26.*",
+    "scikit-learn==1.4.*",
+    # Database
+    "SQLAlchemy==2.0.*",
+    "alembic==1.13.*",
+    "psycopg[binary,pool]==3.1.*",
+    "pgvector==0.2.*",
+    # Config
+    "python-dotenv==1.0.*",
+    # Other
+    "backoff==2.2.*",
+    "aiofiles==23.2.*",
+    "sentry-sdk[fastapi]",
+    # Types
+    "types-aiofiles==23.2.*",
+    "types-tqdm > 4",
+]
+
+[tool.setuptools]
+packages = ["dembrane"]
+
+[tool.rye]
+managed = true
+dev-dependencies = ["mypy", "ruff", "isort"]
+
+[tool.rye.scripts]
+"format" = { chain = ["format:isort", "format:ruff", "fix:ruff"] }
+"format:ruff" = "ruff format"
+"format:isort" = "isort ."
+"lint" = { chain = ["check:ruff", "typecheck"] }
+"check:ruff" = "ruff ."
+"fix:ruff" = "ruff --fix ."
+typecheck = { chain = ["typecheck:mypy"] }
+"typecheck:mypy" = "mypy ."
+
 [tool.mypy]
 plugins = 'pydantic.mypy'
-exclude = ['migrations/versions']
+exclude = ['migrations/versions', 'scripts']
 warn_redundant_casts = true
 warn_unused_ignores = true
 check_untyped_defs = true
@@ -14,7 +71,10 @@ warn_required_dynamic_aliases = true
 warn_untyped_fields = true
 
 [tool.ruff]
-# Exclude a variety of commonly ignored directories.
+line-length = 120
+output-format = "grouped"
+target-version = "py311"
+select = []
 exclude = [
     ".bzr",
     ".direnv",
@@ -42,52 +102,60 @@ exclude = [
     "node_modules",
     "site-packages",
     "venv",
+    "alembic",
+    'scripts',
 ]
-
-# Same as Black.
-line-length = 88
+ignore = [
+    # mutable defaults
+    "B006",
+]
+unfixable = [
+    # disable auto fix for print statements
+    "T201",
+    "T203",
+]
+ignore-init-module-imports = true
 indent-width = 4
 
-# Assume Python 3.8
-target-version = "py38"
-
 [tool.ruff.lint]
-# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
-# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
-# McCabe complexity (`C901`) by default.
-select = ["E4", "E7", "E9", "F"]
+select = [
+    "E4",
+    "E7",
+    "E9",
+    "F",  # isort
+    "I",
+    # bugbear rules
+    "B",
+    # remove unused imports
+    "F401",
+    # bare except statements
+    "E722",
+    # unused arguments
+    "ARG",
+    # print statements
+    "T201",
+    "T203",
+    # misuse of typing.TYPE_CHECKING
+    "TCH004",
+    # import rules
+    "TID251",
+]
 ignore = []
-
-# Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
 unfixable = []
-
-# Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.format]
-# Like Black, use double quotes for strings.
 quote-style = "double"
-
-# Like Black, indent with spaces, rather than tabs.
 indent-style = "space"
-
-# Like Black, respect magic trailing commas.
 skip-magic-trailing-comma = false
-
-# Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
-
-# Enable auto-formatting of code examples in docstrings. Markdown,
-# reStructuredText code/literal blocks and doctests are all supported.
-#
-# This is currently disabled by default, but it is planned for this
-# to be opt-out in the future.
-docstring-code-format = false
-
-# Set the line length limit used when formatting code snippets in
-# docstrings.
-#
-# This only has an effect when the `docstring-code-format` setting is
-# enabled.
+docstring-code-format = true
 docstring-code-line-length = "dynamic"
+
+[tool.ruff.lint.isort]
+length-sort = true
+length-sort-straight = true
+combine-as-imports = true
+extra-standard-library = ["typing_extensions"]
+known-first-party = ["dembrane"]

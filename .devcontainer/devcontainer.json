@@ -24,12 +24,15 @@
 		"vscode": {
 			"extensions": [
 				"ms-azuretools.vscode-docker",
+				"jebbs.plantuml",
+				"EthanSK.restore-terminals",
 				"esbenp.prettier-vscode",
+				"YoavBls.pretty-ts-errors",
 				"bradlc.vscode-tailwindcss",
 				"ms-python.python",
+				"ms-python.mypy-type-checker",
 				"charliermarsh.ruff",
-				"jebbs.plantuml",
-				"EthanSK.restore-terminals"
+				"tamasfe.even-better-toml"
 			]
 		}
 	},

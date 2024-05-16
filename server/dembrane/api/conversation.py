@@ -6,28 +6,28 @@ from fastapi import APIRouter, Request, UploadFile, Form
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import joinedload
-from server.database import (
+from dembrane.database import (
     ConversationModel,
     ConversationChunkModel,
     DependencyInjectDatabase,
     ProjectAnalysisRunModel,
     QuoteModel,
 )
-from server.schemas import (
+from dembrane.schemas import (
     ConversationChunkSchema,
     ConversationSchema,
     QuoteSchema,
 )
 
-from server.api.session import DependencyRequireSession
-from server.api.exceptions import (
+from dembrane.api.session import DependencyRequireSession
+from dembrane.api.exceptions import (
     ConversationNotFoundException,
     NoContentFoundException,
 )
-from server.config import AUDIO_CHUNKS_DIR
-from server.audio_utils import get_mime_type_from_file_path
-from server.tasks import process_conversation_chunk
-from server.utils import generate_uuid
+from dembrane.config import AUDIO_CHUNKS_DIR
+from dembrane.audio_utils import get_mime_type_from_file_path
+from dembrane.tasks import process_conversation_chunk
+from dembrane.utils import generate_uuid
 
 logger = getLogger("api.conversation")
 ConversationRouter = APIRouter(tags=["conversation"])

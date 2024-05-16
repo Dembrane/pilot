@@ -2,10 +2,10 @@ from typing import List
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from server.schemas import ProjectTagSchema
-from server.database import DependencyInjectDatabase, ProjectTagModel
-from server.api.session import DependencyRequireSession
-from server.api.exceptions import ProjectTagNotFoundException
+from dembrane.schemas import ProjectTagSchema
+from dembrane.database import DependencyInjectDatabase, ProjectTagModel
+from dembrane.api.session import DependencyRequireSession
+from dembrane.api.exceptions import ProjectTagNotFoundException
 
 
 TagRouter = APIRouter(tags=["project"])

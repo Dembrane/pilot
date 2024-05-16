@@ -30,8 +30,8 @@ from sqlalchemy.orm import (
 from sqlalchemy.dialects import postgresql
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
-from server.config import DATABASE_URL
-from server.embedding import EMBEDDING_DIM
+from dembrane.config import DATABASE_URL
+from dembrane.embedding import EMBEDDING_DIM
 
 logger = getLogger("database")
 

@@ -2,9 +2,9 @@ from logging import getLogger
 import time
 from typing import Annotated, List, Optional
 from fastapi import APIRouter, Depends, Request, Response
-from server.api.exceptions import SessionInvalidException, SessionNotFoundException
-from server.database import SessionModel, DependencyInjectDatabase
-from server.schemas import SessionSchema
+from dembrane.api.exceptions import SessionInvalidException, SessionNotFoundException
+from dembrane.database import SessionModel, DependencyInjectDatabase
+from dembrane.schemas import SessionSchema
 
 SESSION_ID_COOKIE_KEY = "sid"
 

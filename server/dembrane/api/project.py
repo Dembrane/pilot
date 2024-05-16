@@ -7,7 +7,7 @@ from typing import Generator, List, Optional
 from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from server.database import (
+from dembrane.database import (
     ConversationModel,
     InsightModel,
     ProjectAnalysisRunModel,
@@ -16,7 +16,7 @@ from server.database import (
     DependencyInjectDatabase,
     ProjectTagModel,
 )
-from server.schemas import (
+from dembrane.schemas import (
     ConversationSchema,
     InsightSchema,
     ProjectSchema,
@@ -24,7 +24,7 @@ from server.schemas import (
     ResourceSchema,
     TaskSchema,
 )
-from server.api.exceptions import (
+from dembrane.api.exceptions import (
     ConversationInvalidPinException,
     ConversationNotOpenForParticipationException,
     ProjectLanguageNotSupportedException,
@@ -34,16 +34,16 @@ from server.api.exceptions import (
     ResourceInvalidFileFormatException,
     InternalServerException,
 )
-from server.config import AUDIO_CHUNKS_DIR, RESOURCE_UPLOADS_DIR
+from dembrane.config import AUDIO_CHUNKS_DIR, RESOURCE_UPLOADS_DIR
 
-# from server.process_resource import (
+# from dembrane.process_resource import (
 #     ProcessResourceTaskQueueItem,
 #     process_resource_queue,
 # )
-from server.api.session import DependencyRequireSession
-from server.api.conversation import get_conversation, get_conversation_chunks
-from server.tasks import process_project
-from server.utils import generate_4_digit_pin, generate_6_digit_pin, generate_uuid
+from dembrane.api.session import DependencyRequireSession
+from dembrane.api.conversation import get_conversation, get_conversation_chunks
+from dembrane.tasks import process_project
+from dembrane.utils import generate_4_digit_pin, generate_6_digit_pin, generate_uuid
 from sqlalchemy.orm import Session, joinedload
 
 

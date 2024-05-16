@@ -2,18 +2,18 @@ import os
 from typing import Optional, Tuple, Union
 from celery import Celery, chain, group
 from celery.utils.log import get_task_logger
-from server.config import DATABASE_URL, RABBITMQ_URL
-from server.database import (
+from dembrane.config import DATABASE_URL, RABBITMQ_URL
+from dembrane.database import (
     ConversationChunkModel,
     ConversationModel,
     DatabaseSession,
     ProcessingStatusEnum,
     ProjectAnalysisRunModel,
 )
-from server.audio_utils import ConversionError, convert_mp4_to_mp3
-from server.quote_utils import generate_insights, generate_quotes
-from server.utils import generate_uuid, get_utc_timestamp
-from server.transcribe import TranscriptionError, transcribe_audio
+from dembrane.audio_utils import ConversionError, convert_mp4_to_mp3
+from dembrane.quote_utils import generate_insights, generate_quotes
+from dembrane.utils import generate_uuid, get_utc_timestamp
+from dembrane.transcribe import TranscriptionError, transcribe_audio
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 

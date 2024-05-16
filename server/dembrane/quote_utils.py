@@ -8,9 +8,9 @@ from langchain_experimental.text_splitter import SemanticChunker
 from sqlalchemy.orm import Session
 from langchain_openai import OpenAIEmbeddings
 
-from server.database import ConversationChunkModel, InsightModel, QuoteModel
-from server.embedding import embed_text
-from server.utils import generate_uuid
+from dembrane.database import ConversationChunkModel, InsightModel, QuoteModel
+from dembrane.embedding import embed_text
+from dembrane.utils import generate_uuid
 
 
 logger = logging.getLogger("quote_utils")

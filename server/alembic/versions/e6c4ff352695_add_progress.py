@@ -10,7 +10,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-import server
+import dembrane
 import pgvector
 
 
@@ -48,7 +48,7 @@ def upgrade() -> None:
         "conversation",
         sa.Column(
             "processing_started_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             nullable=True,
         ),
     )
@@ -56,7 +56,7 @@ def upgrade() -> None:
         "conversation",
         sa.Column(
             "processing_completed_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             nullable=True,
         ),
     )
@@ -70,7 +70,7 @@ def upgrade() -> None:
         "conversation_chunk",
         sa.Column(
             "processing_started_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             nullable=True,
         ),
     )
@@ -78,7 +78,7 @@ def upgrade() -> None:
         "conversation_chunk",
         sa.Column(
             "processing_completed_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             nullable=True,
         ),
     )

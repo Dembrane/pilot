@@ -3,12 +3,12 @@ from fastapi import (
     APIRouter,
 )
 
-from server.api.session import SessionRouter
-from server.api.project import ProjectRouter
-from server.api.resource import ResourceRouter
-from server.api.conversation import ConversationRouter
-from server.api.tag import TagRouter
-from server.api.conversation_chunk import ConversationChunkRouter
+from dembrane.api.session import SessionRouter
+from dembrane.api.project import ProjectRouter
+from dembrane.api.resource import ResourceRouter
+from dembrane.api.conversation import ConversationRouter
+from dembrane.api.tag import TagRouter
+from dembrane.api.conversation_chunk import ConversationChunkRouter
 
 logger = getLogger("api")
 

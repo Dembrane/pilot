@@ -843,6 +843,10 @@ const ParticipantBody = ({
             <SystemMessage markdown={conversation.description} />
           )}
 
+          <SystemMessage
+            markdown={t`Please record your response by clicking the "Start Recording" button below. You may also choose to respond in text by clicking the text icon.`}
+          />
+
           {children}
 
           {chunksQuery.data
@@ -981,13 +985,7 @@ export const ParticipantConversationChunkedAudioRoute = () =>
         <ParticipantHeader />
 
         <Box className={clsx("flex-grow px-4 py-4 relative transition-all")}>
-          <ParticipantBody conversation={conversationQuery.data}>
-            {!permissionError && (
-              <UserMessage
-                markdown={t`Please record your response to the prompt by clicking the "Start Recording" button below. You may also choose to respond in text by clicking the text icon.`}
-              />
-            )}
-          </ParticipantBody>
+          <ParticipantBody conversation={conversationQuery.data} />
         </Box>
 
         {!errored && (
@@ -1210,13 +1208,7 @@ export const ParticipantConversationAudioRoute = () =>
         <ParticipantHeader />
 
         <Box className={clsx("flex-grow px-4 py-4 relative transition-all")}>
-          <ParticipantBody conversation={conversationQuery.data}>
-            {!permissionError && (
-              <SystemMessage
-                markdown={t`Please record your response to the prompt by clicking the "Start Recording" button below. You may also choose to respond in text by clicking the text icon.`}
-              />
-            )}
-          </ParticipantBody>
+          <ParticipantBody conversation={conversationQuery.data} />
         </Box>
 
         {!errored && (
@@ -1408,11 +1400,9 @@ export const ParticipantConversationTextRoute = () => {
       <ParticipantHeader />
 
       <Box className={clsx("flex-grow px-4 py-4 relative transition-all")}>
-        <ParticipantBody conversation={conversationQuery.data}>
-          <SystemMessage
-            markdown={t`Please record your response to the prompt by clicking the "Start Recording" button below. You may also choose to respond in text by clicking the text icon.`}
-          />
-        </ParticipantBody>
+        <ParticipantBody
+          conversation={conversationQuery.data}
+        ></ParticipantBody>
       </Box>
 
       <Stack className="sticky bottom-0 z-10 p-4 w-full border-t border-slate-300 bg-white shadow-sm">

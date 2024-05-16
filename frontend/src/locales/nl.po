@@ -82,16 +82,16 @@ msgstr "Ben je er klaar voor? Druk dan op \"Klaar om te beginnen\"."
 #~ msgid "Are you sure you want to delete this document?"
 #~ msgstr "Weet je zeker dat je dit document wilt verwijderen?"
 
-#: src/routes/participant/Conversation.tsx:1290
+#: src/routes/participant/Conversation.tsx:1282
 msgid "Are you sure you want to delete this recording?"
 msgstr "Weet je zeker dat je deze opname wilt verwijderen?"
 
-#: src/routes/participant/Conversation.tsx:1156
-#: src/routes/participant/Conversation.tsx:1397
+#: src/routes/participant/Conversation.tsx:1154
+#: src/routes/participant/Conversation.tsx:1389
 msgid "Are you sure you want to finish?"
 msgstr "Weet je zeker dat je het wilt afmaken?"
 
-#: src/routes/participant/Conversation.tsx:1062
+#: src/routes/participant/Conversation.tsx:1060
 msgid "Are you sure you want to stop recording?"
 msgstr "Weet je zeker dat je wilt stoppen met opnemen?"
 
@@ -121,8 +121,8 @@ msgstr "Weet je zeker dat je wilt stoppen met opnemen?"
 msgid "Cancel"
 msgstr "Annuleren"
 
-#: src/routes/participant/Conversation.tsx:975
-#: src/routes/participant/Conversation.tsx:1204
+#: src/routes/participant/Conversation.tsx:979
+#: src/routes/participant/Conversation.tsx:1202
 msgid "Check microphone access"
 msgstr "Controleer microfoontoegang"
 
@@ -233,8 +233,8 @@ msgstr ""
 msgid "Login with Session"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:921
-#: src/routes/participant/Conversation.tsx:1141
+#: src/routes/participant/Conversation.tsx:925
+#: src/routes/participant/Conversation.tsx:1139
 msgid "Microphone access is still denied. Please check your settings and try again."
 msgstr "Toegang tot de microfoon wordt nog steeds geweigerd. Controleer uw instellingen en probeer het opnieuw."
 
@@ -258,8 +258,8 @@ msgstr ""
 msgid "No resources found. Add resources using the button above."
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:948
-#: src/routes/participant/Conversation.tsx:1177
+#: src/routes/participant/Conversation.tsx:952
+#: src/routes/participant/Conversation.tsx:1175
 msgid "Oops! It looks like microphone access was denied. No worries, though! We've got a handy troubleshooting guide for you. Feel free to check it out. Once you've resolved the issue, come back and visit this page again to check if your microphone is ready."
 msgstr "Oeps! Het lijkt erop dat toegang tot de microfoon geweigerd is. Geen zorgen, we hebben een handige probleemoplossingsgids voor je. Voel je vrij om deze te bekijken. Zodra je het probleem hebt opgelost, kom dan terug naar deze pagina om te controleren of je microfoon klaar is voor gebruik."
 
@@ -272,8 +272,8 @@ msgstr ""
 #~ msgid "Open Document Chat ✨"
 #~ msgstr "Open Document Chat ✨"
 
-#: src/routes/participant/Conversation.tsx:966
-#: src/routes/participant/Conversation.tsx:1195
+#: src/routes/participant/Conversation.tsx:970
+#: src/routes/participant/Conversation.tsx:1193
 msgid "Open troubleshooting guide"
 msgstr "Open de probleemoplossingsgids"
 
@@ -292,8 +292,8 @@ msgstr ""
 msgid "Participation"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1052
-#: src/routes/participant/Conversation.tsx:1345
+#: src/routes/participant/Conversation.tsx:1050
+#: src/routes/participant/Conversation.tsx:1337
 msgid "Pause"
 msgstr "Pauze"
 
@@ -301,11 +301,9 @@ msgstr "Pauze"
 #~ msgid "Please enter a message"
 #~ msgstr "Voer een bericht in"
 
-#: src/routes/participant/Conversation.tsx:987
-#: src/routes/participant/Conversation.tsx:1216
-#: src/routes/participant/Conversation.tsx:1413
-msgid "Please record your response to the prompt by clicking the \"Start Recording\" button below. You may also choose to respond in text by clicking the text icon."
-msgstr "Noteer je antwoord op de vraag via de knop hieronder. Je kunt er ook voor kiezen om in tekst te reageren door op het teksticoon te klikken."
+#: src/routes/participant/Conversation.tsx:847
+msgid "Please record your response by clicking the \"Start Recording\" button below. You may also choose to respond in text by clicking the text icon."
+msgstr "Noteer je antwoord via de knop hieronder. Je kunt er ook voor kiezen om in tekst te reageren door op het teksticoon te klikken."
 
 #: src/routes/participant/Login.tsx:225
 msgid "Privacy Statements"
@@ -323,8 +321,8 @@ msgstr "Klaar om te beginnen"
 msgid "Record another conversation"
 msgstr "Neem nog een gesprek op"
 
-#: src/routes/participant/Conversation.tsx:1043
-#: src/routes/participant/Conversation.tsx:1336
+#: src/routes/participant/Conversation.tsx:1041
+#: src/routes/participant/Conversation.tsx:1328
 msgid "Resume"
 msgstr "Hervatten"
 
@@ -351,21 +349,21 @@ msgstr ""
 msgid "Something went wrong"
 msgstr "Er ging iets mis"
 
-#: src/routes/participant/Conversation.tsx:1305
+#: src/routes/participant/Conversation.tsx:1297
 msgid "Something went wrong. Please try again."
 msgstr "Er is iets misgegaan. Probeer het opnieuw."
 
-#: src/routes/participant/Conversation.tsx:1023
-#: src/routes/participant/Conversation.tsx:1254
+#: src/routes/participant/Conversation.tsx:1021
+#: src/routes/participant/Conversation.tsx:1246
 msgid "Start Recording"
 msgstr "Opname starten"
 
-#: src/routes/participant/Conversation.tsx:1070
-#: src/routes/participant/Conversation.tsx:1356
+#: src/routes/participant/Conversation.tsx:1068
+#: src/routes/participant/Conversation.tsx:1348
 msgid "Stop"
 msgstr "Stop"
 
-#: src/routes/participant/Conversation.tsx:1433
+#: src/routes/participant/Conversation.tsx:1423
 msgid "Submit"
 msgstr "Stuur in"
 
@@ -406,7 +404,7 @@ msgstr ""
 #~ msgid "Type context here..."
 #~ msgstr "Typ hier de context..."
 
-#: src/routes/participant/Conversation.tsx:1421
+#: src/routes/participant/Conversation.tsx:1411
 msgid "Type your response here"
 msgstr "Typ hier je reactie"
 

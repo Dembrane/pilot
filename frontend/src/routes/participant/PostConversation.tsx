@@ -1,12 +1,13 @@
 import { Logo } from "@/components/Logo";
+import { Markdown } from "@/components/Markdown";
 import { PARTICIPANT_BASE_URL } from "@/config";
 import { useProjectById } from "@/lib/query";
 import { useLanguage } from "@/lib/useLanguage";
 import { Trans } from "@lingui/macro";
 import {
-  Anchor,
   Box,
   Button,
+  Divider,
   Group,
   LoadingOverlay,
   Stack,
@@ -16,7 +17,7 @@ import {
 import { Link, useParams } from "react-router-dom";
 
 export const ParticipantPostConversation = () => {
-  const { projectId } = useParams();
+  const { projectId, conversationId } = useParams();
   const project = useProjectById(projectId ?? "");
 
   const { language } = useLanguage();
@@ -25,18 +26,37 @@ export const ParticipantPostConversation = () => {
     PARTICIPANT_BASE_URL +
     `/${language}/${projectId}/login?pin=${project?.data?.pin}`;
 
+  const variables = {
+    "{{CONVERSATION_ID}}": conversationId ?? "null",
+    "{{PROJECT_ID}}": projectId ?? "null",
+  };
+
+  const text =
+    project.data?.default_conversation_finish_text?.replace(
+      /{{CONVERSATION_ID}}|{{PROJECT_ID}}/g,
+      // @ts-ignore
+      (match) => variables[match],
+    ) ?? null;
+
   return (
-    <div className="h-dvh min-h-[100vh] container max-w-2xl mx-auto">
+    <div className="container max-w-2xl mx-auto">
       <header className="fixed left-0 w-full top-0 h-[64px] border-b border-slate-300 py-4 bg-white z-10">
         <Group justify="center" align="center" className="px-4 relative">
           <Logo hideTitle className="left-0 pl-4 absolute sm:relative" />
           <h1 className="text-xl">Dembrane</h1>
         </Group>
       </header>
-      <Stack className="mt-[64px] py-8 px-4 relative">
-        <Title order={2}>
-          <Trans>Thank you for participating!</Trans>
-        </Title>
+      <Stack className="mt-[64px] py-8 px-4">
+        {!!text && text != "" ? (
+          <>
+            <Markdown content={text} />
+            <Divider />
+          </>
+        ) : (
+          <Title order={2}>
+            <Trans>Thank you for participating!</Trans>
+          </Title>
+        )}
         <Text size="lg">
           <Trans>
             Your response has been recorded. You may now close this tab.

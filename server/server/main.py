@@ -14,9 +14,10 @@ from fastapi.openapi.utils import get_openapi
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from server.config import (
+    ADMIN_BASE_URL,
     BUILD_VERSION,
-    FAISS_INDEX_PATH,
     DISABLE_SENTRY,
+    PARTICIPANT_BASE_URL,
     SERVE_API_DOCS,
 )
 from server.api.api import api
@@ -41,7 +42,7 @@ if not DISABLE_SENTRY:
         # We recommend adjusting this value in production.
         profiles_sample_rate=1.0,
         enable_tracing=True,
-        release=BUILD_VERSION
+        release=BUILD_VERSION,
     )
 else:
     logger.info("sentry is disabled by DISABLE_SENTRY")
@@ -62,10 +63,8 @@ docs_url = "/docs" if SERVE_API_DOCS else None
 
 # need to be added at the end
 origins = [
-    "https://admin.findcommonground.app",
-    "https://participant.findcommonground.app",
-    "http://localhost:4173",
-    "http://localhost:5174",
+    ADMIN_BASE_URL,
+    PARTICIPANT_BASE_URL,
 ]
 
 middleware = [

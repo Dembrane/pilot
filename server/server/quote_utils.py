@@ -27,21 +27,17 @@ def generate_quotes(
 
     chunks = (
         db.query(ConversationChunkModel)
-        .filter(ConversationChunkModel.conversation_id == conversation_id)
+        .filter(
+            ConversationChunkModel.conversation_id == conversation_id,
+            ConversationChunkModel.transcript is not None,
+        )
         .order_by(ConversationChunkModel.created_at.asc())
         .all()
     )
 
-    all_chunks_count = (
-        db.query(ConversationChunkModel)
-        .filter(ConversationChunkModel.conversation_id == conversation_id)
-        .count()
-    )
-
-    if all_chunks_count > len(chunks):
-        logger.warning(
-            f"Conversation has more chunks than query 'limit'. {len(chunks)}/{all_chunks_count}"
-        )
+    if len(chunks) == 0:
+        logger.debug(f"no conversation_chunks found for conversation {conversation_id}")
+        return
 
     # Before chunking
     # TODO: quote transformations

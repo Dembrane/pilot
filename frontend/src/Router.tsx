@@ -10,7 +10,11 @@ import { ProjectResourceOverviewRoute } from "./routes/project/ProjectResourceOv
 import { ProjectResourceAnalysisRoute } from "./routes/project/ProjectResourceAnalysis";
 import { ParticipantLayout } from "./components/layout/ParticipantLayout";
 import { ParticipantLoginRoute } from "./routes/participant/Login";
-import { ParticipantConversationRoute } from "./routes/participant/Conversation";
+import {
+  ParticipantConversationAudioRoute,
+  ParticipantConversationChunkedAudioRoute,
+  ParticipantConversationTextRoute,
+} from "./routes/participant/Conversation";
 import { ProjectConversationLayout } from "./components/layout/ProjectConversationLayout";
 import { ProjectConversationOverviewRoute } from "./routes/project/ProjectConversationOverview";
 import { ProjectConversationTranscript } from "./routes/project/ProjectConversationTranscript";
@@ -193,20 +197,17 @@ export const participantRouter = createBrowserRouter([
       },
       {
         path: "conversation/:conversationId",
-        element: <ParticipantConversationRoute />,
+        element: <ParticipantConversationAudioRoute />,
+        // element: <ParticipantConversationChunkedAudioRoute />,
       },
       {
-        path: "finish",
+        path: "conversation/:conversationId/text",
+        element: <ParticipantConversationTextRoute />,
+      },
+      {
+        path: "conversation/:conversationId/finish",
         element: <ParticipantPostConversation />,
       },
-      // {
-      //   path: "conversation/:conversationId/vad",
-      //   element: <ParticipantConversationRoute />,
-      // },
-      // {
-      //   path: "conversation/:conversationId/fallback",
-      //   element: <ParticipantConversationRoute fallback />,
-      // },
     ],
   },
 ]);

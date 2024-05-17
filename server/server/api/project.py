@@ -12,7 +12,6 @@ from server.database import (
     InsightModel,
     ProjectAnalysisRunModel,
     ProjectModel,
-    QuoteModel,
     ResourceModel,
     DependencyInjectDatabase,
     ProjectTagModel,
@@ -78,6 +77,7 @@ class PostProjectRequestSchema(BaseModel):
     default_conversation_title: Optional[str] = None
     default_conversation_description: Optional[str] = None
     default_conversation_context: Optional[str] = None
+    default_conversation_finish_text: Optional[str] = None
 
 
 @ProjectRouter.post("", response_model=ProjectSchema)
@@ -130,12 +130,15 @@ async def create_project(
 
 @ProjectRouter.get("/{project_id}", response_model=ProjectSchema)
 async def get_project(
-    project_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
+    project_id: str,
+    db: DependencyInjectDatabase,
 ) -> ProjectModel:
     project = (
         db.query(ProjectModel)
         .options(joinedload(ProjectModel.tags))
-        .filter(ProjectModel.id == project_id, ProjectModel.session_id == session.id)
+        .filter(
+            ProjectModel.id == project_id,
+        )
         .first()
     )
     if not project:
@@ -189,7 +192,7 @@ async def get_project_transcripts(
     db: DependencyInjectDatabase,
     background_tasks: BackgroundTasks,
 ) -> StreamingResponse:
-    project = await get_project(project_id, session, db)
+    project = await get_project(project_id, db)
 
     conversations = await get_all_conversations_for_project(project_id, session, db)
 
@@ -197,6 +200,12 @@ async def get_project_transcripts(
         raise HTTPException(
             status_code=404, detail="No conversations found for this project"
         )
+
+    conversations = [
+        c
+        for c in conversations
+        if c.chunks and any(ch.transcript is not None for ch in c.chunks)
+    ]
 
     filename_futures = [
         generate_transcript_file(conversation.id, db) for conversation in conversations
@@ -237,21 +246,13 @@ async def update_project(
     session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> ProjectModel:
-    project = await get_project(project_id, session, db)
+    project = await get_project(project_id, db)
 
-    if body.language is not None and body.language not in PROJECT_ALLOWED_LANGUAGES:
-        raise ProjectLanguageNotSupportedException
-
-    project.language = body.language or project.language
-
-    if body.is_conversation_allowed is not None:
-        project.is_conversation_allowed = body.is_conversation_allowed
-
-    project.name = body.name
-    project.context = body.context
-    project.default_conversation_title = body.default_conversation_title
-    project.default_conversation_description = body.default_conversation_description
-    project.default_conversation_context = body.default_conversation_context
+    for field, value in body.model_dump(exclude_unset=True, exclude_none=False).items():
+        if field == "language" and value not in PROJECT_ALLOWED_LANGUAGES:
+            raise HTTPException(status_code=400, detail="Unsupported language")
+        logger.info(f"Setting {field} to {value}")
+        setattr(project, field, value)
 
     db.commit()
     return project
@@ -286,7 +287,9 @@ async def get_all_conversations_for_project(
 
     return (
         db.query(ConversationModel)
-        .options(joinedload(ConversationModel.tags))
+        .options(
+            joinedload(ConversationModel.tags), joinedload(ConversationModel.chunks)
+        )
         .filter(ConversationModel.project_id == project_id)
         .all()
     )
@@ -548,7 +551,6 @@ async def request_project_analysis(
 ):
     project = await get_project(
         db=db,
-        session=session,
         project_id=project_id,
     )
 
@@ -578,7 +580,7 @@ async def get_project_insights(
     db: DependencyInjectDatabase,
     session: DependencyRequireSession,
 ) -> List[InsightModel]:
-    project = await get_project(project_id, session, db)
+    project = await get_project(project_id, db)
 
     latest_project_analysis = get_latest_project_analysis_run(db, project.id)
 

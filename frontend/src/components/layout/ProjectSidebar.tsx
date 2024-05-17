@@ -23,8 +23,9 @@ import {
   Pill,
   UnstyledButton,
   UnstyledButtonProps,
+  Checkbox,
 } from "@mantine/core";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { UploadResourceDropzone } from "../dropzone/UploadResourceDropzone";
 import { apiCommonConfig } from "@/lib/api";
@@ -191,14 +192,14 @@ const ConversationAccordionDetail = ({
           <Text size="xs">{conversation.title}</Text>
         </Box>
       )}
-      {conversation.description && (
+      {/* {conversation.description && (
         <Box>
           <Text size="sm">
             <Trans>Description</Trans>
           </Text>
           <Text size="xs">{conversation.description}</Text>
         </Box>
-      )}
+      )} */}
       <Link
         to={`/projects/${conversation.project_id}/conversation/${conversation.id}/overview`}
       >
@@ -211,11 +212,28 @@ const ConversationAccordionDetail = ({
 };
 
 const ProjectAccordion = ({ projectId }: { projectId: string }) => {
+  const [hideConversationsWithoutContent, setHideConversationsWithoutContent] =
+    useState(true);
   const resourcesQuery = useResourcesByProjectId(projectId);
   const resources = resourcesQuery.data;
 
   const conversationsQuery = useConversationsByProjectId(projectId);
-  const conversations = conversationsQuery.data;
+
+  const allConversations = conversationsQuery.data ?? [];
+  const conversationsWithContent =
+    allConversations?.filter((conversation) => {
+      if (conversation.chunks && conversation.chunks.length > 0)
+        return conversation.chunks[0].transcript != null;
+      return null;
+    }) ?? [];
+  const conversationsWithoutContent =
+    allConversations.filter(
+      (conversation) => conversation.chunks?.length === 0,
+    ) ?? [];
+
+  const filteredConversations = hideConversationsWithoutContent
+    ? conversationsWithContent
+    : allConversations;
 
   const [parent] = useAutoAnimate();
   const [parent2] = useAutoAnimate();
@@ -317,8 +335,18 @@ const ProjectAccordion = ({ projectId }: { projectId: string }) => {
           <Accordion variant="separated" radius="md">
             <LoadingOverlay visible={conversationsQuery.isLoading} />
             <div ref={parent2}>
-              {conversations?.length === 0 && (
-                <Text size="sm" px="md">
+              <Box pl="md" pb="md">
+                <Checkbox
+                  label={`Hide Conversations Without Content (${conversationsWithoutContent.length})`}
+                  checked={hideConversationsWithoutContent}
+                  onChange={() =>
+                    setHideConversationsWithoutContent((prev) => !prev)
+                  }
+                />
+              </Box>
+
+              {filteredConversations?.length === 0 && (
+                <Text size="sm" px="md" py="md">
                   <Trans>
                     No conversations found. Start a conversation using the
                     participation invite link from the{" "}
@@ -328,7 +356,8 @@ const ProjectAccordion = ({ projectId }: { projectId: string }) => {
                   </Trans>
                 </Text>
               )}
-              {conversations?.map((item: TConversation) => (
+
+              {filteredConversations?.map((item: TConversation) => (
                 <Accordion.Item
                   key={item.id}
                   value={item.id}

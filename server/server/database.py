@@ -163,6 +163,9 @@ class ProjectModel(Base):
     default_conversation_context: Mapped[Optional[str]] = mapped_column(
         Text, nullable=True
     )
+    default_conversation_finish_text: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )
 
     chats: Mapped[List["ChatModel"]] = relationship(
         "ChatModel", back_populates="project", cascade="all, delete-orphan"
@@ -456,7 +459,7 @@ class ConversationChunkModel(Base):
         "ConversationModel", back_populates="chunks"
     )
 
-    path: Mapped[str] = mapped_column(String)
+    path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     processing_status: Mapped[ProcessingStatusEnum] = mapped_column(
         String, default="PENDING"

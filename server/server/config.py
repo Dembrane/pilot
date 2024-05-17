@@ -54,3 +54,6 @@ logging.debug(f"DISABLE_SENTRY: {DISABLE_SENTRY}")
 
 BUILD_VERSION = os.environ.get("BUILD_VERSION", "dev")
 logging.debug(f"BUILD_VERSION: {BUILD_VERSION}")
+
+ADMIN_BASE_URL = os.environ.get("ADMIN_BASE_URL", "http://localhost:3000")
+PARTICIPANT_BASE_URL = os.environ.get("PARTICIPANT_BASE_URL", "http://localhost:3001")

@@ -80,6 +80,7 @@ type ProjectEditFormValues = {
   default_conversation_title?: string;
   default_conversation_description?: string;
   default_conversation_context?: string;
+  default_conversation_finish_text?: string;
 };
 
 const ProjectEdit = ({ project }: { project: TProject }) => {
@@ -91,6 +92,8 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
     default_conversation_description:
       project.default_conversation_description ?? "",
     default_conversation_context: project.default_conversation_context ?? "",
+    default_conversation_finish_text:
+      project.default_conversation_finish_text ?? "",
   };
 
   const {
@@ -168,6 +171,8 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
             </Text>
           </Box>
 
+          <ProjectTagsInput projectId={project.id} />
+
           <TextInput
             label="Title"
             {...register("default_conversation_title")}
@@ -182,7 +187,13 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
             placeholder="Conversation Description"
           />
 
-          <ProjectTagsInput projectId={project.id} />
+          <Textarea
+            label="Post Conversation Text"
+            description="This will be shown to participants after they finish a conversation. Markdown is allowed here. The following variables are supported. {{CONVERSATION_ID}}, {{PROJECT_ID}}"
+            rows={5}
+            {...register("default_conversation_finish_text")}
+            placeholder="Post Conversation Text"
+          />
 
           <Box>
             <Title order={4}>Advanced Settings</Title>
@@ -237,6 +248,26 @@ const ProjectEdit = ({ project }: { project: TProject }) => {
   );
 };
 
+type ProjectOverviewSummaryItem = {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  loading?: boolean;
+};
+
+const ProjectOverviewSummaryCard = (props: ProjectOverviewSummaryItem) => {
+  return (
+    <Paper p="md" shadow="0">
+      <LoadingOverlay visible={props.loading} />
+      <Stack>
+        {props.icon}
+        <span>{props.label}</span>
+        <span>{props.value}</span>
+      </Stack>
+    </Paper>
+  );
+};
+
 export const ProjectOverviewRoute = () => {
   const projectId = useParams().projectId;
   const projectQuery = useProjectById(projectId ?? "");
@@ -275,6 +306,65 @@ export const ProjectOverviewRoute = () => {
     });
   };
 
+  const summaryItems = [
+    {
+      loading: projectQuery.isLoading,
+      icon: (
+        <Icons.Signal
+          fill={projectQuery.data?.is_conversation_allowed ? "green" : "gray"}
+        />
+      ),
+      label: "Open for Participation?",
+      value: projectQuery.data?.is_conversation_allowed ? "Yes" : "No",
+    },
+    {
+      loading: resourcesQuery.isLoading,
+      icon: <Icons.DocumentOutline />,
+      label: "Resources",
+      value: `${resourcesQuery.data?.length ?? 0}`,
+    },
+    {
+      laoding: conversationsQuery.isLoading,
+      icon: <Icons.Phone />,
+      label: "Total Conversations",
+      value: `${conversationsQuery.data?.length ?? 0}`,
+    },
+    {
+      loading: conversationsQuery.isLoading,
+      icon: <Icons.Phone fill="green" />,
+      label: "Total Conversations with Content",
+      value: `${
+        conversationsQuery.data?.filter(
+          (conversation) =>
+            conversation.chunks &&
+            conversation.chunks.length > 0 &&
+            conversation.chunks[0].transcript != null,
+        ).length ?? 0
+      }`,
+    },
+    /**
+     * Active conversations = currently receiving data (last chunk.timestamp within 5 mins)
+     */
+    {
+      loading: conversationsQuery.isLoading,
+      icon: <Icons.Phone fill="green" />,
+      label: "Ongoing Conversations",
+      value: `${
+        conversationsQuery.data?.filter(
+          (conversation) =>
+            conversation.chunks &&
+            conversation.chunks.length > 0 &&
+            conversation.chunks
+              .map((chunk) => new Date(chunk.timestamp))
+              .filter(
+                (timestamp) =>
+                  new Date().getTime() - timestamp.getTime() < 5 * 60 * 1000,
+              ).length > 0, // last chunk within 5 mins
+        ).length ?? 0
+      }`,
+    },
+  ];
+
   return (
     <Stack className="py-6 px-2">
       <LoadingOverlay visible={projectQuery.isLoading} />
@@ -288,7 +378,7 @@ export const ProjectOverviewRoute = () => {
           md: 3,
         }}
       >
-        <Paper p="md" shadow="0">
+        {/* <Paper p="md" shadow="0">
           <LoadingOverlay visible={projectQuery.isLoading} />
           {projectQuery.data?.is_conversation_allowed ? (
             <Stack>
@@ -318,7 +408,11 @@ export const ProjectOverviewRoute = () => {
             <Icons.Phone />
             <span>{conversationsQuery.data?.length ?? 0} Conversation(s)</span>
           </Stack>
-        </Paper>
+        </Paper> */}
+
+        {summaryItems.map((item, index) => (
+          <ProjectOverviewSummaryCard key={index} {...item} />
+        ))}
       </SimpleGrid>
       <Divider />
       {/* Share Section */}

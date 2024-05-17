@@ -21,17 +21,29 @@ msgstr "*Bij Dembrane staat privacy op een!*"
 msgid "*Oh, we don't have a cookie statement because we don't use cookies! We eat them.*"
 msgstr "*Oh, we hebben geen cookievermelding want we gebruiken geen cookies! We eten ze op.*"
 
+#: src/routes/participant/Conversation.tsx:770
+#~ msgid "*Thanks for submitting this audio! Transcription in progess.*"
+#~ msgstr "*Bedankt voor het insturen van deze audio! Transcriptie in volle gang.*"
+
+#: src/routes/participant/Conversation.tsx:769
+msgid "*Thanks for submitting this audio! Transcription in progress.*"
+msgstr "*Bedankt voor het insturen van deze audio! Transcriptie in volle gang.*"
+
+#: src/routes/participant/Conversation.tsx:767
+#~ msgid "*Transcribing*"
+#~ msgstr "*Transcriberen*"
+
 #: src/routes/participant/Login.tsx:137
 msgid "*We make sure nothing can be traced back to you, and even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]"
 msgstr "*We zorgen dat niks terug te leiden is naar jou als persoon, ook al zeg je per ongeluk je naam, verwijderen wij deze voordat we alles analyseren. Door deze tool te gebruiken, ga je akkoord met onze privacy voorwaarden. Wil je meer weten? Lees dan onze [privacy verklaring]"
 
-#: src/routes/project/ProjectOverview.tsx:376
+#: src/routes/project/ProjectOverview.tsx:470
 msgid "Access Code"
 msgstr ""
 
 #: src/routes/project/ProjectOverview.tsx:297
-msgid "Active"
-msgstr ""
+#~ msgid "Active"
+#~ msgstr ""
 
 #: src/routes/participant/Login.tsx:199
 msgid "Add all that apply"
@@ -70,7 +82,16 @@ msgstr "Ben je er klaar voor? Druk dan op \"Klaar om te beginnen\"."
 #~ msgid "Are you sure you want to delete this document?"
 #~ msgstr "Weet je zeker dat je dit document wilt verwijderen?"
 
-#: src/routes/participant/Conversation.tsx:722
+#: src/routes/participant/Conversation.tsx:1282
+msgid "Are you sure you want to delete this recording?"
+msgstr "Weet je zeker dat je deze opname wilt verwijderen?"
+
+#: src/routes/participant/Conversation.tsx:1154
+#: src/routes/participant/Conversation.tsx:1389
+msgid "Are you sure you want to finish?"
+msgstr "Weet je zeker dat je het wilt afmaken?"
+
+#: src/routes/participant/Conversation.tsx:1060
 msgid "Are you sure you want to stop recording?"
 msgstr "Weet je zeker dat je wilt stoppen met opnemen?"
 
@@ -95,16 +116,17 @@ msgstr "Weet je zeker dat je wilt stoppen met opnemen?"
 #~ msgstr "Voeg zoveel documenten toe als je wilt analyseren"
 
 #: src/routes/project/ProjectConversationOverview.tsx:176
-#: src/routes/project/ProjectOverview.tsx:231
+#: src/routes/project/ProjectOverview.tsx:242
 #: src/routes/project/ProjectResourceOverview.tsx:150
 msgid "Cancel"
 msgstr "Annuleren"
 
-#: src/routes/participant/Conversation.tsx:617
+#: src/routes/participant/Conversation.tsx:979
+#: src/routes/participant/Conversation.tsx:1202
 msgid "Check microphone access"
 msgstr "Controleer microfoontoegang"
 
-#: src/components/layout/ProjectSidebar.tsx:303
+#: src/components/layout/ProjectSidebar.tsx:321
 msgid "Conversations"
 msgstr ""
 
@@ -112,8 +134,8 @@ msgstr ""
 msgid "Create a new session"
 msgstr "Maak een nieuwe sessie aan"
 
-#: src/components/layout/ProjectSidebar.tsx:109
-#: src/components/layout/ProjectSidebar.tsx:180
+#: src/components/layout/ProjectSidebar.tsx:110
+#: src/components/layout/ProjectSidebar.tsx:181
 msgid "Created on"
 msgstr ""
 
@@ -121,8 +143,7 @@ msgstr ""
 #~ msgid "Delete document"
 #~ msgstr "Verwijder document"
 
-#: src/components/layout/ProjectSidebar.tsx:116
-#: src/components/layout/ProjectSidebar.tsx:197
+#: src/components/layout/ProjectSidebar.tsx:117
 msgid "Description"
 msgstr "Beschrijving"
 
@@ -130,7 +151,7 @@ msgstr "Beschrijving"
 #~ msgid "Document AI Assistant"
 #~ msgstr "Document AI Assistent"
 
-#: src/components/layout/ProjectSidebar.tsx:76
+#: src/components/layout/ProjectSidebar.tsx:77
 msgid "Document is being processed"
 msgstr "Document wordt verwerkt"
 
@@ -150,7 +171,7 @@ msgstr "Document wordt verwerkt"
 msgid "Edit Conversation"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:126
+#: src/routes/project/ProjectOverview.tsx:129
 msgid "Edit Project"
 msgstr ""
 
@@ -193,14 +214,14 @@ msgstr "Hi, Fijn dat je meedoet!"
 #~ msgstr ""
 
 #: src/routes/project/ProjectOverview.tsx:304
-msgid "Inactive"
-msgstr ""
+#~ msgid "Inactive"
+#~ msgstr ""
 
 #: src/components/Message.tsx:212
 #~ msgid "Input global context"
 #~ msgstr "Voer algemene context in"
 
-#: src/routes/project/ProjectOverview.tsx:385
+#: src/routes/project/ProjectOverview.tsx:479
 msgid "Invite Link"
 msgstr ""
 
@@ -212,7 +233,8 @@ msgstr ""
 msgid "Login with Session"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:560
+#: src/routes/participant/Conversation.tsx:925
+#: src/routes/participant/Conversation.tsx:1139
 msgid "Microphone access is still denied. Please check your settings and try again."
 msgstr "Toegang tot de microfoon wordt nog steeds geweigerd. Controleer uw instellingen en probeer het opnieuw."
 
@@ -224,7 +246,7 @@ msgstr "Naam"
 msgid "Next"
 msgstr "Volgende"
 
-#: src/components/layout/ProjectSidebar.tsx:322
+#: src/components/layout/ProjectSidebar.tsx:350
 msgid "No conversations found. Start a conversation using the participation invite link from the <0><1>project overview.</1></0>"
 msgstr ""
 
@@ -232,16 +254,17 @@ msgstr ""
 #~ msgid "No documents uploaded yet"
 #~ msgstr "Nog geen documenten geüpload"
 
-#: src/components/layout/ProjectSidebar.tsx:267
+#: src/components/layout/ProjectSidebar.tsx:285
 msgid "No resources found. Add resources using the button above."
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:590
+#: src/routes/participant/Conversation.tsx:952
+#: src/routes/participant/Conversation.tsx:1175
 msgid "Oops! It looks like microphone access was denied. No worries, though! We've got a handy troubleshooting guide for you. Feel free to check it out. Once you've resolved the issue, come back and visit this page again to check if your microphone is ready."
 msgstr "Oeps! Het lijkt erop dat toegang tot de microfoon geweigerd is. Geen zorgen, we hebben een handige probleemoplossingsgids voor je. Voel je vrij om deze te bekijken. Zodra je het probleem hebt opgelost, kom dan terug naar deze pagina om te controleren of je microfoon klaar is voor gebruik."
 
-#: src/components/layout/ProjectSidebar.tsx:125
-#: src/components/layout/ProjectSidebar.tsx:206
+#: src/components/layout/ProjectSidebar.tsx:126
+#: src/components/layout/ProjectSidebar.tsx:207
 msgid "Open"
 msgstr ""
 
@@ -249,7 +272,8 @@ msgstr ""
 #~ msgid "Open Document Chat ✨"
 #~ msgstr "Open Document Chat ✨"
 
-#: src/routes/participant/Conversation.tsx:608
+#: src/routes/participant/Conversation.tsx:970
+#: src/routes/participant/Conversation.tsx:1193
 msgid "Open troubleshooting guide"
 msgstr "Open de probleemoplossingsgids"
 
@@ -259,16 +283,17 @@ msgstr "Open de probleemoplossingsgids"
 
 #: src/components/layout/ProjectConversationLayout.tsx:58
 #: src/components/layout/ProjectResourceLayout.tsx:52
-#: src/routes/project/ProjectOverview.tsx:282
+#: src/routes/project/ProjectOverview.tsx:372
 msgid "Overview"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:329
-#: src/routes/project/ProjectOverview.tsx:339
+#: src/routes/project/ProjectOverview.tsx:423
+#: src/routes/project/ProjectOverview.tsx:433
 msgid "Participation"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:712
+#: src/routes/participant/Conversation.tsx:1050
+#: src/routes/participant/Conversation.tsx:1337
 msgid "Pause"
 msgstr "Pauze"
 
@@ -276,11 +301,15 @@ msgstr "Pauze"
 #~ msgid "Please enter a message"
 #~ msgstr "Voer een bericht in"
 
+#: src/routes/participant/Conversation.tsx:847
+msgid "Please record your response by clicking the \"Start Recording\" button below. You may also choose to respond in text by clicking the text icon."
+msgstr "Noteer je antwoord via de knop hieronder. Je kunt er ook voor kiezen om in tekst te reageren door op het teksticoon te klikken."
+
 #: src/routes/participant/Login.tsx:225
 msgid "Privacy Statements"
 msgstr "Privacy verklaring"
 
-#: src/components/layout/ProjectSidebar.tsx:403
+#: src/components/layout/ProjectSidebar.tsx:432
 msgid "Project Overview"
 msgstr ""
 
@@ -288,16 +317,17 @@ msgstr ""
 msgid "Ready!"
 msgstr "Klaar om te beginnen"
 
-#: src/routes/participant/PostConversation.tsx:50
+#: src/routes/participant/PostConversation.tsx:70
 msgid "Record another conversation"
 msgstr "Neem nog een gesprek op"
 
-#: src/routes/participant/Conversation.tsx:703
+#: src/routes/participant/Conversation.tsx:1041
+#: src/routes/participant/Conversation.tsx:1328
 msgid "Resume"
 msgstr "Hervatten"
 
 #: src/routes/project/ProjectConversationOverview.tsx:168
-#: src/routes/project/ProjectOverview.tsx:223
+#: src/routes/project/ProjectOverview.tsx:234
 #: src/routes/project/ProjectResourceOverview.tsx:142
 msgid "Save"
 msgstr "Opslaan"
@@ -311,7 +341,7 @@ msgstr "Opslaan"
 #~ msgid "Select your group"
 #~ msgstr "Selecteer je groep"
 
-#: src/routes/project/ProjectOverview.tsx:332
+#: src/routes/project/ProjectOverview.tsx:426
 msgid "Settings"
 msgstr ""
 
@@ -319,19 +349,29 @@ msgstr ""
 msgid "Something went wrong"
 msgstr "Er ging iets mis"
 
-#: src/routes/participant/Conversation.tsx:691
+#: src/routes/participant/Conversation.tsx:1297
+msgid "Something went wrong. Please try again."
+msgstr "Er is iets misgegaan. Probeer het opnieuw."
+
+#: src/routes/participant/Conversation.tsx:1021
+#: src/routes/participant/Conversation.tsx:1246
 msgid "Start Recording"
 msgstr "Opname starten"
 
-#: src/routes/participant/Conversation.tsx:730
+#: src/routes/participant/Conversation.tsx:1068
+#: src/routes/participant/Conversation.tsx:1348
 msgid "Stop"
 msgstr "Stop"
+
+#: src/routes/participant/Conversation.tsx:1423
+msgid "Submit"
+msgstr "Stuur in"
 
 #: src/routes/participant/Login.tsx:198
 msgid "Tags"
 msgstr "Trefwoorden"
 
-#: src/routes/participant/PostConversation.tsx:38
+#: src/routes/participant/PostConversation.tsx:57
 msgid "Thank you for participating!"
 msgstr "Dank je wel voor je deelname!"
 
@@ -343,7 +383,7 @@ msgstr "Dank je wel voor je deelname!"
 msgid "This is a very simple tool where you can record conversations or stories to make your voice heard."
 msgstr "Met deze tool kan je gesprekken of verhalen opnemen om je stem te laten horen."
 
-#: src/components/layout/ProjectSidebar.tsx:189
+#: src/components/layout/ProjectSidebar.tsx:190
 msgid "Title"
 msgstr ""
 
@@ -364,8 +404,12 @@ msgstr ""
 #~ msgid "Type context here..."
 #~ msgstr "Typ hier de context..."
 
+#: src/routes/participant/Conversation.tsx:1411
+msgid "Type your response here"
+msgstr "Typ hier je reactie"
+
 #: src/routes/project/ProjectConversationOverview.tsx:111
-#: src/routes/project/ProjectOverview.tsx:128
+#: src/routes/project/ProjectOverview.tsx:131
 #: src/routes/project/ProjectResourceOverview.tsx:114
 msgid "Unsaved changes"
 msgstr ""
@@ -374,12 +418,12 @@ msgstr ""
 #~ msgid "Upload documents"
 #~ msgstr "Upload documenten"
 
-#: src/components/layout/ProjectSidebar.tsx:251
+#: src/components/layout/ProjectSidebar.tsx:269
 msgid "Upload resources"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:640
-#: src/routes/participant/Conversation.tsx:645
+#: src/routes/participant/Conversation.tsx:827
+#: src/routes/participant/Conversation.tsx:831
 msgid "Welcome"
 msgstr "Welkom"
 
@@ -395,14 +439,14 @@ msgstr "Jij"
 msgid "You can use this by yourself to share your own story, or you can record a conversation between several people, which can often be fun and insightful!"
 msgstr "Je kan dit in je eentje gebruiken om je eigen verhaal te delen, of je kan een gesprek opnemen tussen meerdere mensen, wat vaak leuk en inzichtelijk kan zijn!"
 
-#: src/routes/participant/PostConversation.tsx:44
+#: src/routes/participant/PostConversation.tsx:64
 msgid "You may also choose to record another conversation."
 msgstr "Je kunt er ook voor kiezen om een ander gesprek op te nemen."
 
-#: src/routes/project/ProjectOverview.tsx:379
+#: src/routes/project/ProjectOverview.tsx:473
 msgid "Your code is"
 msgstr ""
 
-#: src/routes/participant/PostConversation.tsx:41
+#: src/routes/participant/PostConversation.tsx:61
 msgid "Your response has been recorded. You may now close this tab."
 msgstr "Je reactie is opgenomen. Je kunt dit tabblad nu sluiten."

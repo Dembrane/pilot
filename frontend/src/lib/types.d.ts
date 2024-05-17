@@ -30,6 +30,7 @@ type TConversation = {
   participant_email?: string;
   participant_name: string;
   tags: TProjectTag[];
+  chunks?: TConversationChunk[];
 };
 
 type TProcessingStatus = "PENDING" | "PROCESSING" | "ERROR" | "DONE";
@@ -60,7 +61,7 @@ type TConversationChunk = {
   updated_at: Date;
   conversation_id: string;
 
-  transcript: string;
+  transcript?: string;
   timestamp: Date;
 
   processing_status?: TProcessingStatus;
@@ -81,6 +82,7 @@ type TProject = {
   default_conversation_title?: string;
   default_conversation_description?: string;
   default_conversation_context?: string;
+  default_conversation_finish_text?: string;
   tags: TProjectTag[];
 };
 

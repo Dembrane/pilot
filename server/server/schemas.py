@@ -35,6 +35,7 @@ class ProjectSchema(BaseModel):
     default_conversation_title: Optional[str] = None
     default_conversation_description: Optional[str] = None
     default_conversation_context: Optional[str] = None
+    default_conversation_finish_text: Optional[str] = None
 
 
 class ResourceSchema(BaseModel):
@@ -53,6 +54,21 @@ class ResourceSchema(BaseModel):
     processing_error: Optional[str] = None
 
 
+class ConversationChunkSchema(BaseModel):
+    id: str
+    created_at: datetime
+    updated_at: datetime
+    conversation_id: str
+
+    processing_status: ProcessingStatusEnum
+    processing_error: Optional[str] = None
+    processing_started_at: Optional[datetime] = None
+    processing_completed_at: Optional[datetime] = None
+
+    transcript: Optional[str] = None
+    timestamp: datetime
+
+
 class ConversationSchema(BaseModel):
     id: str
     created_at: datetime
@@ -67,21 +83,7 @@ class ConversationSchema(BaseModel):
     participant_name: Optional[str] = None
 
     tags: Optional[List[ProjectTagSchema]] = []
-
-
-class ConversationChunkSchema(BaseModel):
-    id: str
-    created_at: datetime
-    updated_at: datetime
-    conversation_id: str
-
-    processing_status: ProcessingStatusEnum
-    processing_error: Optional[str] = None
-    processing_started_at: Optional[datetime] = None
-    processing_completed_at: Optional[datetime] = None
-
-    transcript: Optional[str] = None
-    timestamp: datetime
+    chunks: Optional[List[ConversationChunkSchema]] = []
 
 
 class ChatMessageSchema(BaseModel):

@@ -171,7 +171,7 @@ async def generate_transcript_file(conversation_id: str, db: Session) -> Optiona
     with open(file_path, "w") as file:
         for chunk in chunks:
             try:
-                if chunk.is_processed and chunk.transcript is not None:
+                if chunk.transcript is not None:
                     file.write(str(chunk.transcript) + "\n")
             except Exception as e:
                 logger.error(f"Failed to write transcript for chunk {chunk.id}: {e}")

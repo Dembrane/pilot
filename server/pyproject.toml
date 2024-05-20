@@ -42,6 +42,7 @@ dependencies = [
 packages = ["dembrane"]
 
 [tool.rye]
+virtual = true
 managed = true
 dev-dependencies = ["mypy", "ruff", "isort"]
 

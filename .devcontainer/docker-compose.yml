@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   postgres:
     image: pgvector/pgvector:0.6.2-pg16
@@ -33,9 +32,13 @@ services:
       - postgres
 
   devcontainer:
-    image: mcr.microsoft.com/devcontainers/base:ubuntu
+    build: 
+      context: ../server
+      dockerfile: Dockerfile
+      target: dev
     environment:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
+      - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
     volumes:
       - ../..:/workspaces:cached
     network_mode: service:postgres

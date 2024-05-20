@@ -1,4 +1,4 @@
 #!/bin/sh
 echo "Starting worker"
-cd /code/server 
+cd /workspace/server 
 celery -A dembrane.tasks worker --loglevel=info 

@@ -1,13 +1,14 @@
 from logging import getLogger
+
 from fastapi import (
     APIRouter,
 )
 
-from dembrane.api.session import SessionRouter
+from dembrane.api.tag import TagRouter
 from dembrane.api.project import ProjectRouter
+from dembrane.api.session import SessionRouter
 from dembrane.api.resource import ResourceRouter
 from dembrane.api.conversation import ConversationRouter
-from dembrane.api.tag import TagRouter
 from dembrane.api.conversation_chunk import ConversationChunkRouter
 
 logger = getLogger("api")

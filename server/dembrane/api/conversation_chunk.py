@@ -1,13 +1,12 @@
 from fastapi import APIRouter
+
+from dembrane.schemas import (
+    ConversationChunkSchema,
+)
 from dembrane.database import (
     ConversationChunkModel,
     DependencyInjectDatabase,
 )
-from dembrane.schemas import (
-    ConversationChunkSchema,
-)
-
-from dembrane.api.session import DependencyRequireSession
 
 ConversationChunkRouter = APIRouter()
 
@@ -15,7 +14,6 @@ ConversationChunkRouter = APIRouter()
 @ConversationChunkRouter.delete("/{chunk_id}", response_model=ConversationChunkSchema)
 async def delete_conversation_chunk(
     chunk_id: str,
-    session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> ConversationChunkModel:
     chunk = db.get(ConversationChunkModel, chunk_id)

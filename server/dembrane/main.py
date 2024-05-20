@@ -1,32 +1,32 @@
-from contextlib import asynccontextmanager
 import time
-from logging import getLogger
-from starlette.middleware.cors import CORSMiddleware
-from starlette.middleware import Middleware
 from typing import Any, AsyncGenerator
-from fastapi import (
-    FastAPI,
-    HTTPException,
-    Request,
-)
-from fastapi.staticfiles import StaticFiles
-from fastapi.openapi.utils import get_openapi
-from starlette.exceptions import HTTPException as StarletteHTTPException
-
-from dembrane.config import (
-    ADMIN_BASE_URL,
-    BUILD_VERSION,
-    DISABLE_SENTRY,
-    PARTICIPANT_BASE_URL,
-    SERVE_API_DOCS,
-)
-from dembrane.api.api import api
+from logging import getLogger
+from contextlib import asynccontextmanager
 
 # from dembrane.vectorstore import vectorstore
 # from dembrane.process_resource import (
 #     seed_process_resource_queue,
 # )
 import sentry_sdk
+from fastapi import (
+    FastAPI,
+    Request,
+    HTTPException,
+)
+from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware import Middleware
+from fastapi.openapi.utils import get_openapi
+from starlette.middleware.cors import CORSMiddleware
+
+from dembrane.config import (
+    BUILD_VERSION,
+    ADMIN_BASE_URL,
+    DISABLE_SENTRY,
+    SERVE_API_DOCS,
+    PARTICIPANT_BASE_URL,
+)
+from dembrane.api.api import api
 
 logger = getLogger("server")
 
@@ -49,7 +49,7 @@ else:
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     # startup
     logger.info("starting server")
     # seed_process_resource_queue()
@@ -77,9 +77,7 @@ middleware = [
     )
 ]
 
-app = FastAPI(
-    lifespan=lifespan, docs_url=docs_url, redoc_url=None, middleware=middleware
-)
+app = FastAPI(lifespan=lifespan, docs_url=docs_url, redoc_url=None, middleware=middleware)
 
 
 @app.middleware("http")

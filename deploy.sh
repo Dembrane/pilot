@@ -7,13 +7,21 @@ if [ -z "$ENV" ]; then
     exit 1
 fi
 
+CURRENT_VERSION=$(git rev-parse --short HEAD)
+
 echo "Pulling latest changes"
 git pull
 
 BUILD_VERSION=$(git rev-parse --short HEAD)
 echo "Deploying new version: $BUILD_VERSION"
 
-echo "Building"
+if [ "$CURRENT_VERSION" == "$BUILD_VERSION" ]; then
+    echo "No new changes to deploy, exiting..."
+else
+    echo "Building and deploying new version: $BUILD_VERSION"
+    echo "Changes:"
+    git log --oneline --no-decorate $CURRENT_VERSION..$BUILD_VERSION
+fi
 
 if [[ $ENV == "prod" ]]; then
     echo "Using production settings"

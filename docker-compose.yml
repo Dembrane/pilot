@@ -124,42 +124,7 @@ services:
       - dashboard-frontend
     logging: *default-logging
 
-  # loki:
-  #   image: grafana/loki:2.8.0
-  #   command: -config.file=/etc/loki/local-config.yaml
-  #   volumes:
-  #     - ./loki-config.yaml:/etc/loki/local-config.yaml
-  #     - loki_data:/loki
-  #   ports:
-  #     - "3100:3100"
-  #   networks:
-  #     - default
-
-  # promtail:
-  #   image: grafana/promtail:2.8.0
-  #   command: -config.file=/etc/promtail/config.yml
-  #   volumes:
-  #     - ./promtail-config.yml:/etc/promtail/config.yml
-  #     - /var/log:/var/log
-  #   networks:
-  #     - default
-
-  # grafana:
-  #   image: grafana/grafana:9.0.0
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     - GF_SECURITY_ADMIN_PASSWORD=admin
-  #     - GF_SECURITY_ADMIN_USER=admin
-  #   volumes:
-  #     - grafana_data:/var/lib/grafana
-  #   depends_on:
-  #     - loki
-  #   networks:
-  #     - default
-
   promtail:
-    container_name: promtail
     image: grafana/promtail:2.8.0
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -170,7 +135,6 @@ services:
       - default
 
   loki:
-    container_name: loki
     image: grafana/loki:latest
     restart: unless-stopped
     networks:
@@ -180,7 +144,6 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
 
   grafana:
-    container_name: grafana
     image: grafana/grafana:latest
     restart: unless-stopped
     entrypoint:

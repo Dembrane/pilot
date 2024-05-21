@@ -3,6 +3,10 @@
         protocols tls1.2 tls1.3
         curves x25519 secp256r1 secp384r1
     }
+
+    @grafana path /grafana*
+    reverse_proxy @grafana grafana:3000
+
     reverse_proxy api-server:8000
     header Strict-Transport-Security "max-age=31536000"
     header X-Frame-Options "SAMEORIGIN"
@@ -20,9 +24,6 @@
     basicauth {
 		dembrane $2a$14$CUBGav0EbkCzwTlffbvyU.KdGgZ2SVN4tEAuLOfn1/N6dRJKAhDxm
 	}
-
-    @grafana path /grafana*
-    reverse_proxy @grafana grafana:3000
 
     reverse_proxy dashboard-frontend:5173
     header Strict-Transport-Security "max-age=31536000"

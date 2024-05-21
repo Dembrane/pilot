@@ -4,9 +4,6 @@
         curves x25519 secp256r1 secp384r1
     }
 
-    @grafana path /grafana*
-    reverse_proxy @grafana grafana:3000
-
     reverse_proxy api-server:8000
     header Strict-Transport-Security "max-age=31536000"
     header X-Frame-Options "SAMEORIGIN"

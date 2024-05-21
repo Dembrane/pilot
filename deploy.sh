@@ -56,5 +56,6 @@ else
     exit 1
 fi
 
-echo "Reloading CADDY_CONTAINER"
+echo "Reloading some services"
 docker compose restart caddy
+docker compose restart promtail

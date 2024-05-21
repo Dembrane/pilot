@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED=1
 
 # The virtual environment is created in the working directory where rye is run
 # so the development and production environments must be in the same directory respectively.
-WORKDIR /workspace
+WORKDIR /code
 
 RUN \
     --mount=type=cache,target=/var/lib/apt/lists \
@@ -17,10 +17,10 @@ RUN \
     && apt-get install -y --no-install-recommends build-essential \
     ffmpeg 
 
-COPY requirements.lock /workspace/requirements.lock
+COPY requirements.lock /code/requirements.lock
 RUN pip install --no-cache-dir -r requirements.lock
 
-COPY ./ /workspace
+COPY ./ /code
 
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user

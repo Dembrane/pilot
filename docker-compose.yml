@@ -58,7 +58,7 @@ services:
       context: ./server
       dockerfile: Dockerfile
     restart: unless-stopped
-    command: /bin/sh /workspace/prod.sh
+    command: /bin/sh /code/prod.sh
     environment:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
@@ -68,7 +68,7 @@ services:
     env_file:
       - ./server/.env
     volumes:
-      - ./server:/workspace
+      - ./server:/code
     networks:
       - default
     depends_on:
@@ -80,7 +80,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    command: /bin/sh /workspace/prod-worker.sh
+    command: /bin/sh /code/prod-worker.sh
     environment:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
@@ -88,7 +88,7 @@ services:
     env_file:
       - ./server/.env
     volumes:
-      - ./server:/workspace
+      - ./server:/code
     networks:
       - default
     depends_on:

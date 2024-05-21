@@ -32,7 +32,7 @@ elif [[ $ENV == "local" ]]; then
     export PARTICIPANT_BASE_URL="localhost:8002"
     export GRAFANA_BASE_URL="localhost:3000"
     docker compose up --build -d
-else
+elif [[ $ENV == "test" ]]; then
     echo "Using test settings"
     export BUILD_VERSION="test-$BUILD_VERSION"
     export API_BASE_URL="api-test.findcommonground.app"
@@ -43,6 +43,9 @@ else
     # docker builder prune
     # docker system prune
     docker compose up --build -d
+else
+    echo "Invalid environment $ENV provided, exiting..."
+    exit 1
 fi
 
 echo "Reloading CADDY_CONTAINER"

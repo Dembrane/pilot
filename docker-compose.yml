@@ -173,8 +173,6 @@ services:
     container_name: loki
     image: grafana/loki:latest
     restart: unless-stopped
-    ports:
-      - "3100:3100"
     networks:
       - default
     volumes:

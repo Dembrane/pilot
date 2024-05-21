@@ -25,7 +25,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./caddy_data:/data
-    # logging: *default-logging
+    logging: *default-logging
 
   postgres:
     image: pgvector/pgvector:0.6.2-pg16

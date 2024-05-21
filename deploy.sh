@@ -7,13 +7,13 @@ if [ -z "$ENV" ]; then
     exit 1
 fi
 
-echo "$(date --utc +%FT%TZ): Pulling latest changes"
+echo "Pulling latest changes"
 git pull
 
 BUILD_VERSION=$(git rev-parse --short HEAD)
-echo "$(date --utc +%FT%TZ): Deploying new version: $BUILD_VERSION"
+echo "Deploying new version: $BUILD_VERSION"
 
-echo "$(date --utc +%FT%TZ): Building"
+echo "Building"
 
 if [[ $ENV == "prod" ]]; then
     echo "Using production settings"
@@ -21,6 +21,14 @@ if [[ $ENV == "prod" ]]; then
     export API_BASE_URL="api.findcommonground.app"
     export ADMIN_BASE_URL="admin.findcommonground.app"
     export PARTICIPANT_BASE_URL="participant.findcommonground.app"
+    docker compose up --build -d
+# for "local"
+elif [[ $ENV == "local" ]]; then
+    echo "Using local settings"
+    export BUILD_VERSION="local-$BUILD_VERSION"
+    export API_BASE_URL="localhost:8000"
+    export ADMIN_BASE_URL="localhost:8001"
+    export PARTICIPANT_BASE_URL="localhost:8002"
     docker compose up --build -d
 else
     echo "Using test settings"
@@ -34,20 +42,5 @@ else
     docker compose up --build -d
 fi
 
-echo "$(date --utc +%FT%TZ): reloading CADDY_CONTAINER"
+echo "Reloading CADDY_CONTAINER"
 docker compose restart caddy
-
-# Use later for zero downtime deployment
-
-# docker compose rm -f docker compose build
-# OLD_CONTAINER=$(docker ps -aqf "name=server")
-# echo
-# "$(date --utc +%FT%TZ): Scaling server up..."
-# BUILD_VERSION=$BUILD_VERSION docker compose up -d --no-deps --scale server=2
-# --no-recreate server
-# sleep 30
-# echo "$(date --utc +%FT%TZ): Scaling old server down..." docker container rm -f $OLD_CONTAINER
-# docker compose up -d --no-deps --scale server=1 --no-recreate server
-# echo "$(date --utc +%FT%TZ): Reloading caddy..."
-# CADDY_CONTAINER=$(docker ps -aqf "name=caddy" )
-# docker exec $CADDY_CONTAINER caddy reload -c /etc/caddy/Caddyfile

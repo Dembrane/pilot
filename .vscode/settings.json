@@ -9,6 +9,7 @@
         "editor.useTabStops": true,
         "editor.tabSize": 2
     },
+    "restoreTerminals.runOnStartup": false,
     "restoreTerminals.terminals": [
         {
           "splitTerminals": [

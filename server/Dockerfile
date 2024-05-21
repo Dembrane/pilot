@@ -1,4 +1,4 @@
-FROM python:3.11 as rye
+FROM python:3.11
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -14,42 +14,13 @@ RUN \
     --mount=type=cache,target=/var/lib/apt/lists \
     --mount=type=cache,target=/var/cache/apt/archives \
     apt-get update \
-    && apt-get install -y --no-install-recommends build-essential 
+    && apt-get install -y --no-install-recommends build-essential \
+    ffmpeg 
 
-ENV RYE_HOME="/opt/rye"
-ENV PATH="$RYE_HOME/shims:$PATH"
+COPY requirements.lock /workspace/requirements.lock
+RUN pip install --no-cache-dir -r requirements.lock
 
-ENV RYE_INSTALL_OPTION=--yes
-RUN curl -sSf https://rye-up.com/get | RYE_NO_AUTO_INSTALL=1 RYE_INSTALL_OPTION="--yes" bash
-
-# Download dependencies as a separate step to take advantage of Docker's caching.
-# Leverage a bind mount to some files to avoid having to copy them into
-# into this layer.
-RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    --mount=type=bind,source=requirements.lock,target=requirements.lock \
-    --mount=type=bind,source=requirements-dev.lock,target=requirements-dev.lock \
-    # --mount=type=bind,source=.python-version,target=.python-version \
-    # --mount=type=bind,source=README.md,target=README.md \
-    rye sync --no-dev --no-lock
-
-COPY ./requirements.txt /code/requirements.txt
-
-RUN . .venv/bin/activate
-
-# Stage for development.
-# The development environment assumes a devcontainer and the environment is
-# closed inside the container, so you don't need to be aware of the virtual environment
-FROM rye AS dev
-
-RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    --mount=type=bind,source=requirements.lock,target=requirements.lock \
-    --mount=type=bind,source=requirements-dev.lock,target=requirements-dev.lock \
-    # --mount=type=bind,source=.python-version,target=.python-version \
-    # --mount=type=bind,source=README.md,target=README.md \
-    rye sync --no-lock
-
-# Stage for production
-FROM rye AS run
+COPY ./ /workspace
 
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user
@@ -66,6 +37,6 @@ RUN adduser \
 # Switch to the non-privileged user to run the application.
 USER appuser
 
-COPY . .
+EXPOSE 8000
 
-ENTRYPOINT ["uvicorn", "dembrane.main:app", "--host", "0.0.0.0", "--proxy-headers"]
+CMD ["uvicorn", "dembrane.main:app", "--host", "0.0.0.0", "--proxy-headers"]

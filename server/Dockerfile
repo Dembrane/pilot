@@ -17,7 +17,7 @@ RUN \
     && apt-get install -y --no-install-recommends build-essential \
     ffmpeg 
 
-COPY requirements.lock /code/requirements.lock
+COPY requirements.lock /code/server/requirements.lock
 RUN pip install --no-cache-dir -r requirements.lock
 
 COPY ./ /code/server

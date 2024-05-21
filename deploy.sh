@@ -16,7 +16,7 @@ BUILD_VERSION=$(git rev-parse --short HEAD)
 echo "Deploying new version: $BUILD_VERSION"
 
 if [ "$CURRENT_VERSION" == "$BUILD_VERSION" ]; then
-    echo "No new changes to deploy, exiting..."
+    echo "No new changes to deploy, rebuilding and deploying"
 else
     echo "Building and deploying new version: $BUILD_VERSION"
     echo "Changes:"

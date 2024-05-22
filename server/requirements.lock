@@ -75,6 +75,7 @@ idna==3.7
     # via httpx
     # via requests
     # via yarl
+isort==5.13.2
 joblib==1.4.2
     # via scikit-learn
 jsonpatch==1.33
@@ -110,7 +111,9 @@ marshmallow==3.21.2
 multidict==6.0.5
     # via aiohttp
     # via yarl
+mypy==1.10.0
 mypy-extensions==1.0.0
+    # via mypy
     # via typing-inspect
 numpy==1.26.4
     # via langchain
@@ -164,6 +167,7 @@ requests==2.31.0
     # via langchain-community
     # via langsmith
     # via tiktoken
+ruff==0.4.4
 scikit-learn==1.4.2
 scipy==1.13.0
     # via scikit-learn
@@ -195,6 +199,7 @@ types-tqdm==4.66.0.20240417
 typing-extensions==4.11.0
     # via alembic
     # via fastapi
+    # via mypy
     # via openai
     # via psycopg
     # via psycopg-pool

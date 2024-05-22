@@ -35,6 +35,10 @@ dependencies = [
     # Types
     "types-aiofiles==23.2.*",
     "types-tqdm > 4",
+    # Tools
+    "mypy",
+    "ruff",
+    "isort",
 ]
 
 [tool.setuptools]
@@ -43,7 +47,6 @@ packages = ["dembrane"]
 [tool.rye]
 virtual = true
 managed = true
-dev-dependencies = ["mypy", "ruff", "isort"]
 
 [tool.rye.scripts]
 "format" = { chain = ["format:isort", "format:ruff", "fix:ruff"] }

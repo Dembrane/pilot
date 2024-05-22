@@ -1,12 +1,13 @@
-name: Lint and Type Check
+name: Check code
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
 
 jobs:
-  lint_and_type_check_server:
+  lint_and_typecheck_server:
     name: Lint and Type Check (Server)
     runs-on: ubuntu-latest
     steps:
@@ -16,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5.1.0
         with:
-          python-version: '3.11'  # Specify the Python version you need
+          python-version: "3.11" # Specify the Python version you need
 
       - name: Cache pip
         uses: actions/cache@v3
@@ -40,4 +41,23 @@ jobs:
       - name: Run ruff
         uses: chartboost/ruff-action@v1
         with:
-          src: './server'
+          src: "./server"
+
+  build_and_typecheck_client:
+    name: Build and typecheck (Client)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --immutable
+
+      - name: Build check
+        run: yarn build

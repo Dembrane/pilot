@@ -17,25 +17,11 @@ services:
       - RABBITMQ_DEFAULT_PASS=dembrane
     volumes:
       - ./rabbitmq_data:/var/lib/rabbitmq
-      
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: unless-stopped
-    ports:
-      - "8080:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: password
-    volumes:
-      - ./pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - postgres
 
   devcontainer:
-    build: 
+    build:
       context: ../server
       dockerfile: Dockerfile
-      target: dev
     environment:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
@@ -46,5 +32,3 @@ services:
     depends_on:
       - rabbitmq
       - postgres
-
-

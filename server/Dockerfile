@@ -15,27 +15,14 @@ RUN \
     --mount=type=cache,target=/var/cache/apt/archives \
     apt-get update \
     && apt-get install -y --no-install-recommends build-essential \
-    ffmpeg 
+    ffmpeg \
+    curl \
+    zip
 
 COPY requirements.lock /code/server/requirements.lock
 RUN pip install --no-cache-dir -r requirements.lock
 
 COPY ./ /code/server
-
-# Create a non-privileged user that the app will run under.
-# See https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user
-ARG UID=10001
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    appuser
-
-# Switch to the non-privileged user to run the application.
-USER appuser
 
 EXPOSE 8000
 

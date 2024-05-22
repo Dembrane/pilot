@@ -1,10 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 
-# Function to install Rye
-install_rye() {
-    curl -sSf https://rye-up.com/get | RYE_NO_AUTO_INSTALL=1 RYE_INSTALL_OPTION="--yes" bash
-    source "$HOME/.rye/env"
-}
+curl -sSf https://rye-up.com/get | RYE_INSTALL_OPTION="--yes" bash
+echo 'source "$HOME/.rye/env"' >> ~/.bashrc
+
+curl -fsSL https://fnm.vercel.app/install | bash
+echo 'eval "$(fnm env --use-on-cd)"' >> ~/.bashrc
+
+. ~/.bashrc
+
+fnm completions --shell bash
+fnm install 18
+npm i -g yarn
 
 # Parallel installation for frontend and server dependencies
 (
@@ -15,7 +21,6 @@ frontend_pid=$!
 
 (
   cd server
-  install_rye
   rye sync
   alembic upgrade head
 ) &

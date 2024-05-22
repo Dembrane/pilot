@@ -46,6 +46,9 @@ jobs:
   build_and_typecheck_client:
     name: Build and typecheck (Client)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

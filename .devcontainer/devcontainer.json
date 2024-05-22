@@ -1,49 +1,52 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/universal
 {
-	"name": "dembrane/pilot",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	// "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-	"dockerComposeFile": "docker-compose.yml",
-    "service": "devcontainer",
-    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	"features": {},
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "/bin/sh setup.sh",
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"ms-azuretools.vscode-docker",
-				"jebbs.plantuml",
-				"EthanSK.restore-terminals",
-				"esbenp.prettier-vscode",
-				"YoavBls.pretty-ts-errors",
-				"bradlc.vscode-tailwindcss",
-				"ms-python.python",
-				"ms-python.mypy-type-checker",
-				"charliermarsh.ruff",
-				"tamasfe.even-better-toml"
-			]
-		}
-	},
-	"portsAttributes": {
-		"5173": {
-			"label": "frontend"
-		},
-		"5174": {
-			"label": "frontend-participant"
-		},
-		"8000": {
-			"label": "backend"
-		},
-		"8080": {
-			"label": "pgadmin"
-		}
-	}
-	// Configure tool-specific properties.
-	// "customizations": {},
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+  "name": "dembrane/pilot",
+  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  // "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  "features": {},
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "/bin/sh setup.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // frontend
+        "esbenp.prettier-vscode",
+        "YoavBls.pretty-ts-errors",
+        "bradlc.vscode-tailwindcss",
+        // python
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "matangover.mypy",
+        // other tools
+        "ms-azuretools.vscode-docker",
+        "jebbs.plantuml",
+        "EthanSK.restore-terminals",
+        "tamasfe.even-better-toml"
+      ]
+    }
+  },
+  "portsAttributes": {
+    "5173": {
+      "label": "frontend"
+    },
+    "5174": {
+      "label": "frontend-participant"
+    },
+    "8000": {
+      "label": "backend"
+    },
+    "8080": {
+      "label": "pgadmin"
+    }
+  }
+  // Configure tool-specific properties.
+  // "customizations": {},
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root"
 }

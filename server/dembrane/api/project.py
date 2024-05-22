@@ -1,51 +1,52 @@
-import asyncio
-from http import HTTPStatus
-from logging import getLogger
 import os
+import asyncio
 import zipfile
-from typing import Generator, List, Optional
-from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile
-from fastapi.responses import StreamingResponse
+from http import HTTPStatus
+from typing import List, Optional, Generator
+from logging import getLogger
+
+from fastapi import APIRouter, UploadFile, HTTPException, BackgroundTasks
 from pydantic import BaseModel
-from dembrane.database import (
-    ConversationModel,
-    InsightModel,
-    ProjectAnalysisRunModel,
-    ProjectModel,
-    ResourceModel,
-    DependencyInjectDatabase,
-    ProjectTagModel,
-)
+from sqlalchemy.orm import Session, joinedload
+from fastapi.responses import StreamingResponse
+
+from dembrane.tasks import process_project
+from dembrane.utils import generate_uuid, get_safe_filename, generate_4_digit_pin, generate_6_digit_pin
+from dembrane.config import AUDIO_CHUNKS_DIR, RESOURCE_UPLOADS_DIR
 from dembrane.schemas import (
-    ConversationSchema,
+    TaskSchema,
     InsightSchema,
     ProjectSchema,
-    ProjectTagSchema,
     ResourceSchema,
-    TaskSchema,
+    ProjectTagSchema,
+    ConversationSchema,
 )
-from dembrane.api.exceptions import (
-    ConversationInvalidPinException,
-    ConversationNotOpenForParticipationException,
-    ProjectLanguageNotSupportedException,
-    ProjectNotFoundException,
-    ProjectTagNotFoundException,
-    ResourceFailedToSaveFileException,
-    ResourceInvalidFileFormatException,
-    InternalServerException,
+from dembrane.database import (
+    InsightModel,
+    ProjectModel,
+    ResourceModel,
+    ProjectTagModel,
+    ConversationModel,
+    ProjectAnalysisRunModel,
+    DependencyInjectDatabase,
 )
-from dembrane.config import AUDIO_CHUNKS_DIR, RESOURCE_UPLOADS_DIR
 
 # from dembrane.process_resource import (
 #     ProcessResourceTaskQueueItem,
 #     process_resource_queue,
 # )
 from dembrane.api.session import DependencyRequireSession
+from dembrane.api.exceptions import (
+    InternalServerException,
+    ProjectNotFoundException,
+    ProjectTagNotFoundException,
+    ConversationInvalidPinException,
+    ResourceFailedToSaveFileException,
+    ResourceInvalidFileFormatException,
+    ProjectLanguageNotSupportedException,
+    ConversationNotOpenForParticipationException,
+)
 from dembrane.api.conversation import get_conversation, get_conversation_chunks
-from dembrane.tasks import process_project
-from dembrane.utils import generate_4_digit_pin, generate_6_digit_pin, generate_uuid
-from sqlalchemy.orm import Session, joinedload
-
 
 logger = getLogger("api.project")
 
@@ -53,9 +54,7 @@ ProjectRouter = APIRouter(tags=["project"])
 
 
 @ProjectRouter.get("", response_model=List[ProjectSchema])
-async def get_all_projects(
-    session: DependencyRequireSession, db: DependencyInjectDatabase
-) -> List[ProjectModel]:
+async def get_all_projects(session: DependencyRequireSession, db: DependencyInjectDatabase) -> List[ProjectModel]:
     projects = (
         db.query(ProjectModel)
         .options(joinedload(ProjectModel.tags))
@@ -197,30 +196,25 @@ async def get_project_transcripts(
     conversations = await get_all_conversations_for_project(project_id, session, db)
 
     if not conversations:
-        raise HTTPException(
-            status_code=404, detail="No conversations found for this project"
-        )
+        raise HTTPException(status_code=404, detail="No conversations found for this project")
 
-    conversations = [
-        c
-        for c in conversations
-        if c.chunks and any(ch.transcript is not None for ch in c.chunks)
-    ]
+    conversations = [c for c in conversations if c.chunks and any(ch.transcript is not None for ch in c.chunks)]
 
-    filename_futures = [
-        generate_transcript_file(conversation.id, db) for conversation in conversations
-    ]
+    filename_futures = [generate_transcript_file(conversation.id, db) for conversation in conversations]
     filenames = await asyncio.gather(*filename_futures)
 
     filenames = [filename for filename in filenames if filename]
     if not filenames:
-        raise HTTPException(
-            status_code=404, detail="No transcripts available for this project"
-        )
+        raise HTTPException(status_code=404, detail="No transcripts available for this project")
 
-    zip_file_name = f"{project.name}_transcripts.zip"
+    project_name_or_id = project.name if project.name is not None else project.id
+    safe_project_name = get_safe_filename(project_name_or_id)
+    zip_file_name = f"{safe_project_name}_transcripts.zip"
+
     with zipfile.ZipFile(zip_file_name, "w", zipfile.ZIP_DEFLATED) as zipf:
         for filename in filenames:
+            if not filename:
+                continue
             arcname = os.path.basename(filename)
             zipf.write(filename, arcname)
 
@@ -243,7 +237,7 @@ async def get_project_transcripts(
 async def update_project(
     project_id: str,
     body: PostProjectRequestSchema,
-    session: DependencyRequireSession,
+    _session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> ProjectModel:
     project = await get_project(project_id, db)
@@ -263,9 +257,7 @@ async def delete_project(
     project_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> ProjectModel:
     project = (
-        db.query(ProjectModel)
-        .filter(ProjectModel.id == project_id, ProjectModel.session_id == session.id)
-        .first()
+        db.query(ProjectModel).filter(ProjectModel.id == project_id, ProjectModel.session_id == session.id).first()
     )
     if not project:
         raise ProjectNotFoundException
@@ -287,9 +279,7 @@ async def get_all_conversations_for_project(
 
     return (
         db.query(ConversationModel)
-        .options(
-            joinedload(ConversationModel.tags), joinedload(ConversationModel.chunks)
-        )
+        .options(joinedload(ConversationModel.tags), joinedload(ConversationModel.chunks))
         .filter(ConversationModel.project_id == project_id)
         .all()
     )
@@ -343,11 +333,7 @@ async def initiate_conversation(
                 conversation.participant_email = body.email
 
             if body.tag_id_list is not None and len(body.tag_id_list) > 0:
-                tags = (
-                    db.query(ProjectTagModel)
-                    .filter(ProjectTagModel.id.in_(body.tag_id_list))
-                    .all()
-                )
+                tags = db.query(ProjectTagModel).filter(ProjectTagModel.id.in_(body.tag_id_list)).all()
                 conversation.tags = tags
 
             db.commit()
@@ -366,11 +352,7 @@ async def initiate_conversation(
     )
 
     if body.tag_id_list is not None and len(body.tag_id_list) > 0:
-        tags = (
-            db.query(ProjectTagModel)
-            .filter(ProjectTagModel.id.in_(body.tag_id_list))
-            .all()
-        )
+        tags = db.query(ProjectTagModel).filter(ProjectTagModel.id.in_(body.tag_id_list)).all()
         new_conversation.tags = tags
 
     db.add(new_conversation)
@@ -379,9 +361,7 @@ async def initiate_conversation(
     return new_conversation
 
 
-@ProjectRouter.get(
-    "/{project_id}/resources", response_model=List[ResourceSchema], tags=["resource"]
-)
+@ProjectRouter.get("/{project_id}/resources", response_model=List[ResourceSchema], tags=["resource"])
 async def get_all_resources_for_project(
     project_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> List[ResourceModel]:
@@ -399,7 +379,7 @@ async def get_all_resources_for_project(
 async def upload_resources(
     files: List[UploadFile],
     project_id: str,
-    session: DependencyRequireSession,
+    _session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> List[ResourceModel]:
     resources = []
@@ -407,6 +387,9 @@ async def upload_resources(
     for file in files:
         if not file.filename:
             original_filename = file.filename
+
+            if not file.filename:
+                raise ResourceInvalidFileFormatException
 
             if not file.filename.endswith(".pdf"):
                 raise ResourceInvalidFileFormatException
@@ -448,19 +431,15 @@ async def upload_resources(
 
             except Exception as e:
                 logger.error(f"Failed to save the file: {e}")
-                raise ResourceFailedToSaveFileException
+                raise ResourceFailedToSaveFileException from e
 
     db.commit()
     return resources
 
 
 @ProjectRouter.get("/{project_id}/tag", response_model=List[ProjectTagSchema])
-async def get_project_tags(
-    project_id: str, db: DependencyInjectDatabase
-) -> List[ProjectTagModel]:
-    tags = (
-        db.query(ProjectTagModel).filter(ProjectTagModel.project_id == project_id).all()
-    )
+async def get_project_tags(project_id: str, db: DependencyInjectDatabase) -> List[ProjectTagModel]:
+    tags = db.query(ProjectTagModel).filter(ProjectTagModel.project_id == project_id).all()
 
     return tags
 
@@ -499,9 +478,7 @@ async def update_project_tag(
         raise ProjectNotFoundException
 
     tag = (
-        db.query(ProjectTagModel)
-        .filter(ProjectTagModel.project_id == project_id, ProjectTagModel.id == tag_id)
-        .first()
+        db.query(ProjectTagModel).filter(ProjectTagModel.project_id == project_id, ProjectTagModel.id == tag_id).first()
     )
 
     if not tag:
@@ -525,9 +502,7 @@ async def delete_project_tag(
         raise ProjectNotFoundException
 
     tag = (
-        db.query(ProjectTagModel)
-        .filter(ProjectTagModel.project_id == project_id, ProjectTagModel.id == tag_id)
-        .first()
+        db.query(ProjectTagModel).filter(ProjectTagModel.project_id == project_id, ProjectTagModel.id == tag_id).first()
     )
 
     if not tag:
@@ -546,9 +521,9 @@ async def delete_project_tag(
 )
 async def request_project_analysis(
     project_id: str,
-    session: DependencyRequireSession,
+    _session: DependencyRequireSession,
     db: DependencyInjectDatabase,
-):
+) -> TaskSchema:
     project = await get_project(
         db=db,
         project_id=project_id,
@@ -565,7 +540,7 @@ async def request_project_analysis(
     )
 
 
-def get_latest_project_analysis_run(db: DependencyInjectDatabase, project_id: str):
+def get_latest_project_analysis_run(db: DependencyInjectDatabase, project_id: str) -> Optional[ProjectAnalysisRunModel]:
     return (
         db.query(ProjectAnalysisRunModel)
         .filter(ProjectAnalysisRunModel.project_id == project_id)
@@ -578,7 +553,7 @@ def get_latest_project_analysis_run(db: DependencyInjectDatabase, project_id: st
 async def get_project_insights(
     project_id: str,
     db: DependencyInjectDatabase,
-    session: DependencyRequireSession,
+    _session: DependencyRequireSession,
 ) -> List[InsightModel]:
     project = await get_project(project_id, db)
 

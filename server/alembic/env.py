@@ -28,6 +28,7 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+assert DATABASE_URL is not None
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 

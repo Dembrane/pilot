@@ -1,6 +1,7 @@
-import dotenv
 import os
 import logging
+
+import dotenv
 
 logger = logging.getLogger("config")
 logging.basicConfig(level=logging.INFO)

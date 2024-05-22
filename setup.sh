@@ -23,6 +23,7 @@ frontend_pid=$!
   cd server
   rye sync
   alembic upgrade head
+  pip install mypy
 ) &
 server_pid=$!
 

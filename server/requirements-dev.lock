@@ -119,6 +119,7 @@ numpy==1.26.4
     # via langchain
     # via langchain-community
     # via pandas
+    # via pandas-stubs
     # via pgvector
     # via scikit-learn
     # via scipy
@@ -130,6 +131,7 @@ packaging==23.2
     # via langchain-core
     # via marshmallow
 pandas==2.2.2
+pandas-stubs==2.2.2.240514
 pgvector==0.2.5
 prompt-toolkit==3.0.43
     # via click-repl
@@ -195,6 +197,8 @@ tiktoken==0.7.0
 tqdm==4.66.4
     # via openai
 types-aiofiles==23.2.0.20240403
+types-pytz==2024.1.0.20240417
+    # via pandas-stubs
 types-tqdm==4.66.0.20240417
 typing-extensions==4.11.0
     # via alembic

@@ -39,6 +39,7 @@ dependencies = [
     "mypy",
     "ruff",
     "isort",
+    "pandas-stubs>=2.2.2.240514",
 ]
 
 [tool.setuptools]
@@ -60,7 +61,7 @@ typecheck = { chain = ["typecheck:mypy"] }
 
 [tool.mypy]
 plugins = 'pydantic.mypy'
-exclude = ['migrations/versions', 'scripts']
+exclude = ['server/alembic', 'alembic', 'scripts']
 warn_redundant_casts = true
 warn_unused_ignores = true
 check_untyped_defs = true

@@ -1,10 +1,10 @@
 from logging import getLogger
-from langchain_core.runnables import Runnable
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
-from langchain_openai import ChatOpenAI
-from langchain_core.output_parsers import StrOutputParser
-from langchain.chains import load_summarize_chain as lc_load_summarize_chain
 
+from langchain.chains import load_summarize_chain as lc_load_summarize_chain
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
+from langchain_core.runnables import Runnable
+from langchain_core.output_parsers import StrOutputParser
 
 logger = getLogger("chains")
 

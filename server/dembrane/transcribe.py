@@ -1,7 +1,8 @@
 import logging
 from typing import Optional
-from openai import OpenAI
+
 import backoff
+from openai import OpenAI
 
 openai_client = OpenAI()
 
@@ -13,34 +14,32 @@ class TranscriptionError(Exception):
 
 
 @backoff.on_exception(backoff.expo, (Exception), max_tries=5)
-def transcribe_audio(
-    audio_file_path: str, language: Optional[str], whisper_prompt: Optional[str]
-) -> str:
+def transcribe_audio(audio_file_path: str, language: Optional[str], whisper_prompt: Optional[str]) -> str:
     try:
         f = open(audio_file_path, "rb")
-    except FileNotFoundError:
+    except FileNotFoundError as exc:
         logger.error(f"File not found: {audio_file_path}")
-        raise FileNotFoundError
+        raise FileNotFoundError from exc
     except Exception as exc:
-        raise TranscriptionError(f"Failed to open audio file: {exc}")
-    finally:
-        with f:
-            options = {
-                "model": "whisper-1",
-                "file": f,
-                "response_format": "text",
-                "language": language if language not in [None, "multi", ""] else None,
-                "prompt": whisper_prompt if whisper_prompt else None,
-            }
+        raise TranscriptionError(f"Failed to open audio file: {exc}") from exc
 
-            try:
-                transcription = openai_client.audio.transcriptions.create(**options)
-            except Exception as exc:
-                logger.error(f"Failed to transcribe audio: {exc}")
-                raise TranscriptionError(f"Failed to transcribe audio: {exc}")
+    with f:
+        options = {
+            "model": "whisper-1",
+            "file": f,
+            "response_format": "text",
+            "language": language if language not in [None, "multi", ""] else None,
+            "prompt": whisper_prompt if whisper_prompt else None,
+        }
 
-            if transcription is None or transcription == "":
-                # TODO: track if the transcription is empty
-                logger.info("Transcription is empty!")
+        try:
+            transcription = openai_client.audio.transcriptions.create(**options)  # type: ignore
+        except Exception as exc:
+            logger.error(f"Failed to transcribe audio: {exc}")
+            raise TranscriptionError(f"Failed to transcribe audio: {exc}") from exc
 
-            return str(transcription)
+        if transcription is None or transcription == "":
+            # TODO: track if the transcription is empty
+            logger.info("Transcription is empty!")
+
+    return str(transcription)

@@ -56,7 +56,6 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     yield
     # shutdown
     logger.info("shutting down server")
-    # vectorstore.save_local(FAISS_INDEX_PATH)
 
 
 docs_url = "/docs" if SERVE_API_DOCS else None

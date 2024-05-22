@@ -14,7 +14,6 @@ dependencies = [
     "langchain-community==0.0.*",
     "langchain-experimental==0.0.57",
     "langchain-openai==0.0.*",
-    "faiss-cpu==1.7.*",
     "pypdf==4.0.*",
     # OpenAI
     "openai==1.30.*",

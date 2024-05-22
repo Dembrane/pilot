@@ -3,9 +3,9 @@
 *.sqlite3.bkp
 uploads
 embeddings_cache
-faiss_index
 .env
 dist
 .mypy_cache
 .DS_Store
 *.egg-info
+.venv

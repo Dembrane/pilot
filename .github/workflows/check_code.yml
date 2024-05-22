@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint_and_typecheck_server:
-    name: Lint and Type Check (Server)
+    name: Lint and typecheck (Server)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -43,12 +43,12 @@ jobs:
         with:
           src: "./server"
 
-  build_and_typecheck_client:
-    name: Build and typecheck (Client)
+  build_and_typecheck_frontend:
+    name: Build and typecheck (Frontend)
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend
+        working-directory: ./frontend/
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -58,6 +58,7 @@ jobs:
         with:
           node-version: "18"
           cache: "yarn"
+          cache-dependency-path: "./frontend/yarn.lock"
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile --immutable

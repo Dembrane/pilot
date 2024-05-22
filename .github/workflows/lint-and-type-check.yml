@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5.1.0
         with:
-          python-version: '3.11'
+          python-version: '3.x'  # Specify the Python version you need
 
       - name: Cache pip
         uses: actions/cache@v3
@@ -30,11 +30,14 @@ jobs:
         run: pip install -r server/requirements.lock
 
       - name: Run mypy
-        run: |
-          mypy . | reviewdog -f=diff -name="mypy" -reporter=github-pr-review -level=warning
-        working-directory: server
+        uses: tsuyoshicho/action-mypy@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          level: warning
+          workdir: server
 
       - name: Run ruff
-        run: |
-          ruff . | reviewdog -f=diff -name="ruff" -reporter=github-pr-review -level=warning
-        working-directory: server
+        uses: chartboost/ruff-action@v1
+        with:
+          src: './server'

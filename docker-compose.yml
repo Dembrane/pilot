@@ -1,4 +1,13 @@
-version: '3'
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    # labels-regex: "^.+"
+    max-size: "10m"
+    max-file: "3"
+    tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+  # driver: "journald"
+  # options:
+  #   tag: "{{.Name}}"
 
 services:
   caddy:
@@ -14,12 +23,11 @@ services:
       - API_BASE_URL=${API_BASE_URL}
       - ADMIN_BASE_URL=${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
+      - GRAFANA_BASE_URL=${GRAFANA_BASE_URL}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./caddy_data:/data
-      - ./caddy_config:/config 
-    networks:
-      - default
+    logging: *default-logging
 
   postgres:
     image: pgvector/pgvector:0.6.2-pg16
@@ -32,6 +40,7 @@ services:
       - default
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+    logging: *default-logging
 
   rabbitmq:
     image: rabbitmq:3.13
@@ -43,9 +52,12 @@ services:
       - default
     volumes:
       - ./rabbitmq_data:/var/lib/rabbitmq
+    logging: *default-logging
 
   api-server:
-    build: ./server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
     restart: unless-stopped
     command: /bin/sh /code/server/prod.sh
     environment:
@@ -63,15 +75,18 @@ services:
     depends_on:
       - postgres
       - rabbitmq
+    logging: *default-logging
 
   worker:
-    build: 
+    build:
       context: ./server
       dockerfile: Dockerfile
     command: /bin/sh /code/server/prod-worker.sh
     environment:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
+      - ADMIN_BASE_URL=https://${ADMIN_BASE_URL}
+      - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
     env_file:
       - ./server/.env
@@ -81,11 +96,10 @@ services:
       - default
     depends_on:
       - api-server
-    
-    
+    logging: *default-logging
 
   dashboard-frontend:
-    build: 
+    build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
@@ -96,9 +110,10 @@ services:
     restart: unless-stopped
     depends_on:
       - api-server
-  
+    logging: *default-logging
+
   participant-frontend:
-    build: 
+    build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
@@ -111,7 +126,56 @@ services:
       - default
     depends_on:
       - dashboard-frontend
+    logging: *default-logging
 
+  promtail:
+    image: grafana/promtail:2.8.0
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./promtail-config.yaml:/etc/promtail/config.yaml
+    command: -config.file=/etc/promtail/config.yaml
+    networks:
+      - default
+
+  loki:
+    image: grafana/loki:latest
+    restart: unless-stopped
+    networks:
+      - default
+    volumes:
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /etc/grafana/provisioning/datasources
+        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+        apiVersion: 1
+        datasources:
+          - name: Loki
+            type: loki
+            access: proxy
+            url: http://loki:3100
+        EOF
+        /run.sh
+    ports:
+      - "3000:3000"
+    networks:
+      - default
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - loki
+
+volumes:
+  loki_data:
+  grafana_data:
 
 networks:
   default:

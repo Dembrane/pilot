@@ -1,9 +1,9 @@
-from datetime import datetime, timezone
-import uuid
 import time
+import uuid
 import random
 import threading
 from typing import Generator
+from datetime import datetime, timezone
 
 random.seed(time.time())
 
@@ -25,7 +25,10 @@ def iter_file_content(file_path: str) -> Generator[bytes, None, None]:
         yield from file_like
 
 
-def run_with_timeout(func, args=(), kwargs={}, timeout_sec: int = 1000):  # type: ignore
+def run_with_timeout(func, args=(), kwargs=None, timeout_sec: int = 1000):  # type: ignore
+    if kwargs is None:
+        kwargs = {}
+
     def timeout_handler() -> None:
         raise TimeoutError("Function execution timed out")
 
@@ -41,5 +44,9 @@ def run_with_timeout(func, args=(), kwargs={}, timeout_sec: int = 1000):  # type
         raise e
 
 
-def get_utc_timestamp():
+def get_utc_timestamp() -> datetime:
     return datetime.now(tz=timezone.utc)
+
+
+def get_safe_filename(filename: str) -> str:
+    return filename.replace("/", "_").replace("\\", "_").replace(" ", "_")

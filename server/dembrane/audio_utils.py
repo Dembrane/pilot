@@ -63,7 +63,7 @@ def convert_mp4_to_mp3(input_file_path: str, output_file_path: str) -> bool:
         raise exc
     except Exception as e:
         logger.error(f"Error converting file: {e}")
-        raise ConversionError
+        raise ConversionError from e
 
     if result.returncode != 0:
         logger.info(f"Conversion failed with return code {result.returncode}.")

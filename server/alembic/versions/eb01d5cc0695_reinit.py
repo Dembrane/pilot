@@ -10,7 +10,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-import server
+import dembrane
 
 
 # revision identifiers, used by Alembic.
@@ -35,13 +35,13 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column(
             "created_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
         sa.Column(
             "updated_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
@@ -54,13 +54,13 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column(
             "created_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
         sa.Column(
             "updated_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
@@ -71,13 +71,13 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column(
             "created_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
         sa.Column(
             "updated_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
@@ -102,13 +102,13 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column(
             "created_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
         sa.Column(
             "updated_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
@@ -124,13 +124,13 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column(
             "created_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
         sa.Column(
             "updated_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
@@ -152,13 +152,13 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column(
             "created_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
         sa.Column(
             "updated_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
@@ -196,7 +196,7 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column(
             "created_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
@@ -242,13 +242,13 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column(
             "created_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
         sa.Column(
             "updated_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
@@ -270,13 +270,13 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column(
             "created_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
         sa.Column(
             "updated_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
@@ -284,7 +284,9 @@ def upgrade() -> None:
         sa.Column("path", sa.String(), nullable=False),
         sa.Column("is_processed", sa.Boolean(), nullable=False),
         sa.Column("processing_error", sa.Text(), nullable=True),
-        sa.Column("timestamp", server.database.DateTime(timezone=True), nullable=False),
+        sa.Column(
+            "timestamp", dembrane.database.DateTime(timezone=True), nullable=False
+        ),
         sa.Column("transcript", sa.Text(), nullable=True),
         sa.Column("quote_id", sa.String(), nullable=True),
         sa.ForeignKeyConstraint(

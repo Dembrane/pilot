@@ -1,19 +1,19 @@
 from typing import List
+
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from server.schemas import ProjectTagSchema
-from server.database import DependencyInjectDatabase, ProjectTagModel
-from server.api.session import DependencyRequireSession
-from server.api.exceptions import ProjectTagNotFoundException
-
+from dembrane.schemas import ProjectTagSchema
+from dembrane.database import ProjectTagModel, DependencyInjectDatabase
+from dembrane.api.session import DependencyRequireSession
+from dembrane.api.exceptions import ProjectTagNotFoundException
 
 TagRouter = APIRouter(tags=["project"])
 
 
 @TagRouter.get("/{tag_id}", response_model=List[ProjectTagSchema])
 async def get_tag_by_id(
-    tag_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
+    tag_id: str, _session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> ProjectTagModel:
     tag = db.query(ProjectTagModel).filter(ProjectTagModel.id == tag_id).first()
     if not tag:

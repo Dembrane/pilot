@@ -2,16 +2,15 @@ import logging
 
 import numpy as np
 import pandas as pd
-from sklearn.cluster import KMeans
 from openai import OpenAI
-from langchain_experimental.text_splitter import SemanticChunker
 from sqlalchemy.orm import Session
+from sklearn.cluster import KMeans  # type: ignore
 from langchain_openai import OpenAIEmbeddings
+from langchain_experimental.text_splitter import SemanticChunker
 
-from server.database import ConversationChunkModel, InsightModel, QuoteModel
-from server.embedding import embed_text
-from server.utils import generate_uuid
-
+from dembrane.utils import generate_uuid
+from dembrane.database import QuoteModel, InsightModel, ConversationChunkModel
+from dembrane.embedding import embed_text
 
 logger = logging.getLogger("quote_utils")
 logger.setLevel(logging.DEBUG)
@@ -20,16 +19,14 @@ lc_embedder = OpenAIEmbeddings(model="text-embedding-3-small")
 semantic_chunker = SemanticChunker(lc_embedder)
 
 
-def generate_quotes(
-    db: Session, project_analysis_run_id: str, conversation_id: str
-) -> None:
+def generate_quotes(db: Session, project_analysis_run_id: str, conversation_id: str) -> None:
     """Generate quotes"""
 
     chunks = (
         db.query(ConversationChunkModel)
         .filter(
             ConversationChunkModel.conversation_id == conversation_id,
-            ConversationChunkModel.transcript is not None,
+            ConversationChunkModel.transcript.is_not(None),
         )
         .order_by(ConversationChunkModel.created_at.asc())
         .all()
@@ -54,9 +51,7 @@ def generate_quotes(
             for chunk in chunks
         ],
     )
-    logger.debug(
-        f"generated {len(lc_docs)} documents from {len(chunks)} conversation_chunks"
-    )
+    logger.debug(f"generated {len(lc_docs)} documents from {len(chunks)} conversation_chunks")
 
     quotes = []
 
@@ -71,18 +66,17 @@ def generate_quotes(
                 conversation_id=doc.metadata["conversation_id"],
                 text=doc.page_content,
                 embedding=embed_text(doc.page_content),
-                project_analysis_run_id=project_analysis_run_id
-                if project_analysis_run_id
-                else None,
+                project_analysis_run_id=project_analysis_run_id if project_analysis_run_id else None,
             )
         except Exception as e:
             logger.error(f"Error embedding text {doc.page_content}: {str(e)}")
             continue
 
         chunk = db.get(ConversationChunkModel, doc.metadata["conversation_chunk_id"])
-        quote.conversation_chunks.append(chunk)
 
-        quotes.append(quote)
+        if chunk:
+            quote.conversation_chunks.append(chunk)
+            quotes.append(quote)
 
     logger.debug(f"adding {len(quotes)} quotes to database")
     db.add_all(quotes)
@@ -117,24 +111,24 @@ def generate_insights(db: Session, project_analysis_run_id: str) -> None:
 
     df["embedding"] = df.embedding.apply(np.array)
 
-    matrix = np.vstack(df.embedding.values)
-    print("matrix shape", matrix.shape)
+    matrix = np.vstack(df.embedding.values)  # type: ignore
+    logger.debug("matrix shape", matrix.shape)
 
     n_clusters = len(quotes) // 3
-    print("n_clusters", n_clusters)
-    print("quotes", len(quotes))
+    logger.debug("n_clusters", n_clusters)
+    logger.debug("quotes", len(quotes))
 
     kmeans = KMeans(n_clusters=n_clusters, init="k-means++")
     kmeans.fit(matrix)
     labels = kmeans.labels_
     df["Cluster"] = labels
-    print(df.head())
+    logger.debug(df.head())
 
     df.groupby("Cluster")
 
     # TODO: run concurrently
     for i in range(n_clusters):
-        print(f"Cluster {i} Theme:", end=" ")
+        logger.debug(f"Cluster {i} Theme:")
 
         quote_text_joined = "\n".join(df[df.Cluster == i].text.values)
 
@@ -147,7 +141,7 @@ def generate_insights(db: Session, project_analysis_run_id: str) -> None:
 
         title_response = client.chat.completions.create(
             model="gpt-4",
-            messages=messages,
+            messages=messages,  # type: ignore
             temperature=0,
             max_tokens=64,
             top_p=1,
@@ -157,7 +151,7 @@ def generate_insights(db: Session, project_analysis_run_id: str) -> None:
 
         title = title_response.choices[0].message.content
 
-        print(title)
+        logger.debug(title)
 
         messages = [
             {
@@ -168,7 +162,7 @@ def generate_insights(db: Session, project_analysis_run_id: str) -> None:
 
         summary_response = client.chat.completions.create(
             model="gpt-4",
-            messages=messages,
+            messages=messages,  # type: ignore
             temperature=0,
             max_tokens=256,
             top_p=1,
@@ -178,7 +172,7 @@ def generate_insights(db: Session, project_analysis_run_id: str) -> None:
 
         summary = summary_response.choices[0].message.content
 
-        print(summary)
+        logger.debug(summary)
 
         insight = InsightModel(
             id=generate_uuid(),
@@ -189,9 +183,8 @@ def generate_insights(db: Session, project_analysis_run_id: str) -> None:
 
         quote_ids = df[df.Cluster == i].id.values
 
-        quotes = db.query(QuoteModel).filter(QuoteModel.id.in_(quote_ids)).all()
-
-        insight.quotes.extend(quotes)
+        quotes_list = db.query(QuoteModel).filter(QuoteModel.id.in_(quote_ids)).all()
+        insight.quotes.extend(quotes_list)
 
         db.add(insight)
         db.commit()

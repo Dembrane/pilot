@@ -1,26 +1,26 @@
-from logging import getLogger
 import time
-from typing import Annotated, List, Optional
-from fastapi import APIRouter, Depends, Request, Response
-from server.api.exceptions import SessionInvalidException, SessionNotFoundException
-from server.database import SessionModel, DependencyInjectDatabase
-from server.schemas import SessionSchema
+from typing import List, Optional, Annotated
+from logging import getLogger
+
+from fastapi import Depends, Request, Response, APIRouter
+
+from dembrane.schemas import SessionSchema
+from dembrane.database import SessionModel, DependencyInjectDatabase
+from dembrane.api.exceptions import SessionInvalidException, SessionNotFoundException
 
 SESSION_ID_COOKIE_KEY = "sid"
 
 
-async def require_session(
-    request: Request, db: DependencyInjectDatabase
-) -> SessionModel:
-    try:
-        session_id = int(request.cookies.get(SESSION_ID_COOKIE_KEY))
-    except (ValueError, TypeError):
-        session_id = None
+async def require_session(request: Request, db: DependencyInjectDatabase) -> SessionModel:
+    session_id_str = request.cookies.get(SESSION_ID_COOKIE_KEY)
 
-    if not session_id:
+    if not session_id_str or not session_id_str.isdigit():
         raise SessionInvalidException
 
+    session_id = int(session_id_str)
+
     session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
+
     if not session:
         raise SessionInvalidException
 
@@ -50,11 +50,11 @@ async def initiate_session(
         db.commit()
     else:
         try:
-            session_id = int(session_id.strip())
-        except (TypeError, ValueError):
-            raise SessionNotFoundException
+            session_id_int = int(session_id.strip())
+        except (TypeError, ValueError) as exc:
+            raise SessionNotFoundException from exc
 
-        session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
+        session = db.query(SessionModel).filter(SessionModel.id == session_id_int).first()
         if not session:
             raise SessionNotFoundException
 

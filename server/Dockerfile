@@ -1,19 +1,29 @@
 FROM python:3.11
 
-WORKDIR /code
+# Prevents Python from writing pyc files.
+ENV PYTHONDONTWRITEBYTECODE=1
+# Keeps Python from buffering stdout and stderr to avoid situations where
+# the application crashes without emitting any logs due to buffering.
+ENV PYTHONUNBUFFERED=1
 
-### system dependencies
-RUN apt-get update && apt-get install -y \
+# The virtual environment is created in the working directory where rye is run
+# so the development and production environments must be in the same directory respectively.
+WORKDIR /code/server
+
+RUN \
+    --mount=type=cache,target=/var/lib/apt/lists \
+    --mount=type=cache,target=/var/cache/apt/archives \
+    apt-get update \
+    && apt-get install -y --no-install-recommends build-essential \
     ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
+    curl \
+    zip
 
-COPY ./requirements.txt /code/requirements.txt
+COPY requirements.lock /code/server/requirements.lock
+RUN pip install --no-cache-dir -r requirements.lock
 
-RUN pip install --no-cache-dir -r /code/requirements.txt
-
-COPY ./ /code
+COPY ./ /code/server
 
 EXPOSE 8000
 
-# uvicorn server.main:app --host 0.0.0.0 --proxy-headers
-CMD ["uvicorn", "server.main:app", "--host", "0.0.0.0", "--proxy-headers"]
+CMD ["uvicorn", "dembrane.main:app", "--host", "0.0.0.0", "--proxy-headers"]

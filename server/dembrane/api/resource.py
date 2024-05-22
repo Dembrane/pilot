@@ -1,18 +1,20 @@
-from logging import getLogger
 import os
 from typing import Optional
+from logging import getLogger
+
 from fastapi import APIRouter
-from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from server.api.session import DependencyRequireSession
-from server.database import ResourceModel, DependencyInjectDatabase
-from server.schemas import ResourceSchema
-from server.api.exceptions import (
+from fastapi.responses import StreamingResponse
+
+from dembrane.utils import iter_file_content
+from dembrane.schemas import ResourceSchema
+from dembrane.database import ResourceModel, DependencyInjectDatabase
+from dembrane.api.session import DependencyRequireSession
+from dembrane.api.exceptions import (
+    ResourceNotFoundException,
     ResourceContentNotFoundException,
     ResourceInvalidFileFormatException,
-    ResourceNotFoundException,
 )
-from server.utils import iter_file_content
 
 logger = getLogger("api.resource")
 
@@ -22,7 +24,7 @@ ResourceRouter = APIRouter(tags=["resource"])
 
 @ResourceRouter.get("/{resource_id}", response_model=ResourceSchema)
 async def get_resource(
-    resource_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
+    resource_id: str, _session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> ResourceModel:
     resource = (
         db.query(ResourceModel)
@@ -38,7 +40,7 @@ async def get_resource(
 
 @ResourceRouter.get("/{resource_id}/content", response_model=ResourceSchema)
 async def get_resource_content(
-    resource_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
+    resource_id: str, _session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> StreamingResponse:
     resource = (
         db.query(ResourceModel)
@@ -52,18 +54,14 @@ async def get_resource_content(
         raise ResourceNotFoundException
 
     if not os.path.exists(resource.path):
-        logger.error(
-            f"Resource file not found: {resource.path} but it exists in the database"
-        )
+        logger.error(f"Resource file not found: {resource.path} but it exists in the database")
         raise ResourceContentNotFoundException
 
     if resource.type != "PDF":
         logger.error(f"Invalid file format: {resource.type}")
         raise ResourceInvalidFileFormatException
 
-    return StreamingResponse(
-        iter_file_content(resource.path), media_type="application/pdf"
-    )
+    return StreamingResponse(iter_file_content(resource.path), media_type="application/pdf")
 
 
 class PutResourceRequestBodySchema(BaseModel):

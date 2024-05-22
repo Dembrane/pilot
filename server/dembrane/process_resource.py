@@ -5,10 +5,10 @@
 # from langchain_community.document_loaders import PyPDFLoader
 # from langchain.text_splitter import CharacterTextSplitter
 
-# from server.database import ResourceModel, db
-# from server.chains import load_title_chain, load_summary_chain
-# from server.utils import run_with_timeout
-# from server.vectorstore import vectorstore
+# from dembrane.database import ResourceModel, db
+# from dembrane.chains import load_title_chain, load_summary_chain
+# from dembrane.utils import run_with_timeout
+# from dembrane.vectorstore import vectorstore
 
 # logger = getLogger("process_resource")
 

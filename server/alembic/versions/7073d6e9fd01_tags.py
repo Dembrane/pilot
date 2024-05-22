@@ -10,7 +10,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-import server
+import dembrane
 
 
 # revision identifiers, used by Alembic.
@@ -27,13 +27,13 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column(
             "created_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),
         sa.Column(
             "updated_at",
-            server.database.DateTime(timezone=True),
+            dembrane.database.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
         ),

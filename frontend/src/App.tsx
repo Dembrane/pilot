@@ -16,6 +16,7 @@ const theme = createTheme({
     fontFamily: "'Space Grotesk Variable', sans-serif",
     fontWeight: "500",
   },
+  cursorType: "pointer",
   colors: {
     primary: [
       "#e2f6ff",

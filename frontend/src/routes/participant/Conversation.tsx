@@ -3,6 +3,7 @@ import {
   useConversationById,
   useConversationChunks,
   useDeleteConversationChunkByIdMutation,
+  useProjectById,
   useUploadConversationChunk,
   useUploadConversationTextChunk,
 } from "@/lib/query";
@@ -19,6 +20,9 @@ import {
   ActionIcon,
   Paper,
   Menu,
+  Switch,
+  createTheme,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconCheck,
@@ -42,6 +46,7 @@ import {
   useEffect,
   useCallback,
   PropsWithChildren,
+  useMemo,
 } from "react";
 // import {
 //   ReactRealTimeVADOptions,
@@ -1084,6 +1089,7 @@ export const ParticipantConversationAudioRoute = () =>
   // }
   {
     const { projectId, conversationId } = useParams();
+    const projectQuery = useProjectById(projectId as string);
     const conversationQuery = useConversationById(conversationId as string);
     const uploadChunkMutation = useUploadConversationChunk();
 
@@ -1092,22 +1098,51 @@ export const ParticipantConversationAudioRoute = () =>
 
     const showPreview = false;
 
-    const onChunk = (chunk: Blob) => {
-      if (showPreview) {
-        blob.current = chunk;
-        const url = URL.createObjectURL(chunk);
-        setPreview(url);
+    const [isTranscriptionLive, setIsTranscriptionLive] =
+      useState<boolean>(false);
+
+    const audioRecorder = useMemo(() => {
+      if (isTranscriptionLive === true) {
+        const onChunk = (chunk: Blob) => {
+          if (showPreview) {
+            blob.current = chunk;
+            const url = URL.createObjectURL(chunk);
+            setPreview(url);
+          } else {
+            uploadChunkMutation.mutate({
+              conversationId: conversationId ?? "",
+              chunk,
+              timestamp: new Date(),
+            });
+          }
+        };
+        return useAudioRecorder({ onChunk });
       } else {
-        uploadChunkMutation.mutate({
-          conversationId: conversationId ?? "",
-          chunk,
-          timestamp: new Date(),
-        });
+        const onChunk = (chunk: Blob) => {
+          uploadChunkMutation.mutate({
+            conversationId: conversationId ?? "",
+            chunk,
+            timestamp: new Date(),
+          });
+        };
+        return useChunkedAudioRecorder({ onChunk });
       }
-    };
+    }, [isTranscriptionLive]);
+
+    const isConversationAllowed = useMemo(() => {
+      if (
+        !projectQuery ||
+        !projectQuery.data ||
+        projectQuery.data.is_conversation_allowed === undefined
+      ) {
+        return false;
+      } else {
+        return projectQuery.data.is_conversation_allowed;
+      }
+    }, [projectQuery]);
 
     // const audioRecorder = useVADAudioRecorder({ onChunk });
-    const audioRecorder = useAudioRecorder({ onChunk });
+    // const audioRecorder = useAudioRecorder({ onChunk });
 
     useWakeLock({ obtainWakeLockOnMount: true });
 
@@ -1245,6 +1280,21 @@ export const ParticipantConversationAudioRoute = () =>
                       >
                         <Trans>Start Recording</Trans>
                       </Button>
+                      <Tooltip
+                        label="Do not close your browser tab immediately"
+                        opened={isTranscriptionLive === false}
+                      >
+                        <Switch
+                          disabled={isConversationAllowed === false}
+                          checked={isTranscriptionLive}
+                          onChange={() => {
+                            setIsTranscriptionLive(!isTranscriptionLive);
+                          }}
+                          onLabel="Live"
+                          offLabel="Async."
+                          size="xl"
+                        />
+                      </Tooltip>
 
                       <Link to={textModeUrl}>
                         <ActionIcon component="a" size="60" variant="outline">

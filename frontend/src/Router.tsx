@@ -197,7 +197,14 @@ export const participantRouter = createBrowserRouter([
       },
       {
         path: "conversation/:conversationId",
-        element: <ParticipantConversationAudioRoute />,
+        element: <ParticipantConversationAudioRoute isTranscriptionLive />,
+        // element: <ParticipantConversationChunkedAudioRoute />,
+      },
+      {
+        path: "conversation/:conversationId/async",
+        element: (
+          <ParticipantConversationAudioRoute isTranscriptionLive={false} />
+        ),
         // element: <ParticipantConversationChunkedAudioRoute />,
       },
       {

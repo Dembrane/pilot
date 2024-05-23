@@ -47,6 +47,7 @@ import {
   useCallback,
   PropsWithChildren,
   useMemo,
+  Fragment,
 } from "react";
 // import {
 //   ReactRealTimeVADOptions,
@@ -1081,7 +1082,11 @@ export const ParticipantConversationChunkedAudioRoute = () =>
     );
   };
 
-export const ParticipantConversationAudioRoute = () =>
+export const ParticipantConversationAudioRoute = ({
+  isTranscriptionLive,
+}: {
+  isTranscriptionLive: boolean;
+}) =>
   //   {
   //   fallback = false,
   // }: {
@@ -1098,37 +1103,6 @@ export const ParticipantConversationAudioRoute = () =>
 
     const showPreview = false;
 
-    const [isTranscriptionLive, setIsTranscriptionLive] =
-      useState<boolean>(false);
-
-    const audioRecorder = useMemo(() => {
-      if (isTranscriptionLive === true) {
-        const onChunk = (chunk: Blob) => {
-          if (showPreview) {
-            blob.current = chunk;
-            const url = URL.createObjectURL(chunk);
-            setPreview(url);
-          } else {
-            uploadChunkMutation.mutate({
-              conversationId: conversationId ?? "",
-              chunk,
-              timestamp: new Date(),
-            });
-          }
-        };
-        return useAudioRecorder({ onChunk });
-      } else {
-        const onChunk = (chunk: Blob) => {
-          uploadChunkMutation.mutate({
-            conversationId: conversationId ?? "",
-            chunk,
-            timestamp: new Date(),
-          });
-        };
-        return useChunkedAudioRecorder({ onChunk });
-      }
-    }, [isTranscriptionLive]);
-
     const isConversationAllowed = useMemo(() => {
       if (
         !projectQuery ||
@@ -1141,8 +1115,23 @@ export const ParticipantConversationAudioRoute = () =>
       }
     }, [projectQuery]);
 
+    const onChunk = (chunk: Blob) => {
+      if (showPreview) {
+        blob.current = chunk;
+        const url = URL.createObjectURL(chunk);
+        setPreview(url);
+      } else {
+        uploadChunkMutation.mutate({
+          conversationId: conversationId ?? "",
+          chunk,
+          timestamp: new Date(),
+        });
+      }
+    };
+
     // const audioRecorder = useVADAudioRecorder({ onChunk });
-    // const audioRecorder = useAudioRecorder({ onChunk });
+    const liveAudioRecorder = useAudioRecorder({ onChunk });
+    const asyncAudioRecorder = useChunkedAudioRecorder({ onChunk });
 
     useWakeLock({ obtainWakeLockOnMount: true });
 
@@ -1157,7 +1146,7 @@ export const ParticipantConversationAudioRoute = () =>
       errored,
       loading,
       permissionError,
-    } = audioRecorder;
+    } = isTranscriptionLive === false ? asyncAudioRecorder : liveAudioRecorder;
 
     const [troubleShootingGuideOpened, setTroubleShootingGuideOpened] =
       useState(false);
@@ -1181,6 +1170,9 @@ export const ParticipantConversationAudioRoute = () =>
     if (conversationQuery.isLoading || loading) {
       return <LoadingOverlay visible />;
     }
+
+    const liveUrl = `/${language}/${projectId}/conversation/${conversationId}`;
+    const asyncUrl = `/${language}/${projectId}/conversation/${conversationId}/async`;
 
     const textModeUrl = `/${language}/${projectId}/conversation/${conversationId}/text`;
     const finishUrl = `/${language}/${projectId}/conversation/${conversationId}/finish`;
@@ -1272,29 +1264,36 @@ export const ParticipantConversationAudioRoute = () =>
                 <>
                   {!preview || !blob ? (
                     <Group className="w-full">
-                      <Button
-                        size="xl"
-                        rightSection={<IconMicrophone />}
-                        onClick={startRecording}
-                        className="flex-grow"
-                      >
-                        <Trans>Start Recording</Trans>
-                      </Button>
                       <Tooltip
-                        label="Do not close your browser tab immediately"
-                        opened={isTranscriptionLive === false}
+                        withArrow
+                        label={
+                          "Do not close your browser tab immediately after recording"
+                        }
+                        style={{
+                          display:
+                            isTranscriptionLive === false ? "inherit" : "none",
+                        }}
+                      >
+                        <Button
+                          size="xl"
+                          rightSection={<IconMicrophone />}
+                          onClick={startRecording}
+                          className="flex-grow"
+                        >
+                          <Trans>Start Recording</Trans>
+                        </Button>
+                      </Tooltip>
+                      <Link
+                        to={isTranscriptionLive === false ? liveUrl : asyncUrl}
                       >
                         <Switch
                           disabled={isConversationAllowed === false}
                           checked={isTranscriptionLive}
-                          onChange={() => {
-                            setIsTranscriptionLive(!isTranscriptionLive);
-                          }}
                           onLabel="Live"
                           offLabel="Async."
                           size="xl"
                         />
-                      </Tooltip>
+                      </Link>
 
                       <Link to={textModeUrl}>
                         <ActionIcon component="a" size="60" variant="outline">

@@ -1283,6 +1283,7 @@ export const ParticipantConversationAudioRoute = ({
                           <Trans>Start Recording</Trans>
                         </Button>
                       </Tooltip>
+
                       <Link
                         to={isTranscriptionLive === false ? liveUrl : asyncUrl}
                       >

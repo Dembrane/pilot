@@ -251,35 +251,68 @@ async def upload_conversation_chunk(
     chunk: UploadFile,
     timestamp: Annotated[datetime, Form()],
     db: DependencyInjectDatabase,
-) -> ConversationChunkModel:
+) -> List[ConversationChunkModel]:
     conversation = await get_conversation(conversation_id, db)
 
     if not os.path.exists(os.path.join(AUDIO_CHUNKS_DIR, conversation.id)):
         os.makedirs(os.path.join(AUDIO_CHUNKS_DIR, conversation.id))
 
-    id = generate_uuid()
-    file_path = os.path.join(AUDIO_CHUNKS_DIR, conversation.id, f"{id}-{chunk.filename}")
+    MAX_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB   
+    chunks = []
+    chunk_data = await chunk.read()
+    offset = 0
 
-    file_path = file_path.split(";")[0]
+    while offset < len(chunk_data):
+        chunk_id = generate_uuid()
+        chunk_path = os.path.join(AUDIO_CHUNKS_DIR, conversation.id, f"{chunk_id}-{chunk.filename}")
+        chunk_path = chunk_path.split(";")[0]
 
-    with open(file_path, "wb") as f:
-        logger.info(f"Saving the file to {file_path}")
-        f.write(chunk.file.read())
+        with open(chunk_path, "wb") as f:
+            chunk_size = min(MAX_CHUNK_SIZE, len(chunk_data) - offset)
+            f.write(chunk_data[offset:offset + chunk_size])
+            logger.info(f"Saving the file chunk to {chunk_path}")
 
-    chunk = ConversationChunkModel(
-        id=id,
-        conversation_id=conversation_id,
-        timestamp=timestamp,
-        path=file_path,
-    )
+        chunk_model = ConversationChunkModel(
+            id=chunk_id,
+            conversation_id=conversation_id,
+            timestamp=timestamp,
+            path=chunk_path,
+        )
+        chunks.append(chunk_model)
+        db.add(chunk_model)
+        offset += chunk_size
 
-    db.add(chunk)
     db.commit()
 
-    logger.info(f"Add to processing queue: ConversationChunk@{chunk.id}")
-    process_conversation_chunk.delay(chunk.id)
+    for chunk in chunks:
+        logger.info(f"Add to processing queue: ConversationChunk@{chunk.id}")
+        process_conversation_chunk.delay(chunk.id)
 
-    return chunk
+    return chunks
+
+    # id = generate_uuid()
+    # file_path = os.path.join(AUDIO_CHUNKS_DIR, conversation.id, f"{id}-{chunk.filename}")
+
+    # file_path = file_path.split(";")[0]
+
+    # with open(file_path, "wb") as f:
+    #     logger.info(f"Saving the file to {file_path}")
+    #     f.write(chunk.file.read())
+
+    # chunk = ConversationChunkModel(
+    #     id=id,
+    #     conversation_id=conversation_id,
+    #     timestamp=timestamp,
+    #     path=file_path,
+    # )
+
+    # db.add(chunk)
+    # db.commit()
+
+    # logger.info(f"Add to processing queue: ConversationChunk@{chunk.id}")
+    # process_conversation_chunk.delay(chunk.id)
+
+    # return chunk
 
 
 @ConversationRouter.get("/{conversation_id}/quotes", response_model=List[QuoteSchema])

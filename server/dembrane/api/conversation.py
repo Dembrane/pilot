@@ -356,7 +356,6 @@ async def upload_conversation_chunk(
 
     # return chunk
 
-
 @ConversationRouter.get("/{conversation_id}/quotes", response_model=List[QuoteSchema])
 async def get_conversation_quotes(
     conversation_id: str,

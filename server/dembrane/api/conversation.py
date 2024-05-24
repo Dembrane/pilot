@@ -1,9 +1,11 @@
 import os
+import math
 from typing import List, Optional, Annotated, AsyncGenerator
 from logging import getLogger
 from datetime import datetime
 
-from fastapi import Form, Request, APIRouter, UploadFile
+import ffmpeg
+from fastapi import Form, Request, APIRouter, UploadFile, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import joinedload
 from fastapi.responses import StreamingResponse
@@ -245,7 +247,7 @@ async def upload_conversation_text(
     return chunk
 
 
-@ConversationRouter.post("/{conversation_id}/upload-chunk", response_model=ConversationChunkSchema)
+@ConversationRouter.post("/{conversation_id}/upload-chunk", response_model=List[ConversationChunkSchema])
 async def upload_conversation_chunk(
     conversation_id: str,
     chunk: UploadFile,
@@ -259,18 +261,56 @@ async def upload_conversation_chunk(
 
     MAX_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB   
     chunks = []
-    chunk_data = await chunk.read()
-    offset = 0
+    
+    # Save the uploaded chunk to a temporary file
+    temp_audio_path = os.path.join(AUDIO_CHUNKS_DIR, conversation.id, f"temp-{chunk.filename}")
+    with open(temp_audio_path, "wb") as temp_audio_file:
+        chunk_data = await chunk.read()
+        temp_audio_file.write(chunk_data)
 
-    while offset < len(chunk_data):
+    try:
+        # Get the audio metadata
+        probe = ffmpeg.probe(temp_audio_path)
+        logger.info(f"ffmpeg probe result: {probe}")
+        
+        # Calculate the duration of the audio file
+        if 'format' in probe and 'duration' in probe['format']:
+            duration = float(probe['format']['duration'])
+        else:
+            # Estimate the duration if 'duration' is missing
+            stream = probe['streams'][0]
+            bitrate = int(stream['bit_rate']) if 'bit_rate' in stream else 64000  # default to 64kbps if missing
+            size = int(probe['format']['size'])
+            duration = size / (bitrate / 8)  # size in bytes / (bitrate in bits per second / 8 bits per byte)
+            logger.info(f"Estimated duration: {duration}")
+
+    except ffmpeg.Error as error:
+        logger.error(f"ffmpeg error: {error.stderr.decode()}")
+        raise HTTPException(status_code=500, detail="Error processing audio file.") from error
+
+    file_size = os.path.getsize(temp_audio_path)
+
+    # Calculate the number of chunks needed
+    num_chunks = math.ceil(file_size / MAX_CHUNK_SIZE)
+    chunk_duration = duration / num_chunks
+
+    for i in range(num_chunks):
+        start_time = i * chunk_duration
         chunk_id = generate_uuid()
         chunk_path = os.path.join(AUDIO_CHUNKS_DIR, conversation.id, f"{chunk_id}-{chunk.filename}")
-        chunk_path = chunk_path.split(";")[0]
-
-        with open(chunk_path, "wb") as f:
-            chunk_size = min(MAX_CHUNK_SIZE, len(chunk_data) - offset)
-            f.write(chunk_data[offset:offset + chunk_size])
-            logger.info(f"Saving the file chunk to {chunk_path}")
+        
+        try:
+            (
+                ffmpeg
+                .input(temp_audio_path, ss=start_time, t=chunk_duration)
+                .output(chunk_path)
+                .run()
+            )
+        except ffmpeg.Error as error:
+            logger.error(f"ffmpeg error: {error.stderr.decode()}")
+            raise HTTPException(status_code=500, detail="Error processing audio file.") from error
+        
+        logger.info(f"Saving the file chunk to {chunk_path}")
 
         chunk_model = ConversationChunkModel(
             id=chunk_id,
@@ -280,9 +320,11 @@ async def upload_conversation_chunk(
         )
         chunks.append(chunk_model)
         db.add(chunk_model)
-        offset += chunk_size
-
+    
     db.commit()
+
+    # Clean up temporary file
+    os.remove(temp_audio_path)
 
     for chunk in chunks:
         logger.info(f"Add to processing queue: ConversationChunk@{chunk.id}")

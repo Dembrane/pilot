@@ -1111,8 +1111,8 @@ export const ParticipantConversationAudioRoute = ({
     };
 
     // const audioRecorder = useVADAudioRecorder({ onChunk });
-    const liveAudioRecorder = useAudioRecorder({ onChunk });
-    const asyncAudioRecorder = useChunkedAudioRecorder({ onChunk });
+    const liveAudioRecorder = useChunkedAudioRecorder({ onChunk });
+    const asyncAudioRecorder = useAudioRecorder({ onChunk });
 
     useWakeLock({ obtainWakeLockOnMount: true });
 

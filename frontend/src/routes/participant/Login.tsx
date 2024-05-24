@@ -86,7 +86,7 @@ export const ParticipantLoginRoute = () => {
     if (isSuccess) {
       if (initiateConversationMutation.data?.id) {
         navigate(
-          `/${language}/${projectId}/conversation/${initiateConversationMutation.data?.id}/${transcriptionType === "async" && "async"}`,
+          `/${language}/${projectId}/conversation/${initiateConversationMutation.data?.id}/${transcriptionType === "async" ? "async" : ""}`,
         );
       } else {
         reset();

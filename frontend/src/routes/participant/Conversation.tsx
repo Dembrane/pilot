@@ -1,28 +1,26 @@
+import WelcomeImage from "@/assets/participant-welcome-pattern.png";
 import { Logo } from "@/components/Logo";
+import { Markdown } from "@/components/Markdown";
 import {
   useConversationById,
   useConversationChunks,
   useDeleteConversationChunkByIdMutation,
-  useProjectById,
   useUploadConversationChunk,
   useUploadConversationTextChunk,
 } from "@/lib/query";
 import {
-  Group,
-  Stack,
-  Button,
-  Text,
-  Box,
-  Title,
-  LoadingOverlay,
-  Modal,
-  Divider,
   ActionIcon,
-  Paper,
+  Box,
+  Button,
+  Divider,
+  Group,
+  LoadingOverlay,
   Menu,
-  Switch,
-  createTheme,
-  Tooltip,
+  Modal,
+  Paper,
+  Stack,
+  Text,
+  Title,
 } from "@mantine/core";
 import {
   IconCheck,
@@ -37,29 +35,25 @@ import {
   IconTrash,
   IconUpload,
 } from "@tabler/icons-react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import WelcomeImage from "@/assets/participant-welcome-pattern.png";
-import { Markdown } from "@/components/Markdown";
 import {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
   PropsWithChildren,
-  useMemo,
-  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
 } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 // import {
 //   ReactRealTimeVADOptions,
 //   useMicVAD,
 //   utils,
 // } from "@ricky0123/vad-react";
 // import * as ort from "onnxruntime-web";
-import { Trans, t } from "@lingui/macro";
-import { useWakeLock } from "@/lib/useWakeLock";
-import clsx from "clsx";
 import { useLanguage } from "@/lib/useLanguage";
+import { useWakeLock } from "@/lib/useWakeLock";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { Trans, t } from "@lingui/macro";
+import clsx from "clsx";
 
 // ort.env.wasm.wasmPaths = {
 //   "ort-wasm-simd-threaded.wasm": "/ort-wasm-simd-threaded.wasm",
@@ -1094,7 +1088,6 @@ export const ParticipantConversationAudioRoute = ({
   // }
   {
     const { projectId, conversationId } = useParams();
-    const projectQuery = useProjectById(projectId as string);
     const conversationQuery = useConversationById(conversationId as string);
     const uploadChunkMutation = useUploadConversationChunk();
 
@@ -1102,18 +1095,6 @@ export const ParticipantConversationAudioRoute = ({
     const blob = useRef<Blob | null>(null);
 
     const showPreview = false;
-
-    const isConversationAllowed = useMemo(() => {
-      if (
-        !projectQuery ||
-        !projectQuery.data ||
-        projectQuery.data.is_conversation_allowed === undefined
-      ) {
-        return false;
-      } else {
-        return projectQuery.data.is_conversation_allowed;
-      }
-    }, [projectQuery]);
 
     const onChunk = (chunk: Blob) => {
       if (showPreview) {
@@ -1170,9 +1151,6 @@ export const ParticipantConversationAudioRoute = ({
     if (conversationQuery.isLoading || loading) {
       return <LoadingOverlay visible />;
     }
-
-    const liveUrl = `/${language}/${projectId}/conversation/${conversationId}`;
-    const asyncUrl = `/${language}/${projectId}/conversation/${conversationId}/async`;
 
     const textModeUrl = `/${language}/${projectId}/conversation/${conversationId}/text`;
     const finishUrl = `/${language}/${projectId}/conversation/${conversationId}/finish`;
@@ -1264,37 +1242,14 @@ export const ParticipantConversationAudioRoute = ({
                 <>
                   {!preview || !blob ? (
                     <Group className="w-full">
-                      <Tooltip
-                        withArrow
-                        label={
-                          "Do not close your browser tab immediately after recording"
-                        }
-                        style={{
-                          display:
-                            isTranscriptionLive === false ? "inherit" : "none",
-                        }}
+                      <Button
+                        size="xl"
+                        rightSection={<IconMicrophone />}
+                        onClick={startRecording}
+                        className="flex-grow"
                       >
-                        <Button
-                          size="xl"
-                          rightSection={<IconMicrophone />}
-                          onClick={startRecording}
-                          className="flex-grow"
-                        >
-                          <Trans>Start Recording</Trans>
-                        </Button>
-                      </Tooltip>
-
-                      <Link
-                        to={isTranscriptionLive === false ? liveUrl : asyncUrl}
-                      >
-                        <Switch
-                          disabled={isConversationAllowed === false}
-                          checked={isTranscriptionLive}
-                          onLabel="Live"
-                          offLabel="Async."
-                          size="xl"
-                        />
-                      </Link>
+                        <Trans>Start Recording</Trans>
+                      </Button>
 
                       <Link to={textModeUrl}>
                         <ActionIcon component="a" size="60" variant="outline">

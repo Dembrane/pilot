@@ -1,5 +1,7 @@
-import useSessionStorageState from "use-session-storage-state";
+import { ProjectTagsInput } from "@/components/project/ProjectTagsInput";
+import { PARTICIPANT_BASE_URL } from "@/config";
 import { Icons } from "@/icons";
+import { getProjectTranscriptsLink } from "@/lib/api";
 import {
   useConversationsByProjectId,
   useDeleteProjectByIdMutation,
@@ -10,8 +12,10 @@ import {
 } from "@/lib/query";
 import { Trans } from "@lingui/macro";
 import {
+  Anchor,
   Box,
   Button,
+  Checkbox,
   CopyButton,
   Divider,
   Group,
@@ -20,30 +24,25 @@ import {
   Paper,
   SimpleGrid,
   Stack,
+  Tabs,
+  Text,
   TextInput,
   Textarea,
   Title,
-  Text,
   Tooltip,
   rem,
-  Tabs,
-  Checkbox,
-  Anchor,
 } from "@mantine/core";
-import { useNavigate, useParams } from "react-router-dom";
-import QRCode from "react-qr-code";
 import {
   IconCheck,
   IconCopy,
   IconDownload,
   IconTrash,
 } from "@tabler/icons-react";
-import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { ENABLE_EXPERIMENTAL_FEATURES, PARTICIPANT_BASE_URL } from "@/config";
-import { getProjectTranscriptsLink } from "@/lib/api";
-import { useLanguage } from "@/lib/useLanguage";
-import { ProjectTagsInput } from "@/components/project/ProjectTagsInput";
+import { useForm } from "react-hook-form";
+import QRCode from "react-qr-code";
+import { useNavigate, useParams } from "react-router-dom";
+import useSessionStorageState from "use-session-storage-state";
 
 const ProjectDangerZone = ({ project }: { project: TProject }) => {
   const deleteProjectByIdMutation = useDeleteProjectByIdMutation();
@@ -283,6 +282,9 @@ export const ProjectOverviewRoute = () => {
     },
   );
 
+  const [isTranscriptionLive, setIsTranscriptionLive] =
+    useState<boolean>(false);
+
   const [sharingLink, setSharingLink] = useState(
     `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data?.pin}`,
   );
@@ -290,10 +292,16 @@ export const ProjectOverviewRoute = () => {
   useEffect(() => {
     if (projectQuery.data) {
       setSharingLink(
-        `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data.pin}`,
+        `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data.pin}&transcription=${isTranscriptionLive === false ? "async" : "live"}`,
       );
     }
-  }, [language, setSharingLink, projectQuery.data, projectId]);
+  }, [
+    language,
+    setSharingLink,
+    projectQuery.data,
+    projectId,
+    isTranscriptionLive,
+  ]);
 
   const handleOpenForParticipationCheckboxChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -444,6 +452,19 @@ export const ProjectOverviewRoute = () => {
               />
             </Box>
             <Divider />
+            <Box>
+              <Checkbox
+                checked={isTranscriptionLive}
+                disabled={projectQuery.data?.is_conversation_allowed}
+                onChange={() => setIsTranscriptionLive(!isTranscriptionLive)}
+                label="Live Transcription"
+                description={
+                  isTranscriptionLive === false
+                    ? ""
+                    : "Do not close your browser tab immediately after recording"
+                }
+              />
+            </Box>
             <Title order={2}> Sharing</Title>
             {projectQuery.data?.is_conversation_allowed ? (
               <>

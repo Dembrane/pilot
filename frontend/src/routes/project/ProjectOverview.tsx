@@ -458,11 +458,6 @@ export const ProjectOverviewRoute = () => {
                 disabled={projectQuery.data?.is_conversation_allowed}
                 onChange={() => setIsTranscriptionLive(!isTranscriptionLive)}
                 label="Live Transcription"
-                description={
-                  isTranscriptionLive === false
-                    ? ""
-                    : "Do not close your browser tab immediately after recording"
-                }
               />
             </Box>
             <Title order={2}> Sharing</Title>

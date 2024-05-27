@@ -39,6 +39,7 @@ import {
   PropsWithChildren,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -1091,6 +1092,10 @@ export const ParticipantConversationAudioRoute = ({
     const conversationQuery = useConversationById(conversationId as string);
     const uploadChunkMutation = useUploadConversationChunk();
 
+    const isChunkUploadInProgress = useMemo(() => {
+      return uploadChunkMutation.isPending;
+    }, [uploadChunkMutation.isPending]);
+
     const [preview, setPreview] = useState<string | null>(null);
     const blob = useRef<Blob | null>(null);
 
@@ -1268,6 +1273,7 @@ export const ParticipantConversationAudioRoute = ({
                             component="a"
                             variant="light"
                             rightSection={<IconCheck />}
+                            disabled={isChunkUploadInProgress}
                           >
                             Finish
                           </Button>

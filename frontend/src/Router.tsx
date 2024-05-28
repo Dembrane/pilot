@@ -197,8 +197,8 @@ export const participantRouter = createBrowserRouter([
       },
       {
         path: "conversation/:conversationId",
-        element: <ParticipantConversationAudioRoute />,
-        // element: <ParticipantConversationChunkedAudioRoute />,
+        // element: <ParticipantConversationAudioRoute />,
+        element: <ParticipantConversationChunkedAudioRoute />,
       },
       {
         path: "conversation/:conversationId/text",

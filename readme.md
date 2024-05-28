@@ -4,40 +4,21 @@
 
 - formerly called `dembrane/pdf-pilot`
 
-## Run in production
+## Deployment
 
-- Build and serve frontend
-- Build [`server`](/server/Dockerfile) and run
+- Use the `./deploy.sh` script to deploy
 
-## Run locally (Development)
-
-**Recommended option - Use devcontainer.json**
+## Run locally (Development with Devcontainers in VSCode)
 
 - Have docker installed (https://docs.docker.com/engine/install/)
-- In VSCode, open the command palette(CMD+Shift+P) and "Reopen in Container". It takes 10-15 mins the first time around.
 - Add your env keys to `server/.env`
   ```
   cd server
   cp .env.sample .env
   ```
-- Run migrations (see [Database migrations](#Database-migrations))
-- Run the server
-
-  ```
-  cd server
-  pip install -r requirements.txt
-  ./run.sh
-  ```
-
-- Run the frontend
-
-  > In development, Vite(frontend development server) proxies the FastAPI server running on `:8000` to `/api` (see [`/frontend/vite.config.ts`](/frontend/vite.config.ts))
-
-  ```
-  cd frontend
-  yarn
-  yarn dev
-  ```
+- In VSCode, open the command palette(CMD+Shift+P) and "Reopen in Container". It takes 10-15 mins the first time around.
+- Run setup `./setup.sh
+- In VSCode, open the command palette(CMD+Shift+P) and "Restore Terminals"
 
 ## API reference
 

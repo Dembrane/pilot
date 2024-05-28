@@ -1,6 +1,6 @@
 #!/bin/bash
 
-curl -sSf https://rye-up.com/get | RYE_INSTALL_OPTION="--yes" bash
+curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION="--yes" bash
 echo 'source "$HOME/.rye/env"' >> ~/.bashrc
 
 curl -fsSL https://fnm.vercel.app/install | bash

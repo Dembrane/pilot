@@ -816,7 +816,8 @@ const ParticipantBody = ({
 
   useEffect(() => {
     if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+      // disable autoscroll for now
+      // bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [chunksQuery.data]);
 

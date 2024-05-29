@@ -1,4 +1,7 @@
+import re
+import string
 import logging
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
@@ -18,8 +21,39 @@ logger.setLevel(logging.DEBUG)
 lc_embedder = OpenAIEmbeddings(model="text-embedding-3-small")
 semantic_chunker = SemanticChunker(lc_embedder)
 
+SENTENCE_ENDING_PUNCTUATION = {".", "!", "?"}
+SENTENCE_ENDING_PUNTUATION_REGEX = r"(?<=[.!?]) +"
 
-def generate_quotes(db: Session, project_analysis_run_id: str, conversation_id: str) -> None:
+
+def ends_with_punctuation(s: str) -> bool:
+    if not s:
+        return False
+    return s.strip()[-1] in SENTENCE_ENDING_PUNCTUATION
+
+
+def clean_ellipsis(text: str) -> str:
+    return text.replace("...", "")
+
+
+def join_transcript_chunks(string_list: List[str]) -> str:
+    cleaned_chunks = [clean_ellipsis(chunk).strip() for chunk in string_list]
+    joined_string = cleaned_chunks[0]
+
+    if len(cleaned_chunks) == 1:
+        return joined_string
+
+    for chunk in cleaned_chunks[1:]:
+        if chunk == "":
+            continue
+        if ends_with_punctuation(joined_string):
+            joined_string += " " + chunk
+        else:
+            joined_string += ". " + chunk
+
+    return joined_string
+
+
+def generate_quotes(db: Session, project_analysis_run_id: Optional[str], conversation_id: str) -> List[QuoteModel]:
     """Generate quotes"""
 
     chunks = (
@@ -34,53 +68,59 @@ def generate_quotes(db: Session, project_analysis_run_id: str, conversation_id: 
 
     if len(chunks) == 0:
         logger.debug(f"no conversation_chunks found for conversation {conversation_id}")
-        return
+        return []
 
-    # Before chunking
-    # TODO: quote transformations
-    # - add context of session
-    # - add context for references. eg. "him (Sameer)"
+    conversation_transcript = join_transcript_chunks([chunk.transcript for chunk in chunks])
 
-    lc_docs = semantic_chunker.create_documents(
-        [chunk.transcript for chunk in chunks],
-        metadatas=[
-            {
-                "conversation_id": chunk.conversation_id,
-                "conversation_chunk_id": chunk.id,
-            }
-            for chunk in chunks
-        ],
-    )
-    logger.debug(f"generated {len(lc_docs)} documents from {len(chunks)} conversation_chunks")
+    split_conversation_transcript = re.split(SENTENCE_ENDING_PUNTUATION_REGEX, conversation_transcript)
 
-    quotes = []
+    return []
 
-    for doc in lc_docs:
-        if not doc.page_content or doc.page_content.strip() == "":
-            logger.debug(f"skipping empty doc {doc.metadata}")
-            continue
+    # # Before chunking
+    # # TODO: quote transformations
+    # # - add context of session
+    # # - add context for references. eg. "him (Sameer)"
 
-        try:
-            quote = QuoteModel(
-                id=generate_uuid(),
-                conversation_id=doc.metadata["conversation_id"],
-                text=doc.page_content,
-                embedding=embed_text(doc.page_content),
-                project_analysis_run_id=project_analysis_run_id if project_analysis_run_id else None,
-            )
-        except Exception as e:
-            logger.error(f"Error embedding text {doc.page_content}: {str(e)}")
-            continue
+    # lc_docs = semantic_chunker.create_documents(
+    #     [chunk.transcript for chunk in chunks],
+    #     metadatas=[
+    #         {
+    #             "conversation_id": chunk.conversation_id,
+    #             "conversation_chunk_id": chunk.id,
+    #         }
+    #         for chunk in chunks
+    #     ],
+    # )
+    # logger.debug(f"generated {len(lc_docs)} documents from {len(chunks)} conversation_chunks")
 
-        chunk = db.get(ConversationChunkModel, doc.metadata["conversation_chunk_id"])
+    # quotes = []
 
-        if chunk:
-            quote.conversation_chunks.append(chunk)
-            quotes.append(quote)
+    # for doc in lc_docs:
+    #     if not doc.page_content or doc.page_content.strip() == "":
+    #         logger.debug(f"skipping empty doc {doc.metadata}")
+    #         continue
 
-    logger.debug(f"adding {len(quotes)} quotes to database")
-    db.add_all(quotes)
-    db.commit()
+    #     try:
+    #         quote = QuoteModel(
+    #             id=generate_uuid(),
+    #             conversation_id=doc.metadata["conversation_id"],
+    #             text=doc.page_content,
+    #             embedding=embed_text(doc.page_content),
+    #             project_analysis_run_id=project_analysis_run_id if project_analysis_run_id else None,
+    #         )
+    #     except Exception as e:
+    #         logger.error(f"Error embedding text {doc.page_content}: {str(e)}")
+    #         continue
+
+    #     chunk = db.get(ConversationChunkModel, doc.metadata["conversation_chunk_id"])
+
+    #     if chunk:
+    #         quote.conversation_chunks.append(chunk)
+    #         quotes.append(quote)
+
+    # logger.debug(f"adding {len(quotes)} quotes to database")
+    # db.add_all(quotes)
+    # db.commit()
 
 
 client = OpenAI()
@@ -188,3 +228,11 @@ def generate_insights(db: Session, project_analysis_run_id: str) -> None:
 
         db.add(insight)
         db.commit()
+
+
+if __name__ == "__main__":
+    from dembrane.database import get_db
+
+    db = next(get_db())
+    generate_quotes(db, "project_analysis_run_id", "conversation_id")
+    # generate_insights(db, "project_analysis_run_id")

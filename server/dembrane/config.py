@@ -36,6 +36,8 @@ logger.debug(f"AUDIO_CHUNKS_DIR: {AUDIO_CHUNKS_DIR}")
 EMBEDDINGS_CACHE_DIR = os.path.join(BASE_DIR, "embeddings_cache")
 logger.debug(f"EMBEDDINGS_CACHE_DIR: {EMBEDDINGS_CACHE_DIR}")
 
+TRANKIT_CACHE_DIR = os.path.join(BASE_DIR, "trankit_cache")
+
 DATABASE_URL = os.environ.get("DATABASE_URL")
 assert DATABASE_URL, "DATABASE_URL environment variable is not set"
 

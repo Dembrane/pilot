@@ -12,11 +12,13 @@ import {
   ActionIcon,
   Box,
   Button,
+  Container,
   Divider,
   Group,
   LoadingOverlay,
   Menu,
   Modal,
+  Notification,
   Paper,
   Stack,
   Text,
@@ -39,7 +41,6 @@ import {
   PropsWithChildren,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -1092,9 +1093,26 @@ export const ParticipantConversationAudioRoute = ({
     const conversationQuery = useConversationById(conversationId as string);
     const uploadChunkMutation = useUploadConversationChunk();
 
-    const isChunkUploadInProgress = useMemo(() => {
-      return uploadChunkMutation.isPending;
+    const [uploadInProgress, updatedUploadInProgress] = useState(false);
+    // Add a delay when setting back "uploadInProgress" to false
+    // to avoid "flashing" effect
+    useEffect(() => {
+      if (uploadChunkMutation.isPending === true) {
+        updatedUploadInProgress(true);
+      }
+      if (uploadChunkMutation.isPending === false) {
+        const timer = setTimeout(() => {
+          console.log("here!");
+          updatedUploadInProgress(false);
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
     }, [uploadChunkMutation.isPending]);
+
+    useEffect(() => {
+      console.log("uploadInProgress: ");
+      console.log(uploadInProgress);
+    }, [uploadInProgress]);
 
     const [preview, setPreview] = useState<string | null>(null);
     const blob = useRef<Blob | null>(null);
@@ -1242,6 +1260,12 @@ export const ParticipantConversationAudioRoute = ({
               </div>
             )}
 
+            {uploadInProgress && (
+              <Notification title="Upload in progress">
+                Please do not close your browser
+              </Notification>
+            )}
+
             <Group justify="center">
               {!isRecording && (
                 <>
@@ -1273,7 +1297,7 @@ export const ParticipantConversationAudioRoute = ({
                             component="a"
                             variant="light"
                             rightSection={<IconCheck />}
-                            disabled={isChunkUploadInProgress}
+                            disabled={uploadInProgress}
                           >
                             Finish
                           </Button>

@@ -458,6 +458,7 @@ export const ProjectOverviewRoute = () => {
                 disabled={projectQuery.data?.is_conversation_allowed}
                 onChange={() => setIsTranscriptionLive(!isTranscriptionLive)}
                 label="Live Transcription"
+                description="Participation must be set to inactive to change this setting"
               />
             </Box>
             <Title order={2}> Sharing</Title>

@@ -246,7 +246,6 @@ async def upload_conversation_text(
 
     return chunk
 
-
 @ConversationRouter.post("/{conversation_id}/upload-chunk", response_model=List[ConversationChunkSchema])
 async def upload_conversation_chunk(
     conversation_id: str,
@@ -259,7 +258,8 @@ async def upload_conversation_chunk(
     if not os.path.exists(os.path.join(AUDIO_CHUNKS_DIR, conversation.id)):
         os.makedirs(os.path.join(AUDIO_CHUNKS_DIR, conversation.id))
 
-    MAX_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB   
+    # MAX_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB   
+    MAX_CHUNK_SIZE = (1024 * 1024) / 2   
     chunks = []
     
     # Save the uploaded chunk to a temporary file
@@ -268,10 +268,18 @@ async def upload_conversation_chunk(
         chunk_data = await chunk.read()
         temp_audio_file.write(chunk_data)
 
+    converted_audio_path = temp_audio_path.replace('webm', 'mp3')
+
+    (
+        ffmpeg
+        .input(temp_audio_path)
+        .output(converted_audio_path, f='mp3')
+        .run()
+    )
+    
     try:
         # Get the audio metadata
-        probe = ffmpeg.probe(temp_audio_path)
-        logger.info(f"ffmpeg probe result: {probe}")
+        probe = ffmpeg.probe(converted_audio_path)
         
         # Calculate the duration of the audio file
         if 'format' in probe and 'duration' in probe['format']:
@@ -287,23 +295,42 @@ async def upload_conversation_chunk(
     except ffmpeg.Error as error:
         logger.error(f"ffmpeg error: {error.stderr.decode()}")
         raise HTTPException(status_code=500, detail="Error processing audio file.") from error
+    
+    logger.info("duration")
+    logger.info(duration)
 
-    file_size = os.path.getsize(temp_audio_path)
+    file_size = os.path.getsize(converted_audio_path)
 
     # Calculate the number of chunks needed
     num_chunks = math.ceil(file_size / MAX_CHUNK_SIZE)
     chunk_duration = duration / num_chunks
 
+    logger.info("MAX_CHUNK_SIZE")
+    logger.info(MAX_CHUNK_SIZE)
+    logger.info("file_size")
+    logger.info(file_size)
+    logger.info("num_chunks")
+    logger.info(num_chunks)
+
     for i in range(num_chunks):
         start_time = i * chunk_duration
+        if start_time < 0:
+            start_time = 0
+        start_time = round(start_time, 2)
         chunk_id = generate_uuid()
         chunk_path = os.path.join(AUDIO_CHUNKS_DIR, conversation.id, f"{chunk_id}-{chunk.filename}")
+        logger.info("chunk_path")
+        logger.info(chunk_path)
+        logger.info("start_time")
+        logger.info(start_time)
+        logger.info("chunk_duration")
+        logger.info(chunk_duration)
         
         try:
             (
                 ffmpeg
-                .input(temp_audio_path, ss=start_time, t=chunk_duration)
-                .output(chunk_path)
+                .input(converted_audio_path, ss=start_time, t=chunk_duration)
+                .output(chunk_path, f='mp3')
                 .run()
             )
         except ffmpeg.Error as error:
@@ -325,8 +352,11 @@ async def upload_conversation_chunk(
 
     # Clean up temporary file
     os.remove(temp_audio_path)
+    os.remove(converted_audio_path)
 
     for chunk in chunks:
+        logger.info("chunk id:")
+        logger.info(chunk.id)
         logger.info(f"Add to processing queue: ConversationChunk@{chunk.id}")
         process_conversation_chunk.delay(chunk.id)
 

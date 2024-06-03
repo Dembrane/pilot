@@ -1109,11 +1109,6 @@ export const ParticipantConversationAudioRoute = ({
       }
     }, [uploadChunkMutation.isPending]);
 
-    useEffect(() => {
-      console.log("uploadInProgress: ");
-      console.log(uploadInProgress);
-    }, [uploadInProgress]);
-
     const [preview, setPreview] = useState<string | null>(null);
     const blob = useRef<Blob | null>(null);
 

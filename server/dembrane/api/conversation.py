@@ -4,7 +4,7 @@ from typing import List, Optional, Annotated, AsyncGenerator
 from logging import getLogger
 from datetime import datetime
 
-import ffmpeg
+import ffmpeg  # type: ignore
 from fastapi import Form, Request, APIRouter, UploadFile, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import joinedload
@@ -258,8 +258,7 @@ async def upload_conversation_chunk(
     if not os.path.exists(os.path.join(AUDIO_CHUNKS_DIR, conversation.id)):
         os.makedirs(os.path.join(AUDIO_CHUNKS_DIR, conversation.id))
 
-    # MAX_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB   
-    MAX_CHUNK_SIZE = (1024 * 1024) / 2   
+    MAX_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB  
     chunks = []
     
     # Save the uploaded chunk to a temporary file

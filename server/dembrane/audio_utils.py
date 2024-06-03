@@ -1,5 +1,14 @@
+import os
+import math
 import logging
 import subprocess
+
+import ffmpeg  # type: ignore
+from sqlalchemy.orm import Session
+
+from dembrane.utils import generate_uuid
+from dembrane.config import AUDIO_CHUNKS_DIR
+from dembrane.database import ConversationChunkModel
 
 logger = logging.getLogger("audio_utils")
 
@@ -70,3 +79,59 @@ def convert_mp4_to_mp3(input_file_path: str, output_file_path: str) -> bool:
         raise ConversionError
 
     return True
+
+def pre_process_audio(db: Session, chunk: ConversationChunkModel):
+    MAX_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB
+
+    if chunk.path is None:
+        logger.error("File path not found")
+        return
+
+    try:
+        file_mime_type = get_mime_type_from_file_path(chunk.path)
+        if file_mime_type != "audio/mp3":
+            chunk_file_format = chunk.path.split(".")[-1]
+            updated_chunk_path = chunk.path.replace(chunk_file_format, "mp3")
+            (
+                ffmpeg
+                .input(chunk.path)
+                .output(updated_chunk_path, f='mp3')
+                .run()
+            )
+            chunk.path = updated_chunk_path
+            db.commit()
+    except Exception as e:
+        logger.error(f"File type is not supported: {e}")
+        db.rollback()
+        raise e
+
+    file_size = os.path.getsize(chunk.path)
+    number_chunks = math.ceil(file_size / MAX_CHUNK_SIZE)
+
+    if number_chunks == 1:
+        logger.info("File is already save to DB. No splitting required.")
+        return
+    
+    try:
+        probe = ffmpeg.probe(chunk.path)
+        if 'format' in probe and 'duration' in probe['format']:
+            duration = float(probe['format']['duration'])
+            chunk_duration = duration / number_chunks
+            for i in range(number_chunks):
+                start_time = i * chunk_duration
+                chunk_id = generate_uuid()
+                chunk_path = os.path.join(AUDIO_CHUNKS_DIR, chunk.conversation_id, f"{chunk_id}-{chunk.filename}")
+                
+                (
+                    ffmpeg
+                    .input(chunk.path, ss=start_time, t=chunk_duration)
+                    .output(chunk_path, f='mp3')
+                    .run()
+                )
+                
+    except ffmpeg.Error as e:
+        logger.error(f"ffmpeg error: {e.stderr.decode()}")
+        raise e
+    except Exception as e:
+        logger.error("File spitting failed")
+        raise e

@@ -17,6 +17,14 @@ if DEBUG_MODE:
     logging.basicConfig(level=logging.DEBUG)
     logger.setLevel(logging.DEBUG)
 
+ADMIN_BASE_URL = os.environ.get("ADMIN_BASE_URL", "http://localhost:3000")
+logger.debug(f"ADMIN_BASE_URL: {ADMIN_BASE_URL}")
+
+PARTICIPANT_BASE_URL = os.environ.get("PARTICIPANT_BASE_URL", "http://localhost:3001")
+logger.debug(f"PARTICIPANT_BASE_URL: {PARTICIPANT_BASE_URL}")
+
+DISABLE_REDACTION = os.environ.get("DISABLE_REDACTION", "false").lower() in ["true", "1"]
+logger.debug(f"DISABLE_REDACTION: {DISABLE_REDACTION}")
 
 UPLOADS_DIR = os.path.join(BASE_DIR, "uploads")
 if not os.path.exists(UPLOADS_DIR):
@@ -37,24 +45,25 @@ EMBEDDINGS_CACHE_DIR = os.path.join(BASE_DIR, "embeddings_cache")
 logger.debug(f"EMBEDDINGS_CACHE_DIR: {EMBEDDINGS_CACHE_DIR}")
 
 TRANKIT_CACHE_DIR = os.path.join(BASE_DIR, "trankit_cache")
+logger.debug(f"TRANKIT_CACHE_DIR: {TRANKIT_CACHE_DIR}")
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 assert DATABASE_URL, "DATABASE_URL environment variable is not set"
+logger.debug("DATABASE_URL: set")
 
 RABBITMQ_URL = os.environ.get("RABBITMQ_URL")
 assert RABBITMQ_URL, "RABBITMQ_URL environment variable is not set"
+logger.debug("RABBITMQ_URL: set")
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is not set"
+logger.debug("OPENAI_API: set")
 
 SERVE_API_DOCS = os.environ.get("SERVE_API_DOCS", "false").lower() in ["true", "1"]
-logging.debug(f"SERVE_API_DOCS: {SERVE_API_DOCS}")
+logger.debug(f"SERVE_API_DOCS: {SERVE_API_DOCS}")
 
 DISABLE_SENTRY = os.environ.get("DISABLE_SENTRY", "false").lower() in ["true", "1"]
-logging.debug(f"DISABLE_SENTRY: {DISABLE_SENTRY}")
+logger.debug(f"DISABLE_SENTRY: {DISABLE_SENTRY}")
 
 BUILD_VERSION = os.environ.get("BUILD_VERSION", "dev")
-logging.debug(f"BUILD_VERSION: {BUILD_VERSION}")
-
-ADMIN_BASE_URL = os.environ.get("ADMIN_BASE_URL", "http://localhost:3000")
-PARTICIPANT_BASE_URL = os.environ.get("PARTICIPANT_BASE_URL", "http://localhost:3001")
+logger.debug(f"BUILD_VERSION: {BUILD_VERSION}")

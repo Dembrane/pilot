@@ -8,27 +8,15 @@ echo 'eval "$(fnm env --use-on-cd)"' >> ~/.bashrc
 
 . ~/.bashrc
 
-fnm completions --shell bash
 fnm install 18
 npm i -g yarn
 
-# Parallel installation for frontend and server dependencies
-(
-  cd frontend
-  yarn install
-) &
-frontend_pid=$!
+cd frontend
+yarn install
 
-(
-  cd server
-  rye sync
-  alembic upgrade head
-  pip install mypy
-) &
-server_pid=$!
-
-# Wait for the parallel tasks to complete
-wait $frontend_pid
-wait $server_pid
+cd ../server
+rye sync
+alembic upgrade head
+pip install mypy
 
 echo "Setup complete"

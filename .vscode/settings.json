@@ -1,5 +1,7 @@
 {
   "mypy.runUsingActiveInterpreter": true,
+  "mypy.targets": ["./server/dembrane"],
+  "mypy.configFile": "./server/pyproject.toml",
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.useTabStops": true,

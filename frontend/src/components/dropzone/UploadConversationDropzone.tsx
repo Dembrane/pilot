@@ -37,7 +37,13 @@ export const UploadConversationDropzone = (
         console.log("rejected files", files);
       }}
       loading={uploadConversationMutation.isPending}
-      accept={["audio/m4a", "audio/x-m4a", "audio/mp3", "audio/wav"]}
+      accept={[
+        "audio/m4a",
+        "audio/x-m4a",
+        "audio/mp3",
+        "audio/wav",
+        "audio/mpeg",
+      ]}
     >
       <Group justify="center" gap="xl" style={{ pointerEvents: "none" }}>
         <Dropzone.Accept>

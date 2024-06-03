@@ -1,7 +1,6 @@
 import logging
 from typing import Optional
 
-import backoff
 from openai import OpenAI
 
 openai_client = OpenAI()
@@ -13,7 +12,6 @@ class TranscriptionError(Exception):
     pass
 
 
-@backoff.on_exception(backoff.expo, (Exception), max_tries=5)
 def transcribe_audio(audio_file_path: str, language: Optional[str], whisper_prompt: Optional[str]) -> str:
     try:
         f = open(audio_file_path, "rb")

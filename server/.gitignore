@@ -3,6 +3,7 @@
 *.sqlite3.bkp
 uploads
 embeddings_cache
+trankit_cache
 .env
 dist
 .mypy_cache

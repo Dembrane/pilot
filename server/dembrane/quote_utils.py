@@ -1,5 +1,4 @@
 import re
-import string
 import logging
 from typing import List, Optional
 
@@ -11,8 +10,9 @@ from sklearn.cluster import KMeans  # type: ignore
 from langchain_openai import OpenAIEmbeddings
 from langchain_experimental.text_splitter import SemanticChunker
 
-from dembrane.utils import generate_uuid
-from dembrane.database import QuoteModel, InsightModel, ConversationChunkModel
+from dembrane.ner import anonymize_sentence
+from dembrane.utils import generate_uuid, get_utc_timestamp
+from dembrane.database import QuoteModel, InsightModel, ConversationChunkModel, ProjectAnalysisRunModel
 from dembrane.embedding import embed_text
 
 logger = logging.getLogger("quote_utils")
@@ -32,7 +32,7 @@ def ends_with_punctuation(s: str) -> bool:
 
 
 def clean_ellipsis(text: str) -> str:
-    return text.replace("...", "")
+    return text.replace("...", "").replace("…", "")
 
 
 def join_transcript_chunks(string_list: List[str]) -> str:
@@ -53,8 +53,44 @@ def join_transcript_chunks(string_list: List[str]) -> str:
     return joined_string
 
 
+def llm_split_text(text: str) -> List[str]:
+    logger = logging.getLogger("llm_split_text")
+    logger.debug(f"splitting text: {text}")
+    messages = [
+        {
+            "role": "user",
+            "content": 'Split the following text into 2 meaningful sentences. Retain the exact wording. Response format: <Sentence1>\\n<Sentence2>. Do not enclose your response in quotes or other special characters. Only output text.\n\n"""'
+            + text
+            + '\n"""',
+        }
+    ]
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=messages,  # type: ignore
+        temperature=0,
+        max_tokens=64,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+    )
+    logger.debug(response)
+
+    split_text = response.choices[0].message.content
+    logger.debug(split_text)
+
+    return split_text.split("\n")
+
+
+MERGE_SENTENCE_LOWER_WORD_LIMIT = 8
+MERGE_SENTENCE_UPPER_WORD_LIMIT = 45
+BACKWARD_MERGE_UPPER_WORD_LIMIT = 35
+LONG_SENTENCE_LIMIT = 75
+
+
 def generate_quotes(db: Session, project_analysis_run_id: Optional[str], conversation_id: str) -> List[QuoteModel]:
     """Generate quotes"""
+    logger = logging.getLogger("generate_quotes")
 
     chunks = (
         db.query(ConversationChunkModel)
@@ -66,15 +102,80 @@ def generate_quotes(db: Session, project_analysis_run_id: Optional[str], convers
         .all()
     )
 
+    logger.debug(f"chunks found: {len(chunks)}")
+
     if len(chunks) == 0:
         logger.debug(f"no conversation_chunks found for conversation {conversation_id}")
         return []
 
-    conversation_transcript = join_transcript_chunks([chunk.transcript for chunk in chunks])
+    conversation_transcript = join_transcript_chunks([anonymize_sentence(chunk.transcript) for chunk in chunks])
 
     split_conversation_transcript = re.split(SENTENCE_ENDING_PUNTUATION_REGEX, conversation_transcript)
 
-    return []
+    logger.debug(f"after joining chunks and splitting into sentences: {len(split_conversation_transcript)} sentences")
+
+    quote_strs = []
+    buffer = []
+
+    # forward pass
+    for sentence in split_conversation_transcript:
+        if len(sentence.split()) < MERGE_SENTENCE_LOWER_WORD_LIMIT and buffer:
+            buffer[-1] += " " + sentence
+        else:
+            buffer.append(sentence)
+
+        current_quote = " ".join(buffer).strip()
+        if len(current_quote.split()) > MERGE_SENTENCE_UPPER_WORD_LIMIT:
+            if len(current_quote.split()) > LONG_SENTENCE_LIMIT:
+                quote_strs.extend(llm_split_text(current_quote))
+            else:
+                quote_strs.append(current_quote)
+            buffer = []
+
+    if buffer:
+        quote_strs.append(" ".join(buffer).strip())
+
+    # backward pass
+    final_quotes = []
+    i = len(quote_strs) - 1
+
+    while i >= 0:
+        if i > 0 and len(quote_strs[i].split()) + len(quote_strs[i - 1].split()) <= BACKWARD_MERGE_UPPER_WORD_LIMIT:
+            merged_quote = quote_strs[i - 1] + " " + quote_strs[i]
+            if len(merged_quote.split()) <= LONG_SENTENCE_LIMIT:
+                final_quotes.append(merged_quote)
+                i -= 2
+            else:
+                final_quotes.append(quote_strs[i])
+                i -= 1
+        else:
+            final_quotes.append(quote_strs[i])
+            i -= 1
+
+    final_quotes.reverse()
+
+    quotes = []
+
+    for quote_str in final_quotes:
+        try:
+            quote = QuoteModel(
+                id=generate_uuid(),
+                created_at=get_utc_timestamp(),
+                project_analysis_run_id=project_analysis_run_id if project_analysis_run_id else None,
+                conversation_id=conversation_id,
+                text=quote_str,
+                embedding=embed_text(quote_str),
+            )
+        except Exception as e:
+            logger.error(f"Error embedding text {quote_str}: {str(e)}")
+            continue
+
+        quotes.append(quote)
+
+    db.add_all(quotes)
+    db.commit()
+
+    return quotes
 
     # # Before chunking
     # # TODO: quote transformations
@@ -152,11 +253,13 @@ def generate_insights(db: Session, project_analysis_run_id: str) -> None:
     df["embedding"] = df.embedding.apply(np.array)
 
     matrix = np.vstack(df.embedding.values)  # type: ignore
-    logger.debug("matrix shape", matrix.shape)
+    logger.debug(f"matrix shape {matrix.shape}")
 
     n_clusters = len(quotes) // 3
-    logger.debug("n_clusters", n_clusters)
-    logger.debug("quotes", len(quotes))
+    # logger.debug("n_clusters", n_clusters)
+    logger.debug(f"n_clusters, {n_clusters}")
+    # logger.debug("quotes", len(quotes))
+    logger.debug(f"quotes, {len(quotes)}")
 
     kmeans = KMeans(n_clusters=n_clusters, init="k-means++")
     kmeans.fit(matrix)
@@ -180,7 +283,7 @@ def generate_insights(db: Session, project_analysis_run_id: str) -> None:
         ]
 
         title_response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=messages,  # type: ignore
             temperature=0,
             max_tokens=64,
@@ -201,7 +304,7 @@ def generate_insights(db: Session, project_analysis_run_id: str) -> None:
         ]
 
         summary_response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=messages,  # type: ignore
             temperature=0,
             max_tokens=256,
@@ -234,5 +337,16 @@ if __name__ == "__main__":
     from dembrane.database import get_db
 
     db = next(get_db())
-    generate_quotes(db, "project_analysis_run_id", "conversation_id")
+
+    project_analysis_run = ProjectAnalysisRunModel(
+        id=generate_uuid(), project_id="38f84a2f-8edf-42fe-8358-e71d561127c8", processing_status="DONE"
+    )
+
+    db.add(project_analysis_run)
+    db.commit()
+
+    quotes = generate_quotes(db, project_analysis_run.id, "387a8819-fb6b-43f8-89a9-bfb4a445d90b")
+
+    generate_insights(db, project_analysis_run.id)
+
     # generate_insights(db, "project_analysis_run_id")

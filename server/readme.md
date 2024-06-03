@@ -1,5 +1,0 @@
-# Dembrane
-
-## Installation
-
-`rye sync`

@@ -25,7 +25,7 @@ import {
   UnstyledButtonProps,
   Checkbox,
 } from "@mantine/core";
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { UploadResourceDropzone } from "../dropzone/UploadResourceDropzone";
 import { apiCommonConfig } from "@/lib/api";
@@ -219,21 +219,40 @@ const ProjectAccordion = ({ projectId }: { projectId: string }) => {
 
   const conversationsQuery = useConversationsByProjectId(projectId);
 
-  const allConversations = conversationsQuery.data ?? [];
-  const conversationsWithContent =
-    allConversations?.filter((conversation) => {
-      if (conversation.chunks && conversation.chunks.length > 0)
-        return conversation.chunks[0].transcript != null;
-      return null;
-    }) ?? [];
-  const conversationsWithoutContent =
-    allConversations.filter(
-      (conversation) => conversation.chunks?.length === 0,
-    ) ?? [];
+  const allConversations = useMemo(
+    () => conversationsQuery.data ?? [],
+    [conversationsQuery.data],
+  );
 
-  const filteredConversations = hideConversationsWithoutContent
-    ? conversationsWithContent
-    : allConversations;
+  const conversationsWithContent = useMemo(
+    () =>
+      allConversations?.filter((conversation) => {
+        if (conversation.chunks && conversation.chunks.length > 0)
+          return conversation.chunks[0].transcript != null;
+        return null;
+      }) ?? [],
+    [allConversations],
+  );
+
+  const conversationsWithoutContent = useMemo(
+    () =>
+      allConversations.filter(
+        (conversation) => conversation.chunks?.length === 0,
+      ) ?? [],
+    [allConversations],
+  );
+
+  const filteredConversations = useMemo(
+    () =>
+      hideConversationsWithoutContent
+        ? conversationsWithContent
+        : allConversations,
+    [
+      conversationsWithContent,
+      allConversations,
+      hideConversationsWithoutContent,
+    ],
+  );
 
   const [parent] = useAutoAnimate();
   const [parent2] = useAutoAnimate();

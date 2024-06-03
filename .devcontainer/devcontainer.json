@@ -41,8 +41,8 @@
     "8000": {
       "label": "backend"
     },
-    "8080": {
-      "label": "pgadmin"
+    "5432": {
+      "label": "pg"
     }
   }
   // Configure tool-specific properties.

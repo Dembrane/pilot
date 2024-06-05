@@ -40,6 +40,7 @@ dependencies = [
     "ruff",
     "isort",
     "pandas-stubs>=2.2.2.240514",
+    "ffmpeg-python>=0.2.0",
 ]
 
 [tool.setuptools]

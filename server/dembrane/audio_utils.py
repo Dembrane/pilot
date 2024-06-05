@@ -32,6 +32,8 @@ def get_mime_type_from_file_path(file_path: str) -> str:
         return "audio/m4a"
     elif file_path.endswith(".mp4"):
         return "video/mp4"
+    elif file_path.endswith(".mpeg"):
+        return "video/mpeg"
     else:
         raise ValueError(f"Unsupported file type: {file_path}")
 
@@ -83,7 +85,7 @@ def convert_mp4_to_mp3(input_file_path: str, output_file_path: str) -> bool:
     return True
 
 
-MAX_CHUNK_SIZE = 20 * 1024 * 1024  # 20MB
+MAX_CHUNK_SIZE = 10 * 1024 * 1024  # 20MB
 
 
 def split_audio_chunk(db: Session, original_chunk: ConversationChunkModel) -> List[ConversationChunkModel]:
@@ -132,7 +134,7 @@ def split_audio_chunk(db: Session, original_chunk: ConversationChunkModel) -> Li
                 start_time = i * chunk_duration
                 chunk_id = generate_uuid()
                 chunk_path = os.path.join(
-                    AUDIO_CHUNKS_DIR, original_chunk.conversation_id, f"{chunk_id}-{original_chunk.filename}"
+                    AUDIO_CHUNKS_DIR, original_chunk.conversation_id, f"{chunk_id}_{i}-of-{number_chunks}.mp3"
                 )
 
                 (ffmpeg.input(original_chunk.path, ss=start_time, t=chunk_duration).output(chunk_path, f="mp3").run())

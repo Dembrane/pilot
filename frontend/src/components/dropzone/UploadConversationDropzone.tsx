@@ -3,6 +3,7 @@ import { Group, LoadingOverlay, rem } from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { IconUpload, IconX } from "@tabler/icons-react";
 import { PropsWithChildren } from "react";
+import { toast } from "../Toaster";
 
 export const UploadConversationDropzone = (
   props: PropsWithChildren<{
@@ -31,10 +32,12 @@ export const UploadConversationDropzone = (
           timestamps: files.map(() => new Date()),
         });
       }}
-      maxFiles={5}
-      maxSize={24 * 1024 * 1024}
+      maxFiles={10}
+      maxSize={200 * 1024 * 1024}
       onReject={(files) => {
-        console.log("rejected files", files);
+        toast.error(
+          `Something went wrong while uploading the file: ${files[0].errors[0].message}`,
+        );
       }}
       loading={uploadConversationMutation.isPending}
       accept={[

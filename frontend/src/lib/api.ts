@@ -217,7 +217,7 @@ export const uploadConversationChunk = async (payload: {
   formData.append("chunk", file);
   formData.append("timestamp", payload.timestamp.toISOString());
 
-  return apiNoAuth.post<unknown, TConversationChunk>(
+  return apiNoAuth.post<unknown, TConversationChunk[]>(
     `/conversations/${payload.conversationId}/upload-chunk`,
     formData,
     {

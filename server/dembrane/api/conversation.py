@@ -245,21 +245,22 @@ async def upload_conversation_text(
     return chunk
 
 
-@ConversationRouter.post("/{conversation_id}/upload-chunk", response_model=ConversationChunkSchema)
+@ConversationRouter.post("/{conversation_id}/upload-chunk", response_model=List[ConversationChunkSchema])
 async def upload_conversation_chunk(
     conversation_id: str,
     chunk: UploadFile,
     timestamp: Annotated[datetime, Form()],
     db: DependencyInjectDatabase,
-) -> ConversationChunkModel:
+) -> List[ConversationChunkModel]:
     conversation = await get_conversation(conversation_id, db)
-
-    if not os.path.exists(os.path.join(AUDIO_CHUNKS_DIR, conversation.id)):
-        os.makedirs(os.path.join(AUDIO_CHUNKS_DIR, conversation.id))
 
     id = generate_uuid()
     file_path = os.path.join(AUDIO_CHUNKS_DIR, conversation.id, f"{id}-{chunk.filename}")
 
+    # ensure the directory exists
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    # remove unnecessary information from the file_path
     file_path = file_path.split(";")[0]
 
     with open(file_path, "wb") as f:
@@ -279,7 +280,7 @@ async def upload_conversation_chunk(
     logger.info(f"Add to processing queue: ConversationChunk@{chunk.id}")
     process_conversation_chunk.delay(chunk.id)
 
-    return chunk
+    return [chunk]
 
 
 @ConversationRouter.get("/{conversation_id}/quotes", response_model=List[QuoteSchema])

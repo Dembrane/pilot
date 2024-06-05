@@ -41,6 +41,7 @@ dependencies = [
     "isort",
     "pandas-stubs>=2.2.2.240514",
     "trankit @ git+https://github.com/nlp-uoregon/trankit",
+    "ffmpeg-python>=0.2.0",
 ]
 
 [tool.setuptools]

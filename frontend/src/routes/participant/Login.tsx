@@ -20,7 +20,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useInitiateConversationMutation, useProjectTags } from "@/lib/query";
 import { AxiosError } from "axios";
 import { Trans, t } from "@lingui/macro";
@@ -72,6 +72,10 @@ export const ParticipantLoginRoute = () => {
 
   const { language, i18n } = useLanguage();
 
+  const transcriptionType = useMemo(() => {
+    return searchParams.get("transcription");
+  }, [searchParams]);
+
   useEffect(() => {
     if (searchParams.get("pin")) {
       setValue("pin", searchParams.get("pin") ?? "");
@@ -82,13 +86,19 @@ export const ParticipantLoginRoute = () => {
     if (isSuccess) {
       if (initiateConversationMutation.data?.id) {
         navigate(
-          `/${language}/${projectId}/conversation/${initiateConversationMutation.data?.id}`,
+          `/${language}/${projectId}/conversation/${initiateConversationMutation.data?.id}/${transcriptionType === "async" ? "async" : ""}`,
         );
       } else {
         reset();
       }
     }
-  }, [isSuccess, reset, initiateConversationMutation.data?.id, navigate]);
+  }, [
+    isSuccess,
+    reset,
+    initiateConversationMutation.data?.id,
+    navigate,
+    transcriptionType,
+  ]);
 
   useEffect(() => {
     if (isError) {

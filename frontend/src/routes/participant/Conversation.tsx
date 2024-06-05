@@ -734,7 +734,6 @@ const ParticipantHeader = () => {
 };
 
 const UserChunkMessage = ({ chunk }: { chunk?: TConversationChunk }) => {
-  const [open, setOpen] = useState(false);
   const deleteChunkMutation = useDeleteConversationChunkByIdMutation();
 
   if (!chunk) return <></>;
@@ -1273,8 +1272,8 @@ export const ParticipantConversationAudioRoute = ({
             )}
 
             {uploadInProgress && (
-              <Notification title="Upload in progress">
-                Please do not close your browser
+              <Notification title={t`Upload in progress`}>
+                <Trans>Please do not close your browser</Trans>
               </Notification>
             )}
 

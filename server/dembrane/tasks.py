@@ -17,7 +17,7 @@ from dembrane.database import (
     ProjectAnalysisRunModel,
 )
 from dembrane.transcribe import TranscriptionError, transcribe_audio
-from dembrane.audio_utils import ConversionError, convert_mp4_to_mp3
+from dembrane.audio_utils import ConversionError, split_audio_chunk
 from dembrane.quote_utils import generate_quotes, generate_insights
 
 logger = get_task_logger("celery_tasks")
@@ -57,58 +57,6 @@ def set_processing_status(
     else:
         instance.processing_completed_at = get_utc_timestamp()
     db.commit()
-
-
-# def is_conversation_ready(db: Session, conversation_id: str) -> Tuple[bool, str]:
-#     """
-#     Check if a conversation is ready for processing.
-
-#     Args:
-#         db (Session): SQLAlchemy session
-#         conversation_id (str): Conversation ID
-
-#     Returns:
-#         Tuple[bool, str]: (is_ready, reason)
-
-#     Raises:
-#         ValueError: Conversation not found
-#     """
-#     conversation = (
-#         db.query(ConversationModel)
-#         .filter(ConversationModel.id == conversation_id)
-#         .first()
-#     )
-#     if conversation is None:
-#         raise ValueError("Conversation not found")
-
-#     latest_chunk = (
-#         db.query(ConversationChunkModel)
-#         .filter(ConversationChunkModel.conversation_id == conversation_id)
-#         .order_by(ConversationChunkModel.created_at.desc())
-#         .first()
-#     )
-#     if latest_chunk is None:
-#         return False, "No chunks found"
-
-#     # if get_utc_timestamp() - latest_chunk.created_at < timedelta(minutes=5):
-#     #     return False, "Latest chunk is too recent"
-
-#     all_chunks_ready = (
-#         db.query(ConversationChunkModel)
-#         .filter(
-#             ConversationChunkModel.conversation_id == conversation_id,
-#             ConversationChunkModel.processing_status == ProcessingStatusEnum.DONE,
-#         )
-#         .count()
-#         == 0
-#     )
-
-#     logger.debug(f"Conversation: {conversation_id}, all_chunks_ready: {all_chunks_ready}")
-
-#     if not all_chunks_ready:
-#         return False, "Not all chunks are ready"
-#     else:
-#         return True, "Ready"
 
 
 def is_conversation_fully_processed(db: Session, conversation_id: str) -> Tuple[bool, str]:
@@ -155,7 +103,7 @@ def is_conversation_fully_processed(db: Session, conversation_id: str) -> Tuple[
     retry_backoff=True,
     retry_kwargs={"max_retries": 3},
 )
-def process_conversation_chunk(self, conversation_chunk_id: str):
+def transcribe_conversation_chunk(self, conversation_chunk_id: str):
     """Process conversation chunk for transcription"""
     with DatabaseSession() as db:
         try:
@@ -179,18 +127,6 @@ def process_conversation_chunk(self, conversation_chunk_id: str):
 
             if not os.path.exists(chunk.path):
                 raise FileNotFoundError(f"File not found: {chunk.path}")
-
-            # convert mp4 to mp3 if necessary
-            if chunk.path.endswith(".mp4"):
-                output_path = chunk.path.replace(".mp4", ".mp3")
-                logger.info(f"Converting to mp3: {output_path}")
-
-                if not os.path.exists(output_path):
-                    convert_mp4_to_mp3(chunk.path, output_path)
-                    logger.info(f"Converted to mp3: {output_path}")
-
-                chunk.path = output_path
-                db.add(chunk)
 
             # fetch conversation details
             conversation = db.query(ConversationModel).filter(ConversationModel.id == chunk.conversation_id).first()
@@ -266,6 +202,41 @@ def process_conversation_chunk(self, conversation_chunk_id: str):
                 ProcessingStatusEnum.ERROR,
                 "Unexpected error",
             )
+            raise self.retry(exc=exc) from exc
+
+
+@celery_app.task(
+    bind=True,
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 5},
+)
+def process_conversation_chunk(self, chunk_id: str):
+    with DatabaseSession() as db:
+        try:
+            chunk = db.get(ConversationChunkModel, chunk_id)
+
+            if chunk is None:
+                return chunk_id
+
+            if chunk.processing_status == ProcessingStatusEnum.DONE:
+                return chunk_id
+
+            split_chunks = split_audio_chunk(db, chunk)
+
+            if not split_chunks:
+                return chunk_id
+
+            task_signatures = []
+
+            for split_chunk in split_chunks:
+                task_signatures.append(transcribe_conversation_chunk.si(split_chunk.id))
+
+            result = group(*task_signatures).apply_async()
+
+            return result
+        except Exception as exc:
+            logger.error(f"Error: {exc}")
+            db.rollback()
             raise self.retry(exc=exc) from exc
 
 

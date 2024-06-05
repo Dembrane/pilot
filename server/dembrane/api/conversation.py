@@ -246,6 +246,7 @@ async def upload_conversation_text(
 
     return chunk
 
+
 @ConversationRouter.post("/{conversation_id}/upload-chunk", response_model=List[ConversationChunkSchema])
 async def upload_conversation_chunk(
     conversation_id: str,
@@ -255,135 +256,30 @@ async def upload_conversation_chunk(
 ) -> List[ConversationChunkModel]:
     conversation = await get_conversation(conversation_id, db)
 
-    if not os.path.exists(os.path.join(AUDIO_CHUNKS_DIR, conversation.id)):
-        os.makedirs(os.path.join(AUDIO_CHUNKS_DIR, conversation.id))
+    id = generate_uuid()
+    file_path = os.path.join(AUDIO_CHUNKS_DIR, conversation.id, f"{id}-{chunk.filename}")
 
-    MAX_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB  
-    chunks = []
-    
-    # Save the uploaded chunk to a temporary file
-    temp_audio_path = os.path.join(AUDIO_CHUNKS_DIR, conversation.id, f"temp-{chunk.filename}")
-    with open(temp_audio_path, "wb") as temp_audio_file:
-        chunk_data = await chunk.read()
-        temp_audio_file.write(chunk_data)
+    file_path = file_path.split(";")[0]
 
-    converted_audio_path = temp_audio_path.replace('webm', 'mp3')
+    with open(file_path, "wb") as f:
+        logger.info(f"Saving the file to {file_path}")
+        f.write(chunk.file.read())
 
-    (
-        ffmpeg
-        .input(temp_audio_path)
-        .output(converted_audio_path, f='mp3')
-        .run()
+    chunk = ConversationChunkModel(
+        id=id,
+        conversation_id=conversation_id,
+        timestamp=timestamp,
+        path=file_path,
     )
-    
-    try:
-        # Get the audio metadata
-        probe = ffmpeg.probe(converted_audio_path)
-        
-        # Calculate the duration of the audio file
-        if 'format' in probe and 'duration' in probe['format']:
-            duration = float(probe['format']['duration'])
-        else:
-            # Estimate the duration if 'duration' is missing
-            stream = probe['streams'][0]
-            bitrate = int(stream['bit_rate']) if 'bit_rate' in stream else 64000  # default to 64kbps if missing
-            size = int(probe['format']['size'])
-            duration = size / (bitrate / 8)  # size in bytes / (bitrate in bits per second / 8 bits per byte)
-            logger.info(f"Estimated duration: {duration}")
 
-    except ffmpeg.Error as error:
-        logger.error(f"ffmpeg error: {error.stderr.decode()}")
-        raise HTTPException(status_code=500, detail="Error processing audio file.") from error
-    
-    logger.info("duration")
-    logger.info(duration)
-
-    file_size = os.path.getsize(converted_audio_path)
-
-    # Calculate the number of chunks needed
-    num_chunks = math.ceil(file_size / MAX_CHUNK_SIZE)
-    chunk_duration = duration / num_chunks
-
-    logger.info("MAX_CHUNK_SIZE")
-    logger.info(MAX_CHUNK_SIZE)
-    logger.info("file_size")
-    logger.info(file_size)
-    logger.info("num_chunks")
-    logger.info(num_chunks)
-
-    for i in range(num_chunks):
-        start_time = i * chunk_duration
-        if start_time < 0:
-            start_time = 0
-        start_time = round(start_time, 2)
-        chunk_id = generate_uuid()
-        chunk_path = os.path.join(AUDIO_CHUNKS_DIR, conversation.id, f"{chunk_id}-{chunk.filename}")
-        logger.info("chunk_path")
-        logger.info(chunk_path)
-        logger.info("start_time")
-        logger.info(start_time)
-        logger.info("chunk_duration")
-        logger.info(chunk_duration)
-        
-        try:
-            (
-                ffmpeg
-                .input(converted_audio_path, ss=start_time, t=chunk_duration)
-                .output(chunk_path, f='mp3')
-                .run()
-            )
-        except ffmpeg.Error as error:
-            logger.error(f"ffmpeg error: {error.stderr.decode()}")
-            raise HTTPException(status_code=500, detail="Error processing audio file.") from error
-        
-        logger.info(f"Saving the file chunk to {chunk_path}")
-
-        chunk_model = ConversationChunkModel(
-            id=chunk_id,
-            conversation_id=conversation_id,
-            timestamp=timestamp,
-            path=chunk_path,
-        )
-        chunks.append(chunk_model)
-        db.add(chunk_model)
-    
+    db.add(chunk)
     db.commit()
 
-    # Clean up temporary file
-    os.remove(temp_audio_path)
-    os.remove(converted_audio_path)
+    logger.info(f"Add to processing queue: ConversationChunk@{chunk.id}")
+    process_conversation_chunk.delay(chunk.id)
 
-    for chunk in chunks:
-        logger.info("chunk id:")
-        logger.info(chunk.id)
-        logger.info(f"Add to processing queue: ConversationChunk@{chunk.id}")
-        process_conversation_chunk.delay(chunk.id)
+    return chunk
 
-    return chunks
-
-    # id = generate_uuid()
-    # file_path = os.path.join(AUDIO_CHUNKS_DIR, conversation.id, f"{id}-{chunk.filename}")
-
-    # file_path = file_path.split(";")[0]
-
-    # with open(file_path, "wb") as f:
-    #     logger.info(f"Saving the file to {file_path}")
-    #     f.write(chunk.file.read())
-
-    # chunk = ConversationChunkModel(
-    #     id=id,
-    #     conversation_id=conversation_id,
-    #     timestamp=timestamp,
-    #     path=file_path,
-    # )
-
-    # db.add(chunk)
-    # db.commit()
-
-    # logger.info(f"Add to processing queue: ConversationChunk@{chunk.id}")
-    # process_conversation_chunk.delay(chunk.id)
-
-    # return chunk
 
 @ConversationRouter.get("/{conversation_id}/quotes", response_model=List[QuoteSchema])
 async def get_conversation_quotes(

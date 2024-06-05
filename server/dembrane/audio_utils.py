@@ -2,6 +2,8 @@ import os
 import math
 import logging
 import subprocess
+from typing import List
+from datetime import timedelta
 
 import ffmpeg  # type: ignore
 from sqlalchemy.orm import Session
@@ -80,58 +82,87 @@ def convert_mp4_to_mp3(input_file_path: str, output_file_path: str) -> bool:
 
     return True
 
-def pre_process_audio(db: Session, chunk: ConversationChunkModel):
-    MAX_CHUNK_SIZE = 25 * 1024 * 1024  # 25MB
 
-    if chunk.path is None:
-        logger.error("File path not found")
-        return
+MAX_CHUNK_SIZE = 20 * 1024 * 1024  # 20MB
+
+
+def split_audio_chunk(db: Session, original_chunk: ConversationChunkModel) -> List[ConversationChunkModel]:
+    logger = logging.getLogger("audio_utils.pre_process_audio")
+
+    logger.debug(f"Splitting audio chunk: {original_chunk.id}")
+    if original_chunk.path is None:
+        raise FileNotFoundError("File path is not found")
 
     try:
-        file_mime_type = get_mime_type_from_file_path(chunk.path)
+        file_mime_type = get_mime_type_from_file_path(original_chunk.path)
+
+        # convert all to mp3
+        logger.debug("Converting audio to mp3")
         if file_mime_type != "audio/mp3":
-            chunk_file_format = chunk.path.split(".")[-1]
-            updated_chunk_path = chunk.path.replace(chunk_file_format, "mp3")
-            (
-                ffmpeg
-                .input(chunk.path)
-                .output(updated_chunk_path, f='mp3')
-                .run()
-            )
-            chunk.path = updated_chunk_path
+            chunk_file_format = original_chunk.path.split(".")[-1]
+            logger.debug(f"Converting {chunk_file_format} to mp3")
+            updated_chunk_path = original_chunk.path.replace(chunk_file_format, "mp3")
+            (ffmpeg.input(original_chunk.path).output(updated_chunk_path, f="mp3").run())
+            original_chunk.path = updated_chunk_path
             db.commit()
+        else:
+            logger.info("File is already in mp3 format")
+
     except Exception as e:
-        logger.error(f"File type is not supported: {e}")
+        logger.error(f"Error occured while trying to convert audio to mp3: {e}")
         db.rollback()
         raise e
 
-    file_size = os.path.getsize(chunk.path)
+    file_size = os.path.getsize(original_chunk.path)
     number_chunks = math.ceil(file_size / MAX_CHUNK_SIZE)
+    logger.debug(f"Number of chunks: {number_chunks}, File size: {file_size}")
 
     if number_chunks == 1:
         logger.info("File is already save to DB. No splitting required.")
-        return
-    
+        return [original_chunk]
+
     try:
-        probe = ffmpeg.probe(chunk.path)
-        if 'format' in probe and 'duration' in probe['format']:
-            duration = float(probe['format']['duration'])
+        split_chunks = []
+        probe = ffmpeg.probe(original_chunk.path)
+        if "format" in probe and "duration" in probe["format"]:
+            duration = float(probe["format"]["duration"])
             chunk_duration = duration / number_chunks
+            logger.debug(f"Duration: {duration}, Chunk duration: {chunk_duration}")
             for i in range(number_chunks):
                 start_time = i * chunk_duration
                 chunk_id = generate_uuid()
-                chunk_path = os.path.join(AUDIO_CHUNKS_DIR, chunk.conversation_id, f"{chunk_id}-{chunk.filename}")
-                
-                (
-                    ffmpeg
-                    .input(chunk.path, ss=start_time, t=chunk_duration)
-                    .output(chunk_path, f='mp3')
-                    .run()
+                chunk_path = os.path.join(
+                    AUDIO_CHUNKS_DIR, original_chunk.conversation_id, f"{chunk_id}-{original_chunk.filename}"
                 )
-                
+
+                (ffmpeg.input(original_chunk.path, ss=start_time, t=chunk_duration).output(chunk_path, f="mp3").run())
+
+                chunk = ConversationChunkModel(
+                    id=chunk_id,
+                    conversation_id=original_chunk.conversation_id,
+                    # do this to avoid the same timestamp for all chunks
+                    created_at=original_chunk.created_at + timedelta(seconds=start_time),
+                    updated_at=original_chunk.updated_at + timedelta(seconds=start_time),
+                    timestamp=original_chunk.timestamp + timedelta(seconds=start_time),
+                    path=chunk_path,
+                )
+                split_chunks.append(chunk)
+                db.commit()
+
+            db.add_all(split_chunks)
+            db.delete(original_chunk)
+            db.commit()
+
+            logger.debug(f"File split into {number_chunks} chunks")
+            return split_chunks
+        else:
+            raise ValueError("Duration not found in ffmpeg probe")
+
     except ffmpeg.Error as e:
         logger.error(f"ffmpeg error: {e.stderr.decode()}")
+        db.rollback()
         raise e
     except Exception as e:
         logger.error("File spitting failed")
+        db.rollback()
         raise e

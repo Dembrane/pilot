@@ -1,4 +1,6 @@
+import WelcomeImage from "@/assets/participant-welcome-pattern.png";
 import { Logo } from "@/components/Logo";
+import { Markdown } from "@/components/Markdown";
 import {
   useConversationById,
   useConversationChunks,
@@ -7,18 +9,20 @@ import {
   useUploadConversationTextChunk,
 } from "@/lib/query";
 import {
-  Group,
-  Stack,
-  Button,
-  Text,
-  Box,
-  Title,
-  LoadingOverlay,
-  Modal,
-  Divider,
   ActionIcon,
-  Paper,
+  Box,
+  Button,
+  Container,
+  Divider,
+  Group,
+  LoadingOverlay,
   Menu,
+  Modal,
+  Notification,
+  Paper,
+  Stack,
+  Text,
+  Title,
 } from "@mantine/core";
 import {
   IconCheck,
@@ -33,27 +37,25 @@ import {
   IconTrash,
   IconUpload,
 } from "@tabler/icons-react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import WelcomeImage from "@/assets/participant-welcome-pattern.png";
-import { Markdown } from "@/components/Markdown";
 import {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
   PropsWithChildren,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
 } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 // import {
 //   ReactRealTimeVADOptions,
 //   useMicVAD,
 //   utils,
 // } from "@ricky0123/vad-react";
 // import * as ort from "onnxruntime-web";
-import { Trans, t } from "@lingui/macro";
-import { useWakeLock } from "@/lib/useWakeLock";
-import clsx from "clsx";
 import { useLanguage } from "@/lib/useLanguage";
+import { useWakeLock } from "@/lib/useWakeLock";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { Trans, t } from "@lingui/macro";
+import clsx from "clsx";
 
 // ort.env.wasm.wasmPaths = {
 //   "ort-wasm-simd-threaded.wasm": "/ort-wasm-simd-threaded.wasm",
@@ -732,7 +734,6 @@ const ParticipantHeader = () => {
 };
 
 const UserChunkMessage = ({ chunk }: { chunk?: TConversationChunk }) => {
-  const [open, setOpen] = useState(false);
   const deleteChunkMutation = useDeleteConversationChunkByIdMutation();
 
   if (!chunk) return <></>;
@@ -1093,7 +1094,11 @@ export const ParticipantConversationChunkedAudioRoute = () =>
     );
   };
 
-export const ParticipantConversationAudioRoute = () =>
+export const ParticipantConversationAudioRoute = ({
+  isTranscriptionLive,
+}: {
+  isTranscriptionLive: boolean;
+}) =>
   //   {
   //   fallback = false,
   // }: {
@@ -1103,6 +1108,22 @@ export const ParticipantConversationAudioRoute = () =>
     const { projectId, conversationId } = useParams();
     const conversationQuery = useConversationById(conversationId as string);
     const uploadChunkMutation = useUploadConversationChunk();
+
+    const [uploadInProgress, updatedUploadInProgress] = useState(false);
+    // Add a delay when setting back "uploadInProgress" to false
+    // to avoid "flashing" effect
+    useEffect(() => {
+      if (uploadChunkMutation.isPending === true) {
+        updatedUploadInProgress(true);
+      }
+      if (uploadChunkMutation.isPending === false) {
+        const timer = setTimeout(() => {
+          console.log("here!");
+          updatedUploadInProgress(false);
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
+    }, [uploadChunkMutation.isPending]);
 
     const [preview, setPreview] = useState<string | null>(null);
     const blob = useRef<Blob | null>(null);
@@ -1124,7 +1145,8 @@ export const ParticipantConversationAudioRoute = () =>
     };
 
     // const audioRecorder = useVADAudioRecorder({ onChunk });
-    const audioRecorder = useAudioRecorder({ onChunk });
+    const liveAudioRecorder = useChunkedAudioRecorder({ onChunk });
+    const asyncAudioRecorder = useAudioRecorder({ onChunk });
 
     useWakeLock({ obtainWakeLockOnMount: true });
 
@@ -1139,7 +1161,7 @@ export const ParticipantConversationAudioRoute = () =>
       errored,
       loading,
       permissionError,
-    } = audioRecorder;
+    } = isTranscriptionLive === false ? asyncAudioRecorder : liveAudioRecorder;
 
     const [troubleShootingGuideOpened, setTroubleShootingGuideOpened] =
       useState(false);
@@ -1249,6 +1271,12 @@ export const ParticipantConversationAudioRoute = () =>
               </div>
             )}
 
+            {uploadInProgress && (
+              <Notification title={t`Upload in progress`}>
+                <Trans>Please do not close your browser</Trans>
+              </Notification>
+            )}
+
             <Group justify="center">
               {!isRecording && (
                 <>
@@ -1280,6 +1308,7 @@ export const ParticipantConversationAudioRoute = () =>
                             component="a"
                             variant="light"
                             rightSection={<IconCheck />}
+                            disabled={uploadInProgress}
                           >
                             Finish
                           </Button>

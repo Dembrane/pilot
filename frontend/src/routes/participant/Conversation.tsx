@@ -818,7 +818,8 @@ const ParticipantBody = ({
 
   useEffect(() => {
     if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+      // disable autoscroll for now
+      // bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [chunksQuery.data]);
 
@@ -929,11 +930,20 @@ export const ParticipantConversationChunkedAudioRoute = () =>
       }
     };
 
+    const chunks = useConversationChunks(conversationId as string, 10000);
+
     if (conversationQuery.isLoading || loading) {
       return <LoadingOverlay visible />;
     }
 
     const textModeUrl = `/${language}/${projectId}/conversation/${conversationId}/text`;
+    const finishUrl = `/${language}/${projectId}/conversation/${conversationId}/finish`;
+
+    const handleFinish = () => {
+      if (window.confirm(t`Are you sure you want to finish?`)) {
+        navigate(finishUrl);
+      }
+    };
 
     return (
       <div className="min-h-dvh flex flex-col container max-w-2xl mx-auto">
@@ -991,7 +1001,7 @@ export const ParticipantConversationChunkedAudioRoute = () =>
         </Box>
 
         {!errored && (
-          <Box className="sticky bottom-0 z-10 p-4 w-full border-t border-slate-300 bg-white shadow-sm">
+          <Stack className="sticky bottom-0 z-10 p-4 w-full border-t border-slate-300 bg-white shadow-sm">
             {/* Recording time indicator */}
             {isRecording && (
               <div className="w-full bg-white border-slate-300 pt-2 pb-4">
@@ -1013,22 +1023,36 @@ export const ParticipantConversationChunkedAudioRoute = () =>
 
             <Group justify="center">
               {!isRecording && (
-                <Group className="w-full">
-                  <Button
-                    size="xl"
-                    rightSection={<IconMicrophone size={16} />}
-                    onClick={startRecording}
-                    className="flex-grow"
-                  >
-                    <Trans>Start Recording</Trans>
-                  </Button>
+                <>
+                  <Group className="w-full">
+                    <Button
+                      size="xl"
+                      rightSection={<IconMicrophone />}
+                      onClick={startRecording}
+                      className="flex-grow"
+                    >
+                      <Trans>Start Recording</Trans>
+                    </Button>
 
-                  <Link to={textModeUrl}>
-                    <ActionIcon component="a" size="xl" variant="outline">
-                      <IconTextCaption size={24} />
-                    </ActionIcon>
-                  </Link>
-                </Group>
+                    <Link to={textModeUrl}>
+                      <ActionIcon component="a" size="60" variant="outline">
+                        <IconTextCaption />
+                      </ActionIcon>
+                    </Link>
+
+                    {!isRecording && chunks?.data && chunks.data.length > 0 && (
+                      <Button
+                        size="xl"
+                        onClick={handleFinish}
+                        component="a"
+                        variant="light"
+                        rightSection={<IconCheck />}
+                      >
+                        Finish
+                      </Button>
+                    )}
+                  </Group>
+                </>
               )}
 
               {isRecording && (
@@ -1057,14 +1081,7 @@ export const ParticipantConversationChunkedAudioRoute = () =>
                     size="xl"
                     rightSection={<IconPlayerStop size={16} />}
                     onClick={() => {
-                      if (
-                        window.confirm(
-                          t`Are you sure you want to stop recording?`,
-                        )
-                      ) {
-                        stopRecording();
-                        navigate(`/${language}/${projectId}/finish`);
-                      }
+                      stopRecording();
                     }}
                   >
                     <Trans>Stop</Trans>
@@ -1072,7 +1089,7 @@ export const ParticipantConversationChunkedAudioRoute = () =>
                 </>
               )}
             </Group>
-          </Box>
+          </Stack>
         )}
       </div>
     );

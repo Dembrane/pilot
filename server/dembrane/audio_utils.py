@@ -101,12 +101,18 @@ def split_audio_chunk(db: Session, original_chunk: ConversationChunkModel) -> Li
         # convert all to mp3
         logger.debug("Converting audio to mp3")
         if file_mime_type != "audio/mp3":
+            # save the original path to delete later
+            path_to_delete_later = original_chunk.path
+
             chunk_file_format = original_chunk.path.split(".")[-1]
             logger.debug(f"Converting {chunk_file_format} to mp3")
             updated_chunk_path = original_chunk.path.replace(chunk_file_format, "mp3")
             (ffmpeg.input(original_chunk.path).output(updated_chunk_path, f="mp3").run())
             original_chunk.path = updated_chunk_path
             db.commit()
+
+            # delete the original file (if anything fails above, the original file will be kept)
+            os.remove(path_to_delete_later)
         else:
             logger.info("File is already in mp3 format")
 

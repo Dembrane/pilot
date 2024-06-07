@@ -66,6 +66,7 @@ services:
       - ADMIN_BASE_URL=https://${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
+      - DISABLE_REDACTION=1
     env_file:
       - ./server/.env
     volumes:
@@ -88,6 +89,7 @@ services:
       - ADMIN_BASE_URL=https://${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
+      - DISABLE_REDACTION=1
     env_file:
       - ./server/.env
     volumes:

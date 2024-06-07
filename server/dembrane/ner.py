@@ -1,21 +1,25 @@
 import logging
 
-from trankit import Pipeline  # type:ignore
-
 from dembrane.config import DISABLE_REDACTION, TRANKIT_CACHE_DIR
 
-p = Pipeline(
-    "english",
-    #  embedding="xlm-roberta-large",
-    cache_dir=TRANKIT_CACHE_DIR,
-    gpu=False,
-)
-p.add("dutch")
-
-# use langid to switch to the correct language
-p.set_auto(True)
-
 logger = logging.getLogger("ner")
+
+if not DISABLE_REDACTION:
+    logger.info("Loading NER model")
+    from trankit import Pipeline  # type:ignore
+
+    p = Pipeline(
+        "english",
+        #  embedding="xlm-roberta-large",
+        cache_dir=TRANKIT_CACHE_DIR,
+        gpu=False,
+    )
+    p.add("dutch")
+
+    # use langid to switch to the correct language
+    p.set_auto(True)
+else:
+    logger.info("NER redaction pipeline is disabled")
 
 
 def anonymize_sentence(sentence: str) -> str:

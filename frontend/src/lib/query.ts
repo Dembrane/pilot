@@ -33,82 +33,6 @@ import {
 import { toast } from "@/components/Toaster";
 import { AxiosError } from "axios";
 
-// export const useDocumentById = (
-//   documentId: string,
-//   initialData?: TDocument,
-// ) => {
-//   return useQuery({
-//     queryKey: ["document", documentId],
-//     queryFn: () => getDocumentById(documentId),
-//     initialData,
-//     refetchInterval: 10000,
-//   });
-// };
-
-// export const useUploadDocuments = () => {
-//   const queryClient = useQueryClient();
-
-//   const mutationResult = useMutation({
-//     mutationFn: uploadDocument,
-//     onSuccess: () => {
-//       queryClient.invalidateQueries({
-//         queryKey: ["document"],
-//       });
-//       toast.success("Document(s) uploaded successfully");
-//     },
-//     onError: (error) => {
-//       console.error("uploadDocument error", error);
-//       toast.error("Error uploading document(s). Please try again.");
-//     },
-//   });
-
-//   return { ...mutationResult, uploadDocument: mutationResult.mutate };
-// };
-
-// export const useUpdateDocument = () => {
-//   const queryClient = useQueryClient();
-
-//   const mutation = useMutation({
-//     mutationFn: updateDocument,
-//     onSuccess: () => {
-//       queryClient.invalidateQueries({
-//         queryKey: ["document"],
-//       });
-//     },
-//     onError: (error) => {
-//       console.error("updateDocument error", error);
-//     },
-//   });
-
-//   return mutation;
-// };
-
-// export const useDeleteDocument = () => {
-//   const queryClient = useQueryClient();
-
-//   const mutation = useMutation({
-//     mutationFn: deleteDocument,
-//     onMutate: (document: TDocument) => {
-//       queryClient.setQueryData(
-//         ["document"],
-//         (oldData: TDocument[] | undefined) => {
-//           return oldData ? oldData.filter((d) => d.id !== document.id) : [];
-//         },
-//       );
-//     },
-//     onSuccess: () => {
-//       queryClient.invalidateQueries({
-//         queryKey: ["document"],
-//       });
-//     },
-//     onError: (error) => {
-//       console.error("deleteDocument error", error);
-//     },
-//   });
-
-//   return mutation;
-// };
-
 export const useCurrentSession = () => {
   return useQuery({
     queryKey: ["session", "current"],
@@ -211,7 +135,7 @@ export const useResourcesByProjectId = (projectId: string) => {
   return useQuery({
     queryKey: ["project", projectId, "resources"],
     queryFn: () => getResourcesByProjectId(projectId),
-    refetchInterval: 10000,
+    refetchInterval: 15000,
   });
 };
 
@@ -285,7 +209,7 @@ export const useConversationById = (conversationId: string) => {
   return useQuery({
     queryKey: ["conversation", conversationId],
     queryFn: () => getConversationById(conversationId),
-    refetchInterval: 5000,
+    refetchInterval: 10000,
   });
 };
 
@@ -356,7 +280,7 @@ export const useConversationsByProjectId = (projectId: string) => {
   return useQuery({
     queryKey: ["conversation", "all", projectId],
     queryFn: () => getConversationsByProjectId(projectId),
-    refetchInterval: 10000,
+    refetchInterval: 20000,
   });
 };
 
@@ -498,7 +422,7 @@ export const useUploadConversation = () => {
 
 export const useConversationChunks = (
   conversationId: string,
-  refetchInterval: number = 5000,
+  refetchInterval: number = 10000,
 ) => {
   return useQuery({
     queryKey: ["conversation", conversationId, "chunks"],
@@ -548,215 +472,3 @@ export const useRequestProjectAnalysisMutation = () => {
     },
   });
 };
-
-// export const useConversationDuration = (conversationId: string) => {
-//   return useQuery({
-//     queryKey: ["conversation", conversationId, "duration"],
-//     queryFn: () => getConversationDuration(conversationId),
-//   });
-// };
-
-// // const getSessionById = async (sessionId: string) => {
-// //   return api.get<unknown, TSession>(`/session/${sessionId}`);
-// // };
-
-// // export const useSessionById = (sessionId: string) => {
-// //   return useQuery({
-// //     queryKey: ["session", sessionId],
-// //     queryFn: () => getSessionById(sessionId),
-// //     refetchInterval: 10000,
-// //   });
-// // };
-
-// // const updateCurrentSession = async (session: Partial<TSession>) => {
-// //   return api.put<TSession, TSession>(`/session`, session);
-// // };
-
-// // export const useUpdateCurrentSession = () => {
-// //   const queryClient = useQueryClient();
-
-// //   const mutation = useMutation({
-// //     mutationFn: updateCurrentSession,
-// //     onSuccess: () => {
-// //       queryClient.invalidateQueries({
-// //         queryKey: ["session"],
-// //       });
-// //       toast.success("Updated successfully");
-// //     },
-// //     onError: (error) => {
-// //       toast.error("Error updating session. Please try again.");
-// //       console.error("updateSession error", error);
-// //     },
-// //   });
-
-// //   return mutation;
-// // };
-
-// const updateSessionById = async ({
-//   sessionId,
-//   payload,
-// }: {
-//   sessionId: string;
-//   payload: Partial<TSession>;
-// }) => {
-//   return api.put<TSession, TSession>(`/session/${sessionId}`, payload);
-// };
-
-// export const useUpdateSessionById = () => {
-//   const queryClient = useQueryClient();
-
-//   const mutation = useMutation({
-//     mutationFn: updateSessionById,
-//     onSuccess: () => {
-//       queryClient.invalidateQueries({
-//         queryKey: ["session"],
-//       });
-//       toast.success("Updated successfully");
-//     },
-//     onError: (error) => {
-//       toast.error("Error updating session. Please try again.");
-//       console.error("updateSession error", error);
-//     },
-//   });
-
-//   return mutation;
-// };
-
-// const getDocumentMessages = async (documentId: string) => {
-//   return api.get<unknown, TDocumentMessage[]>(`/document/${documentId}/chat`);
-// };
-
-// export const useDocumentMessages = (documentId: string) => {
-//   return useQuery({
-//     queryKey: ["document", documentId, "chat"],
-//     queryFn: () => getDocumentMessages(documentId),
-//     refetchInterval: 10000,
-//   });
-// };
-
-// type PostDocumentMessagePayload = {
-//   documentId: string;
-//   message: string;
-// };
-
-// const postDocumentMessage = async (payload: PostDocumentMessagePayload) => {
-//   if (payload.message == "") {
-//     throw new Error("Please enter a message");
-//   }
-//   return api.post<unknown, TDocumentMessage>(
-//     `/document/${payload.documentId}/chat`,
-//     {
-//       message: payload.message,
-//     },
-//   );
-// };
-
-// export const usePostDocumentMessage = () => {
-//   const queryClient = useQueryClient();
-
-//   const mutation = useMutation({
-//     mutationFn: postDocumentMessage,
-//     onMutate: ({ documentId, message }) => {
-//       queryClient.setQueryData(
-//         ["document", documentId, "chat"],
-//         (oldData: TDocumentMessage[] | undefined) => {
-//           return oldData
-//             ? [
-//                 ...oldData,
-//                 {
-//                   id: `optimistic-${Date.now()}`,
-//                   document_id: documentId,
-//                   created_at: new Date(),
-//                   text: message,
-//                   from_user: true,
-//                 } as TDocumentMessage,
-//               ]
-//             : [];
-//         },
-//       );
-//     },
-//     onSuccess: ({ document_id }) => {
-//       queryClient.invalidateQueries({
-//         queryKey: ["document", document_id, "chat"],
-//       });
-//     },
-//     onError: (error) => {
-//       console.error("postDocumentMessage error", error);
-//       toast.error("Error getting a chat response. Please try again.");
-//     },
-//   });
-
-//   return mutation;
-// };
-
-// const getSessionMessages = async () => {
-//   return api.get<unknown, TSessionMessage[]>(`/session/chat`);
-// };
-
-// export const useSessionMessages = () => {
-//   return useQuery({
-//     queryKey: ["session", "chat"],
-//     queryFn: () => getSessionMessages(),
-//     refetchInterval: 10000,
-//   });
-// };
-
-// type PostSessionMessagePayload = {
-//   message: string;
-// };
-
-// export const postSessionMessage = async (
-//   payload: PostSessionMessagePayload,
-// ) => {
-//   if (payload.message == "") {
-//     throw new Error("Please enter a message");
-//   }
-//   return api.post<unknown, TSessionMessage>("/session/chat", {
-//     message: payload.message,
-//   });
-// };
-
-// export const usePostSessionMessage = () => {
-//   const queryClient = useQueryClient();
-
-//   const mutation = useMutation({
-//     mutationFn: postSessionMessage,
-//     onMutate: ({ message }) => {
-//       queryClient.setQueryData(["session"], (oldData: TSession | undefined) => {
-//         return {
-//           ...oldData,
-//           processing_since: new Date(),
-//         } as TSession;
-//       });
-//       queryClient.setQueryData(
-//         ["session", "chat"],
-//         (oldData: TSessionMessage[] | undefined) => {
-//           return oldData
-//             ? [
-//                 ...oldData,
-//                 {
-//                   id: `optimistic-${Date.now()}`,
-//                   session_id: "current",
-//                   created_at: new Date(),
-//                   text: message,
-//                   from_user: true,
-//                   documents_used: [],
-//                 } as TSessionMessage,
-//               ]
-//             : [];
-//         },
-//       );
-//     },
-//     onSuccess: () => {
-//       queryClient.invalidateQueries({
-//         queryKey: ["session"],
-//       });
-//     },
-//     onError: (error) => {
-//       console.error("postSessionMessage error", error);
-//       toast.error("Error getting a chat response. Please try again.");
-//     },
-//   });
-
-//   return mutation;
-// };

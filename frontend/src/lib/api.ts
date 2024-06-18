@@ -102,7 +102,7 @@ export const createProject = async (payload: Partial<TProject>) => {
 };
 
 export const getProjectById = async (projectId: string) => {
-  return api.get<unknown, TProject>(`/projects/${projectId}`);
+  return api.get<unknown, TProject>(`/participant/projects/${projectId}`);
 };
 
 export const getProjectInsights = async (projectId: string) => {
@@ -154,7 +154,7 @@ export const initiateConversation = async (payload: {
   tagIdList: string[];
 }) => {
   return apiNoAuth.post<unknown, TConversation>(
-    `/projects/${payload.projectId}/conversations/initiate`,
+    `/participant/projects/${payload.projectId}/conversations/initiate`,
     {
       email: payload.email ?? undefined,
       name: payload.name,
@@ -218,7 +218,7 @@ export const uploadConversationChunk = async (payload: {
   formData.append("timestamp", payload.timestamp.toISOString());
 
   return apiNoAuth.post<unknown, TConversationChunk[]>(
-    `/conversations/${payload.conversationId}/upload-chunk`,
+    `/participant/conversations/${payload.conversationId}/upload-chunk`,
     formData,
     {
       // 10 min
@@ -239,7 +239,7 @@ export const uploadConversationText = async (payload: {
   timestamp: Date;
 }) => {
   return apiNoAuth.post<unknown, TConversationChunk>(
-    `/conversations/${payload.conversationId}/upload-text`,
+    `/participant/conversations/${payload.conversationId}/upload-text`,
     {
       content: payload.content,
       timestamp: payload.timestamp.toISOString(),

@@ -8,6 +8,7 @@ from dembrane.api.tag import TagRouter
 from dembrane.api.project import ProjectRouter
 from dembrane.api.session import SessionRouter
 from dembrane.api.resource import ResourceRouter
+from dembrane.api.participant import ParticipantRouter
 from dembrane.api.conversation import ConversationRouter
 from dembrane.api.conversation_chunk import ConversationChunkRouter
 
@@ -27,6 +28,7 @@ api.include_router(ResourceRouter, prefix="/resources")
 api.include_router(ConversationRouter, prefix="/conversations")
 api.include_router(ConversationChunkRouter, prefix="/conversation-chunks")
 api.include_router(TagRouter, prefix="/tag")
+api.include_router(ParticipantRouter, prefix="/participant")
 
 ## the code below is from the pdf-pilot - chat usecase
 ## ignore for now

@@ -23,12 +23,12 @@ from server.vectorstore import vectorstore
 logger = getLogger("chains")
 
 chat_llm_small = ChatOpenAI(
-    temperature=0.5, model_name="gpt-3.5-turbo-1106", max_retries=6
+    temperature=0.5, model_name="gpt-4o", max_retries=6
 )  # type: ignore
 
 # For global question answering
 chat_llm_large = ChatOpenAI(
-    temperature=0.2, model_name="gpt-4-0125-preview", max_retries=6
+    temperature=0.2, model_name="gpt-4o", max_retries=6
 )  # type: ignore
 
 

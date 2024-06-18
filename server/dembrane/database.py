@@ -438,6 +438,29 @@ class QuoteModel(Base):
     )
 
 
+class AspectModel(Base):
+    __tablename__ = "aspect"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    name: Mapped[str] = mapped_column(String, unique=True)
+
+
+class ViewModel(Base):
+    __tablename__ = "view"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+## Depracated
 class InsightModel(Base):
     __tablename__ = "insight"
 

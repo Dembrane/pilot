@@ -177,51 +177,58 @@ def generate_quotes(db: Session, project_analysis_run_id: Optional[str], convers
 
     return quotes
 
-    # # Before chunking
-    # # TODO: quote transformations
-    # # - add context of session
-    # # - add context for references. eg. "him (Sameer)"
 
-    # lc_docs = semantic_chunker.create_documents(
-    #     [chunk.transcript for chunk in chunks],
-    #     metadatas=[
-    #         {
-    #             "conversation_id": chunk.conversation_id,
-    #             "conversation_chunk_id": chunk.id,
-    #         }
-    #         for chunk in chunks
-    #     ],
-    # )
-    # logger.debug(f"generated {len(lc_docs)} documents from {len(chunks)} conversation_chunks")
+def generate_aspects(user_input: str, initial_aspects: Optional[List[str]] = None) -> List[dict]:
+    # Generate aspects based on user input and initial aspects
+    aspects = [
+        {"name": "positive", "description": "this aspect captures all quotes with a positive sentiment"},
+        {"name": "neutral", "description": "this aspect captures all quotes with a neutral sentiment"},
+        {"name": "negative", "description": "this aspect captures all quotes with a negative sentiment"}
+    ]
+    return aspects
 
-    # quotes = []
+def generate_quotes(conversation_id: str, db: Session, project_analysis_run_id: Optional[str] = None) -> List[QuoteModel]:
+    # Generate quotes from conversation data
+    # Implement your logic here
+    pass
 
-    # for doc in lc_docs:
-    #     if not doc.page_content or doc.page_content.strip() == "":
-    #         logger.debug(f"skipping empty doc {doc.metadata}")
-    #         continue
+def cluster_quotes(quotes: List[QuoteModel], num_clusters: int = 5) -> List[List[QuoteModel]]:
+    # Cluster quotes into aspects
+    embeddings = [quote.embedding for quote in quotes]
+    kmeans = KMeans(n_clusters=num_clusters).fit(embeddings)
+    clusters = [[] for _ in range(num_clusters)]
+    for quote, label in zip(quotes, kmeans.labels_):
+        clusters[label].append(quote)
+    return clusters
 
-    #     try:
-    #         quote = QuoteModel(
-    #             id=generate_uuid(),
-    #             conversation_id=doc.metadata["conversation_id"],
-    #             text=doc.page_content,
-    #             embedding=embed_text(doc.page_content),
-    #             project_analysis_run_id=project_analysis_run_id if project_analysis_run_id else None,
-    #         )
-    #     except Exception as e:
-    #         logger.error(f"Error embedding text {doc.page_content}: {str(e)}")
-    #         continue
+def analyze_aspects(aspects: List[dict], quotes: List[QuoteModel]) -> List[Aspect]:
+    # Analyze and populate aspects with quotes and metadata
+    clustered_quotes = cluster_quotes(quotes, len(aspects))
+    for aspect, cluster in zip(aspects, clustered_quotes):
+        aspect_obj = Aspect(name=aspect['name'], description=aspect['description'], quotes=cluster)
+        # Add further analysis here
+    return aspects
 
-    #     chunk = db.get(ConversationChunkModel, doc.metadata["conversation_chunk_id"])
+def summarize_aspects(aspects: List[Aspect]) -> None:
+    # Generate summaries for each aspect
+    for aspect in aspects:
+        # Example: generate short and long summaries
+        aspect.short_summary = "Short summary of the aspect."
+        aspect.long_summary = "Long summary of the aspect."
 
-    #     if chunk:
-    #         quote.conversation_chunks.append(chunk)
-    #         quotes.append(quote)
+def create_view(view_name: str, user_input: str, initial_aspects: Optional[List[str]] = None, db: Session, project_analysis_run_id: Optional[str] = None) -> dict:
+    aspects = generate_aspects(user_input, initial_aspects)
+    quotes = generate_quotes(view_name, db, project_analysis_run_id)
+    analyzed_aspects = analyze_aspects(aspects, quotes)
+    summarize_aspects(analyzed_aspects)
+    
+    view = {
+        "view_name": view_name,
+        "aspects": [aspect.__dict__ for aspect in analyzed_aspects]
+    }
+    return view
 
-    # logger.debug(f"adding {len(quotes)} quotes to database")
-    # db.add_all(quotes)
-    # db.commit()
+
 
 
 client = OpenAI()

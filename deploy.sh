@@ -31,15 +31,6 @@ if [[ $ENV == "prod" ]]; then
     export PARTICIPANT_BASE_URL="participant.findcommonground.app"
     export GRAFANA_BASE_URL="grafana.findcommonground.app"
     docker compose up --build -d
-# for "local"
-elif [[ $ENV == "local" ]]; then
-    echo "Using local settings"
-    export BUILD_VERSION="local-$BUILD_VERSION"
-    export API_BASE_URL="localhost:8000"
-    export ADMIN_BASE_URL="localhost:8001"
-    export PARTICIPANT_BASE_URL="localhost:8002"
-    export GRAFANA_BASE_URL="localhost:3000"
-    docker compose up --build -d
 elif [[ $ENV == "test" ]]; then
     echo "Using test settings"
     export BUILD_VERSION="test-$BUILD_VERSION"

@@ -1,4 +1,4 @@
-pdf-pilot.findcommonground.online {
+pdf-pilot.findcommonground.online, pilot.findcommonground.online {
     basicauth {
 		dembrane $2a$14$CUBGav0EbkCzwTlffbvyU.KdGgZ2SVN4tEAuLOfn1/N6dRJKAhDxm
 	}

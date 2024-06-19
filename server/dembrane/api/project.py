@@ -7,7 +7,7 @@ from logging import getLogger
 
 from fastapi import APIRouter, UploadFile, HTTPException, BackgroundTasks
 from pydantic import BaseModel
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, selectinload
 from fastapi.responses import StreamingResponse
 
 from dembrane.tasks import process_project
@@ -57,7 +57,7 @@ ProjectRouter = APIRouter(tags=["project"])
 async def get_all_projects(session: DependencyRequireSession, db: DependencyInjectDatabase) -> List[ProjectModel]:
     projects = (
         db.query(ProjectModel)
-        .options(joinedload(ProjectModel.tags))
+        .options(selectinload(ProjectModel.tags))
         .filter(ProjectModel.session_id == session.id)
         .all()
     )
@@ -134,7 +134,7 @@ async def get_project(
 ) -> ProjectModel:
     project = (
         db.query(ProjectModel)
-        .options(joinedload(ProjectModel.tags))
+        .options(selectinload(ProjectModel.tags))
         .filter(
             ProjectModel.id == project_id,
         )
@@ -152,7 +152,7 @@ async def generate_transcript_file(conversation_id: str, db: Session) -> Optiona
     if not chunks:
         return None
 
-    conversation = await get_conversation(conversation_id, db)
+    conversation = await get_conversation(conversation_id, db, load_chunks=False)
     email = conversation.participant_email
     name = conversation.participant_name
 
@@ -279,7 +279,7 @@ async def get_all_conversations_for_project(
 
     return (
         db.query(ConversationModel)
-        .options(joinedload(ConversationModel.tags), joinedload(ConversationModel.chunks))
+        .options(selectinload(ConversationModel.tags), selectinload(ConversationModel.chunks))
         .filter(ConversationModel.project_id == project_id)
         .all()
     )
@@ -564,7 +564,7 @@ async def get_project_insights(
 
     insights = (
         db.query(InsightModel)
-        .options(joinedload(InsightModel.quotes))
+        .options(selectinload(InsightModel.quotes))
         .filter(InsightModel.project_analysis_run_id == latest_project_analysis.id)
         .all()
     )

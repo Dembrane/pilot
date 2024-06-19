@@ -276,23 +276,32 @@ export const ProjectOverviewRoute = () => {
   const requestProjectAnalysisMutation = useRequestProjectAnalysisMutation();
 
   const [language, setLanguage] = useSessionStorageState<string>(
-    `sharing-link-language-${projectId}`,
+    `settings/${projectId}/sharingLanguage`,
     {
       defaultValue: "en",
     },
   );
 
+  // TODO: Move this to server state
   const [isTranscriptionLive, setIsTranscriptionLive] =
-    useState<boolean>(false);
+    useSessionStorageState<boolean>(
+      `settings/${projectId}/isTranscriptionLive`,
+      {
+        defaultValue: false,
+      },
+    );
+
+  const getTranscriptionType = (isTranscriptionLive: boolean) =>
+    isTranscriptionLive ? "live" : "async";
 
   const [sharingLink, setSharingLink] = useState(
-    `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data?.pin}`,
+    `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data?.pin}&transcription=${getTranscriptionType(isTranscriptionLive)}`,
   );
 
   useEffect(() => {
     if (projectQuery.data) {
       setSharingLink(
-        `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data.pin}&transcription=${isTranscriptionLive === false ? "async" : "live"}`,
+        `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data.pin}&transcription=${getTranscriptionType(isTranscriptionLive)}`,
       );
     }
   }, [
@@ -386,45 +395,13 @@ export const ProjectOverviewRoute = () => {
           md: 3,
         }}
       >
-        {/* <Paper p="md" shadow="0">
-          <LoadingOverlay visible={projectQuery.isLoading} />
-          {projectQuery.data?.is_conversation_allowed ? (
-            <Stack>
-              <Icons.Signal fill="green" />
-              <span>
-                <Trans>Active</Trans>
-              </span>
-            </Stack>
-          ) : (
-            <Stack>
-              <Icons.Signal fill="gray" />
-              <span>
-                <Trans>Inactive</Trans>
-              </span>
-            </Stack>
-          )}
-        </Paper>
-        <Paper p="md" shadow="0" className="relative">
-          <LoadingOverlay visible={resourcesQuery.isLoading} />
-          <Stack>
-            <Icons.DocumentOutline />
-            <span>{resourcesQuery.data?.length ?? 0} Resource(s)</span>
-          </Stack>
-        </Paper>
-        <Paper p="md" shadow="0">
-          <Stack>
-            <Icons.Phone />
-            <span>{conversationsQuery.data?.length ?? 0} Conversation(s)</span>
-          </Stack>
-        </Paper> */}
-
         {summaryItems.map((item, index) => (
           <ProjectOverviewSummaryCard key={index} {...item} />
         ))}
       </SimpleGrid>
       <Divider />
-      {/* Share Section */}
 
+      {/* Share Section */}
       <Tabs variant="default" defaultValue="participation">
         <Tabs.List grow justify="space-between">
           <Tabs.Tab value="participation">
@@ -442,7 +419,7 @@ export const ProjectOverviewRoute = () => {
             </Title>
             <Box>
               <Checkbox
-                label="Open for participation"
+                label="Open for Participation"
                 description="Allow participants using the link to start new conversations"
                 checked={projectQuery.data?.is_conversation_allowed}
                 disabled={
@@ -451,16 +428,25 @@ export const ProjectOverviewRoute = () => {
                 onChange={handleOpenForParticipationCheckboxChange}
               />
             </Box>
-            <Divider />
             <Box>
               <Checkbox
                 checked={isTranscriptionLive}
-                disabled={projectQuery.data?.is_conversation_allowed}
+                disabled={
+                  projectQuery.data?.is_conversation_allowed ||
+                  updateProjectMutation.isPending ||
+                  projectQuery.isFetching
+                }
                 onChange={() => setIsTranscriptionLive(!isTranscriptionLive)}
                 label="Live Transcription"
-                description="Participation must be set to inactive to change this setting"
+                description={
+                  (projectQuery.data?.is_conversation_allowed
+                    ? 'Please uncheck the "Open for Participation" to modify this setting as the sharing link will be updated. '
+                    : "") +
+                  "Select this option for immediate live transcription. If you prefer higher quality transcription, leave this option unchecked."
+                }
               />
             </Box>
+            <Divider />
             <Title order={2}> Sharing</Title>
             {projectQuery.data?.is_conversation_allowed ? (
               <>

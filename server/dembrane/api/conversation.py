@@ -5,7 +5,7 @@ from datetime import datetime
 
 from fastapi import Form, Request, APIRouter, UploadFile
 from pydantic import BaseModel
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 from fastapi.responses import StreamingResponse
 
 from dembrane.tasks import process_conversation_chunk
@@ -35,26 +35,42 @@ ConversationRouter = APIRouter(tags=["conversation"])
 
 
 @ConversationRouter.get("/{conversation_id}", response_model=ConversationSchema)
-async def get_conversation(conversation_id: str, db: DependencyInjectDatabase) -> ConversationModel:
-    conversation = (
-        db.query(ConversationModel)
-        .options(
-            joinedload(ConversationModel.tags),
-            joinedload(ConversationModel.chunks),
+async def get_conversation(
+    conversation_id: str, db: DependencyInjectDatabase, load_chunks: Optional[bool] = True
+) -> ConversationModel:
+    if load_chunks:
+        conversation = (
+            db.query(ConversationModel)
+            .options(
+                selectinload(ConversationModel.tags),
+                selectinload(ConversationModel.chunks),
+            )
+            .filter(
+                ConversationModel.id == conversation_id,
+            )
+            .first()
         )
-        .filter(
-            ConversationModel.id == conversation_id,
+    else:
+        conversation = (
+            db.query(ConversationModel)
+            .options(
+                selectinload(ConversationModel.tags),
+            )
+            .filter(
+                ConversationModel.id == conversation_id,
+            )
+            .first()
         )
-        .first()
-    )
+
     if not conversation:
         raise ConversationNotFoundException
+
     return conversation
 
 
 @ConversationRouter.get("/{conversation_id}/chunks", response_model=List[ConversationChunkSchema])
 async def get_conversation_chunks(conversation_id: str, db: DependencyInjectDatabase) -> List[ConversationChunkModel]:
-    conversation = await get_conversation(conversation_id, db)
+    conversation = await get_conversation(conversation_id, db, load_chunks=False)
 
     chunks = (
         db.query(ConversationChunkModel)
@@ -134,9 +150,7 @@ async def get_conversation_content(
 async def get_conversation_chunk_content(
     request: Request, conversation_id: str, chunk_id: str, db: DependencyInjectDatabase
 ) -> StreamingResponse:
-    # Example function to get file paths for a conversation
-    # Replace this with your actual function to fetch file paths
-    conversation = await get_conversation(conversation_id, db)
+    conversation = await get_conversation(conversation_id, db, load_chunks=False)
 
     chunk = (
         db.query(ConversationChunkModel)
@@ -196,7 +210,7 @@ async def update_conversation(
     _session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> ConversationModel:
-    conversation = await get_conversation(conversation_id, db)
+    conversation = await get_conversation(conversation_id, db, load_chunks=False)
 
     conversation.title = body.title
     conversation.description = body.description
@@ -212,7 +226,7 @@ async def delete_conversation(
     _session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> ConversationModel:
-    conversation = await get_conversation(conversation_id, db)
+    conversation = await get_conversation(conversation_id, db, load_chunks=False)
     db.delete(conversation)
     db.commit()
     return conversation
@@ -229,7 +243,7 @@ async def upload_conversation_text(
     body: UploadConversationBodySchema,
     db: DependencyInjectDatabase,
 ) -> ConversationChunkModel:
-    conversation = await get_conversation(conversation_id, db)
+    conversation = await get_conversation(conversation_id, db, load_chunks=False)
 
     chunk = ConversationChunkModel(
         id=generate_uuid(),
@@ -252,7 +266,7 @@ async def upload_conversation_chunk(
     timestamp: Annotated[datetime, Form()],
     db: DependencyInjectDatabase,
 ) -> List[ConversationChunkModel]:
-    conversation = await get_conversation(conversation_id, db)
+    conversation = await get_conversation(conversation_id, db, load_chunks=False)
 
     id = generate_uuid()
     file_path = os.path.join(AUDIO_CHUNKS_DIR, conversation.id, f"{id}-{chunk.filename}")
@@ -289,7 +303,7 @@ async def get_conversation_quotes(
     db: DependencyInjectDatabase,
     _session: DependencyRequireSession,
 ) -> List[QuoteModel]:
-    conversation = await get_conversation(conversation_id, db)
+    conversation = await get_conversation(conversation_id, db, load_chunks=False)
 
     project_id = conversation.project_id
 
@@ -305,7 +319,7 @@ async def get_conversation_quotes(
 
     quotes = (
         db.query(QuoteModel)
-        .options(joinedload(QuoteModel.conversation_chunks))
+        .options(selectinload(QuoteModel.conversation_chunks))
         .filter(
             QuoteModel.conversation_id == conversation_id,
             QuoteModel.project_analysis_run_id == latest_project_analysis.id,

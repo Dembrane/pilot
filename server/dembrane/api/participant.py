@@ -118,7 +118,7 @@ async def initiate_conversation(
     db.add(new_conversation)
     db.commit()
     
-    cleaned_response = clean_response(new_conversation, ['created_at', 'updated_at'])
+    cleaned_response = clean_response(new_conversation, ['context', 'created_at', 'updated_at'])
 
     return cleaned_response
 
@@ -138,7 +138,7 @@ async def get_project(
     if not project:
         raise ProjectNotFoundException
     
-    cleaned_response = clean_response(project, ['id', 'created_at', 'updated_at'])
+    cleaned_response = clean_response(project, ['name', 'context', 'created_at', 'updated_at'])
 
     return cleaned_response
 
@@ -181,7 +181,7 @@ async def upload_conversation_text(
     db.add(chunk)
     db.commit()
 
-    cleaned_response = clean_response(chunk, ['id', 'created_at', 'updated_at', 'conversation_id', 'transcript'])
+    cleaned_response = clean_response(chunk, ['created_at', 'updated_at', 'processing_error'])
 
     return cleaned_response
 
@@ -220,6 +220,6 @@ async def upload_conversation_chunk(
     logger.info(f"Add to processing queue: ConversationChunk@{chunk.id}")
     process_conversation_chunk.delay(chunk.id)
 
-    cleaned_response = clean_response(chunk, ['id', 'created_at', 'updated_at', 'conversation_id', 'transcript'])
+    cleaned_response = clean_response(chunk, ['created_at', 'updated_at', 'processing_error'])
 
     return [cleaned_response]

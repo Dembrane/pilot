@@ -39,10 +39,9 @@ class ProjectSchema(BaseModel):
     default_conversation_finish_text: Optional[str] = None
 
 class PublicProjectSchema(BaseModel):
+    id: str
     language: str
     pin: str
-    name: Optional[str] = None
-    context: Optional[str] = None
 
     tags: Optional[List[ProjectTagSchema]] = []
 
@@ -84,11 +83,14 @@ class ConversationChunkSchema(BaseModel):
     timestamp: datetime
 
 class PublicConversationChunkSchema(BaseModel):
+    id: str
+    conversation_id: str
+
     processing_status: ProcessingStatusEnum
-    processing_error: Optional[str] = None
     processing_started_at: Optional[datetime] = None
     processing_completed_at: Optional[datetime] = None
 
+    transcript: Optional[str] = None
     timestamp: datetime
 
 
@@ -114,7 +116,6 @@ class PublicConversationSchema(BaseModel):
 
     title: Optional[str] = None
     description: Optional[str] = None
-    context: Optional[str] = None
 
     participant_email: Optional[str] = None
     participant_name: Optional[str] = None

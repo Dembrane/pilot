@@ -36,7 +36,7 @@ ConversationRouter = APIRouter(tags=["conversation"])
 
 @ConversationRouter.get("/{conversation_id}", response_model=ConversationSchema)
 async def get_conversation(
-    conversation_id: str, db: DependencyInjectDatabase, load_chunks: Optional[bool] = True
+    conversation_id: str, _session: DependencyRequireSession, db: DependencyInjectDatabase, load_chunks: Optional[bool] = True
 ) -> ConversationModel:
     if load_chunks:
         conversation = (
@@ -69,8 +69,8 @@ async def get_conversation(
 
 
 @ConversationRouter.get("/{conversation_id}/chunks", response_model=List[ConversationChunkSchema])
-async def get_conversation_chunks(conversation_id: str, db: DependencyInjectDatabase) -> List[ConversationChunkModel]:
-    conversation = await get_conversation(conversation_id, db, load_chunks=False)
+async def get_conversation_chunks(conversation_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase) -> List[ConversationChunkModel]:
+    conversation = await get_conversation(conversation_id, session, db)
 
     chunks = (
         db.query(ConversationChunkModel)
@@ -113,10 +113,10 @@ async def stream_audio(file_paths: List[str], start: int = 0, end: Optional[int]
 
 @ConversationRouter.get("/{conversation_id}/content")
 async def get_conversation_content(
-    request: Request, conversation_id: str, db: DependencyInjectDatabase
+    request: Request, conversation_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> StreamingResponse:
     # ordered by timestamp
-    chunks = await get_conversation_chunks(conversation_id, db)
+    chunks = await get_conversation_chunks(conversation_id, session, db)
     file_paths = [chunk.path for chunk in chunks if chunk.path]
 
     # how does this work when there are multiple files with different types?
@@ -148,9 +148,11 @@ async def get_conversation_content(
 
 @ConversationRouter.get("/{conversation_id}/chunks/{chunk_id}/content")
 async def get_conversation_chunk_content(
-    request: Request, conversation_id: str, chunk_id: str, db: DependencyInjectDatabase
+    request: Request, conversation_id: str, chunk_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> StreamingResponse:
-    conversation = await get_conversation(conversation_id, db, load_chunks=False)
+    # Example function to get file paths for a conversation
+    # Replace this with your actual function to fetch file paths
+    conversation = await get_conversation(conversation_id, session, db)
 
     chunk = (
         db.query(ConversationChunkModel)
@@ -207,10 +209,10 @@ class PutConversationRequestBodySchema(BaseModel):
 async def update_conversation(
     conversation_id: str,
     body: PutConversationRequestBodySchema,
-    _session: DependencyRequireSession,
+    session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> ConversationModel:
-    conversation = await get_conversation(conversation_id, db, load_chunks=False)
+    conversation = await get_conversation(conversation_id, session, db)
 
     conversation.title = body.title
     conversation.description = body.description
@@ -223,10 +225,10 @@ async def update_conversation(
 @ConversationRouter.delete("/{conversation_id}", response_model=ConversationSchema)
 async def delete_conversation(
     conversation_id: str,
-    _session: DependencyRequireSession,
+    session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> ConversationModel:
-    conversation = await get_conversation(conversation_id, db, load_chunks=False)
+    conversation = await get_conversation(conversation_id, session, db)
     db.delete(conversation)
     db.commit()
     return conversation
@@ -241,9 +243,10 @@ class UploadConversationBodySchema(BaseModel):
 async def upload_conversation_text(
     conversation_id: str,
     body: UploadConversationBodySchema,
+    session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> ConversationChunkModel:
-    conversation = await get_conversation(conversation_id, db, load_chunks=False)
+    conversation = await get_conversation(conversation_id, session, db)
 
     chunk = ConversationChunkModel(
         id=generate_uuid(),
@@ -264,9 +267,10 @@ async def upload_conversation_chunk(
     conversation_id: str,
     chunk: UploadFile,
     timestamp: Annotated[datetime, Form()],
+    session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> List[ConversationChunkModel]:
-    conversation = await get_conversation(conversation_id, db, load_chunks=False)
+    conversation = await get_conversation(conversation_id, session, db)
 
     id = generate_uuid()
     file_path = os.path.join(AUDIO_CHUNKS_DIR, conversation.id, f"{id}-{chunk.filename}")
@@ -300,10 +304,10 @@ async def upload_conversation_chunk(
 @ConversationRouter.get("/{conversation_id}/quotes", response_model=List[QuoteSchema])
 async def get_conversation_quotes(
     conversation_id: str,
+    session: DependencyRequireSession,
     db: DependencyInjectDatabase,
-    _session: DependencyRequireSession,
 ) -> List[QuoteModel]:
-    conversation = await get_conversation(conversation_id, db, load_chunks=False)
+    conversation = await get_conversation(conversation_id, session, db)
 
     project_id = conversation.project_id
 

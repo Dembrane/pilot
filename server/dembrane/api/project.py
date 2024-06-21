@@ -130,6 +130,7 @@ async def create_project(
 @ProjectRouter.get("/{project_id}", response_model=ProjectSchema)
 async def get_project(
     project_id: str,
+    _session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> ProjectModel:
     project = (
@@ -145,14 +146,14 @@ async def get_project(
     return project
 
 
-async def generate_transcript_file(conversation_id: str, db: Session) -> Optional[str]:
+async def generate_transcript_file(conversation_id: str, session: DependencyRequireSession, db: Session) -> Optional[str]:
     logger.info(f"generating transcript for conversation {conversation_id}")
-    chunks = await get_conversation_chunks(conversation_id, db)
+    chunks = await get_conversation_chunks(conversation_id, session, db)
 
     if not chunks:
         return None
 
-    conversation = await get_conversation(conversation_id, db, load_chunks=False)
+    conversation = await get_conversation(conversation_id, session, db)
     email = conversation.participant_email
     name = conversation.participant_name
 
@@ -191,7 +192,7 @@ async def get_project_transcripts(
     db: DependencyInjectDatabase,
     background_tasks: BackgroundTasks,
 ) -> StreamingResponse:
-    project = await get_project(project_id, db)
+    project = await get_project(project_id, session, db)
 
     conversations = await get_all_conversations_for_project(project_id, session, db)
 
@@ -200,7 +201,7 @@ async def get_project_transcripts(
 
     conversations = [c for c in conversations if c.chunks and any(ch.transcript is not None for ch in c.chunks)]
 
-    filename_futures = [generate_transcript_file(conversation.id, db) for conversation in conversations]
+    filename_futures = [generate_transcript_file(conversation.id, session, db) for conversation in conversations]
     filenames = await asyncio.gather(*filename_futures)
 
     filenames = [filename for filename in filenames if filename]
@@ -237,10 +238,10 @@ async def get_project_transcripts(
 async def update_project(
     project_id: str,
     body: PostProjectRequestSchema,
-    _session: DependencyRequireSession,
+    session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> ProjectModel:
-    project = await get_project(project_id, db)
+    project = await get_project(project_id, session, db)
 
     for field, value in body.model_dump(exclude_unset=True, exclude_none=False).items():
         if field == "language" and value not in PROJECT_ALLOWED_LANGUAGES:
@@ -302,6 +303,7 @@ class InitiateConversationRequestBodySchema(BaseModel):
 async def initiate_conversation(
     body: InitiateConversationRequestBodySchema,
     project_id: str,
+    _session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> ConversationModel:
     project = db.query(ProjectModel).filter(ProjectModel.id == project_id).first()
@@ -521,12 +523,13 @@ async def delete_project_tag(
 )
 async def request_project_analysis(
     project_id: str,
-    _session: DependencyRequireSession,
+    session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> TaskSchema:
     project = await get_project(
         db=db,
         project_id=project_id,
+        _session=session
     )
 
     task = process_project.si(project.id).delay()
@@ -553,9 +556,9 @@ def get_latest_project_analysis_run(db: DependencyInjectDatabase, project_id: st
 async def get_project_insights(
     project_id: str,
     db: DependencyInjectDatabase,
-    _session: DependencyRequireSession,
+    session: DependencyRequireSession,
 ) -> List[InsightModel]:
-    project = await get_project(project_id, db)
+    project = await get_project(project_id, session, db)
 
     latest_project_analysis = get_latest_project_analysis_run(db, project.id)
 

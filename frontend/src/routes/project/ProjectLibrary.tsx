@@ -1,6 +1,11 @@
+import { Breadcrumbs } from "@/components/breadcrumbs/Breadcrumbs";
+import { Insight } from "@/components/insight/Insight";
+import { ViewExpandedCard } from "@/components/view/View";
+import { Icons } from "@/icons";
 import {
   useConversationsByProjectId,
   useProjectInsights,
+  useProjectViews,
   useRequestProjectAnalysisMutation,
 } from "@/lib/query";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -15,44 +20,28 @@ import {
   Box,
   Button,
   LoadingOverlay,
-  Paper,
 } from "@mantine/core";
 import {
   IconClock,
   IconInfoCircle,
   IconPlus,
-  IconRefresh,
   IconSortAscending,
 } from "@tabler/icons-react";
 import { useCallback, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-
-const Insight = ({ data }: { data: TInsight }) => {
-  const { projectId } = useParams();
-  return (
-    <Link to={`/projects/${projectId}/library/insights/${data.id}`}>
-      <Paper
-        component="a"
-        className="p-4 h-full place-content-start text-left hover:-translate-y-1 hover:border-opacity-70 border-2 border-opacity-0 border-primary-300 transition-all"
-      >
-        <Stack className="h-full">
-          <Text size="md" className="font-semibold">
-            {data.title}
-          </Text>
-          <Text size="sm">{data.summary}</Text>
-        </Stack>
-      </Paper>
-    </Link>
-  );
-};
+import { useParams } from "react-router-dom";
 
 type SortBy = "relevance" | "default";
 
 export const ProjectLibrary = () => {
   const { projectId } = useParams();
 
+  const viewsQuery = useProjectViews(projectId ?? "");
   const insightsQuery = useProjectInsights(projectId ?? "");
-  const conversationsQuery = useConversationsByProjectId(projectId ?? "");
+  const conversationsQuery = useConversationsByProjectId(
+    projectId ?? "",
+    false,
+  );
+
   const requestProjectAnalysisMutation = useRequestProjectAnalysisMutation();
   const [sortBy, setSortBy] = useState<SortBy>("relevance");
   const toggleSort = useCallback(() => {
@@ -104,11 +93,25 @@ export const ProjectLibrary = () => {
     }
   };
 
+  const insightsExist =
+    insightsQuery && insightsQuery.data && insightsQuery.data.length === 0;
+
   return (
-    <Stack className="py-6 px-2">
+    <Stack className="py-6 px-4">
       <Group justify="space-between">
-        <Title order={1}>Insight Library</Title>
-        {insightsQuery.data && (
+        <Breadcrumbs
+          items={[
+            {
+              label: <Icons.Sidebar />,
+              link: `/projects/${projectId}/overview`,
+            },
+            {
+              label: "Library",
+            },
+          ]}
+        />
+        {/* <Title order={1}>Library</Title> */}
+        {/* {insightsQuery.data && (
           <Box>
             <Button
               onClick={() =>
@@ -124,16 +127,8 @@ export const ProjectLibrary = () => {
               Regenerate Library
             </Button>
           </Box>
-        )}
+        )} */}
       </Group>
-      <Box>
-        {requestProjectAnalysisMutation.isSuccess && (
-          <Text>
-            Please refresh this page after a bit <br /> DEBUG: <br />
-            {JSON.stringify(requestProjectAnalysisMutation.data) ?? ""}
-          </Text>
-        )}
-      </Box>
       <Divider />
 
       {insightsQuery.isLoading && (
@@ -143,43 +138,55 @@ export const ProjectLibrary = () => {
         </>
       )}
 
-      {insightsQuery &&
-        insightsQuery.data &&
-        insightsQuery.data.length === 0 && (
-          // true && (
-          <>
-            <Alert variant="sublte" color="black" icon={<IconInfoCircle />}>
-              <Group>
-                <Text>
-                  This is your insight library. It serves as a collection of
-                  insights contained in a project. Currently,{" "}
-                  {conversationsQuery.data?.length ?? 0} conversations are
-                  waiting to be processed.
-                </Text>
-                <Box>
-                  <Button
-                    onClick={() =>
-                      requestProjectAnalysisMutation.mutate({
-                        projectId: projectId ?? "",
-                      })
-                    }
-                    leftSection={<IconPlus />}
-                    loading={requestProjectAnalysisMutation.isPending}
-                    disabled={requestProjectAnalysisMutation.isPending}
-                  >
-                    Create Library
-                  </Button>
-                </Box>
-              </Group>
-            </Alert>
+      {insightsExist && (
+        <>
+          <Alert variant="light" icon={<IconInfoCircle />}>
+            <Group>
+              <Text>
+                This is your insight library. It serves as a collection of
+                insights contained in a project. Currently,{" "}
+                {conversationsQuery.data?.length ?? 0} conversations are waiting
+                to be processed.
+              </Text>
+              <Box>
+                <Button
+                  onClick={() =>
+                    requestProjectAnalysisMutation.mutate({
+                      projectId: projectId ?? "",
+                    })
+                  }
+                  leftSection={<IconPlus />}
+                  loading={requestProjectAnalysisMutation.isPending}
+                  disabled={requestProjectAnalysisMutation.isPending}
+                >
+                  Create Library
+                </Button>
+              </Box>
+            </Group>
+          </Alert>
 
-            <Title order={3}>Your Views</Title>
-            <Text>Create a library to generate your first view.</Text>
+          <Title order={2}>Your Views</Title>
+          <Text>
+            {!viewsQuery.data ||
+              (viewsQuery.data.length === 0 &&
+                "These are view templates. Once you created your first insight library they will be your first two views.")}
+          </Text>
+          {/* <SimpleGrid cols={3} spacing="md">
+                {viewsQuery.data &&
+                  viewsQuery.data.map((v) => <ViewCard key={v.id} data={v} />)}
+              </SimpleGrid> */}
 
-            <Title order={3}>All Insights</Title>
-            <Text>Create a library to see your first insights.</Text>
-          </>
-        )}
+          <Stack>
+            {viewsQuery.data &&
+              viewsQuery.data.map((v) => (
+                <ViewExpandedCard key={v.id} data={v} />
+              ))}
+          </Stack>
+
+          <Title order={2}>All Insights</Title>
+          <Text>Create a library to see your first insights.</Text>
+        </>
+      )}
       {insightsQuery.data && insightsQuery.data.length > 0 && (
         <>
           <Title order={3}>All Insights</Title>

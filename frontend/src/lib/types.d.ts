@@ -55,6 +55,30 @@ type TInsight = {
   quotes: TQuote[];
 };
 
+type TAspect = {
+  id: string;
+  created_at: Date;
+  updated_at: Date;
+  project_analysis_run_id: string;
+  name: string;
+  description?: string;
+  short_summary?: string;
+  long_summary?: string;
+  image_url?: string;
+  view_id?: string;
+  quotes?: TQuote[];
+};
+
+type TView = {
+  id: string;
+  created_at: Date;
+  updated_at: Date;
+  project_analysis_run_id: string;
+  name: string;
+  summary?: string;
+  aspects?: TAspect[];
+};
+
 type TConversationChunk = {
   id: string;
   created_at: Date;

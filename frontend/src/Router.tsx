@@ -25,6 +25,9 @@ import { i18n } from "@lingui/core";
 import { ProjectLibrary } from "./routes/project/ProjectLibrary";
 import { ProjectLibraryInsight } from "./routes/project/ProjectLibraryInsight";
 import { ParticipantPostConversation } from "./routes/participant/PostConversation";
+import { ProjectLibraryLayout } from "./components/layout/ProjectLibraryLayout";
+import { ProjectLibraryView } from "./routes/project/ProjectLibraryView";
+import { ProjectLibraryAspect } from "./routes/project/ProjectLibraryAspect";
 
 // export const _router = createBrowserRouter([
 //   {
@@ -86,7 +89,6 @@ export const mainRouter = createBrowserRouter([
     element: <Navigate to="/projects/home" />,
     errorElement: <Navigate to="/projects/home" />,
   },
-
   {
     path: "/login",
     element: (
@@ -110,74 +112,83 @@ export const mainRouter = createBrowserRouter([
       },
       {
         path: ":projectId",
-        element: <ProjectLayout />,
         children: [
           {
-            path: "overview",
-            index: true,
-            element: <ProjectOverviewRoute />,
-          },
-          {
-            path: "chat",
-            element: <></>,
-          },
-          ...(ENABLE_EXPERIMENTAL_FEATURES
-            ? [
-                {
-                  path: "library",
-                  element: <ProjectLibrary />,
-                },
-                {
-                  path: "library/insights/:insightId",
-                  element: <ProjectLibraryInsight />,
-                },
-              ]
-            : []),
-          {
-            path: "resources/:resourceId",
-            element: <ProjectResourceLayout />,
-
+            path: "library",
+            element: <ProjectLibraryLayout />,
             children: [
               {
-                path: "overview",
+                path: "views/:viewId/aspects/:aspectId",
+                element: <ProjectLibraryAspect />,
+              },
+              {
+                path: "views/:viewId",
+                element: <ProjectLibraryView />,
+              },
+              {
+                path: "insights/:insightId",
+                element: <ProjectLibraryInsight />,
+              },
+              {
                 index: true,
-                element: <ProjectResourceOverviewRoute />,
+                element: <ProjectLibrary />,
+              },
+            ],
+          },
+          {
+            element: <ProjectLayout />,
+            children: [
+              {
+                index: true,
+                path: "overview",
+                element: <ProjectOverviewRoute />,
               },
               {
                 path: "chat",
-                element: <ProjectResourceAnalysisRoute />,
-              },
-              // {
-              //   path: "chat/:chatId",
-              //   element: <>Not Implemented</>,
-              // },
-            ],
-          },
-          {
-            path: "conversation/:conversationId",
-            element: <ProjectConversationLayout />,
-            children: [
-              {
-                path: "overview",
-                element: <ProjectConversationOverviewRoute />,
+                element: <></>,
               },
               {
-                path: "transcript",
-                element: <ProjectConversationTranscript />,
+                path: "resources/:resourceId",
+                element: <ProjectResourceLayout />,
+                children: [
+                  {
+                    index: true,
+                    path: "overview",
+                    element: <ProjectResourceOverviewRoute />,
+                  },
+                  {
+                    path: "chat",
+                    element: <ProjectResourceAnalysisRoute />,
+                  },
+                ],
               },
-              ...(ENABLE_EXPERIMENTAL_FEATURES
-                ? [
-                    {
-                      path: "analysis",
-                      element: <ProjectConversationAnalysis />,
-                    },
-                  ]
-                : []),
+              {
+                path: "conversation/:conversationId",
+                element: <ProjectConversationLayout />,
+                children: [
+                  {
+                    path: "overview",
+                    element: <ProjectConversationOverviewRoute />,
+                  },
+                  {
+                    path: "transcript",
+                    element: <ProjectConversationTranscript />,
+                  },
+                  ...(ENABLE_EXPERIMENTAL_FEATURES
+                    ? [
+                        {
+                          path: "analysis",
+                          element: <ProjectConversationAnalysis />,
+                        },
+                      ]
+                    : []),
+                ],
+              },
+              {
+                path: "chat/:chatId",
+                element: <></>,
+              },
             ],
-          },
-          {
-            path: "chat/:chatId",
-            element: <></>,
           },
         ],
       },

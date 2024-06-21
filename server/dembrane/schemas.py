@@ -134,6 +134,38 @@ class InsightSchema(BaseModel):
     quotes: Optional[List[QuoteSchema]] = []
 
 
+class AspectSchema(BaseModel):
+    id: str
+    created_at: datetime
+    updated_at: datetime
+
+    project_analysis_run_id: str
+
+    name: str
+    description: Optional[str] = None
+    short_summary: Optional[str] = None
+    long_summary: Optional[str] = None
+
+    image_url: Optional[str] = None
+
+    view_id: Optional[str] = None
+
+    quotes: Optional[List[QuoteSchema]] = []
+
+
+class ViewSchema(BaseModel):
+    id: str
+    created_at: datetime
+    updated_at: datetime
+
+    project_analysis_run_id: str
+
+    name: str
+    summary: Optional[str] = None
+
+    aspects: Optional[List["AspectSchema"]] = []
+
+
 class ProjectAnalysisRunSchema(BaseModel):
     id: str
     created_at: datetime

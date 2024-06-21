@@ -17,6 +17,9 @@ if DEBUG_MODE:
     logging.basicConfig(level=logging.DEBUG)
     logger.setLevel(logging.DEBUG)
 
+API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:8000")
+logger.debug(f"API_BASE_URL: {API_BASE_URL}")
+
 ADMIN_BASE_URL = os.environ.get("ADMIN_BASE_URL", "http://localhost:3000")
 logger.debug(f"ADMIN_BASE_URL: {ADMIN_BASE_URL}")
 
@@ -40,6 +43,11 @@ AUDIO_CHUNKS_DIR = os.path.join(UPLOADS_DIR, "audio_chunks")
 if not os.path.exists(AUDIO_CHUNKS_DIR):
     os.makedirs(AUDIO_CHUNKS_DIR)
 logger.debug(f"AUDIO_CHUNKS_DIR: {AUDIO_CHUNKS_DIR}")
+
+IMAGES_DIR = os.path.join(UPLOADS_DIR, "images")
+if not os.path.exists(IMAGES_DIR):
+    os.makedirs(IMAGES_DIR)
+logger.debug(f"IMAGES_DIR: {IMAGES_DIR}")
 
 EMBEDDINGS_CACHE_DIR = os.path.join(BASE_DIR, "embeddings_cache")
 logger.debug(f"EMBEDDINGS_CACHE_DIR: {EMBEDDINGS_CACHE_DIR}")

@@ -4,6 +4,7 @@
 
 ```
 cd server
+source .venv/bin/activate
 alembic revision --autogenerate -m "message"
 ```
 
@@ -11,5 +12,6 @@ alembic revision --autogenerate -m "message"
 
 ```
 cd server
+source .venv/bin/activate
 alembic upgrade head
 ```

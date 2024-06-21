@@ -197,6 +197,8 @@ class ProjectAnalysisRunModel(Base):
 
     quotes: Mapped[List["QuoteModel"]] = relationship("QuoteModel", back_populates="project_analysis_run")
     insights: Mapped[List["InsightModel"]] = relationship("InsightModel", back_populates="project_analysis_run")
+    aspects: Mapped[List["AspectModel"]] = relationship("AspectModel", back_populates="project_analysis_run")
+    views: Mapped[List["ViewModel"]] = relationship("ViewModel", back_populates="project_analysis_run")
 
     processing_status: Mapped[ProcessingStatusEnum] = mapped_column(String, default="PENDING")
     processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -408,6 +410,21 @@ class ConversationChunkModel(Base):
     )
 
 
+quote_aspect_association_table = Table(
+    "quote_aspect_association",
+    Base.metadata,
+    Column("quote_id", ForeignKey("quote.id"), primary_key=True),
+    Column("aspect_id", ForeignKey("aspect.id"), primary_key=True),
+)
+
+representative_quote_aspect_association_table = Table(
+    "representative_quote_aspect_association",
+    Base.metadata,
+    Column("quote_id", ForeignKey("quote.id"), primary_key=True),
+    Column("aspect_id", ForeignKey("aspect.id"), primary_key=True),
+)
+
+
 class QuoteModel(Base):
     __tablename__ = "quote"
 
@@ -432,9 +449,36 @@ class QuoteModel(Base):
     insight_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("insight.id"))
     insight: Mapped[Optional["InsightModel"]] = relationship("InsightModel", back_populates="quotes")
 
+    aspects: Mapped[List["AspectModel"]] = relationship(
+        "AspectModel", back_populates="quotes", secondary=quote_aspect_association_table
+    )
+    representative_aspects: Mapped[List["AspectModel"]] = relationship(
+        "AspectModel", back_populates="representative_quotes", secondary=representative_quote_aspect_association_table
+    )
+
     project_analysis_run_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("project_analysis_run.id"))
     project_analysis_run: Mapped[Optional["ProjectAnalysisRunModel"]] = relationship(
         ProjectAnalysisRunModel, back_populates="quotes"
+    )
+
+
+class ViewModel(Base):
+    __tablename__ = "view"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    name: Mapped[str] = mapped_column(String)
+    summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    aspects: Mapped[List["AspectModel"]] = relationship("AspectModel", back_populates="view")
+
+    project_analysis_run_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("project_analysis_run.id"))
+    project_analysis_run: Mapped[Optional["ProjectAnalysisRunModel"]] = relationship(
+        ProjectAnalysisRunModel, back_populates="views"
     )
 
 
@@ -447,16 +491,28 @@ class AspectModel(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    name: Mapped[str] = mapped_column(String, unique=True)
+    name: Mapped[str] = mapped_column(String)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    image_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    short_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    long_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    view_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("view.id"))
+    view: Mapped[Optional["ViewModel"]] = relationship("ViewModel", back_populates="aspects")
 
-class ViewModel(Base):
-    __tablename__ = "view"
+    quotes: Mapped[List["QuoteModel"]] = relationship(
+        "QuoteModel", back_populates="aspects", secondary=quote_aspect_association_table
+    )
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    representative_quotes: Mapped[List["QuoteModel"]] = relationship(
+        "QuoteModel", back_populates="representative_aspects", secondary=representative_quote_aspect_association_table
+    )
+
+    centroid_embedding: Mapped[List[float]] = mapped_column(Vector(EMBEDDING_DIM), nullable=True)
+
+    project_analysis_run_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("project_analysis_run.id"))
+    project_analysis_run: Mapped[Optional["ProjectAnalysisRunModel"]] = relationship(
+        ProjectAnalysisRunModel, back_populates="aspects"
     )
 
 

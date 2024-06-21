@@ -15,6 +15,7 @@ from dembrane.utils import generate_uuid, get_safe_filename, generate_4_digit_pi
 from dembrane.config import AUDIO_CHUNKS_DIR, RESOURCE_UPLOADS_DIR
 from dembrane.schemas import (
     TaskSchema,
+    ViewSchema,
     InsightSchema,
     ProjectSchema,
     ResourceSchema,
@@ -22,6 +23,8 @@ from dembrane.schemas import (
     ConversationSchema,
 )
 from dembrane.database import (
+    ViewModel,
+    AspectModel,
     InsightModel,
     ProjectModel,
     ResourceModel,
@@ -570,3 +573,53 @@ async def get_project_insights(
     )
 
     return insights
+
+
+@ProjectRouter.get("/{project_id}/views", response_model=List[ViewSchema])
+async def get_project_views(
+    project_id: str,
+    db: DependencyInjectDatabase,
+    _session: DependencyRequireSession,
+) -> List[ViewModel]:
+    project = await get_project(project_id, db)
+
+    latest_project_analysis = get_latest_project_analysis_run(db, project.id)
+
+    if not latest_project_analysis:
+        return []
+
+    views = (
+        db.query(ViewModel)
+        .options(selectinload(ViewModel.aspects))
+        .filter(ViewModel.project_analysis_run_id == latest_project_analysis.id)
+        .all()
+    )
+
+    return views
+
+
+@ProjectRouter.get("/{project_id}/views/{view_id}", response_model=ViewSchema)
+async def get_project_view_aspects(
+    project_id: str,
+    view_id: str,
+    db: DependencyInjectDatabase,
+    _session: DependencyRequireSession,
+) -> ViewModel:
+    project = await get_project(project_id, db)
+
+    latest_project_analysis = get_latest_project_analysis_run(db, project.id)
+
+    if not latest_project_analysis:
+        raise HTTPException(status_code=404, detail="No analysis found for this project")
+
+    view = (
+        db.query(ViewModel)
+        .options(selectinload(ViewModel.aspects).selectinload(AspectModel.quotes))
+        .filter(ViewModel.project_analysis_run_id == latest_project_analysis.id, ViewModel.id == view_id)
+        .first()
+    )
+
+    if not view:
+        raise HTTPException(status_code=404, detail="View not found")
+
+    return view

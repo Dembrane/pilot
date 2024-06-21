@@ -42,6 +42,7 @@ dependencies = [
     "pandas-stubs>=2.2.2.240514",
     "trankit @ git+https://github.com/nlp-uoregon/trankit",
     "ffmpeg-python>=0.2.0",
+    "types-requests>=2.32.0.20240602",
 ]
 
 [tool.setuptools]
@@ -143,8 +144,8 @@ select = [
     # unused arguments
     "ARG",
     # print statements
-    "T201",
-    "T203",
+    # "T201",
+    # "T203",
     # misuse of typing.TYPE_CHECKING
     "TCH004",
     # import rules

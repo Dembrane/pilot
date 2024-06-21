@@ -17,6 +17,8 @@ import {
   getCurrentSession,
   getProjectById,
   getProjectInsights,
+  getProjectViewById,
+  getProjectViews,
   getResourceById,
   getResourcesByProjectId,
   getTagsByProjectId,
@@ -101,6 +103,20 @@ export const useProjectInsights = (projectId: string) => {
   return useQuery({
     queryKey: ["project", projectId, "insights"],
     queryFn: () => getProjectInsights(projectId),
+  });
+};
+
+export const useProjectViews = (projectId: string) => {
+  return useQuery({
+    queryKey: ["project", projectId, "views"],
+    queryFn: () => getProjectViews(projectId),
+  });
+};
+
+export const useProjectViewById = (projectId: string, viewId: string) => {
+  return useQuery({
+    queryKey: ["project", projectId, "views", viewId],
+    queryFn: () => getProjectViewById(projectId, viewId),
   });
 };
 
@@ -276,11 +292,18 @@ export const useDeleteConversationChunkByIdMutation = () => {
   });
 };
 
-export const useConversationsByProjectId = (projectId: string) => {
+export const useConversationsByProjectId = (
+  projectId: string,
+  load_chunks?: boolean,
+) => {
   return useQuery({
-    queryKey: ["conversation", "all", projectId],
+    queryKey: [
+      "conversation",
+      projectId,
+      load_chunks ? "all" : "all/no_chunks",
+    ],
     queryFn: () => getConversationsByProjectId(projectId),
-    refetchInterval: 20000,
+    refetchInterval: 30000,
   });
 };
 

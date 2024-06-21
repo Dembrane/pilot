@@ -109,6 +109,14 @@ export const getProjectInsights = async (projectId: string) => {
   return api.get<unknown, TInsight[]>(`/projects/${projectId}/insights`);
 };
 
+export const getProjectViews = async (projectId: string) => {
+  return api.get<unknown, TView[]>(`/projects/${projectId}/views`);
+};
+
+export const getProjectViewById = async (projectId: string, viewId: string) => {
+  return api.get<unknown, TView>(`/projects/${projectId}/views/${viewId}`);
+};
+
 export const getProjectTranscriptsLink = (projectId: string) =>
   `${apiCommonConfig.baseURL}/projects/${projectId}/transcripts`;
 
@@ -193,9 +201,17 @@ export const deleteConversationChunkById = async (chunkId: string) => {
   return api.delete(`/conversation-chunks/${chunkId}`);
 };
 
-export const getConversationsByProjectId = async (projectId: string) => {
+export const getConversationsByProjectId = async (
+  projectId: string,
+  load_chunks?: boolean,
+) => {
   return api.get<unknown, TConversation[]>(
     `/projects/${projectId}/conversations`,
+    {
+      params: {
+        load_chunks,
+      },
+    },
   );
 };
 

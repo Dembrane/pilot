@@ -6,6 +6,17 @@ x-logging: &default-logging
     tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 services:
+  directus:
+    image: directus/directus:10.12.1
+    environment:
+      SECRET: ${DIRECTUS_SECRET}
+      ADMIN_EMAIL: admin@dembrane.com
+      ADMIN_PASSWORD: dembrane
+      WEBSOCKETS_ENABLED: true
+      MAX_PAYLOAD_SIZE: 100m
+      DB_CLIENT: postgres
+      DB_CONNECTION_STRING: postgres://dembrane:dembrane@postgres:5432/dembrane
+
   postgres:
     image: pgvector/pgvector:0.6.2-pg16
     restart: unless-stopped

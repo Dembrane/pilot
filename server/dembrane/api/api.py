@@ -5,6 +5,7 @@ from fastapi import (
 )
 
 from dembrane.api.tag import TagRouter
+from dembrane.api.task import TaskRouter
 from dembrane.api.static import StaticRouter
 from dembrane.api.project import ProjectRouter
 from dembrane.api.session import SessionRouter
@@ -29,3 +30,4 @@ api.include_router(ConversationRouter, prefix="/conversations")
 api.include_router(ConversationChunkRouter, prefix="/conversation-chunks")
 api.include_router(TagRouter, prefix="/tag")
 api.include_router(StaticRouter, prefix="/static")
+api.include_router(TaskRouter, prefix="/task")

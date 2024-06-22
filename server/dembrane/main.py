@@ -117,3 +117,9 @@ def custom_openapi() -> Any:
 
 
 app.openapi = custom_openapi  # type: ignore
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)

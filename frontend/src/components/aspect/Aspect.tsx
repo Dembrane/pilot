@@ -27,8 +27,10 @@ export const AspectCard = ({
         to={`/projects/${projectId}/library/views/${data.view_id}/aspects/${data.id}`}
       >
         <Paper
+          bg="white"
+          shadow="sm"
           className={cn(
-            "rounded-md overflow-hidden hover:bg-opacity-75 transition group h-full w-[300px] text-left flex flex-col",
+            "rounded-md overflow-hidden hover:-translate-y-1 my-1 transition group h-full w-[320px] text-left flex flex-col",
             className,
           )}
         >
@@ -67,7 +69,7 @@ export const AspectCard = ({
               <Stack className="pt-4">
                 <Divider />
                 <Group>
-                  <Pill bg="rgba(35, 131, 226, 0.102)" c="#152652">
+                  <Pill>
                     <Group>
                       <Text className="font-semibold">
                         {data.quotes?.length ?? 0} Quotes

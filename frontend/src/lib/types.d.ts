@@ -88,10 +88,7 @@ type TConversationChunk = {
   transcript?: string;
   timestamp: Date;
 
-  processing_status?: TProcessingStatus;
-  processing_error?: string;
-  processing_started_at?: Date;
-  processing_completed_at?: Date;
+  task_id?: string;
 };
 
 type TProject = {
@@ -115,3 +112,32 @@ type TSession = {
   created_at: Date;
   updated_at: Date;
 };
+
+type TTaskState =
+  | "PENDING"
+  | "STARTED"
+  | "PROGRESS"
+  | "SUCCESS"
+  | "FAILURE"
+  | "RETRY"
+  | "REVOKED"
+  | "IGNORED";
+
+type TTaskProgressMeta = {
+  current: number;
+  total: number;
+  percent: number;
+  message?: string;
+};
+
+type TTask =
+  | {
+      id: string;
+      state: TTaskState;
+      meta: any;
+    }
+  | {
+      id: string;
+      state: "PROGRESS";
+      meta: TTaskProgressMeta;
+    };

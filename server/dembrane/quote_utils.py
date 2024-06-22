@@ -1,8 +1,10 @@
+import os
 import re
 import json
 import random
 import logging
 from typing import Dict, List, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import numpy as np
 import pandas as pd
@@ -21,6 +23,7 @@ from dembrane.database import (
     QuoteModel,
     AspectModel,
     InsightModel,
+    DatabaseSession,
     ConversationModel,
     ConversationChunkModel,
     ProjectAnalysisRunModel,
@@ -413,7 +416,7 @@ def format_json_string_to_list(json_string: str) -> List[str]:
     sample_quotes_json_string = sample_quotes_json_string.strip()
 
     # Log the last character for debugging purposes
-    logger.debug("Last character:", sample_quotes_json_string[-1] if sample_quotes_json_string else "Empty String")
+    # logger.debug("Last character: {sample_quotes_json_string[-1] if sample_quotes_json_string else "Empty String"})
 
     # Ensure the string starts with '[' and ends with ']'
     if not sample_quotes_json_string.startswith("["):
@@ -881,68 +884,87 @@ def generate_insights(db: Session, project_analysis_run_id: str) -> None:
 
     df.groupby("Cluster")
 
-    # TODO: run concurrently
-    for i in range(n_clusters):
-        logger.debug(f"Cluster {i} Theme:")
+    def process_cluster(cluster_index):
+        with DatabaseSession() as db:
+            logger.debug(f"Cluster {cluster_index} Theme:")
 
-        quote_text_joined = "\n".join(df[df.Cluster == i].text.values)
+            quote_text_joined = "\n".join(df[df.Cluster == cluster_index].text.values)
 
-        messages = [
-            {
-                "role": "user",
-                "content": f'What do the following text have in common? Generate a short theme based on the given text. Do not enclose your response in quotes or other special characters. Only output text.\n\nText:\n"""\n{quote_text_joined}\n"""\n\nTheme:',
-            }
-        ]
+            messages = [
+                {
+                    "role": "user",
+                    "content": f'What do the following text have in common? Generate a short theme based on the given text. Do not enclose your response in quotes or other special characters. Only output text.\n\nText:\n"""\n{quote_text_joined}\n"""\n\nTheme:',
+                }
+            ]
 
-        title_response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=messages,  # type: ignore
-            temperature=0,
-            max_tokens=64,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0,
-        )
+            title_response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=messages,  # type: ignore
+                temperature=0,
+                max_tokens=64,
+                top_p=1,
+                frequency_penalty=0,
+                presence_penalty=0,
+            )
 
-        title = title_response.choices[0].message.content
+            title = title_response.choices[0].message.content
 
-        logger.debug(title)
+            logger.debug(title)
 
-        messages = [
-            {
-                "role": "user",
-                "content": f'What do the following text have in common? Generate a brief(4-5 sentences) summary and explanation of the theme based on the given texts. Use aspects like sentiment, simlarities and dissimilarities between the texts to form your summary. Do not enclose your response in quotes or other special characters. Only output text.\n\nTexts:\n"""\n{quote_text_joined}\n"""\n\nTheme: {title}\n\nSummary:',
-            }
-        ]
+            messages = [
+                {
+                    "role": "user",
+                    "content": f'What do the following text have in common? Generate a brief(4-5 sentences) summary and explanation of the theme based on the given texts. Use aspects like sentiment, similarities and dissimilarities between the texts to form your summary. Do not enclose your response in quotes or other special characters. Only output text.\n\nTexts:\n"""\n{quote_text_joined}\n"""\n\nTheme: {title}\n\nSummary:',
+                }
+            ]
 
-        summary_response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=messages,  # type: ignore
-            temperature=0,
-            max_tokens=256,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0,
-        )
+            summary_response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=messages,  # type: ignore
+                temperature=0,
+                max_tokens=256,
+                top_p=1,
+                frequency_penalty=0,
+                presence_penalty=0,
+            )
 
-        summary = summary_response.choices[0].message.content
+            summary = summary_response.choices[0].message.content
 
-        logger.debug(summary)
+            logger.debug(summary)
 
-        insight = InsightModel(
-            id=generate_uuid(),
-            project_analysis_run_id=project_analysis_run_id,
-            title=title,
-            summary=summary,
-        )
+            insight = InsightModel(
+                id=generate_uuid(),
+                project_analysis_run_id=project_analysis_run_id,
+                title=title,
+                summary=summary,
+            )
 
-        quote_ids = df[df.Cluster == i].id.values
+            quote_ids = df[df.Cluster == cluster_index].id.values
 
-        quotes_list = db.query(QuoteModel).filter(QuoteModel.id.in_(quote_ids)).all()
-        insight.quotes.extend(quotes_list)
+            quotes_list = db.query(QuoteModel).filter(QuoteModel.id.in_(quote_ids)).all()
+            insight.quotes.extend(quotes_list)
 
-        db.add(insight)
-        db.commit()
+            db.add(insight)
+            db.commit()
+
+    # Determine the number of CPU cores
+    cpu_cores = os.cpu_count()
+
+    # Adjust max_workers based on the type of task and CPU cores
+    if cpu_cores is not None:
+        max_workers = min(n_clusters, cpu_cores * 2)  # Adjust this multiplier based on task nature
+    else:
+        max_workers = 10  # Fallback to a default value if CPU count is not available
+
+    logger.debug(f"Using {max_workers} workers for concurrent processing")
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = [executor.submit(process_cluster, i) for i in range(n_clusters)]
+        for future in as_completed(futures):  # noqa: F821
+            try:
+                future.result()
+            except Exception as e:
+                logger.error(f"Error processing cluster: {e}")
 
 
 if __name__ == "__main__":
@@ -950,9 +972,9 @@ if __name__ == "__main__":
 
     db = next(get_db())
 
-    # project_id = "92fae8ed-26c5-4650-88a6-15a557b5ca6a"
+    project_id = "261ec4f1-d2ad-4bb8-b640-e2bd0d911e1f"
 
-    # analysis_id = "f57e2b52-4ff7-4fa3-872a-e7472fc56887"
+    analysis_id = "27857ef4-8659-4cb7-8b7e-99468b71841b"
 
     # project_analysis_run = ProjectAnalysisRunModel(id=generate_uuid(), project_id=project_id, processing_status="DONE")
 
@@ -972,15 +994,15 @@ if __name__ == "__main__":
 
     # logger.debug("quotes are generated")
 
-    # view = generate_view(
-    #     db,
-    #     analysis_id,
-    #     "Sentiment",
-    #     "Im ok to keep this fairly basic, with just 3. Positive, Neutral, Negative",
-    # )
+    # view = generate_view(db, analysis_id, "Make a plan to restructure the TUE Governance", "Make it a detailed plan")
     # assign_aspect_centroids_and_cluster_quotes(db, analysis_id, view.id)
     # generate_view_extras(db, view.id)
     # logger.debug(view.id)
+
+    view = generate_view(db, analysis_id, "Sentiment", "Use only 3")
+    assign_aspect_centroids_and_cluster_quotes(db, analysis_id, view.id)
+    generate_view_extras(db, view.id)
+    logger.debug(view.id)
 
     # view = generate_view(
     #     db, analysis_id, "Recurring Themes", "Use around 15-20 themes. It would help me make an interesting report!"
@@ -989,6 +1011,6 @@ if __name__ == "__main__":
     # generate_view_extras(db, view.id)
     # logger.debug(view.id)
 
-    generate_view_extras(db, "aa2d3e5e-0285-4379-9520-c13881fe9987")
+    # generate_view_extras(db, "aa2d3e5e-0285-4379-9520-c13881fe9987")
 
-    # generate_insights(db, id)
+    generate_insights(db, id)

@@ -370,7 +370,9 @@ class ConversationModel(Base):
         back_populates="conversations",
     )
 
-    quotes: Mapped[List["QuoteModel"]] = relationship("QuoteModel", back_populates="conversation")
+    quotes: Mapped[List["QuoteModel"]] = relationship(
+        "QuoteModel", back_populates="conversation", cascade="all, delete-orphan"
+    )
 
 
 conversation_chunk_quote_association_table = Table(
@@ -395,10 +397,7 @@ class ConversationChunkModel(Base):
 
     path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
-    processing_status: Mapped[ProcessingStatusEnum] = mapped_column(String, default="PENDING")
-    processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    processing_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    task_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     transcript: Mapped[str] = mapped_column(Text, nullable=True)

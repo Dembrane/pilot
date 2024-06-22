@@ -20,6 +20,9 @@ import {
   Box,
   Button,
   LoadingOverlay,
+  SimpleGrid,
+  Paper,
+  Pill,
 } from "@mantine/core";
 import {
   IconClock,
@@ -31,6 +34,33 @@ import { useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 
 type SortBy = "relevance" | "default";
+
+const DummyViews = () => {
+  return (
+    <Stack>
+      <Text c="gray">
+        These are your default view templates. Once you create your library
+        these will be your first two views.
+      </Text>
+      <Paper p="md">
+        <SimpleGrid cols={3}>
+          <Paper bg="white" p="md">
+            <Text className="font-xl font-semibold pb-2">Topics</Text>
+            <Group>
+              <Pill>0 Aspects</Pill>
+            </Group>
+          </Paper>
+          <Paper bg="white" p="md">
+            <Text className="font-xl font-semibold pb-2">Sentiment</Text>
+            <Group>
+              <Pill>0 Aspects</Pill>
+            </Group>
+          </Paper>
+        </SimpleGrid>
+      </Paper>
+    </Stack>
+  );
+};
 
 export const ProjectLibrary = () => {
   const { projectId } = useParams();
@@ -94,7 +124,10 @@ export const ProjectLibrary = () => {
   };
 
   const insightsExist =
-    insightsQuery && insightsQuery.data && insightsQuery.data.length === 0;
+    insightsQuery && insightsQuery.data && insightsQuery.data.length > 0;
+
+  const viewsExist =
+    viewsQuery && viewsQuery.data && viewsQuery.data.length > 0;
 
   return (
     <Stack className="py-6 px-4">
@@ -106,28 +139,10 @@ export const ProjectLibrary = () => {
               link: `/projects/${projectId}/overview`,
             },
             {
-              label: "Library",
+              label: <Title order={1}>Library</Title>,
             },
           ]}
         />
-        {/* <Title order={1}>Library</Title> */}
-        {/* {insightsQuery.data && (
-          <Box>
-            <Button
-              onClick={() =>
-                requestProjectAnalysisMutation.mutate({
-                  projectId: projectId ?? "",
-                })
-              }
-              variant="outline"
-              leftSection={<IconRefresh />}
-              loading={requestProjectAnalysisMutation.isPending}
-              disabled={requestProjectAnalysisMutation.isPending}
-            >
-              Regenerate Library
-            </Button>
-          </Box>
-        )} */}
       </Group>
       <Divider />
 
@@ -138,13 +153,12 @@ export const ProjectLibrary = () => {
         </>
       )}
 
-      {insightsExist && (
+      {!insightsExist && (
         <>
           <Alert variant="light" icon={<IconInfoCircle />}>
-            <Group>
+            <Group justify="space-between">
               <Text>
-                This is your insight library. It serves as a collection of
-                insights contained in a project. Currently,{" "}
+                This is your project library. Currently,{" "}
                 {conversationsQuery.data?.length ?? 0} conversations are waiting
                 to be processed.
               </Text>
@@ -164,29 +178,20 @@ export const ProjectLibrary = () => {
               </Box>
             </Group>
           </Alert>
-
-          <Title order={2}>Your Views</Title>
-          <Text>
-            {!viewsQuery.data ||
-              (viewsQuery.data.length === 0 &&
-                "These are view templates. Once you created your first insight library they will be your first two views.")}
-          </Text>
-          {/* <SimpleGrid cols={3} spacing="md">
-                {viewsQuery.data &&
-                  viewsQuery.data.map((v) => <ViewCard key={v.id} data={v} />)}
-              </SimpleGrid> */}
-
-          <Stack>
-            {viewsQuery.data &&
-              viewsQuery.data.map((v) => (
-                <ViewExpandedCard key={v.id} data={v} />
-              ))}
-          </Stack>
-
-          <Title order={2}>All Insights</Title>
-          <Text>Create a library to see your first insights.</Text>
         </>
       )}
+
+      <Title order={2}>Your Views</Title>
+      {!viewsExist && <DummyViews />}
+
+      <Stack>
+        {viewsQuery.data &&
+          viewsQuery.data.map((v) => <ViewExpandedCard key={v.id} data={v} />)}
+      </Stack>
+
+      <Title order={2}>All Insights</Title>
+      <Text>Create a library to see your first insights.</Text>
+
       {insightsQuery.data && insightsQuery.data.length > 0 && (
         <>
           <Title order={3}>All Insights</Title>

@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session, selectinload
 from fastapi.responses import StreamingResponse
 
-from dembrane.tasks import process_project
+# from dembrane.tasks import process_project
 from dembrane.utils import generate_uuid, get_safe_filename, generate_4_digit_pin, generate_6_digit_pin
 from dembrane.config import AUDIO_CHUNKS_DIR, RESOURCE_UPLOADS_DIR
 from dembrane.schemas import (
@@ -22,6 +22,7 @@ from dembrane.schemas import (
     ProjectTagSchema,
     ConversationSchema,
 )
+from dembrane.api.task import get_task_status
 from dembrane.database import (
     ViewModel,
     AspectModel,
@@ -517,30 +518,27 @@ async def delete_project_tag(
     return tag
 
 
-@ProjectRouter.post(
-    "/{project_id}/request-analysis",
-    response_model=TaskSchema,
-    status_code=HTTPStatus.ACCEPTED,
-)
-async def request_project_analysis(
-    project_id: str,
-    _session: DependencyRequireSession,
-    db: DependencyInjectDatabase,
-) -> TaskSchema:
-    project = await get_project(
-        db=db,
-        project_id=project_id,
-    )
+# @ProjectRouter.post(
+#     "/{project_id}/request-analysis",
+#     response_model=TaskSchema,
+#     status_code=HTTPStatus.ACCEPTED,
+# )
+# async def request_project_analysis(
+#     project_id: str,
+#     _session: DependencyRequireSession,
+#     db: DependencyInjectDatabase,
+# ) -> TaskSchema:
+#     project = await get_project(
+#         db=db,
+#         project_id=project_id,
+#     )
 
-    task = process_project.si(project.id).delay()
+#     task = process_project.si(project.id).delay()
 
-    logger.info(f"Task {task.id} created for project {project.id}")
+#     logger.info(f"Task {task.id} created for project {project.id}")
+#     task_status = await get_task_status(task.id)
 
-    # TODO: add a result backend and task ID checks
-    return TaskSchema(
-        id=task.id,
-        status="PENDING",
-    )
+#     return task_status
 
 
 def get_latest_project_analysis_run(db: DependencyInjectDatabase, project_id: str) -> Optional[ProjectAnalysisRunModel]:

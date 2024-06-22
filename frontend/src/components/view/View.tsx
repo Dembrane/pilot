@@ -1,8 +1,17 @@
 import { Icons } from "@/icons";
-import { Paper, Stack, Group, Pill, ActionIcon, Text } from "@mantine/core";
+import {
+  Paper,
+  Stack,
+  Group,
+  Pill,
+  ActionIcon,
+  Text,
+  Spoiler,
+} from "@mantine/core";
 import { IconArrowsDiagonal } from "@tabler/icons-react";
 import { AspectCard } from "../aspect/Aspect";
 import { Link, useParams } from "react-router-dom";
+import { Markdown } from "../Markdown";
 
 export const ViewCard = ({ data }: { data: TView }) => {
   return (
@@ -10,7 +19,7 @@ export const ViewCard = ({ data }: { data: TView }) => {
       <Stack gap="sm">
         <Text size="xl">{data.name}</Text>
         <Group>
-          <Pill bg="rgba(35, 131, 226, 0.102)" c="#152652">
+          <Pill>
             <Group>
               <Text className="font-semibold">
                 {data.aspects?.length ?? 0} Aspects
@@ -43,7 +52,7 @@ export const ViewExpandedCard = ({ data }: { data: TView }) => {
         </Group>
         <Text className="text-2xl font-semibold">{data.name}</Text>
         <Group>
-          <Pill bg="rgba(35, 131, 226, 0.102)" c="#152652">
+          <Pill>
             <Group>
               <Text className="font-semibold">
                 {data.aspects?.length ?? 0} Aspects
@@ -51,7 +60,9 @@ export const ViewExpandedCard = ({ data }: { data: TView }) => {
             </Group>
           </Pill>
         </Group>
-        <Text>{data.summary}</Text>
+        <Spoiler maxHeight={120} showLabel="Show more" hideLabel="Show less">
+          <Markdown content={data.summary ?? ""} />
+        </Spoiler>
 
         <div className="snap-x pb-2 flex w-full overflow-x-auto">
           {data.aspects?.map((a) => (

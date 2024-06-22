@@ -173,9 +173,17 @@ export const initiateConversation = async (payload: {
   );
 };
 
-export const getConversationById = async (conversationId: string) => {
+export const getConversationById = async (
+  conversationId: string,
+  loadChunks?: boolean,
+) => {
   return apiNoAuth.get<unknown, TConversation>(
     `/conversations/${conversationId}`,
+    {
+      params: {
+        load_chunks: loadChunks,
+      },
+    },
   );
 };
 

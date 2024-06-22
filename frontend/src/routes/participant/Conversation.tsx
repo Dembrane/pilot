@@ -878,7 +878,10 @@ export const ParticipantConversationChunkedAudioRoute = () =>
   // }
   {
     const { projectId, conversationId } = useParams();
-    const conversationQuery = useConversationById(conversationId as string);
+    const conversationQuery = useConversationById(
+      conversationId as string,
+      false,
+    );
     const uploadChunkMutation = useUploadConversationChunk();
 
     const onChunk = (chunk: Blob) => {
@@ -1104,7 +1107,10 @@ export const ParticipantConversationAudioRoute = ({
   // }
   {
     const { projectId, conversationId } = useParams();
-    const conversationQuery = useConversationById(conversationId as string);
+    const conversationQuery = useConversationById(
+      conversationId as string,
+      false,
+    );
     const uploadChunkMutation = useUploadConversationChunk();
 
     const [uploadInProgress, updatedUploadInProgress] = useState(false);
@@ -1402,7 +1408,10 @@ export const ParticipantConversationAudioRoute = ({
 
 export const ParticipantConversationTextRoute = () => {
   const { projectId, conversationId } = useParams();
-  const conversationQuery = useConversationById(conversationId as string);
+  const conversationQuery = useConversationById(
+    conversationId as string,
+    false,
+  );
   const uploadChunkMutation = useUploadConversationTextChunk();
 
   const [text, setText] = useState("");

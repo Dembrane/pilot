@@ -221,10 +221,13 @@ export const useInitiateConversationMutation = () => {
   });
 };
 
-export const useConversationById = (conversationId: string) => {
+export const useConversationById = (
+  conversationId: string,
+  loadChunks?: boolean,
+) => {
   return useQuery({
-    queryKey: ["conversation", conversationId],
-    queryFn: () => getConversationById(conversationId),
+    queryKey: ["conversation", loadChunks, conversationId],
+    queryFn: () => getConversationById(conversationId, loadChunks),
     refetchInterval: 10000,
   });
 };

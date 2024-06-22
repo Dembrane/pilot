@@ -1,3 +1,4 @@
+import { Markdown } from "@/components/Markdown";
 import { AspectCard } from "@/components/aspect/Aspect";
 import { Breadcrumbs } from "@/components/breadcrumbs/Breadcrumbs";
 import { Icons } from "@/icons";
@@ -41,7 +42,7 @@ export const ProjectLibraryView = () => {
       <Divider />
       <LoadingOverlay visible={view.isLoading} />
       <Title order={1}>{view.data?.name}</Title>
-      <Text>{view.data?.summary}</Text>
+      <Markdown content={view.data?.summary ?? ""} />
       <Paper p="md">
         <Stack>
           <Group c="gray">
@@ -53,7 +54,6 @@ export const ProjectLibraryView = () => {
             cols={{
               sm: 2,
               md: 3,
-              lg: 4,
             }}
             spacing="md"
           >

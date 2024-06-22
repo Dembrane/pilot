@@ -45,9 +45,12 @@ const theme = createTheme({
     },
     Paper: {
       defaultProps: {
-        rounded: "md",
-        shadow: "md",
+        // rounded: "xl",
         bg: "gray.0",
+        // withBorder: true,
+        classNames: {
+          root: "rounded-md border border-gray-100",
+        },
       },
     },
     Button: {
@@ -59,6 +62,12 @@ const theme = createTheme({
     Textarea: {
       defaultProps: {
         resize: "vertical",
+      },
+    },
+    Pill: {
+      defaultProps: {
+        bg: "primary.1",
+        color: "primary.8",
       },
     },
   },

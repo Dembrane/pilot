@@ -15,7 +15,10 @@ services:
       WEBSOCKETS_ENABLED: true
       MAX_PAYLOAD_SIZE: 100m
       DB_CLIENT: postgres
-      DB_CONNECTION_STRING: postgres://dembrane:dembrane@postgres:5432/dembrane
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: dembrane
+      DB_PASS: dembrane
 
   postgres:
     image: pgvector/pgvector:0.6.2-pg16

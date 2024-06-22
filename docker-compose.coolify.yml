@@ -19,6 +19,7 @@ services:
       DB_PORT: 5432
       DB_USER: dembrane
       DB_PASS: dembrane
+      DB_DATABASE: dembrane
 
   postgres:
     image: pgvector/pgvector:0.6.2-pg16

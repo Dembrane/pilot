@@ -8,8 +8,10 @@ logging.basicConfig(level=logging.INFO)
 
 BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 dotenv_path = os.path.join(BASE_DIR, ".env")
-logger.info(f"loading environment variables from {dotenv_path}")
-dotenv.load_dotenv(dotenv_path, verbose=True)
+
+if os.path.exists(dotenv_path):
+    logger.info(f"loading environment variables from {dotenv_path}")
+    dotenv.load_dotenv(dotenv_path, verbose=True)
 
 DEBUG_MODE = os.environ.get("DEBUG_MODE", "false").lower() in ["true", "1"]
 logger.info(f"DEBUG_MODE: {DEBUG_MODE}")

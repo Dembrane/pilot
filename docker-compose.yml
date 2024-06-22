@@ -69,7 +69,8 @@ services:
     env_file:
       - ./server/.env
     volumes:
-      - ./server:/code/server
+      - ./server/uploads:/code/server/uploads
+      - ./server/trankit_cache:/code/server/trankit_cache
     networks:
       - default
     depends_on:
@@ -91,7 +92,8 @@ services:
     env_file:
       - ./server/.env
     volumes:
-      - ./server:/code/server
+      - ./server/uploads:/code/server/uploads
+      - ./server/trankit_cache:/code/server/trankit_cache
     networks:
       - default
     depends_on:

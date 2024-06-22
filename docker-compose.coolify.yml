@@ -18,7 +18,7 @@ services:
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: dembrane
-      DB_PASS: dembrane
+      DB_PASSWORD: dembrane
       DB_DATABASE: dembrane
 
   postgres:

@@ -43,6 +43,7 @@ services:
       - ADMIN_BASE_URL=https://${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     env_file:
       - ./server/.env
     volumes:
@@ -66,6 +67,7 @@ services:
       - ADMIN_BASE_URL=https://${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     env_file:
       - ./server/.env
     volumes:

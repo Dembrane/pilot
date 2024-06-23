@@ -12,7 +12,7 @@ services:
       PORT: 8055
       SECRET: ${DIRECTUS_SECRET}
       ADMIN_EMAIL: admin@dembrane.com
-      ADMIN_PASSWORD: dembrane
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
       WEBSOCKETS_ENABLED: true
       DB_CLIENT: postgres
       DB_HOST: postgres

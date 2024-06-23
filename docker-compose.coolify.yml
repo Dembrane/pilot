@@ -116,6 +116,7 @@ services:
     labels:
       - caddy_0.basicauth.0_dembrane=${CADDY_HASHED_PASSWORD}
 
+
   participant-frontend:
     build:
       context: ./frontend

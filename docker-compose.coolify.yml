@@ -9,11 +9,11 @@ services:
   directus:
     image: directus/directus:10.12.1
     environment:
+      PORT: 8055
       SECRET: ${DIRECTUS_SECRET}
       ADMIN_EMAIL: admin@dembrane.com
       ADMIN_PASSWORD: dembrane
       WEBSOCKETS_ENABLED: true
-      MAX_PAYLOAD_SIZE: 100m
       DB_CLIENT: postgres
       DB_HOST: postgres
       DB_PORT: 5432

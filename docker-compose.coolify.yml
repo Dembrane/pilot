@@ -20,6 +20,7 @@ services:
       DB_USER: dembrane
       DB_PASSWORD: dembrane
       DB_DATABASE: dembrane
+      PUBLIC_URL: https://directus.test.findcommonground.app
 
   postgres:
     image: pgvector/pgvector:0.6.2-pg16

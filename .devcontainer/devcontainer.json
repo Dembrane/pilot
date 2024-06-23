@@ -41,8 +41,11 @@
     "8000": {
       "label": "backend"
     },
+    "8055": {
+      "label": "directus"
+    },
     "5432": {
-      "label": "pg"
+      "label": "postgres"
     }
   }
   // Configure tool-specific properties.

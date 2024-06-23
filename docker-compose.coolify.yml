@@ -1,33 +1,26 @@
 x-logging: &default-logging
   driver: "json-file"
   options:
-    # labels-regex: "^.+"
     max-size: "10m"
     max-file: "3"
     tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-  # driver: "journald"
-  # options:
-  #   tag: "{{.Name}}"
 
 services:
-  caddy:
-    image: caddy:2
-    restart: unless-stopped
-    cap_add:
-      - NET_ADMIN
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
+  directus:
+    image: directus/directus:10.12.1
     environment:
-      - API_BASE_URL=${API_BASE_URL}
-      - ADMIN_BASE_URL=${ADMIN_BASE_URL}
-      - PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
-      - GRAFANA_BASE_URL=${GRAFANA_BASE_URL}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./caddy_data:/data
-    logging: *default-logging
+      PORT: 8055
+      SECRET: ${DIRECTUS_SECRET}
+      ADMIN_EMAIL: admin@dembrane.com
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
+      WEBSOCKETS_ENABLED: true
+      DB_CLIENT: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: dembrane
+      DB_PASSWORD: dembrane
+      DB_DATABASE: dembrane
+      PUBLIC_URL: https://directus.test.findcommonground.app
 
   postgres:
     image: pgvector/pgvector:0.6.2-pg16
@@ -60,14 +53,18 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     command: /bin/sh /code/server/prod.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
     environment:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
-      - API_BASE_URL=https://${API_BASE_URL}
       - ADMIN_BASE_URL=https://${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
-      - DISABLE_REDACTION=1
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     env_file:
       - ./server/.env
     volumes:
@@ -88,11 +85,10 @@ services:
     environment:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
-      - API_BASE_URL=https://${API_BASE_URL}
       - ADMIN_BASE_URL=https://${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
-      - DISABLE_REDACTION=1
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     env_file:
       - ./server/.env
     volumes:
@@ -117,6 +113,9 @@ services:
     depends_on:
       - api-server
     logging: *default-logging
+    labels:
+      - caddy_0.basicauth.0_dembrane=${CADDY_HASHED_PASSWORD}
+
 
   participant-frontend:
     build:
@@ -170,14 +169,14 @@ services:
             url: http://loki:3100
         EOF
         /run.sh
-    ports:
-      - "3000:3000"
     networks:
       - default
     volumes:
       - grafana_data:/var/lib/grafana
     depends_on:
       - loki
+    labels:
+      - caddy_0.basicauth.0_dembrane=${CADDY_HASHED_PASSWORD}
 
 volumes:
   loki_data:

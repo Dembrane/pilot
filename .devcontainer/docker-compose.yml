@@ -10,6 +10,24 @@ services:
       POSTGRES_PASSWORD: dembrane
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+    
+  directus:
+    image: directus/directus:10.12
+    restart: unless-stopped
+    ports:
+      - 8055:8055
+    environment:
+      SECRET: really-secret-stuff-here
+      ADMIN_EMAIL: admin@example.com
+      ADMIN_PASSWORD: password
+      WEBSOCKETS_ENABLED: true
+      MAX_PAYLOAD_SIZE: 10m
+      DB_CLIENT: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: dembrane
+      DB_PASSWORD: dembrane
+      DB_DATABASE: dembrane
 
   rabbitmq:
     image: rabbitmq:3.13

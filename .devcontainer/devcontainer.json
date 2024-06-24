@@ -41,8 +41,11 @@
     "8000": {
       "label": "backend"
     },
-    "8080": {
-      "label": "pgadmin"
+    "8055": {
+      "label": "directus"
+    },
+    "5432": {
+      "label": "postgres"
     }
   }
   // Configure tool-specific properties.

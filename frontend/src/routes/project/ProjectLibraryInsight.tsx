@@ -14,9 +14,7 @@ import {
 import { IconArrowBack, IconChevronLeft } from "@tabler/icons-react";
 import { Link, useParams } from "react-router-dom";
 
-export const Quote = ({ data }: { data: TQuote }) => {
-  const conversationId = data.conversation_id;
-  const conversationQuery = useConversationById(conversationId);
+export const Quote = ({ data }: { data: Quote | TQuote }) => {
   const { projectId } = useParams();
 
   return (
@@ -24,11 +22,14 @@ export const Quote = ({ data }: { data: TQuote }) => {
       <Text size="sm" pb="xs">
         "{data.text}"
       </Text>
-      {conversationQuery.data && (
+      {data.conversation_id && (
         <Link
-          to={`/projects/${projectId}/conversation/${conversationId}/transcript`}
+          to={`/projects/${projectId}/conversation/${data.conversation_id}/transcript`}
         >
-          <Pill>{conversationQuery.data?.participant_name ?? ""}</Pill>
+          <Pill>
+            {((data as any).conversation_id as Conversation).participant_name ??
+              ""}
+          </Pill>
         </Link>
       )}
     </Paper>

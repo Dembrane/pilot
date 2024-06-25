@@ -16,7 +16,7 @@ export const AspectCard = ({
   data,
   className,
 }: {
-  data: TAspect;
+  data: Aspect;
   className?: string;
 }) => {
   const { projectId } = useParams();
@@ -72,7 +72,7 @@ export const AspectCard = ({
                   <Pill>
                     <Group>
                       <Text className="font-semibold">
-                        {data.quotes?.length ?? 0} Quotes
+                        {data.quotes_count} Quotes
                       </Text>
                     </Group>
                   </Pill>

@@ -139,7 +139,9 @@ class ProjectModel(Base):
     @staticmethod
     def belongs_to_session(project_id: str, session_id: int) -> bool:
         return (
-            db.query(ProjectModel).filter(ProjectModel.id == project_id, ProjectModel.session_id == session_id).first()
+            db.query(ProjectModel)
+            .filter(ProjectModel.id == project_id, ProjectModel.session_id == session_id)
+            .first()
             is not None
         )
 
@@ -153,20 +155,33 @@ class ProjectAnalysisRunModel(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    task_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-
     project_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("project.id"))
-    project: Mapped["ProjectModel"] = relationship("ProjectModel", back_populates="project_analysis_runs")
+    project: Mapped["ProjectModel"] = relationship(
+        "ProjectModel", back_populates="project_analysis_runs"
+    )
 
-    quotes: Mapped[List["QuoteModel"]] = relationship("QuoteModel", back_populates="project_analysis_run")
-    insights: Mapped[List["InsightModel"]] = relationship("InsightModel", back_populates="project_analysis_run")
-    aspects: Mapped[List["AspectModel"]] = relationship("AspectModel", back_populates="project_analysis_run")
-    views: Mapped[List["ViewModel"]] = relationship("ViewModel", back_populates="project_analysis_run")
+    quotes: Mapped[List["QuoteModel"]] = relationship(
+        "QuoteModel", back_populates="project_analysis_run"
+    )
+    insights: Mapped[List["InsightModel"]] = relationship(
+        "InsightModel", back_populates="project_analysis_run"
+    )
+    aspects: Mapped[List["AspectModel"]] = relationship(
+        "AspectModel", back_populates="project_analysis_run"
+    )
+    views: Mapped[List["ViewModel"]] = relationship(
+        "ViewModel", back_populates="project_analysis_run"
+    )
 
-    processing_status: Mapped[ProcessingStatusEnum] = mapped_column(String, default="PENDING")
+    processing_status: Mapped[ProcessingStatusEnum] = mapped_column(Text, default="PENDING")
+    processing_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    processing_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    processing_started_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
 
 conversation_project_tag_association_table = Table(
@@ -249,8 +264,12 @@ class ConversationModel(Base):
 
     processing_status: Mapped[ProcessingStatusEnum] = mapped_column(String, default="PENDING")
     processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    processing_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    processing_started_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     chunks: Mapped[List["ConversationChunkModel"]] = relationship(
         "ConversationChunkModel",
@@ -288,11 +307,11 @@ class ConversationChunkModel(Base):
     )
 
     conversation_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("conversation.id"))
-    conversation: Mapped["ConversationModel"] = relationship("ConversationModel", back_populates="chunks")
+    conversation: Mapped["ConversationModel"] = relationship(
+        "ConversationModel", back_populates="chunks"
+    )
 
     path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-
-    task_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     transcript: Mapped[str] = mapped_column(Text, nullable=True)
@@ -343,13 +362,17 @@ class QuoteModel(Base):
     )
 
     insight_id: Mapped[Optional[str]] = mapped_column(UUID(as_uuid=False), ForeignKey("insight.id"))
-    insight: Mapped[Optional["InsightModel"]] = relationship("InsightModel", back_populates="quotes")
+    insight: Mapped[Optional["InsightModel"]] = relationship(
+        "InsightModel", back_populates="quotes"
+    )
 
     aspects: Mapped[List["AspectModel"]] = relationship(
         "AspectModel", back_populates="quotes", secondary=quote_aspect_association_table
     )
     representative_aspects: Mapped[List["AspectModel"]] = relationship(
-        "AspectModel", back_populates="representative_quotes", secondary=representative_quote_aspect_association_table
+        "AspectModel",
+        back_populates="representative_quotes",
+        secondary=representative_quote_aspect_association_table,
     )
 
     project_analysis_run_id: Mapped[Optional[str]] = mapped_column(
@@ -381,6 +404,16 @@ class ViewModel(Base):
         ProjectAnalysisRunModel, back_populates="views"
     )
 
+    processing_status: Mapped[ProcessingStatusEnum] = mapped_column(Text, default="PENDING")
+    processing_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    processing_started_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
 
 class AspectModel(Base):
     __tablename__ = "aspect"
@@ -405,7 +438,9 @@ class AspectModel(Base):
     )
 
     representative_quotes: Mapped[List["QuoteModel"]] = relationship(
-        "QuoteModel", back_populates="representative_aspects", secondary=representative_quote_aspect_association_table
+        "QuoteModel",
+        back_populates="representative_aspects",
+        secondary=representative_quote_aspect_association_table,
     )
 
     centroid_embedding: Mapped[List[float]] = mapped_column(Vector(EMBEDDING_DIM), nullable=True)

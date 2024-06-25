@@ -1,6 +1,5 @@
 import { Breadcrumbs } from "@/components/breadcrumbs/Breadcrumbs";
 import { Icons } from "@/icons";
-import { useProjectViewById } from "@/lib/query";
 import {
   Divider,
   LoadingOverlay,
@@ -13,16 +12,18 @@ import {
 import { useParams } from "react-router-dom";
 import { Quote } from "./ProjectLibraryInsight";
 import { Markdown } from "@/components/Markdown";
+import { useAspectById } from "@/lib/query";
 
 export const ProjectLibraryAspect = () => {
   const { projectId, viewId, aspectId } = useParams();
 
-  const view = useProjectViewById(projectId ?? "", viewId ?? "");
-
-  const aspect = view.data?.aspects?.find((a) => a.id === aspectId);
+  const { data: aspect, isLoading } = useAspectById(
+    projectId ?? "",
+    aspectId ?? "",
+  );
 
   return (
-    <Stack className="py-6 px-4">
+    <Stack className="py-6 px-4 relative">
       <Breadcrumbs
         items={[
           {
@@ -43,9 +44,9 @@ export const ProjectLibraryAspect = () => {
         ]}
       />
       <Divider />
-      <LoadingOverlay visible={view.isLoading} />
 
-      <Stack gap="md">
+      <Stack gap="md" className="relative">
+        <LoadingOverlay visible={isLoading} />
         <img
           src={
             aspect?.image_url ??
@@ -67,7 +68,9 @@ export const ProjectLibraryAspect = () => {
 
       <Stack>
         <Title order={2}>Quotes</Title>
-        {aspect?.quotes?.map((quote) => <Quote key={quote.id} data={quote} />)}
+        {aspect?.quotes.map((quote: QuoteAspect) => (
+          <Quote key={quote.id} data={quote.quote_id as Quote} />
+        ))}
       </Stack>
     </Stack>
   );

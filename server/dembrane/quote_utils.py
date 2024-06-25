@@ -18,6 +18,7 @@ from langchain_experimental.text_splitter import SemanticChunker
 from dembrane.ner import anonymize_sentence
 from dembrane.utils import generate_uuid, get_utc_timestamp, download_image_and_get_public_url
 from dembrane.database import (
+    ProcessingStatusEnum,
     ViewModel,
     QuoteModel,
     AspectModel,
@@ -349,6 +350,9 @@ def initialize_view(
         id=generate_uuid(),
         project_analysis_run_id=project_analysis_run_id,
         name=user_input,
+        processing_status=ProcessingStatusEnum.PROCESSING,
+        processing_message="Generating aspects",
+        processing_started_at=get_utc_timestamp(),
     )
     db.add(view)
     db.commit()

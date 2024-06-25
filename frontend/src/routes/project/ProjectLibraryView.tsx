@@ -2,7 +2,7 @@ import { Markdown } from "@/components/Markdown";
 import { AspectCard } from "@/components/aspect/Aspect";
 import { Breadcrumbs } from "@/components/breadcrumbs/Breadcrumbs";
 import { Icons } from "@/icons";
-import { useProjectViewById } from "@/lib/query";
+import { useViewById } from "@/lib/query";
 import {
   Anchor,
   Box,
@@ -20,7 +20,7 @@ import { Link, useParams } from "react-router-dom";
 export const ProjectLibraryView = () => {
   const { projectId, viewId } = useParams();
 
-  const view = useProjectViewById(projectId ?? "", viewId ?? "");
+  const view = useViewById(projectId ?? "", viewId ?? "");
 
   return (
     <Stack className="py-6 px-4 min-h-dvh">
@@ -58,7 +58,7 @@ export const ProjectLibraryView = () => {
             }}
             spacing="md"
           >
-            {view.data?.aspects?.map((aspect) => (
+            {view.data?.aspects?.map((aspect: Aspect) => (
               <AspectCard
                 key={aspect.id}
                 data={aspect}

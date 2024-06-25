@@ -83,8 +83,8 @@ services:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
       - REDIS_URL=redis://redis:6379
-      - ADMIN_BASE_URL=https://${ADMIN_BASE_URL}
-      - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
+      - ADMIN_BASE_URL=${ADMIN_BASE_URL}
+      - PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - DISABLE_SENTRY=${DISABLE_SENTRY:-0}
@@ -112,8 +112,8 @@ services:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
       - REDIS_URL=redis://redis:6379
-      - ADMIN_BASE_URL=https://${ADMIN_BASE_URL}
-      - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
+      - ADMIN_BASE_URL=${ADMIN_BASE_URL}
+      - PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - DISABLE_SENTRY=${DISABLE_SENTRY:-0}
@@ -135,10 +135,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_BASE_URL=https://${API_BASE_URL}/api
-        - VITE_PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
+        - VITE_API_BASE_URL=${API_BASE_URL}/api
+        - VITE_PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
         - VITE_BUILD_VERSION=${BUILD_VERSION}
         - VITE_USE_PARTICIPANT_ROUTER=0
+        - VITE_DIRECTUS_PUBLIC_URL=${DIRECTUS_PUBLIC_URL}
     restart: unless-stopped
     depends_on:
       - api-server
@@ -151,10 +152,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_BASE_URL=https://${API_BASE_URL}/api
-        - VITE_PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
+        - VITE_API_BASE_URL=${API_BASE_URL}/api
+        - VITE_PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
         - VITE_BUILD_VERSION=${BUILD_VERSION}
         - VITE_USE_PARTICIPANT_ROUTER=1
+        - VITE_DIRECTUS_PUBLIC_URL=${DIRECTUS_PUBLIC_URL}
     restart: unless-stopped
     networks:
       - default

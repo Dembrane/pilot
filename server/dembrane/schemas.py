@@ -62,8 +62,6 @@ class ConversationChunkSchema(BaseModel):
     updated_at: datetime
     conversation_id: str
 
-    task_id: Optional[str] = None
-
     transcript: Optional[str] = None
     timestamp: datetime
 

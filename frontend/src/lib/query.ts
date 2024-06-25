@@ -17,7 +17,7 @@ import {
   getCurrentSession,
   getProjectById,
   getProjectInsights,
-  getProjectViewById,
+  getViewById,
   getProjectViews,
   getResourceById,
   getResourcesByProjectId,
@@ -33,6 +33,8 @@ import {
   uploadResourceByProjectId,
   getTaskById,
   generateProjectView,
+  getLatestProjectAnalysisRunByProjectId,
+  getAspectById,
 } from "./api";
 import { toast } from "@/components/Toaster";
 import { AxiosError } from "axios";
@@ -105,6 +107,7 @@ export const useProjectInsights = (projectId: string) => {
   return useQuery({
     queryKey: ["project", projectId, "insights"],
     queryFn: () => getProjectInsights(projectId),
+    refetchInterval: 10000,
   });
 };
 
@@ -112,13 +115,23 @@ export const useProjectViews = (projectId: string) => {
   return useQuery({
     queryKey: ["project", projectId, "views"],
     queryFn: () => getProjectViews(projectId),
+    refetchInterval: 10000,
   });
 };
 
-export const useProjectViewById = (projectId: string, viewId: string) => {
+export const useViewById = (projectId: string, viewId: string) => {
   return useQuery({
     queryKey: ["project", projectId, "views", viewId],
-    queryFn: () => getProjectViewById(projectId, viewId),
+    queryFn: () => getViewById(viewId),
+    refetchInterval: 10000,
+  });
+};
+
+export const useAspectById = (projectId: string, aspect_id: string) => {
+  return useQuery({
+    queryKey: ["project", projectId, "aspects", aspect_id],
+    queryFn: () => getAspectById(aspect_id),
+    refetchInterval: 10000,
   });
 };
 
@@ -493,10 +506,12 @@ export const useProjectTags = (projectId: string) => {
 };
 
 export const useGenerateProjectLibraryMutation = () => {
+  const client = useQueryClient();
   return useMutation({
     mutationFn: generateProjectLibrary,
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       toast.success("Analysis requested successfully");
+      client.invalidateQueries({ queryKey: ["project", variables.projectId] });
     },
   });
 };
@@ -514,6 +529,14 @@ export const useTaskStatus = (taskId: string) => {
   return useQuery({
     queryKey: ["task", taskId],
     queryFn: () => getTaskById(taskId),
+    refetchInterval: 10000,
+  });
+};
+
+export const useLatestProjectAnalysisRunByProjectId = (projectId: string) => {
+  return useQuery({
+    queryKey: ["project", projectId, "latest_analysis"],
+    queryFn: () => getLatestProjectAnalysisRunByProjectId(projectId),
     refetchInterval: 10000,
   });
 };

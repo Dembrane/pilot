@@ -32,7 +32,7 @@ export const ViewCard = ({ data }: { data: TView }) => {
   );
 };
 
-export const ViewExpandedCard = ({ data }: { data: TView }) => {
+export const ViewExpandedCard = ({ data }: { data: View }) => {
   const { projectId } = useParams();
 
   return (
@@ -50,6 +50,13 @@ export const ViewExpandedCard = ({ data }: { data: TView }) => {
             </ActionIcon>
           </Link>
         </Group>
+
+        {data.processing_status !== "DONE" && (
+          <Text className="text-gray-700 italic">
+            {data.processing_status}: {data.processing_message}
+          </Text>
+        )}
+
         <Text className="text-2xl font-semibold">{data.name}</Text>
         <Group>
           <Pill>

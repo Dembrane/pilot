@@ -5,6 +5,8 @@ import axios, {
   AxiosRequestConfig,
   CreateAxiosDefaults,
 } from "axios";
+import { directus } from "./directus";
+import { QueryAlias, readItem, readItems } from "@directus/sdk";
 
 export const apiCommonConfig: CreateAxiosDefaults = {
   baseURL: API_BASE_URL,
@@ -110,11 +112,64 @@ export const getProjectInsights = async (projectId: string) => {
 };
 
 export const getProjectViews = async (projectId: string) => {
-  return api.get<unknown, TView[]>(`/projects/${projectId}/views`);
+  const project_analysis_run =
+    await getLatestProjectAnalysisRunByProjectId(projectId);
+
+  if (!project_analysis_run) {
+    return [];
+  }
+
+  return directus.request<View[]>(
+    readItems("view", {
+      fields: ["*", { aspects: ["*", "count(quotes)"] }],
+      deep: {
+        aspects: {
+          _sort: "name",
+        } as any,
+      },
+      filter: {
+        project_analysis_run_id: project_analysis_run?.id,
+      },
+      sort: "-created_at",
+    }),
+  );
 };
 
-export const getProjectViewById = async (projectId: string, viewId: string) => {
-  return api.get<unknown, TView>(`/projects/${projectId}/views/${viewId}`);
+export const getViewById = async (viewId: string) => {
+  return directus.request<View>(
+    readItem("view", viewId, {
+      fields: ["*", { aspects: ["*", "count(quotes)"] }],
+      deep: {
+        aspects: {
+          _sort: "name",
+        } as any,
+      },
+    }),
+  );
+};
+
+export const getAspectById = async (aspectId: string) => {
+  return directus.request<Aspect>(
+    readItem("aspect", aspectId, {
+      fields: [
+        "*",
+        {
+          quotes: [
+            {
+              quote_id: [
+                "id",
+                "text",
+                "created_at",
+                {
+                  conversation_id: ["id", "participant_name", "created_at"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
 };
 
 export const getProjectTranscriptsLink = (projectId: string) =>
@@ -387,4 +442,23 @@ export const generateProjectView = async (payload: {
 
 export const getTaskById = async (taskId: string) => {
   return api.get<unknown, TTask>(`/tasks/${taskId}`);
+};
+
+export const getLatestProjectAnalysisRunByProjectId = async (
+  projectId: string,
+) => {
+  const data = await directus.request<ProjectAnalysisRun[]>(
+    readItems("project_analysis_run", {
+      filter: {
+        project_id: projectId,
+      },
+      sort: "-created_at",
+    }),
+  );
+
+  if (!data || data.length === 0) {
+    return null;
+  }
+
+  return data[0];
 };

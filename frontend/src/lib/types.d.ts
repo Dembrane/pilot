@@ -87,8 +87,6 @@ type TConversationChunk = {
 
   transcript?: string;
   timestamp: Date;
-
-  task_id?: string;
 };
 
 type TProject = {
@@ -105,6 +103,20 @@ type TProject = {
   default_conversation_context?: string;
   default_conversation_finish_text?: string;
   tags: TProjectTag[];
+};
+
+type TProjectAnalysisRun = {
+  id: string;
+  created_at: Date;
+  updated_at: Date;
+  project_id: string;
+  views: TView[];
+  aspects: TAspect[];
+  insights: TInsight[];
+  quotes: TQuote[];
+  processing_status?: TProcessingStatus;
+  processing_error?: string;
+  processing_started_at?: Date;
 };
 
 type TSession = {

@@ -7,7 +7,7 @@ from sentry_sdk import capture_exception
 from celery.utils.log import get_task_logger  # type: ignore
 
 import dembrane.tasks_config
-from dembrane.utils import generate_uuid
+from dembrane.utils import generate_uuid, get_utc_timestamp
 from dembrane.config import REDIS_URL, RABBITMQ_URL
 from dembrane.database import (
     AspectModel,
@@ -15,7 +15,9 @@ from dembrane.database import (
     DatabaseSession,
     ConversationModel,
     ConversationChunkModel,
+    ProcessingStatusEnum,
     ProjectAnalysisRunModel,
+    ViewModel,
 )
 from dembrane.transcribe import transcribe_conversation_chunk
 from dembrane.audio_utils import split_audio_chunk
@@ -336,7 +338,13 @@ def task_generate_aspect_extras(self, aspect_id: str):
 def task_generate_view_extras(self, view_id: str):
     with DatabaseSession() as db:
         try:
+            view = db.get(ViewModel, view_id)
+            view.processing_message = "Analysing aspects"
+            db.commit()
             generate_view_extras(db, view_id)
+            view.processing_status = ProcessingStatusEnum.DONE
+            view.processing_completed_at = get_utc_timestamp()
+            db.commit()
         except Exception as exc:
             logger.error(f"Error: {exc}")
             db.rollback()
@@ -384,7 +392,7 @@ def task_cluster_quotes_using_aspect_centroids(self, view_id: str):
     ignore_result=False,
     base=BaseTask,
 )
-def task_create_view(self, project_analysis_run_id: str, user_query: str, user_query_context: str):
+def task_create_view(_self, project_analysis_run_id: str, user_query: str, user_query_context: str):
     with DatabaseSession() as db:
         try:
             project_analysis_run = db.get(ProjectAnalysisRunModel, project_analysis_run_id)
@@ -396,7 +404,7 @@ def task_create_view(self, project_analysis_run_id: str, user_query: str, user_q
             # FIXME: update_progress(self, 1, 4, message="Creating view")
             # TODO: convert to task
             view = initialize_view(db, project_analysis_run_id, user_query, user_query_context)
-            view.task_id = self.request.id
+            view.processing_message = "Clustering aspects"
             db.commit()
 
             # update_progress(self, 2, 4, message="Clustering quotes")
@@ -426,41 +434,28 @@ def task_create_view(self, project_analysis_run_id: str, user_query: str, user_q
             raise
 
 
-@celery_app.task(
-    bind=True,
-    retry_backoff=True,
-    ignore_result=False,
-    base=BaseTask,
-)
-def task_generate_insights_and_initial_views(self, project_analysis_run_id: str):
-    insight_task = task_generate_insights.si(project_analysis_run_id)
+@celery_app.task(bind=True, retry_backoff=True, ignore_result=False, base=BaseTask)
+def task_finalize_project_library(_self, project_analysis_run_id: str):
+    with DatabaseSession() as db:
+        project_analysis_run = db.get(ProjectAnalysisRunModel, project_analysis_run_id)
+        project_analysis_run.processing_status = ProcessingStatusEnum.DONE
+        project_analysis_run.processing_message = "Project library created"
+        project_analysis_run.processing_completed_at = get_utc_timestamp()
+        db.commit()
 
-    sentiment_view = task_create_view.si(project_analysis_run_id, "Sentiment", "Use only 3")
-
-    theme_view = task_create_view.si(
-        project_analysis_run_id,
-        "Recurring Themes",
-        "I will use these to make a detailed report. Give me around 15-20 aspects.",
-    )
-
-    job = group(
-        insight_task,
-        sentiment_view,
-        theme_view,
-    )
-
-    result = job.apply_async()
-
-    return result
+        return
 
 
 @celery_app.task(bind=True, retry_backoff=True, ignore_result=False, base=BaseTask)
-def task_create_project_library(self, project_id: str):
+def task_create_project_library(_self, project_id: str):
     with DatabaseSession() as db:
         try:
             project_analysis_run = ProjectAnalysisRunModel(
                 id=generate_uuid(),
                 project_id=project_id,
+                processing_status=ProcessingStatusEnum.PROCESSING,
+                processing_message="Creating your project library",
+                processing_started_at=get_utc_timestamp(),
             )
 
             db.add(project_analysis_run)
@@ -469,6 +464,11 @@ def task_create_project_library(self, project_id: str):
             conversations = (
                 db.query(ConversationModel).filter(ConversationModel.project_id == project_id).all()
             )
+
+            project_analysis_run.processing_message = (
+                f"Gathering quotes from {len(conversations)} conversations"
+            )
+            db.commit()
 
             quote_s_list = []
 
@@ -483,7 +483,24 @@ def task_create_project_library(self, project_id: str):
                 logger.info(f"No conversations to process for project: {project_id}")
                 return
 
-            callback = task_generate_insights_and_initial_views.si(project_analysis_run.id)
+            insight_task = task_generate_insights.si(project_analysis_run.id)
+
+            sentiment_view = task_create_view.si(project_analysis_run.id, "Sentiment", "Use only 3")
+
+            theme_view = task_create_view.si(
+                project_analysis_run.id,
+                "Recurring Themes",
+                "I will use these to make a detailed report. Give me around 15-18 aspects or more if really necessary. Ensure to merge similar aspects.",
+            )
+
+            callback = chord(
+                group(
+                    insight_task,
+                    sentiment_view,
+                    theme_view,
+                ),
+                task_finalize_project_library.si(project_analysis_run.id),
+            )
 
             result = chord(g)(callback.on_error(log_error.s()))
 

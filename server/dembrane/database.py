@@ -13,7 +13,6 @@ from sqlalchemy import (
     Integer,
     DateTime as _DateTime,
     ForeignKey,
-    LargeBinary,
     TypeDecorator,
     func,
     create_engine,
@@ -28,8 +27,7 @@ from sqlalchemy.orm import (
     declarative_base,
 )
 from pgvector.sqlalchemy import Vector  # type: ignore
-from sqlalchemy.dialects import postgresql
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from sqlalchemy.dialects.postgresql import UUID
 
 from dembrane.config import DATABASE_URL
 from dembrane.embedding import EMBEDDING_DIM
@@ -48,20 +46,6 @@ DatabaseSession = Session
 
 # Define your models as subclasses of the base class
 Base: Any = declarative_base()
-
-chat_resource_association_table = Table(
-    "chat_resource_association",
-    Base.metadata,
-    Column("chat_id", ForeignKey("chat.id"), primary_key=True),
-    Column("resource_id", ForeignKey("document.id"), primary_key=True),
-)
-
-chat_conversation_association_table = Table(
-    "chat_conversation_association",
-    Base.metadata,
-    Column("chat_id", ForeignKey("chat.id"), primary_key=True),
-    Column("conversation_id", ForeignKey("conversation.id"), primary_key=True),
-)
 
 
 class DateTime(TypeDecorator[_DateTime]):
@@ -83,32 +67,6 @@ class DateTime(TypeDecorator[_DateTime]):
             return value.replace(tzinfo=timezone.utc)
 
         return value.astimezone(timezone.utc) if value else None
-
-
-class CeleryTaskSetMetaModel(Base):
-    __tablename__ = "celery_tasksetmeta"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    taskset_id: Mapped[str] = mapped_column(String(155), nullable=True, unique=True)
-    result: Mapped[bytes] = mapped_column(LargeBinary, nullable=True)
-    date_done: Mapped[datetime] = mapped_column(postgresql.TIMESTAMP(), nullable=True)
-
-
-class CeleryTaskMetaModel(Base):
-    __tablename__ = "celery_taskmeta"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    task_id: Mapped[str] = mapped_column(String(155), unique=True, nullable=True)
-    status: Mapped[str] = mapped_column(String(50), nullable=True)
-    result: Mapped[bytes] = mapped_column(LargeBinary, nullable=True)
-    date_done: Mapped[datetime] = mapped_column(postgresql.TIMESTAMP(), nullable=True)
-    traceback: Mapped[str] = mapped_column(Text, nullable=True)
-    name: Mapped[str] = mapped_column(String(155), nullable=True)
-    args: Mapped[bytes] = mapped_column(LargeBinary, nullable=True)
-    kwargs: Mapped[bytes] = mapped_column(LargeBinary, nullable=True)
-    worker: Mapped[str] = mapped_column(String(155), nullable=True)
-    retries: Mapped[int] = mapped_column(Integer, nullable=True)
-    queue: Mapped[str] = mapped_column(String(155), nullable=True)
 
 
 class ProcessingStatusEnum(Enum):
@@ -133,7 +91,9 @@ class SessionModel(Base):
 class ProjectModel(Base):
     __tablename__ = "project"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)
+    # id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, server_default=func.uuid_generate_v4())
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True)
+
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -150,12 +110,13 @@ class ProjectModel(Base):
     context: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     is_conversation_allowed: Mapped[bool] = mapped_column(Boolean, default=True)
+    image_generation_model: Mapped[str] = mapped_column(String, default="MODEST")
+
     default_conversation_title: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     default_conversation_description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     default_conversation_context: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     default_conversation_finish_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    chats: Mapped[List["ChatModel"]] = relationship("ChatModel", back_populates="project", cascade="all, delete-orphan")
     resources: Mapped[List["ResourceModel"]] = relationship(
         "ResourceModel", back_populates="project", cascade="all, delete-orphan"
     )
@@ -178,7 +139,9 @@ class ProjectModel(Base):
     @staticmethod
     def belongs_to_session(project_id: str, session_id: int) -> bool:
         return (
-            db.query(ProjectModel).filter(ProjectModel.id == project_id, ProjectModel.session_id == session_id).first()
+            db.query(ProjectModel)
+            .filter(ProjectModel.id == project_id, ProjectModel.session_id == session_id)
+            .first()
             is not None
         )
 
@@ -186,109 +149,69 @@ class ProjectModel(Base):
 class ProjectAnalysisRunModel(Base):
     __tablename__ = "project_analysis_run"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    project_id: Mapped[str] = mapped_column(String, ForeignKey("project.id"))
-    project: Mapped["ProjectModel"] = relationship("ProjectModel", back_populates="project_analysis_runs")
+    project_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("project.id"))
+    project: Mapped["ProjectModel"] = relationship(
+        "ProjectModel", back_populates="project_analysis_runs"
+    )
 
-    quotes: Mapped[List["QuoteModel"]] = relationship("QuoteModel", back_populates="project_analysis_run")
-    insights: Mapped[List["InsightModel"]] = relationship("InsightModel", back_populates="project_analysis_run")
+    quotes: Mapped[List["QuoteModel"]] = relationship(
+        "QuoteModel", back_populates="project_analysis_run"
+    )
+    insights: Mapped[List["InsightModel"]] = relationship(
+        "InsightModel", back_populates="project_analysis_run"
+    )
+    aspects: Mapped[List["AspectModel"]] = relationship(
+        "AspectModel", back_populates="project_analysis_run"
+    )
+    views: Mapped[List["ViewModel"]] = relationship(
+        "ViewModel", back_populates="project_analysis_run"
+    )
 
-    processing_status: Mapped[ProcessingStatusEnum] = mapped_column(String, default="PENDING")
+    processing_status: Mapped[ProcessingStatusEnum] = mapped_column(Text, default="PENDING")
+    processing_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    processing_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    processing_started_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
 
-project_conversation_tag_association_table = Table(
-    "project_conversation_tag_association",
+conversation_project_tag_association_table = Table(
+    "conversation_project_tag",
     Base.metadata,
-    Column("conversation_id", ForeignKey("conversation.id"), primary_key=True),
-    Column(
-        "project_tag",
-        ForeignKey("project_tag.id"),
-        primary_key=True,
-    ),
+    Column("id", Integer, autoincrement=True, primary_key=True, unique=True),
+    Column("conversation_id", ForeignKey("conversation.id")),
+    Column("project_tag_id", ForeignKey("project_tag.id")),
 )
 
 
 class ProjectTagModel(Base):
     __tablename__ = "project_tag"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    project_id: Mapped[str] = mapped_column(String, ForeignKey("project.id"))
+    project_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("project.id"))
     project: Mapped["ProjectModel"] = relationship("ProjectModel", back_populates="tags")
 
     conversations: Mapped[List["ConversationModel"]] = relationship(
         "ConversationModel",
-        secondary=project_conversation_tag_association_table,
+        secondary=conversation_project_tag_association_table,
         back_populates="tags",
     )
 
     text: Mapped[str] = mapped_column(String)
-
-
-class ChatModel(Base):
-    __tablename__ = "chat"
-
-    id: Mapped[str] = mapped_column(String, primary_key=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
-
-    project_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("project.id"), nullable=True)
-    project: Mapped[Optional["ProjectModel"]] = relationship("ProjectModel", back_populates="chats")
-
-    resources: Mapped[List["ResourceModel"]] = relationship(
-        "ResourceModel",
-        secondary=chat_resource_association_table,
-        back_populates="chats",
-    )
-    conversations: Mapped[List["ConversationModel"]] = relationship(
-        "ConversationModel",
-        secondary=chat_conversation_association_table,
-        back_populates="chats",
-    )
-
-    messages: Mapped[List["ChatMessageModel"]] = relationship("ChatMessageModel", back_populates="chat")
-
-    def get_lc_messages(self) -> List[AIMessage | HumanMessage | SystemMessage]:
-        return [message.get_lc_message() for message in self.messages]
-
-
-class ChatMessageRoleEnum(Enum):
-    USER = "user"
-    ASSISTANT = "assistant"
-
-
-class ChatMessageModel(Base):
-    __tablename__ = "chat_message"
-
-    id: Mapped[str] = mapped_column(String, primary_key=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    text: Mapped[str] = mapped_column(Text)
-    role: Mapped[ChatMessageRoleEnum] = mapped_column(String)
-
-    chat_id: Mapped[str] = mapped_column(String, ForeignKey("chat.id"))
-    chat: Mapped["ChatModel"] = relationship("ChatModel", back_populates="messages")
-
-    def get_lc_message(self) -> AIMessage | HumanMessage | SystemMessage:
-        if self.role == ChatMessageRoleEnum.USER:
-            return HumanMessage(content=self.text)
-        elif self.role == ChatMessageRoleEnum.ASSISTANT:
-            return AIMessage(content=self.text)
-        else:
-            raise ValueError(f"Invalid role: {self.role}")
 
 
 class ResourceTypeEnum(Enum):
@@ -298,13 +221,13 @@ class ResourceTypeEnum(Enum):
 class ResourceModel(Base):
     __tablename__ = "document"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    project_id: Mapped[str] = mapped_column(String, ForeignKey("project.id"))
+    project_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("project.id"))
     project: Mapped["ProjectModel"] = relationship("ProjectModel", back_populates="resources")
 
     original_filename: Mapped[str] = mapped_column(String, default="")
@@ -318,23 +241,17 @@ class ResourceModel(Base):
     is_processed: Mapped[bool] = mapped_column(Boolean, default=False)
     processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    chats: Mapped[List["ChatModel"]] = relationship(
-        "ChatModel",
-        secondary=chat_resource_association_table,
-        back_populates="resources",
-    )
-
 
 class ConversationModel(Base):
     __tablename__ = "conversation"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    project_id: Mapped[str] = mapped_column(String, ForeignKey("project.id"))
+    project_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("project.id"))
     project: Mapped["ProjectModel"] = relationship("ProjectModel", back_populates="conversations")
 
     participant_name: Mapped[str] = mapped_column(String, nullable=False, default="")
@@ -347,13 +264,11 @@ class ConversationModel(Base):
 
     processing_status: Mapped[ProcessingStatusEnum] = mapped_column(String, default="PENDING")
     processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    processing_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-
-    chats = relationship(
-        "ChatModel",
-        secondary=chat_conversation_association_table,
-        back_populates="conversations",
+    processing_started_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
     )
 
     chunks: Mapped[List["ConversationChunkModel"]] = relationship(
@@ -364,39 +279,39 @@ class ConversationModel(Base):
 
     tags: Mapped[List["ProjectTagModel"]] = relationship(
         "ProjectTagModel",
-        secondary=project_conversation_tag_association_table,
+        secondary=conversation_project_tag_association_table,
         back_populates="conversations",
     )
 
-    quotes: Mapped[List["QuoteModel"]] = relationship("QuoteModel", back_populates="conversation")
+    quotes: Mapped[List["QuoteModel"]] = relationship(
+        "QuoteModel", back_populates="conversation", cascade="all, delete-orphan"
+    )
 
 
 conversation_chunk_quote_association_table = Table(
-    "conversation_chunk_quote_association",
+    "quote_conversation_chunk",
     Base.metadata,
-    Column("conversation_chunk_id", ForeignKey("conversation_chunk.id"), primary_key=True),
-    Column("quote_id", ForeignKey("quote.id"), primary_key=True),
+    Column("id", Integer, autoincrement=True, primary_key=True, unique=True),
+    Column("conversation_chunk_id", ForeignKey("conversation_chunk.id")),
+    Column("quote_id", ForeignKey("quote.id")),
 )
 
 
 class ConversationChunkModel(Base):
     __tablename__ = "conversation_chunk"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    conversation_id: Mapped[str] = mapped_column(String, ForeignKey("conversation.id"))
-    conversation: Mapped["ConversationModel"] = relationship("ConversationModel", back_populates="chunks")
+    conversation_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("conversation.id"))
+    conversation: Mapped["ConversationModel"] = relationship(
+        "ConversationModel", back_populates="chunks"
+    )
 
     path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-
-    processing_status: Mapped[ProcessingStatusEnum] = mapped_column(String, default="PENDING")
-    processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    processing_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     transcript: Mapped[str] = mapped_column(Text, nullable=True)
@@ -408,10 +323,27 @@ class ConversationChunkModel(Base):
     )
 
 
+quote_aspect_association_table = Table(
+    "quote_aspect",
+    Base.metadata,
+    Column("id", Integer, autoincrement=True, primary_key=True, unique=True),
+    Column("quote_id", ForeignKey("quote.id"), primary_key=True),
+    Column("aspect_id", ForeignKey("aspect.id"), primary_key=True),
+)
+
+representative_quote_aspect_association_table = Table(
+    "quote_aspect_1",
+    Base.metadata,
+    Column("id", Integer, autoincrement=True, primary_key=True, unique=True),
+    Column("quote_id", ForeignKey("quote.id"), primary_key=True),
+    Column("aspect_id", ForeignKey("aspect.id"), primary_key=True),
+)
+
+
 class QuoteModel(Base):
     __tablename__ = "quote"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -420,7 +352,7 @@ class QuoteModel(Base):
     text: Mapped[str] = mapped_column(Text)
     embedding: Mapped[List[float]] = mapped_column(Vector(EMBEDDING_DIM))
 
-    conversation_id: Mapped[str] = mapped_column(String, ForeignKey("conversation.id"))
+    conversation_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("conversation.id"))
     conversation: Mapped["ConversationModel"] = relationship("ConversationModel")
 
     conversation_chunks: Mapped[List["ConversationChunkModel"]] = relationship(
@@ -429,30 +361,116 @@ class QuoteModel(Base):
         back_populates="quotes",
     )
 
-    insight_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("insight.id"))
-    insight: Mapped[Optional["InsightModel"]] = relationship("InsightModel", back_populates="quotes")
+    insight_id: Mapped[Optional[str]] = mapped_column(UUID(as_uuid=False), ForeignKey("insight.id"))
+    insight: Mapped[Optional["InsightModel"]] = relationship(
+        "InsightModel", back_populates="quotes"
+    )
 
-    project_analysis_run_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("project_analysis_run.id"))
+    aspects: Mapped[List["AspectModel"]] = relationship(
+        "AspectModel", back_populates="quotes", secondary=quote_aspect_association_table
+    )
+    representative_aspects: Mapped[List["AspectModel"]] = relationship(
+        "AspectModel",
+        back_populates="representative_quotes",
+        secondary=representative_quote_aspect_association_table,
+    )
+
+    project_analysis_run_id: Mapped[Optional[str]] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("project_analysis_run.id")
+    )
     project_analysis_run: Mapped[Optional["ProjectAnalysisRunModel"]] = relationship(
         ProjectAnalysisRunModel, back_populates="quotes"
     )
 
 
-class InsightModel(Base):
-    __tablename__ = "insight"
+class ViewModel(Base):
+    __tablename__ = "view"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    title: Mapped[str] = mapped_column(Text)
+    name: Mapped[str] = mapped_column(String)
+    summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    aspects: Mapped[List["AspectModel"]] = relationship("AspectModel", back_populates="view")
+
+    project_analysis_run_id: Mapped[Optional[str]] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("project_analysis_run.id")
+    )
+    project_analysis_run: Mapped[Optional["ProjectAnalysisRunModel"]] = relationship(
+        ProjectAnalysisRunModel, back_populates="views"
+    )
+
+    processing_status: Mapped[ProcessingStatusEnum] = mapped_column(Text, default="PENDING")
+    processing_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    processing_started_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+
+class AspectModel(Base):
+    __tablename__ = "aspect"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    name: Mapped[str] = mapped_column(String)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    image_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    short_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    long_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    view_id: Mapped[Optional[str]] = mapped_column(UUID(as_uuid=False), ForeignKey("view.id"))
+    view: Mapped[Optional["ViewModel"]] = relationship("ViewModel", back_populates="aspects")
+
+    quotes: Mapped[List["QuoteModel"]] = relationship(
+        "QuoteModel", back_populates="aspects", secondary=quote_aspect_association_table
+    )
+
+    representative_quotes: Mapped[List["QuoteModel"]] = relationship(
+        "QuoteModel",
+        back_populates="representative_aspects",
+        secondary=representative_quote_aspect_association_table,
+    )
+
+    centroid_embedding: Mapped[List[float]] = mapped_column(Vector(EMBEDDING_DIM), nullable=True)
+
+    project_analysis_run_id: Mapped[Optional[str]] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("project_analysis_run.id")
+    )
+    project_analysis_run: Mapped[Optional["ProjectAnalysisRunModel"]] = relationship(
+        ProjectAnalysisRunModel, back_populates="aspects"
+    )
+
+
+## Depracated
+class InsightModel(Base):
+    __tablename__ = "insight"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    title: Mapped[Optional[str]] = mapped_column(Text, nullable=False)
     summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     quotes: Mapped[List["QuoteModel"]] = relationship("QuoteModel", back_populates="insight")
 
-    project_analysis_run_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("project_analysis_run.id"))
+    project_analysis_run_id: Mapped[Optional[str]] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("project_analysis_run.id")
+    )
     project_analysis_run: Mapped[Optional["ProjectAnalysisRunModel"]] = relationship(
         ProjectAnalysisRunModel, back_populates="insights"
     )

@@ -1,34 +1,38 @@
 #!/bin/bash
 
-curl -sSf https://rye-up.com/get | RYE_INSTALL_OPTION="--yes" bash
-echo 'source "$HOME/.rye/env"' >> ~/.bashrc
+frontend_setup () {
+  curl -fsSL https://fnm.vercel.app/install | bash
+  echo 'eval "$(fnm env --use-on-cd)"' >> ~/.bashrc
+  FNM_PATH="/root/.local/share/fnm"
+  if [ -d "$FNM_PATH" ]; then
+    export PATH="$FNM_PATH:$PATH"
+    eval "`fnm env`"
+  fi  
+  fnm install 18
+  npm i -g yarn
 
-curl -fsSL https://fnm.vercel.app/install | bash
-echo 'eval "$(fnm env --use-on-cd)"' >> ~/.bashrc
-
-. ~/.bashrc
-
-fnm completions --shell bash
-fnm install 18
-npm i -g yarn
-
-# Parallel installation for frontend and server dependencies
-(
   cd frontend
   yarn install
-) &
-frontend_pid=$!
+}
 
-(
+server_setup() {
+  curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION="--yes" bash
+  echo 'source "$HOME/.rye/env"' >> ~/.bashrc
+  . $HOME/.rye/env
   cd server
   rye sync
   alembic upgrade head
   pip install mypy
-) &
-server_pid=$!
+}
 
-# Wait for the parallel tasks to complete
-wait $frontend_pid
-wait $server_pid
+# hide stdout, only show stderr
+frontend_setup &
+first=$!
+
+server_setup &
+second=$!
+
+wait $first
+wait $second
 
 echo "Setup complete"

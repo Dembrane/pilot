@@ -55,6 +55,30 @@ type TInsight = {
   quotes: TQuote[];
 };
 
+type TAspect = {
+  id: string;
+  created_at: Date;
+  updated_at: Date;
+  project_analysis_run_id: string;
+  name: string;
+  description?: string;
+  short_summary?: string;
+  long_summary?: string;
+  image_url?: string;
+  view_id?: string;
+  quotes?: TQuote[];
+};
+
+type TView = {
+  id: string;
+  created_at: Date;
+  updated_at: Date;
+  project_analysis_run_id: string;
+  name: string;
+  summary?: string;
+  aspects?: TAspect[];
+};
+
 type TConversationChunk = {
   id: string;
   created_at: Date;
@@ -63,11 +87,6 @@ type TConversationChunk = {
 
   transcript?: string;
   timestamp: Date;
-
-  processing_status?: TProcessingStatus;
-  processing_error?: string;
-  processing_started_at?: Date;
-  processing_completed_at?: Date;
 };
 
 type TProject = {
@@ -86,8 +105,51 @@ type TProject = {
   tags: TProjectTag[];
 };
 
+type TProjectAnalysisRun = {
+  id: string;
+  created_at: Date;
+  updated_at: Date;
+  project_id: string;
+  views: TView[];
+  aspects: TAspect[];
+  insights: TInsight[];
+  quotes: TQuote[];
+  processing_status?: TProcessingStatus;
+  processing_error?: string;
+  processing_started_at?: Date;
+};
+
 type TSession = {
   id: number;
   created_at: Date;
   updated_at: Date;
 };
+
+type TTaskState =
+  | "PENDING"
+  | "STARTED"
+  | "PROGRESS"
+  | "SUCCESS"
+  | "FAILURE"
+  | "RETRY"
+  | "REVOKED"
+  | "IGNORED";
+
+type TTaskProgressMeta = {
+  current: number;
+  total: number;
+  percent: number;
+  message?: string;
+};
+
+type TTask =
+  | {
+      id: string;
+      state: TTaskState;
+      meta: any;
+    }
+  | {
+      id: string;
+      state: "PROGRESS";
+      meta: TTaskProgressMeta;
+    };

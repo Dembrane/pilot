@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM python:3.11 AS base
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -21,6 +21,8 @@ RUN \
 
 COPY requirements.lock /code/server/requirements.lock
 RUN pip install --no-cache-dir -r requirements.lock
+
+FROM base
 
 COPY ./ /code/server
 

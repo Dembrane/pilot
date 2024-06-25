@@ -63,9 +63,11 @@ services:
     environment:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
+      - API_BASE_URL=https://${API_BASE_URL}
       - ADMIN_BASE_URL=https://${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
+      - DISABLE_REDACTION=1
     env_file:
       - ./server/.env
     volumes:
@@ -86,9 +88,11 @@ services:
     environment:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
+      - API_BASE_URL=https://${API_BASE_URL}
       - ADMIN_BASE_URL=https://${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
+      - DISABLE_REDACTION=1
     env_file:
       - ./server/.env
     volumes:

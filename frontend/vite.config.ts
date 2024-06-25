@@ -46,6 +46,15 @@ export default defineConfig({
           return path;
         },
       },
+      "/directus": {
+        target: "http://localhost:8055",
+        changeOrigin: true,
+        rewrite: (path) => {
+          const newPath = path.replace(/^\/directus/, "/");
+          console.log("Proxying request to", newPath);
+          return newPath;
+        },
+      },
     },
   },
 });

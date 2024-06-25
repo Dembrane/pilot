@@ -4,6 +4,9 @@ export const PARTICIPANT_BASE_URL =
   import.meta.env.VITE_PARTICIPANT_BASE_URL ?? window.location.origin;
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
+export const DIRECTUS_PUBLIC_URL =
+  import.meta.env.VITE_DIRECTUS_PUBLIC_URL ?? "/directus";
+
 export const DISABLE_SENTRY = import.meta.env.VITE_DISABLE_SENTRY === "1";
 
 export const ENABLE_EXPERIMENTAL_FEATURES =

@@ -8,7 +8,7 @@ dependencies = [
     "fastapi==0.109.*",
     "uvicorn[standard]==0.27.*",
     "python-multipart==0.0.*",
-    "celery==5.4.*",
+    "celery[redis]>=5.4.0",
     # Langchain
     "langchain==0.1.*",
     "langchain-community==0.0.*",
@@ -40,7 +40,10 @@ dependencies = [
     "ruff",
     "isort",
     "pandas-stubs>=2.2.2.240514",
+    "trankit @ git+https://github.com/nlp-uoregon/trankit",
     "ffmpeg-python>=0.2.0",
+    "types-requests>=2.32.0.20240602",
+    "flower>=2.0.1",
 ]
 
 [tool.setuptools]
@@ -69,6 +72,10 @@ check_untyped_defs = true
 no_implicit_reexport = true
 disallow_untyped_defs = true
 
+[[tool.mypy.overrides]]
+follow_imports = "skip"
+module = ["trankit.*"]
+
 [tool.pydantic-mypy]
 init_forbid_extra = true
 init_typed = true
@@ -76,7 +83,7 @@ warn_required_dynamic_aliases = true
 warn_untyped_fields = true
 
 [tool.ruff]
-line-length = 120
+line-length = 100
 output-format = "grouped"
 target-version = "py311"
 select = []
@@ -138,8 +145,8 @@ select = [
     # unused arguments
     "ARG",
     # print statements
-    "T201",
-    "T203",
+    # "T201",
+    # "T203",
     # misuse of typing.TYPE_CHECKING
     "TCH004",
     # import rules

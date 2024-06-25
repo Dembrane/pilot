@@ -5,10 +5,10 @@ from datetime import datetime
 
 from fastapi import Form, Request, APIRouter, UploadFile
 from pydantic import BaseModel
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import noload, selectinload
 from fastapi.responses import StreamingResponse
 
-from dembrane.tasks import process_conversation_chunk
+from dembrane.tasks import task_process_conversation_chunk
 from dembrane.utils import generate_uuid
 from dembrane.config import AUDIO_CHUNKS_DIR
 from dembrane.schemas import (
@@ -51,9 +51,11 @@ async def get_conversation(
             .first()
         )
     else:
+        logger.info(f"Loading conversation without chunks: {conversation_id}")
         conversation = (
             db.query(ConversationModel)
             .options(
+                noload(ConversationModel.chunks),
                 selectinload(ConversationModel.tags),
             )
             .filter(
@@ -292,7 +294,7 @@ async def upload_conversation_chunk(
     db.commit()
 
     logger.info(f"Add to processing queue: ConversationChunk@{chunk.id}")
-    process_conversation_chunk.delay(chunk.id)
+    task_process_conversation_chunk.delay(chunk.id)
 
     return [chunk]
 

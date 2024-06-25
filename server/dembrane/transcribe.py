@@ -1,8 +1,10 @@
+import os
 import logging
 from typing import Optional
 
-import backoff
 from openai import OpenAI
+
+from dembrane.database import DatabaseSession, ConversationModel, ConversationChunkModel
 
 openai_client = OpenAI()
 
@@ -13,7 +15,6 @@ class TranscriptionError(Exception):
     pass
 
 
-@backoff.on_exception(backoff.expo, (Exception), max_tries=5)
 def transcribe_audio(audio_file_path: str, language: Optional[str], whisper_prompt: Optional[str]) -> str:
     try:
         f = open(audio_file_path, "rb")
@@ -43,3 +44,49 @@ def transcribe_audio(audio_file_path: str, language: Optional[str], whisper_prom
             logger.info("Transcription is empty!")
 
     return str(transcription)
+
+
+DEFAULT_WHISPER_PROMPTS = {
+    "en": "Hi, lets get started. First we'll have a round of introductions and then we can get into the topic for today.",
+    "nl": "Hallo, laten we beginnen. Eerst even een introductieronde en dan kunnen we aan de slag met de thema van vandaag.",
+}
+
+
+def transcribe_conversation_chunk(conversation_chunk_id: str) -> None:
+    """Process conversation chunk for transcription"""
+    with DatabaseSession() as db:
+        try:
+            chunk = db.get(ConversationChunkModel, conversation_chunk_id)
+
+            if chunk is None:
+                return
+
+            if not chunk.path:
+                logger.info(f"Chunk {conversation_chunk_id} has no path")
+                return
+
+            if not os.path.exists(chunk.path):
+                raise FileNotFoundError(f"File not found: {chunk.path}")
+
+            # fetch conversation details
+            conversation = db.query(ConversationModel).filter(ConversationModel.id == chunk.conversation_id).first()
+            if conversation is None:
+                raise ValueError("Conversation not found")
+
+            project = conversation.project
+            language = project.language or "en"
+            default_prompt = DEFAULT_WHISPER_PROMPTS.get(language, "")
+            whisper_prompt = default_prompt + " " + (conversation.context if conversation.context else "")
+
+            transcription = transcribe_audio(chunk.path, language=language, whisper_prompt=whisper_prompt)
+
+            chunk.transcript = transcription
+            db.commit()
+
+            logger.debug(f"Processed chunk: {conversation_chunk_id}")
+            return
+
+        except Exception as exc:
+            logger.error(f"Unexpected error: {exc}")
+            db.rollback()
+            raise exc

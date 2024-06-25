@@ -6,7 +6,7 @@ import {
   useConversationsByProjectId,
   useDeleteProjectByIdMutation,
   useProjectById,
-  useRequestProjectAnalysisMutation,
+  useGenerateProjectLibraryMutation,
   useResourcesByProjectId,
   useUpdateProjectByIdMutation,
 } from "@/lib/query";
@@ -273,7 +273,7 @@ export const ProjectOverviewRoute = () => {
   const resourcesQuery = useResourcesByProjectId(projectId ?? "");
   const conversationsQuery = useConversationsByProjectId(projectId ?? "");
   const updateProjectMutation = useUpdateProjectByIdMutation();
-  const requestProjectAnalysisMutation = useRequestProjectAnalysisMutation();
+  const requestProjectAnalysisMutation = useGenerateProjectLibraryMutation();
 
   const [language, setLanguage] = useSessionStorageState<string>(
     `settings/${projectId}/sharingLanguage`,

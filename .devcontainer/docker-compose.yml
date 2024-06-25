@@ -1,4 +1,11 @@
 services:
+  redis:
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - ./redis_data:/bitnami/redis/data
+  
   postgres:
     image: pgvector/pgvector:0.6.2-pg16
     restart: unless-stopped
@@ -10,24 +17,6 @@ services:
       POSTGRES_PASSWORD: dembrane
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
-    
-  directus:
-    image: directus/directus:10.12
-    restart: unless-stopped
-    ports:
-      - 8055:8055
-    environment:
-      SECRET: really-secret-stuff-here
-      ADMIN_EMAIL: admin@example.com
-      ADMIN_PASSWORD: password
-      WEBSOCKETS_ENABLED: true
-      MAX_PAYLOAD_SIZE: 10m
-      DB_CLIENT: postgres
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: dembrane
-      DB_PASSWORD: dembrane
-      DB_DATABASE: dembrane
 
   rabbitmq:
     image: rabbitmq:3.13
@@ -37,14 +26,46 @@ services:
       - RABBITMQ_DEFAULT_PASS=dembrane
     volumes:
       - ./rabbitmq_data:/var/lib/rabbitmq
-
+  
+  directus:
+      image: directus/directus:10.12.1
+      ports:
+        - 8055:8055
+      environment:
+        PORT: 8055
+        SECRET: 134985uy13nfalksjdjhfalskdjf
+        ADMIN_EMAIL: admin@dembrane.com
+        ADMIN_PASSWORD: admin
+        WEBSOCKETS_ENABLED: true
+        DB_CLIENT: postgres
+        DB_HOST: postgres
+        DB_PORT: 5432
+        DB_USER: dembrane
+        DB_PASSWORD: dembrane
+        DB_DATABASE: dembrane
+        TELEMETRY: false
+        REDIS_ENABLED: true
+        REDIS: redis://redis:6379
+        CORS_ENABLED: true
+        CORS_ORIGIN: "*"
+      
+      volumes:
+        - ../directus/migrations:/directus/migrations
+        - ../directus/extensions:/directus/extensions
+        - ../directus/uploads:/directus/uploads
+      depends_on: 
+        - postgres
+        - redis
+      
   devcontainer:
     build:
       context: ../server
       dockerfile: Dockerfile
+      target: base
     environment:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
+      - REDIS_URL=redis://redis:6379
     volumes:
       - ../..:/workspaces:cached
     network_mode: service:postgres
@@ -52,3 +73,4 @@ services:
     depends_on:
       - rabbitmq
       - postgres
+      - redis

@@ -88,8 +88,14 @@ def convert_mp4_to_mp3(input_file_path: str, output_file_path: str) -> bool:
 MAX_CHUNK_SIZE = 10 * 1024 * 1024  # 20MB
 
 
-def split_audio_chunk(db: Session, original_chunk: ConversationChunkModel) -> List[ConversationChunkModel]:
+def split_audio_chunk(db: Session, original_chunk_id: str) -> List[ConversationChunkModel]:
     logger = logging.getLogger("audio_utils.pre_process_audio")
+
+    original_chunk = db.get(ConversationChunkModel, original_chunk_id)
+
+    if original_chunk is None:
+        logger.error(f"Chunk not found: {original_chunk_id}")
+        raise ValueError(f"Chunk not found: {original_chunk_id}")
 
     logger.debug(f"Splitting audio chunk: {original_chunk.id}")
     if original_chunk.path is None:

@@ -4,7 +4,7 @@ import { useConversationById, useConversationChunks } from "@/lib/query";
 import {
   ActionIcon,
   Group,
-  LoadingOverlay,
+  // LoadingOverlay,
   Text,
   Stack,
   Tooltip,
@@ -44,13 +44,13 @@ const Chunk = ({ chunk }: { chunk: TConversationChunk }) => {
         </>
       }
     >
-      {chunk.processing_error ? (
+      {/* {chunk.processing_error ? (
         <p className="text-red-500">Transcription error</p>
       ) : chunk.processing_status === "PROCESSING" ? (
         <LoadingOverlay visible />
-      ) : (
-        <Text>{chunk.transcript}</Text>
-      )}
+      ) : ( */}
+      <Text>{chunk.transcript ?? ""}</Text>
+      {/* )} */}
     </BaseMessage>
   );
 };

@@ -225,6 +225,18 @@
     "@babel/helper-validator-identifier" "^7.22.20"
     to-fast-properties "^2.0.0"
 
+"@directus/sdk@^16.1.0":
+  version "16.1.0"
+  resolved "https://registry.yarnpkg.com/@directus/sdk/-/sdk-16.1.0.tgz#f38b827886d50f176225fe6f7dfdcbb7e82ad5be"
+  integrity sha512-vqgG2Fn2uVAZkKz8UdXIrWd0GH+cYGsDUH0ojsGgjmUlaS1Ef5L89ZV4jynILPE+/+PPrNQsZHjHSkVoqFyFoQ==
+  dependencies:
+    "@directus/system-data" "1.0.4"
+
+"@directus/system-data@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@directus/system-data/-/system-data-1.0.4.tgz#49d07c3a5f0885ed3a59a4ccd714950ab83392da"
+  integrity sha512-9qDfL/fSy1K01SMMXc7XiTbfAqA/1G9RBEO3nafHDN6SKJfE15YRlnELQA0LeWDKKiyIlWtKzpUBLrq7r6sN2Q==
+
 "@esbuild/aix-ppc64@0.19.12":
   version "0.19.12"
   resolved "https://registry.yarnpkg.com/@esbuild/aix-ppc64/-/aix-ppc64-0.19.12.tgz#d1bc06aedb6936b3b6d313bf809a5a40387d2b7f"

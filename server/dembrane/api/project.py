@@ -10,23 +10,33 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session, selectinload
 from fastapi.responses import StreamingResponse
 
-from dembrane.tasks import process_project
-from dembrane.utils import generate_uuid, get_safe_filename, generate_4_digit_pin, generate_6_digit_pin
+from dembrane.tasks import task_create_view, task_create_project_library
+from dembrane.utils import (
+    generate_uuid,
+    get_safe_filename,
+    generate_4_digit_pin,
+    generate_6_digit_pin,
+)
 from dembrane.config import AUDIO_CHUNKS_DIR, RESOURCE_UPLOADS_DIR
 from dembrane.schemas import (
     TaskSchema,
+    ViewSchema,
     InsightSchema,
     ProjectSchema,
     ResourceSchema,
     ProjectTagSchema,
     ConversationSchema,
 )
+from dembrane.api.task import get_task_status
 from dembrane.database import (
+    ViewModel,
+    AspectModel,
     InsightModel,
     ProjectModel,
     ResourceModel,
     ProjectTagModel,
     ConversationModel,
+    ProcessingStatusEnum,
     ProjectAnalysisRunModel,
     DependencyInjectDatabase,
 )
@@ -54,7 +64,9 @@ ProjectRouter = APIRouter(tags=["project"])
 
 
 @ProjectRouter.get("", response_model=List[ProjectSchema])
-async def get_all_projects(session: DependencyRequireSession, db: DependencyInjectDatabase) -> List[ProjectModel]:
+async def get_all_projects(
+    session: DependencyRequireSession, db: DependencyInjectDatabase
+) -> List[ProjectModel]:
     projects = (
         db.query(ProjectModel)
         .options(selectinload(ProjectModel.tags))
@@ -198,9 +210,13 @@ async def get_project_transcripts(
     if not conversations:
         raise HTTPException(status_code=404, detail="No conversations found for this project")
 
-    conversations = [c for c in conversations if c.chunks and any(ch.transcript is not None for ch in c.chunks)]
+    conversations = [
+        c for c in conversations if c.chunks and any(ch.transcript is not None for ch in c.chunks)
+    ]
 
-    filename_futures = [generate_transcript_file(conversation.id, db) for conversation in conversations]
+    filename_futures = [
+        generate_transcript_file(conversation.id, db) for conversation in conversations
+    ]
     filenames = await asyncio.gather(*filename_futures)
 
     filenames = [filename for filename in filenames if filename]
@@ -257,7 +273,9 @@ async def delete_project(
     project_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> ProjectModel:
     project = (
-        db.query(ProjectModel).filter(ProjectModel.id == project_id, ProjectModel.session_id == session.id).first()
+        db.query(ProjectModel)
+        .filter(ProjectModel.id == project_id, ProjectModel.session_id == session.id)
+        .first()
     )
     if not project:
         raise ProjectNotFoundException
@@ -333,7 +351,9 @@ async def initiate_conversation(
                 conversation.participant_email = body.email
 
             if body.tag_id_list is not None and len(body.tag_id_list) > 0:
-                tags = db.query(ProjectTagModel).filter(ProjectTagModel.id.in_(body.tag_id_list)).all()
+                tags = (
+                    db.query(ProjectTagModel).filter(ProjectTagModel.id.in_(body.tag_id_list)).all()
+                )
                 conversation.tags = tags
 
             db.commit()
@@ -361,7 +381,9 @@ async def initiate_conversation(
     return new_conversation
 
 
-@ProjectRouter.get("/{project_id}/resources", response_model=List[ResourceSchema], tags=["resource"])
+@ProjectRouter.get(
+    "/{project_id}/resources", response_model=List[ResourceSchema], tags=["resource"]
+)
 async def get_all_resources_for_project(
     project_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
 ) -> List[ResourceModel]:
@@ -478,7 +500,9 @@ async def update_project_tag(
         raise ProjectNotFoundException
 
     tag = (
-        db.query(ProjectTagModel).filter(ProjectTagModel.project_id == project_id, ProjectTagModel.id == tag_id).first()
+        db.query(ProjectTagModel)
+        .filter(ProjectTagModel.project_id == project_id, ProjectTagModel.id == tag_id)
+        .first()
     )
 
     if not tag:
@@ -502,7 +526,9 @@ async def delete_project_tag(
         raise ProjectNotFoundException
 
     tag = (
-        db.query(ProjectTagModel).filter(ProjectTagModel.project_id == project_id, ProjectTagModel.id == tag_id).first()
+        db.query(ProjectTagModel)
+        .filter(ProjectTagModel.project_id == project_id, ProjectTagModel.id == tag_id)
+        .first()
     )
 
     if not tag:
@@ -514,39 +540,76 @@ async def delete_project_tag(
     return tag
 
 
-@ProjectRouter.post(
-    "/{project_id}/request-analysis",
-    response_model=TaskSchema,
-    status_code=HTTPStatus.ACCEPTED,
-)
-async def request_project_analysis(
-    project_id: str,
-    _session: DependencyRequireSession,
-    db: DependencyInjectDatabase,
-) -> TaskSchema:
-    project = await get_project(
-        db=db,
-        project_id=project_id,
-    )
-
-    task = process_project.si(project.id).delay()
-
-    logger.info(f"Task {task.id} created for project {project.id}")
-
-    # TODO: add a result backend and task ID checks
-    return TaskSchema(
-        id=task.id,
-        status="PENDING",
-    )
-
-
-def get_latest_project_analysis_run(db: DependencyInjectDatabase, project_id: str) -> Optional[ProjectAnalysisRunModel]:
+def get_latest_project_analysis_run(
+    db: DependencyInjectDatabase, project_id: str
+) -> Optional[ProjectAnalysisRunModel]:
     return (
         db.query(ProjectAnalysisRunModel)
         .filter(ProjectAnalysisRunModel.project_id == project_id)
         .order_by(ProjectAnalysisRunModel.created_at.desc())
         .first()
     )
+
+
+@ProjectRouter.post(
+    "/{project_id}/create-library",
+    status_code=HTTPStatus.ACCEPTED,
+)
+async def post_create_project_library(
+    project_id: str,
+    _session: DependencyRequireSession,
+    db: DependencyInjectDatabase,
+):
+    project = await get_project(
+        db=db,
+        project_id=project_id,
+    )
+
+    analysis_run = get_latest_project_analysis_run(db, project.id)
+
+    if analysis_run and analysis_run.processing_status in [
+        ProcessingStatusEnum.PENDING,
+        ProcessingStatusEnum.PROCESSING,
+    ]:
+        raise HTTPException(
+            status_code=409,
+            detail="Analysis is already in progress",
+        )
+
+    result = task_create_project_library.si(project_id).apply_async()
+
+    logger.info(f"Task {result.id} created for project {project.id}")
+
+    return
+
+
+class CreateViewRequestBodySchema(BaseModel):
+    query: str
+    additional_context: Optional[str] = ""
+
+
+@ProjectRouter.post(
+    "/{project_id}/create-view", response_model=TaskSchema, status_code=HTTPStatus.ACCEPTED
+)
+async def post_create_view(
+    project_id: str,
+    body: CreateViewRequestBodySchema,
+    db: DependencyInjectDatabase,
+    _session: DependencyRequireSession,
+) -> TaskSchema:
+    project_analysis_run = get_latest_project_analysis_run(db, project_id)
+
+    if not project_analysis_run:
+        raise HTTPException(status_code=404, detail="No analysis found for this project")
+
+    result = task_create_view.si(
+        project_analysis_run.id, body.query, body.additional_context
+    ).apply_async()
+
+    logger.info(f"Task {result.id} created for project {project_id}")
+    task_status = await get_task_status(result.id)
+
+    return task_status
 
 
 @ProjectRouter.get("/{project_id}/insights", response_model=List[InsightSchema])
@@ -570,3 +633,55 @@ async def get_project_insights(
     )
 
     return insights
+
+
+@ProjectRouter.get("/{project_id}/views", response_model=List[ViewSchema])
+async def get_project_views(
+    project_id: str,
+    db: DependencyInjectDatabase,
+    _session: DependencyRequireSession,
+) -> List[ViewModel]:
+    project = await get_project(project_id, db)
+
+    latest_project_analysis = get_latest_project_analysis_run(db, project.id)
+
+    if not latest_project_analysis:
+        return []
+
+    views = (
+        db.query(ViewModel)
+        .options(selectinload(ViewModel.aspects))
+        .filter(ViewModel.project_analysis_run_id == latest_project_analysis.id)
+        .all()
+    )
+
+    return views
+
+
+@ProjectRouter.get("/{project_id}/views/{view_id}", response_model=ViewSchema)
+async def get_project_view_aspects(
+    project_id: str,
+    view_id: str,
+    db: DependencyInjectDatabase,
+    _session: DependencyRequireSession,
+) -> ViewModel:
+    project = await get_project(project_id, db)
+
+    latest_project_analysis = get_latest_project_analysis_run(db, project.id)
+
+    if not latest_project_analysis:
+        raise HTTPException(status_code=404, detail="No analysis found for this project")
+
+    view = (
+        db.query(ViewModel)
+        .options(selectinload(ViewModel.aspects).selectinload(AspectModel.quotes))
+        .filter(
+            ViewModel.project_analysis_run_id == latest_project_analysis.id, ViewModel.id == view_id
+        )
+        .first()
+    )
+
+    if not view:
+        raise HTTPException(status_code=404, detail="View not found")
+
+    return view

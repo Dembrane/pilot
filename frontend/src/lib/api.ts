@@ -5,6 +5,8 @@ import axios, {
   AxiosRequestConfig,
   CreateAxiosDefaults,
 } from "axios";
+import { directus } from "./directus";
+import { QueryAlias, readItem, readItems } from "@directus/sdk";
 
 export const apiCommonConfig: CreateAxiosDefaults = {
   baseURL: API_BASE_URL,
@@ -109,6 +111,67 @@ export const getProjectInsights = async (projectId: string) => {
   return api.get<unknown, TInsight[]>(`/projects/${projectId}/insights`);
 };
 
+export const getProjectViews = async (projectId: string) => {
+  const project_analysis_run =
+    await getLatestProjectAnalysisRunByProjectId(projectId);
+
+  if (!project_analysis_run) {
+    return [];
+  }
+
+  return directus.request<View[]>(
+    readItems("view", {
+      fields: ["*", { aspects: ["*", "count(quotes)"] }],
+      deep: {
+        aspects: {
+          _sort: "name",
+        } as any,
+      },
+      filter: {
+        project_analysis_run_id: project_analysis_run?.id,
+      },
+      sort: "-created_at",
+    }),
+  );
+};
+
+export const getViewById = async (viewId: string) => {
+  return directus.request<View>(
+    readItem("view", viewId, {
+      fields: ["*", { aspects: ["*", "count(quotes)"] }],
+      deep: {
+        aspects: {
+          _sort: "name",
+        } as any,
+      },
+    }),
+  );
+};
+
+export const getAspectById = async (aspectId: string) => {
+  return directus.request<Aspect>(
+    readItem("aspect", aspectId, {
+      fields: [
+        "*",
+        {
+          quotes: [
+            {
+              quote_id: [
+                "id",
+                "text",
+                "created_at",
+                {
+                  conversation_id: ["id", "participant_name", "created_at"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+};
+
 export const getProjectTranscriptsLink = (projectId: string) =>
   `${apiCommonConfig.baseURL}/projects/${projectId}/transcripts`;
 
@@ -165,9 +228,17 @@ export const initiateConversation = async (payload: {
   );
 };
 
-export const getConversationById = async (conversationId: string) => {
+export const getConversationById = async (
+  conversationId: string,
+  loadChunks?: boolean,
+) => {
   return apiNoAuth.get<unknown, TConversation>(
     `/conversations/${conversationId}`,
+    {
+      params: {
+        load_chunks: loadChunks,
+      },
+    },
   );
 };
 
@@ -193,9 +264,17 @@ export const deleteConversationChunkById = async (chunkId: string) => {
   return api.delete(`/conversation-chunks/${chunkId}`);
 };
 
-export const getConversationsByProjectId = async (projectId: string) => {
+export const getConversationsByProjectId = async (
+  projectId: string,
+  load_chunks?: boolean,
+) => {
   return api.get<unknown, TConversation[]>(
     `/projects/${projectId}/conversations`,
+    {
+      params: {
+        load_chunks,
+      },
+    },
   );
 };
 
@@ -339,10 +418,47 @@ export const createProjectTag = async (payload: {
   });
 };
 
-export const requestProjectAnalysis = async (payload: {
+export const generateProjectLibrary = async (payload: {
   projectId: string;
 }) => {
-  return api.post<unknown, unknown>(
-    `/projects/${payload.projectId}/request-analysis`,
+  return api.post<unknown, TTask>(
+    `/projects/${payload.projectId}/create-library`,
   );
+};
+
+export const generateProjectView = async (payload: {
+  projectId: string;
+  query: string;
+  additionalContext?: string;
+}) => {
+  return api.post<unknown, TTask>(
+    `/projects/${payload.projectId}/create-view`,
+    {
+      query: payload.query,
+      additional_context: payload.additionalContext,
+    },
+  );
+};
+
+export const getTaskById = async (taskId: string) => {
+  return api.get<unknown, TTask>(`/tasks/${taskId}`);
+};
+
+export const getLatestProjectAnalysisRunByProjectId = async (
+  projectId: string,
+) => {
+  const data = await directus.request<ProjectAnalysisRun[]>(
+    readItems("project_analysis_run", {
+      filter: {
+        project_id: projectId,
+      },
+      sort: "-created_at",
+    }),
+  );
+
+  if (!data || data.length === 0) {
+    return null;
+  }
+
+  return data[0];
 };

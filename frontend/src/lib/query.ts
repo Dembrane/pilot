@@ -17,18 +17,24 @@ import {
   getCurrentSession,
   getProjectById,
   getProjectInsights,
+  getViewById,
+  getProjectViews,
   getResourceById,
   getResourcesByProjectId,
   getTagsByProjectId,
   initiateAndUploadConversationChunk,
   initiateConversation,
-  requestProjectAnalysis,
+  generateProjectLibrary as generateProjectLibrary,
   updateConversationById,
   updateProjectById,
   updateResourceById,
   uploadConversationChunk,
   uploadConversationText,
   uploadResourceByProjectId,
+  getTaskById,
+  generateProjectView,
+  getLatestProjectAnalysisRunByProjectId,
+  getAspectById,
 } from "./api";
 import { toast } from "@/components/Toaster";
 import { AxiosError } from "axios";
@@ -101,6 +107,31 @@ export const useProjectInsights = (projectId: string) => {
   return useQuery({
     queryKey: ["project", projectId, "insights"],
     queryFn: () => getProjectInsights(projectId),
+    refetchInterval: 10000,
+  });
+};
+
+export const useProjectViews = (projectId: string) => {
+  return useQuery({
+    queryKey: ["project", projectId, "views"],
+    queryFn: () => getProjectViews(projectId),
+    refetchInterval: 10000,
+  });
+};
+
+export const useViewById = (projectId: string, viewId: string) => {
+  return useQuery({
+    queryKey: ["project", projectId, "views", viewId],
+    queryFn: () => getViewById(viewId),
+    refetchInterval: 10000,
+  });
+};
+
+export const useAspectById = (projectId: string, aspect_id: string) => {
+  return useQuery({
+    queryKey: ["project", projectId, "aspects", aspect_id],
+    queryFn: () => getAspectById(aspect_id),
+    refetchInterval: 10000,
   });
 };
 
@@ -205,10 +236,13 @@ export const useInitiateConversationMutation = () => {
   });
 };
 
-export const useConversationById = (conversationId: string) => {
+export const useConversationById = (
+  conversationId: string,
+  loadChunks?: boolean,
+) => {
   return useQuery({
-    queryKey: ["conversation", conversationId],
-    queryFn: () => getConversationById(conversationId),
+    queryKey: ["conversation", loadChunks, conversationId],
+    queryFn: () => getConversationById(conversationId, loadChunks),
     refetchInterval: 10000,
   });
 };
@@ -276,11 +310,18 @@ export const useDeleteConversationChunkByIdMutation = () => {
   });
 };
 
-export const useConversationsByProjectId = (projectId: string) => {
+export const useConversationsByProjectId = (
+  projectId: string,
+  load_chunks?: boolean,
+) => {
   return useQuery({
-    queryKey: ["conversation", "all", projectId],
-    queryFn: () => getConversationsByProjectId(projectId),
-    refetchInterval: 20000,
+    queryKey: [
+      "conversation",
+      projectId,
+      load_chunks ? "all" : "all/no_chunks",
+    ],
+    queryFn: () => getConversationsByProjectId(projectId, load_chunks),
+    refetchInterval: 30000,
   });
 };
 
@@ -464,11 +505,38 @@ export const useProjectTags = (projectId: string) => {
   });
 };
 
-export const useRequestProjectAnalysisMutation = () => {
+export const useGenerateProjectLibraryMutation = () => {
+  const client = useQueryClient();
   return useMutation({
-    mutationFn: requestProjectAnalysis,
+    mutationFn: generateProjectLibrary,
+    onSuccess: (_, variables) => {
+      toast.success("Analysis requested successfully");
+      client.invalidateQueries({ queryKey: ["project", variables.projectId] });
+    },
+  });
+};
+
+export const useGenerateProjectViewMutation = () => {
+  return useMutation({
+    mutationFn: generateProjectView,
     onSuccess: () => {
       toast.success("Analysis requested successfully");
     },
+  });
+};
+
+export const useTaskStatus = (taskId: string) => {
+  return useQuery({
+    queryKey: ["task", taskId],
+    queryFn: () => getTaskById(taskId),
+    refetchInterval: 10000,
+  });
+};
+
+export const useLatestProjectAnalysisRunByProjectId = (projectId: string) => {
+  return useQuery({
+    queryKey: ["project", projectId, "latest_analysis"],
+    queryFn: () => getLatestProjectAnalysisRunByProjectId(projectId),
+    refetchInterval: 10000,
   });
 };

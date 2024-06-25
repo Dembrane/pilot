@@ -14,6 +14,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@directus/sdk": "^16.1.0",
     "@fontsource-variable/space-grotesk": "^5.0.16",
     "@formkit/auto-animate": "^0.8.1",
     "@hookform/resolvers": "^3.3.4",

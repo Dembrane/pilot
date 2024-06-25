@@ -1,5 +1,7 @@
 {
   "mypy.runUsingActiveInterpreter": true,
+  "mypy.targets": ["./server/dembrane"],
+  "mypy.configFile": "./server/pyproject.toml",
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.useTabStops": true,
@@ -23,7 +25,7 @@
     {
       "splitTerminals": [
         {
-          "name": "worker",
+          "name": "workers",
           "commands": ["cd server", "./run-worker.sh"]
         }
       ]

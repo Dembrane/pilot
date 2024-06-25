@@ -1,237 +1,181 @@
 # mypy: disable-error-code="no-untyped-def"
-import os
-from typing import Any, Tuple, Union, Optional
+from typing import List
 
-from celery import Celery, chain, group  # type: ignore
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+from celery import Celery, chain, chord, group  # type: ignore
+from sentry_sdk import capture_exception
 from celery.utils.log import get_task_logger  # type: ignore
 
+import dembrane.tasks_config
 from dembrane.utils import generate_uuid, get_utc_timestamp
-from dembrane.config import DATABASE_URL, RABBITMQ_URL
+from dembrane.config import REDIS_URL, RABBITMQ_URL
 from dembrane.database import (
+    ViewModel,
+    AspectModel,
     DatabaseSession,
     ConversationModel,
     ProcessingStatusEnum,
     ConversationChunkModel,
     ProjectAnalysisRunModel,
 )
-from dembrane.transcribe import TranscriptionError, transcribe_audio
-from dembrane.audio_utils import ConversionError, split_audio_chunk
-from dembrane.quote_utils import generate_quotes, generate_insights
+from dembrane.transcribe import transcribe_conversation_chunk
+from dembrane.audio_utils import split_audio_chunk
+from dembrane.quote_utils import (
+    generate_quotes,
+    initialize_view,
+    initialize_insights,
+    generate_view_extras,
+    assign_aspect_centroid,
+    generate_aspect_extras,
+    generate_insight_extras,
+    cluster_quotes_using_aspect_centroids,
+)
 
 logger = get_task_logger("celery_tasks")
 
-assert DATABASE_URL is not None
-result_backend_url = "db+" + DATABASE_URL
-celery_app = Celery("tasks", broker=RABBITMQ_URL, result_backend=result_backend_url)
+assert RABBITMQ_URL, "RABBITMQ_URL environment variable is not set"
+assert REDIS_URL, "REDIS_URL environment variable is not set"
 
-DEFAULT_WHISPER_PROMPTS = {
-    "en": "Hi, lets get started. First we’ll have a round of introductions and then we can get into the topic for today.",
-    "nl": "Hallo, laten we beginnen. Eerst even een introductieronde en dan kunnen we aan de slag met de thema van vandaag.",
-}
+celery_app = Celery("tasks", broker=RABBITMQ_URL, result_backend=REDIS_URL + "/0")
+
+celery_app.config_from_object(dembrane.tasks_config)
 
 
-def set_processing_status(
-    db: Session,
-    model: Union[type[ConversationChunkModel], type[ConversationModel], type[ProjectAnalysisRunModel]],
-    id: str,
-    status: ProcessingStatusEnum,
-    error_message: Optional[str] = None,
-) -> None:
-    """
-    Generalized function to set the processing status for a conversation or conversation chunk.
+class BaseTask(celery_app.Task):
+    """Abstract base class for all tasks in my app."""
 
-    :param db: SQLAlchemy Session instance
-    :param model: SQLAlchemy model class
-    :param status: Processing status enum value (e.g., PROCESSING, DONE, ERROR)
-    :param id: ID of the conversation or conversation chunk
-    :param error_message: Error message string, default is None
-    """
-    instance: Any = db.get(model, id)
-    instance.processing_status = status
-    instance.processing_error = error_message
-    if status == ProcessingStatusEnum.PROCESSING:
-        instance.processing_started_at = get_utc_timestamp()
-        instance.processing_completed_at = None
-    else:
-        instance.processing_completed_at = get_utc_timestamp()
-    db.commit()
+    abstract = True
 
+    def on_retry(self, exc, task_id, args, kwargs, einfo):
+        """Log the exceptions to sentry at retry."""
+        capture_exception(exc)
+        super(BaseTask, self).on_retry(exc, task_id, args, kwargs, einfo)
 
-def is_conversation_fully_processed(db: Session, conversation_id: str) -> Tuple[bool, str]:
-    """
-    Check if a conversation is fully processed.
-
-    Args:
-        db (Session): SQLAlchemy session
-        conversation_id (str): Conversation ID
-
-    Returns:
-        Tuple[bool, str]: (is_ready, reason)
-
-    Raises:
-        ValueError: Conversation not found
-    """
-    conversation = db.query(ConversationModel).filter(ConversationModel.id == conversation_id).first()
-
-    if conversation is None:
-        raise ValueError("Conversation not found")
-
-    latest_chunk = (
-        db.query(ConversationChunkModel)
-        .filter(ConversationChunkModel.conversation_id == conversation_id)
-        .order_by(ConversationChunkModel.created_at.desc())
-        .first()
-    )
-
-    if latest_chunk is None:
-        return False, "No chunks found"
-
-    if (
-        conversation.processing_status == ProcessingStatusEnum.DONE
-        and latest_chunk.processing_status == ProcessingStatusEnum.DONE
-        and latest_chunk.created < conversation.processing_completed_at
-    ):
-        return True, "Fully processed"
-    else:
-        return False, "Not fully processed"
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        """Log the exceptions to sentry."""
+        capture_exception(exc)
+        super(BaseTask, self).on_failure(exc, task_id, args, kwargs, einfo)
 
 
 @celery_app.task(
     bind=True,
     retry_backoff=True,
-    retry_kwargs={"max_retries": 3},
+    ignore_result=True,
+    base=BaseTask,
 )
-def transcribe_conversation_chunk(self, conversation_chunk_id: str):
-    """Process conversation chunk for transcription"""
+def log_error(_self, exc: Exception):
+    logger.error(f"Error: {exc}")
+    raise exc
+
+
+# def update_progress(
+#     self_object: Any,
+#     current: int,
+#     total: int,
+#     message: Optional[str] = None,
+# ):
+#     """
+#     Update the progress of a task.
+
+#     Args:
+#         self_object: The task object
+#         currentStep: The current step
+#         totalStep: The total number of steps
+#         message: Optional message to display
+#     """
+#     self_object.update_state(
+#         state="PROGRESS",
+#         meta={
+#             "current": current,
+#             "total": total,
+#             "percent": floor((current / total) * 100),
+#             "message": message,
+#         },
+#     )
+
+
+@celery_app.task(
+    bind=True,
+    retry_backoff=True,
+    ignore_result=True,
+    base=BaseTask,
+)
+def task_transcribe_conversation_chunk(self, conversation_chunk_id: str):
+    try:
+        transcribe_conversation_chunk(conversation_chunk_id)
+    except (ValueError, FileNotFoundError) as e:
+        raise e
+    except Exception as e:
+        raise self.retry(exc=e) from e
+
+
+@celery_app.task(
+    bind=True,
+    retry_backoff=True,
+    ignore_result=True,
+    base=BaseTask,
+)
+def task_transcribe_conversation_chunks(self, conversation_chunk_id: List[str]):
+    try:
+        task_signatures = [
+            task_transcribe_conversation_chunk.si(chunk_id).on_error(log_error.s())
+            for chunk_id in conversation_chunk_id
+        ]
+
+        g = group(*task_signatures)
+
+        result = g.apply_async()
+
+        return result
+    except (ValueError, FileNotFoundError) as e:
+        raise e
+    except Exception as e:
+        raise self.retry(exc=e) from e
+
+
+@celery_app.task(
+    bind=True,
+    retry_backoff=True,
+    ignore_result=False,
+    base=BaseTask,
+)
+def task_split_audio_chunk(self, chunk_id: str) -> List[str]:
+    """
+    Split audio chunk into smaller chunks. Returns the list of split chunks.
+    """
     with DatabaseSession() as db:
         try:
-            chunk = db.get(ConversationChunkModel, conversation_chunk_id)
-
-            if chunk is None:
-                return conversation_chunk_id
-
-            if chunk.processing_status == ProcessingStatusEnum.DONE:
-                return conversation_chunk_id  # skip already processed chunks for idempotency
-
-            set_processing_status(
-                db,
-                ConversationChunkModel,
-                conversation_chunk_id,
-                ProcessingStatusEnum.PROCESSING,
-            )
-
-            if not chunk.path:
-                return conversation_chunk_id
-
-            if not os.path.exists(chunk.path):
-                raise FileNotFoundError(f"File not found: {chunk.path}")
-
-            # fetch conversation details
-            conversation = db.query(ConversationModel).filter(ConversationModel.id == chunk.conversation_id).first()
-            if conversation is None:
-                raise ValueError("Conversation not found")
-
-            project = conversation.project
-            language = project.language or "en"
-            default_prompt = DEFAULT_WHISPER_PROMPTS.get(language, "")
-            whisper_prompt = default_prompt + " " + (conversation.context if conversation.context else "")
-
-            transcription = transcribe_audio(chunk.path, language=language, whisper_prompt=whisper_prompt)
-
-            chunk.transcript = transcription
-
-            set_processing_status(
-                db,
-                ConversationChunkModel,
-                conversation_chunk_id,
-                ProcessingStatusEnum.DONE,
-            )
-
-            logger.debug(f"Processed chunk: {conversation_chunk_id}")
-            return conversation_chunk_id
-
-        except FileNotFoundError as exc:
-            logger.error(f"File not found: {exc}")
-            db.rollback()
-            set_processing_status(
-                db,
-                ConversationChunkModel,
-                conversation_chunk_id,
-                ProcessingStatusEnum.ERROR,
-                "File not found",
-            )
-            raise exc
-
-        except (
-            ValueError,
-            ConversionError,
-            TranscriptionError,
-        ) as exc:
-            logger.error(f"Processing error: {exc}")
-            db.rollback()
-            set_processing_status(
-                db,
-                ConversationChunkModel,
-                conversation_chunk_id,
-                ProcessingStatusEnum.ERROR,
-                str(exc),
-            )
-            raise self.retry(exc=exc) from exc
-
-        except SQLAlchemyError as exc:
-            logger.error(f"Database error: {exc}")
-            db.rollback()
-            set_processing_status(
-                db,
-                ConversationChunkModel,
-                conversation_chunk_id,
-                ProcessingStatusEnum.ERROR,
-                "Database error during processing",
-            )
-            raise self.retry(exc=exc) from exc
-
+            chunks = split_audio_chunk(db, chunk_id)
+            return [chunk.id for chunk in chunks]
         except Exception as exc:
-            logger.error(f"Unexpected error: {exc}")
+            logger.error(f"Error: {exc}")
             db.rollback()
-            set_processing_status(
-                db,
-                ConversationChunkModel,
-                conversation_chunk_id,
-                ProcessingStatusEnum.ERROR,
-                "Unexpected error",
-            )
             raise self.retry(exc=exc) from exc
 
 
 @celery_app.task(
     bind=True,
     retry_backoff=True,
-    retry_kwargs={"max_retries": 5},
+    ignore_result=True,
+    base=BaseTask,
 )
-def process_conversation_chunk(self, chunk_id: str):
+def task_process_conversation_chunk(self, chunk_id: str):
     with DatabaseSession() as db:
         try:
             chunk = db.get(ConversationChunkModel, chunk_id)
 
             if chunk is None:
-                return chunk_id
+                logger.info(f"Chunk not found: {chunk_id}")
+                return None
 
-            if chunk.processing_status == ProcessingStatusEnum.DONE:
-                return chunk_id
+            chunk.task_id = self.request.id
+            db.commit()
 
-            split_chunks = split_audio_chunk(db, chunk)
+            c = chain(
+                task_split_audio_chunk.s(chunk_id),
+                task_transcribe_conversation_chunks.s(),
+            )
 
-            if not split_chunks:
-                return chunk_id
-
-            task_signatures = []
-
-            for split_chunk in split_chunks:
-                task_signatures.append(transcribe_conversation_chunk.si(split_chunk.id))
-
-            result = group(*task_signatures).apply_async()
+            result = c.apply_async()
 
             return result
         except Exception as exc:
@@ -243,62 +187,21 @@ def process_conversation_chunk(self, chunk_id: str):
 @celery_app.task(
     bind=True,
     retry_backoff=True,
-    retry_kwargs={"max_retries": 5},
+    retry_kwargs={"max_retries": 2},
+    ignore_result=False,
+    base=BaseTask,
 )
-def process_conversation(
+def task_generate_quotes(
     self,
     project_analysis_run_id: str,
     conversation_id: str,
 ):
     with DatabaseSession() as db:
         try:
-            # ready, reason = is_conversation_ready(db, conversation_id)
-            if not True:
-                logger.info(
-                    # f"Conversation not ready: {conversation_id}, reason: {reason}"
-                )
-                set_processing_status(
-                    db,
-                    ConversationModel,
-                    conversation_id,
-                    ProcessingStatusEnum.ERROR,
-                    # f"Conversation not ready: {reason}",
-                )
-                # raise ValueError(f"Conversation not ready: {reason}")
-
-            is_processed, reason = is_conversation_fully_processed(db, conversation_id)
-
-            if is_processed:
-                logger.info(f"Conversation already processed: {conversation_id}, {reason}")
-                return conversation_id
-
-            set_processing_status(
-                db,
-                ConversationModel,
-                conversation_id,
-                ProcessingStatusEnum.PROCESSING,
-            )
-
             generate_quotes(db, project_analysis_run_id, conversation_id)
-
-            set_processing_status(
-                db,
-                ConversationModel,
-                conversation_id,
-                ProcessingStatusEnum.DONE,
-            )
-
+        # FIXME - Add specific exceptions
         except Exception as exc:
             logger.error(f"Error: {exc}")
-
-            set_processing_status(
-                db,
-                ConversationModel,
-                conversation_id,
-                ProcessingStatusEnum.ERROR,
-                str(exc),
-            )
-
             db.rollback()
             raise self.retry(exc=exc) from exc
 
@@ -306,21 +209,14 @@ def process_conversation(
 @celery_app.task(
     bind=True,
     retry_backoff=True,
-    retry_kwargs={"max_retries": 5},
+    retry_kwargs={"max_retries": 3},
+    ignore_result=False,
+    base=BaseTask,
 )
-def finalize_project_analysis_run_processing(self, project_analysis_run_id):
+def task_generate_insight_extras(self, insight_id: str):
     with DatabaseSession() as db:
         try:
-            generate_insights(db, project_analysis_run_id)
-
-            set_processing_status(
-                db,
-                ProjectAnalysisRunModel,
-                project_analysis_run_id,
-                ProcessingStatusEnum.DONE,
-            )
-
-            logger.info(f"Project processing finalized: {project_analysis_run_id}")
+            generate_insight_extras(db, insight_id)
         except Exception as exc:
             logger.error(f"Error: {exc}")
             db.rollback()
@@ -330,50 +226,281 @@ def finalize_project_analysis_run_processing(self, project_analysis_run_id):
 @celery_app.task(
     bind=True,
     retry_backoff=True,
-    retry_kwargs={"max_retries": 5},
+    retry_kwargs={"max_retries": 3},
+    ignore_result=True,
+    base=BaseTask,
 )
-def process_project(_self, project_id: str):
+def task_generate_insight_extras_multiple(self, insight_ids: List[str]):
+    with DatabaseSession() as db:
+        try:
+            task_signatures = [
+                task_generate_insight_extras.si(insight_id).on_error(log_error.s())
+                for insight_id in insight_ids
+            ]
+
+            result = group(*task_signatures).apply_async()
+
+            return result
+        except Exception as exc:
+            logger.error(f"Error: {exc}")
+            db.rollback()
+            raise self.retry(exc=exc) from exc
+
+
+# task_initialize_insights
+
+
+@celery_app.task(
+    bind=True,
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 3},
+    ignore_result=False,
+    base=BaseTask,
+)
+def task_initialize_insights(self, project_analysis_run_id: str) -> List[str]:
+    with DatabaseSession() as db:
+        try:
+            return initialize_insights(db, project_analysis_run_id)
+        except Exception as exc:
+            logger.error(f"Error: {exc}")
+            db.rollback()
+            raise self.retry(exc=exc) from exc
+
+
+@celery_app.task(
+    bind=True,
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 3},
+    ignore_result=False,
+    base=BaseTask,
+)
+def task_generate_insights(self, project_analysis_run_id: str):
+    with DatabaseSession() as db:
+        try:
+            job = chain(
+                task_initialize_insights.si(project_analysis_run_id),
+                task_generate_insight_extras_multiple.s(),
+            )
+
+            result = job.apply_async()
+
+            return result
+
+        except Exception as exc:
+            logger.error(f"Error: {exc}")
+            db.rollback()
+            raise self.retry(exc=exc) from exc
+
+
+# @celery_app.task(
+#     bind=True,
+#     retry_backoff=True,
+#     retry_kwargs={"max_retries": 2},
+#     ignore_result=False,
+#     base=BaseTask,
+# )
+# def task_assign_aspect_centroids_and_cluster_quotes(self, project_analysis_run_id: str, view_id: str):
+#     with DatabaseSession() as db:
+#         try:
+#             assign_aspect_centroids_and_cluster_quotes(db, project_analysis_run_id, view_id)
+#         except Exception as exc:
+#             logger.error(f"Error: {exc}")
+#             db.rollback()
+#             raise self.retry(exc=exc) from exc
+
+
+@celery_app.task(
+    bind=True,
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 3},
+    ignore_result=False,
+    base=BaseTask,
+)
+def task_generate_aspect_extras(self, aspect_id: str):
+    with DatabaseSession() as db:
+        try:
+            generate_aspect_extras(db, aspect_id)
+        except Exception as exc:
+            logger.error(f"Error: {exc}")
+            db.rollback()
+            raise self.retry(exc=exc) from exc
+
+
+@celery_app.task(
+    bind=True,
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 3},
+    ignore_result=False,
+    base=BaseTask,
+)
+def task_generate_view_extras(self, view_id: str):
+    with DatabaseSession() as db:
+        try:
+            view = db.get(ViewModel, view_id)
+            view.processing_message = "Analysing aspects"
+            db.commit()
+            generate_view_extras(db, view_id)
+            view.processing_status = ProcessingStatusEnum.DONE
+            view.processing_completed_at = get_utc_timestamp()
+            db.commit()
+        except Exception as exc:
+            logger.error(f"Error: {exc}")
+            db.rollback()
+            raise self.retry(exc=exc) from exc
+
+
+@celery_app.task(
+    bind=True,
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 3},
+    ignore_result=False,
+    base=BaseTask,
+)
+def task_assign_aspect_centroid(self, aspect_id: str):
+    with DatabaseSession() as db:
+        try:
+            assign_aspect_centroid(db, aspect_id)
+        except Exception as exc:
+            logger.error(f"Error: {exc}")
+            db.rollback()
+            raise self.retry(exc=exc) from exc
+
+
+@celery_app.task(
+    bind=True,
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 3},
+    ignore_result=False,
+    base=BaseTask,
+)
+def task_cluster_quotes_using_aspect_centroids(self, view_id: str):
+    with DatabaseSession() as db:
+        try:
+            cluster_quotes_using_aspect_centroids(db, view_id)
+        except Exception as exc:
+            logger.error(f"Error: {exc}")
+            db.rollback()
+            raise self.retry(exc=exc) from exc
+
+
+@celery_app.task(
+    bind=True,
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 3},
+    ignore_result=False,
+    base=BaseTask,
+)
+def task_create_view(_self, project_analysis_run_id: str, user_query: str, user_query_context: str):
+    with DatabaseSession() as db:
+        try:
+            project_analysis_run = db.get(ProjectAnalysisRunModel, project_analysis_run_id)
+
+            if project_analysis_run is None:
+                logger.info(f"Project analysis run not found: {project_analysis_run_id}")
+                return None
+
+            # FIXME: update_progress(self, 1, 4, message="Creating view")
+            # TODO: convert to task
+            view = initialize_view(db, project_analysis_run_id, user_query, user_query_context)
+            view.processing_message = "Clustering aspects"
+            db.commit()
+
+            # update_progress(self, 2, 4, message="Clustering quotes")
+
+            aspect_ids = [aspect.id for aspect in view.aspects]
+            aspect_jobs = [task_assign_aspect_centroid.si(aspect_id) for aspect_id in aspect_ids]
+
+            # update_progress(self, 3, 4, message="Clustering quotes")
+
+            aspects = db.query(AspectModel).filter(AspectModel.view_id == view.id).all()
+            aspect_extra_jobs = [task_generate_aspect_extras.si(aspect.id) for aspect in aspects]
+
+            result = chord(
+                chord(group(*aspect_jobs), task_cluster_quotes_using_aspect_centroids.si(view.id)),
+                chord(group(*aspect_extra_jobs), task_generate_view_extras.si(view.id)),
+            ).apply_async()
+
+            logger.debug(result)
+
+            # update_progress(self, 4, 4, message="Analysing results")
+
+            return result
+
+        except Exception as e:
+            logger.error(f"Error: {e}")
+            db.rollback()
+            raise
+
+
+@celery_app.task(bind=True, retry_backoff=True, ignore_result=False, base=BaseTask)
+def task_finalize_project_library(_self, project_analysis_run_id: str):
+    with DatabaseSession() as db:
+        project_analysis_run = db.get(ProjectAnalysisRunModel, project_analysis_run_id)
+        project_analysis_run.processing_status = ProcessingStatusEnum.DONE
+        project_analysis_run.processing_message = "Project library created"
+        project_analysis_run.processing_completed_at = get_utc_timestamp()
+        db.commit()
+
+        return
+
+
+@celery_app.task(bind=True, retry_backoff=True, ignore_result=False, base=BaseTask)
+def task_create_project_library(_self, project_id: str):
     with DatabaseSession() as db:
         try:
             project_analysis_run = ProjectAnalysisRunModel(
                 id=generate_uuid(),
                 project_id=project_id,
                 processing_status=ProcessingStatusEnum.PROCESSING,
+                processing_message="Creating your project library",
+                processing_started_at=get_utc_timestamp(),
             )
 
             db.add(project_analysis_run)
             db.commit()
 
-            conversations = db.query(ConversationModel).filter(ConversationModel.project_id == project_id).all()
-
-            set_processing_status(
-                db,
-                ProjectAnalysisRunModel,
-                project_analysis_run.id,
-                ProcessingStatusEnum.PROCESSING,
+            conversations = (
+                db.query(ConversationModel).filter(ConversationModel.project_id == project_id).all()
             )
 
-            task_signatures = []
+            project_analysis_run.processing_message = (
+                f"Gathering quotes from {len(conversations)} conversations"
+            )
+            db.commit()
+
+            quote_s_list = []
 
             for conversation in conversations:
-                already_fully_processed, reason = is_conversation_fully_processed(db, conversation.id)
-                logger.info(f"Conversation: {conversation.id}, reason: {reason}")
+                quote_s_list.append(
+                    task_generate_quotes.si(project_analysis_run.id, conversation.id)
+                )
 
-                if already_fully_processed:
-                    continue
-                else:
-                    task_signatures.append(process_conversation.si(project_analysis_run.id, conversation.id))
+            g = group(*quote_s_list)
 
-            if not task_signatures:
+            if not quote_s_list:
                 logger.info(f"No conversations to process for project: {project_id}")
-                return project_id
+                return
 
-            task_chain = chain(
-                group(*task_signatures),
-                finalize_project_analysis_run_processing.si(project_analysis_run.id),
+            insight_task = task_generate_insights.si(project_analysis_run.id)
+
+            sentiment_view = task_create_view.si(project_analysis_run.id, "Sentiment", "Use only 3")
+
+            theme_view = task_create_view.si(
+                project_analysis_run.id,
+                "Recurring Themes",
+                "I will use these to make a detailed report. Give me around 15-18 aspects or more if really necessary. Ensure to merge similar aspects.",
             )
 
-            result = task_chain.apply_async()
+            callback = chord(
+                group(
+                    insight_task,
+                    sentiment_view,
+                    theme_view,
+                ),
+                task_finalize_project_library.si(project_analysis_run.id),
+            )
+
+            result = chord(g)(callback.on_error(log_error.s()))
 
             return result
 

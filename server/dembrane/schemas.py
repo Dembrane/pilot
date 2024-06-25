@@ -1,4 +1,5 @@
-from typing import List, Optional
+from enum import Enum
+from typing import Any, List, Union, Optional
 from datetime import datetime
 
 from pydantic import BaseModel
@@ -61,11 +62,6 @@ class ConversationChunkSchema(BaseModel):
     updated_at: datetime
     conversation_id: str
 
-    processing_status: ProcessingStatusEnum
-    processing_error: Optional[str] = None
-    processing_started_at: Optional[datetime] = None
-    processing_completed_at: Optional[datetime] = None
-
     transcript: Optional[str] = None
     timestamp: datetime
 
@@ -83,8 +79,8 @@ class ConversationSchema(BaseModel):
     participant_email: Optional[str] = None
     participant_name: Optional[str] = None
 
-    tags: Optional[List[ProjectTagSchema]] = []
-    chunks: Optional[List[ConversationChunkSchema]] = []
+    tags: Optional[List[ProjectTagSchema]] = None
+    chunks: Optional[List[ConversationChunkSchema]] = None
 
 
 class ChatMessageSchema(BaseModel):
@@ -134,6 +130,38 @@ class InsightSchema(BaseModel):
     quotes: Optional[List[QuoteSchema]] = []
 
 
+class AspectSchema(BaseModel):
+    id: str
+    created_at: datetime
+    updated_at: datetime
+
+    project_analysis_run_id: str
+
+    name: str
+    description: Optional[str] = None
+    short_summary: Optional[str] = None
+    long_summary: Optional[str] = None
+
+    image_url: Optional[str] = None
+
+    view_id: Optional[str] = None
+
+    quotes: Optional[List[QuoteSchema]] = []
+
+
+class ViewSchema(BaseModel):
+    id: str
+    created_at: datetime
+    updated_at: datetime
+
+    project_analysis_run_id: str
+
+    name: str
+    summary: Optional[str] = None
+
+    aspects: Optional[List["AspectSchema"]] = []
+
+
 class ProjectAnalysisRunSchema(BaseModel):
     id: str
     created_at: datetime
@@ -149,6 +177,25 @@ class ProjectAnalysisRunSchema(BaseModel):
     processing_completed_at: Optional[datetime] = None
 
 
+class TaskStateEnum(str, Enum):
+    PENDING = "PENDING"
+    STARTED = "STARTED"
+    PROGRESS = "PROGRESS"
+    SUCCESS = "SUCCESS"
+    FAILURE = "FAILURE"
+    RETRY = "RETRY"
+    REVOKED = "REVOKED"
+    IGNORED = "IGNORED"
+
+
+class TaskProgressMetaSchema(BaseModel):
+    current: int
+    total: int
+    percent: int
+    message: Optional[str] = None
+
+
 class TaskSchema(BaseModel):
     id: str
-    status: str
+    state: TaskStateEnum
+    meta: Optional[Union[TaskProgressMetaSchema, Any]] = None

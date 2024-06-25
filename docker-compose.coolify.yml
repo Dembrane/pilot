@@ -87,6 +87,9 @@ services:
       - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DISABLE_SENTRY=${DISABLE_SENTRY:-0}
+      - SERVE_API_DOCS=${SERVE_API_DOCS:-0}
+      - DISABLE_REDACTION=1
     env_file:
       - ./server/.env
     volumes:
@@ -113,6 +116,9 @@ services:
       - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DISABLE_SENTRY=${DISABLE_SENTRY:-0}
+      - SERVE_API_DOCS=${SERVE_API_DOCS:-0}
+      - DISABLE_REDACTION=1
     env_file:
       - ./server/.env
     volumes:

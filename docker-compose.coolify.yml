@@ -7,7 +7,8 @@ x-logging: &default-logging
 
 services:
   redis:
-    image: 'bitnami/redis:latest'
+    image: "bitnami/redis:latest"
+    restart: unless-stopped
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     volumes:
@@ -39,7 +40,8 @@ services:
     logging: *default-logging
 
   directus:
-    build: 
+    restart: unless-stopped
+    build:
       context: ./directus
       dockerfile: Dockerfile
     ports:

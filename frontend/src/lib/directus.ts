@@ -1,12 +1,17 @@
 import { DIRECTUS_PUBLIC_URL } from "@/config";
-import { createDirectus, rest, graphql, realtime } from "@directus/sdk";
+import { createDirectus, rest, realtime } from "@directus/sdk";
 
-export const directus = createDirectus<CustomDirectusTypes>(
-  "http://localhost:8055",
-).with(rest());
+export const directus =
+  createDirectus<CustomDirectusTypes>(DIRECTUS_PUBLIC_URL).with(rest());
+
+// remove any http or https from the url
+const directusBaseUrl = ((DIRECTUS_PUBLIC_URL as string) ?? "").replace(
+  /^(https?:\/\/)/,
+  "",
+);
 
 export const wsDirectus = createDirectus<CustomDirectusTypes>(
-  "ws://localhost:8055/websocket",
+  "ws://" + directusBaseUrl + "/websocket",
 ).with(realtime());
 
 wsDirectus.connect().then(() => {

@@ -539,7 +539,7 @@ fields:
       table: aspect
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: false
@@ -805,7 +805,7 @@ fields:
       table: aspect
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -1363,7 +1363,7 @@ fields:
       table: conversation
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: false
@@ -1401,7 +1401,7 @@ fields:
       table: conversation
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -1439,7 +1439,7 @@ fields:
       table: conversation
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -1477,7 +1477,7 @@ fields:
       table: conversation
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -1591,7 +1591,7 @@ fields:
       table: conversation
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: false
@@ -1732,7 +1732,7 @@ fields:
       options:
         enableLink: true
         filter: null
-        template: '{{project_tag_id.text}}'
+        template: "{{project_tag_id.text}}"
       readonly: false
       required: false
       sort: 11
@@ -1873,7 +1873,7 @@ fields:
       interface: select-dropdown-m2o
       note: null
       options:
-        template: '{{participant_name}}'
+        template: "{{participant_name}}"
       readonly: false
       required: false
       sort: null
@@ -1926,7 +1926,7 @@ fields:
       table: conversation_chunk
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -2041,7 +2041,7 @@ fields:
       table: conversation_chunk
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -2372,7 +2372,7 @@ fields:
       table: document
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: false
@@ -2410,7 +2410,7 @@ fields:
       table: document
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: false
@@ -2448,7 +2448,7 @@ fields:
       table: document
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: false
@@ -2486,7 +2486,7 @@ fields:
       table: document
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: false
@@ -3013,7 +3013,7 @@ fields:
       interface: select-dropdown-m2o
       note: null
       options:
-        template: '{{id}}'
+        template: "{{id}}"
       readonly: false
       required: false
       sort: 4
@@ -3066,7 +3066,7 @@ fields:
       table: project
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: false
@@ -3111,7 +3111,7 @@ fields:
       table: project
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: false
@@ -3187,7 +3187,7 @@ fields:
       table: project
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -3264,7 +3264,7 @@ fields:
       table: project
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -3436,7 +3436,7 @@ fields:
       options:
         enableLink: true
         enableSelect: false
-        template: '{{text}}'
+        template: "{{text}}"
       readonly: false
       required: false
       sort: 15
@@ -3620,7 +3620,7 @@ fields:
       interface: select-dropdown-m2o
       note: null
       options:
-        template: '{{name}}'
+        template: "{{name}}"
       readonly: false
       required: false
       sort: 4
@@ -3673,7 +3673,7 @@ fields:
       table: project_analysis_run
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: false
@@ -3882,7 +3882,7 @@ fields:
         enableCreate: false
         enableLink: true
         enableSelect: false
-        template: '{{id}}{{title}}'
+        template: "{{id}}{{title}}"
       readonly: false
       required: false
       sort: 11
@@ -3909,7 +3909,7 @@ fields:
         enableCreate: false
         enableLink: true
         enableSelect: false
-        template: '{{name}}'
+        template: "{{name}}"
       readonly: false
       required: false
       sort: 12
@@ -4101,7 +4101,7 @@ fields:
       table: project_tag
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: false
@@ -4132,7 +4132,7 @@ fields:
           - conversation_id.participant_name
         layout: table
         tableSpacing: compact
-        template: '{{conversation_id.participant_name}}'
+        template: "{{conversation_id.participant_name}}"
       readonly: false
       required: false
       sort: 6
@@ -4423,7 +4423,7 @@ fields:
       interface: select-dropdown-m2o
       note: null
       options:
-        template: '{{created_at}}{{id}}'
+        template: "{{created_at}}{{id}}"
       readonly: false
       required: false
       sort: 9
@@ -5161,7 +5161,7 @@ fields:
       table: view
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: false

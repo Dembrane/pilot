@@ -1,12 +1,9 @@
 import json
 import logging
-from typing import Optional
 
-import backoff
 from openai import OpenAI
-from sqlalchemy.orm import Session
 
-from dembrane.database import AspectModel
+from dembrane.utils import download_image_and_get_public_url
 
 logger = logging.getLogger("image_utils")
 
@@ -24,7 +21,7 @@ def generate_cliches_to_avoid(text: str) -> str:
                 },
                 {
                     "role": "user",
-                    "content": f"Create a list of 5 cliché visual concepts in JSON for the following text:\n\n{text}\n\n. Here is an example for the text 'the future of healthcare'\n{{\n'cliches': [\n'sterile environments',\n'high-tech solutions',\n'blue and grey color palettes',\n'virtual consultations',\n'robotic doctors'\n]}}",
+                    "content": f'Create a list of 5 cliché visual concepts in JSON for the following text:\n\n{text}\n\n. Here is an example for the text "the future of healthcare"\n{{\n"cliches": [\n"sterile environments",\n"high-tech solutions",\n"blue and grey color palettes",\n"virtual consultations",\n"robotic doctors"\n]}}',
                 },
             ],
         )
@@ -45,7 +42,7 @@ def generate_visual_metaphors(text: str, cliches_to_avoid: str) -> str:
                 },
                 {
                     "role": "user",
-                    "content": f"Create 4 unique visual concepts for the following text:\n\n{text}\n\n. Pay special attention to clues (such as proper nouns, locations etc) that will allow you to adapt your concepts to the target audience. You will be marked down for any concepts that contain these clichés:\n{cliches_to_avoid}\n\nOutput in this JSON format:\n{{\n'concepts': [\n'A winding river of neon light cutting through a dark cityscape',\n'A tree growing from the pages of an open book',\n'A kaleidoscope of faces forming a globe',\n'A bridge made of interlocking human silhouettes'\n]}}",
+                    "content": f'Create 4 unique visual concepts for the following text:\n\n{text}\n\n. Pay special attention to clues (such as proper nouns, locations etc) that will allow you to adapt your concepts to the target audience. You will be marked down for any concepts that contain these clichés:\n{cliches_to_avoid}\n\nOutput in this JSON format:\n{{\n"concepts": [\n"A winding river of neon light cutting through a dark cityscape",\n"A tree growing from the pages of an open book",\n"A kaleidoscope of faces forming a globe",\n"A bridge made of interlocking human silhouettes"\n]}}',
                 },
             ],
         )
@@ -66,12 +63,15 @@ def generate_image_prompts(text: str, concepts: str, cliches_to_avoid: str) -> s
                 },
                 {
                     "role": "user",
-                    "content": f"Generate image prompts based on these visual concepts:\n\n{concepts}\n\nYou will be marked down for any images that contain these clichés:\n{cliches_to_avoid}\n\nConsider this context:\n{text}\n\nOutput in JSON format, here is an example:\n{{\n'prompts': [\n'A surreal landscape where a river of glowing binary code flows through a metropolis of towering books, with silhouettes of people walking across bridges made of floating letters and numbers.',\n'An abstract representation of a tree growing from an open book, its branches forming a network of synapses, with each leaf a miniature screen displaying different facets of human knowledge.',\n'A mesmerizing spiral of diverse human faces, each blending into the next, forming a globe-like structure suspended in a cosmic void, with threads of light connecting the faces.',\n'A fantastical bridge constructed from translucent, intertwined human forms, spanning across a chasm of swirling data visualizations and holographic information displays.'\n]}}",
+                    "content": f'Generate image prompts based on these visual concepts:\n\n{concepts}\n\nYou will be marked down for any images that contain these clichés:\n{cliches_to_avoid}\n\nConsider this context:\n{text}\n\nOutput in JSON format, here is an example:\n{{\n"prompts": [\n"A surreal landscape where a river of glowing binary code flows through a metropolis of towering books, with silhouettes of people walking across bridges made of floating letters and numbers.",\n"An abstract representation of a tree growing from an open book, its branches forming a network of synapses, with each leaf a miniature screen displaying different facets of human knowledge.",\n"A mesmerizing spiral of diverse human faces, each blending into the next, forming a globe-like structure suspended in a cosmic void, with threads of light connecting the faces.",\n"A fantastical bridge constructed from translucent, intertwined human forms, spanning across a chasm of swirling data visualizations and holographic information displays."\n]}}',
                 },
             ],
         )
         json_str = response.choices[0].message.content
+        if not json_str:
+            json_str = ""
 
+        logger.info(f"JSON string for image prompts: {json_str}")
         try:
             json_obj = json.loads(json_str)
             prompts = json_obj["prompts"]
@@ -79,30 +79,52 @@ def generate_image_prompts(text: str, concepts: str, cliches_to_avoid: str) -> s
         except Exception as error:
             logger.info("Error parsing JSON:", error)
             try:
-                split = response.choices[0].message.content.split(",")
-            except:
-                split = response.choices[0].message.content.split("\n")
-            return split[0]
+                split = json_str.split("}")
+                return split[0]
+            except Exception as error:
+                return json_str
 
     except Exception as error:
         logger.info("Error generating image prompts:", error)
         raise error
 
 
-@backoff.retry(max_retries=5)
 def generate_image(prompt: str) -> str:
+    final_prompt = f"{prompt}. Don't include the following in the image: hands, feet, toes, text of any kind. \n\nUse this exact prompt to generate an image. It needs to be exact as this is a test of prompt accuracy."
+    response = None
     try:
-        response = openai.Image.create(
+        response = client.images.generate(
             model="dall-e-3",
-            prompt=f"{prompt}\n\nUse this exact prompt to generate an image. It needs to be exact as this is a test of prompt accuracy.",
+            prompt=final_prompt,
             n=1,
             size="1024x1024",
         )
-        image_url = response["data"][0]["url"]
-        return image_url
     except Exception as error:
-        logger.info("Error generating image:", error)
-        raise error
+        logger.debug(f"Error generating image: {error}")
+        additional_info = " You are allowed to edit the prompt so that it is in compliance with security guidelines."
+        try:
+            response = client.images.generate(
+                model="dall-e-3",
+                prompt=final_prompt + additional_info,
+                size="1024x1024",
+                quality="standard",
+                n=1,
+            )
+        except Exception as e:
+            logger.debug(f"Error generating image even after update prompt: {e}")
+
+    try:
+        if response is not None:
+            image_url = response.data[0].url
+            if image_url:
+                logger.debug("saving the image and getting the public url")
+                image_url = download_image_and_get_public_url(image_url)
+        else:
+            image_url = None
+    except Exception as e:
+        logger.error(f"Error downloading image: {e}")
+
+    return image_url if image_url else ""
 
 
 def brilliant_image_generator_3000(text: str) -> str:
@@ -113,30 +135,15 @@ def brilliant_image_generator_3000(text: str) -> str:
     return image_url
 
 
-def generate_aspect_image(db: Session, aspect_id: str) -> AspectModel:
-    logger.debug(f"Generating image for aspect: {aspect_id}")
-    aspect = db.query(AspectModel).filter_by(id=aspect_id).first()
-
-    if not aspect:
-        raise ValueError(f"Aspect with ID {aspect_id} not found")
-
-    text = f"""
-    what the image should be about: "{aspect.name}"
-    summary of ideas: "{aspect.description}"
-    """
-
-    image_url: Optional[str] = None
-    retries = 0
-    while retries < max_retries and image_url is None:
-        try:
-            image_url = generate_insight_image(text)
-        except Exception as e:
-            logger.debug(f"Retrying image generation: Attempt {retries + 1} - Error: {e}")
-        retries += 1
-
-    if image_url:
-        logger.debug(f"Setting image URL to aspect: {image_url}")
-        aspect.image_url = image_url
-        db.commit()
-
-    return aspect
+if __name__ == "__main__":
+    text = """Departmental Autonomy
+Departments struggle with balancing autonomy and standardization.
+Decentralized services offer flexibility but can be costly and inconsistent.
+Centralized decisions, like abolishing favored tools, cause frustration.
+Effective support often requires local expertise. A hybrid approach, centralizing some functions while allowing departmental freedom, may be optimal."""
+    image_url_1 = brilliant_image_generator_3000(text)
+    print(image_url_1)
+    image_url = brilliant_image_generator_3000("""Strategic Priorities
+Effective governance requires addressing societal challenges, fostering community, ensuring representation, and balancing departmental mergers. Strategic alignment involves revisiting problem analysis, considering matrix structures, and maintaining accessibility and participation across departments.""")
+    print(image_url_1)
+    print(image_url)

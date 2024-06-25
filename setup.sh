@@ -1,22 +1,38 @@
 #!/bin/bash
 
-curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION="--yes" bash
-echo 'source "$HOME/.rye/env"' >> ~/.bashrc
+frontend_setup () {
+  curl -fsSL https://fnm.vercel.app/install | bash
+  echo 'eval "$(fnm env --use-on-cd)"' >> ~/.bashrc
+  FNM_PATH="/root/.local/share/fnm"
+  if [ -d "$FNM_PATH" ]; then
+    export PATH="$FNM_PATH:$PATH"
+    eval "`fnm env`"
+  fi  
+  fnm install 18
+  npm i -g yarn
 
-curl -fsSL https://fnm.vercel.app/install | bash
-echo 'eval "$(fnm env --use-on-cd)"' >> ~/.bashrc
+  cd frontend
+  yarn install
+}
 
-. ~/.bashrc
+server_setup() {
+  curl -sSf https://rye.astral.sh/get | RYE_INSTALL_OPTION="--yes" bash
+  echo 'source "$HOME/.rye/env"' >> ~/.bashrc
+  . $HOME/.rye/env
+  cd server
+  rye sync
+  alembic upgrade head
+  pip install mypy
+}
 
-fnm install 18
-npm i -g yarn
+# hide stdout, only show stderr
+frontend_setup &
+first=$!
 
-cd frontend
-yarn install
+server_setup &
+second=$!
 
-cd ../server
-rye sync
-alembic upgrade head
-pip install mypy
+wait $first
+wait $second
 
 echo "Setup complete"

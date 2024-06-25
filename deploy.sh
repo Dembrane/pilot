@@ -42,6 +42,15 @@ elif [[ $ENV == "test" ]]; then
     # docker builder prune
     # docker system prune
     docker compose up --build -d
+elif [[ $ENV == "local" ]]; then
+    echo "Using local settings"
+    export BUILD_VERSION="local-$BUILD_VERSION"
+    export API_BASE_URL="localhost:8000"
+    export ADMIN_BASE_URL="localhost:8001"
+    export PARTICIPANT_BASE_URL="localhost:8002"
+    export GRAFANA_BASE_URL="localhost:3000"
+    docker compose down
+    docker compose -f docker-compose.coolify.yml up --build -d
 else
     echo "Invalid environment $ENV provided, exiting..."
     exit 1

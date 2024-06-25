@@ -8,6 +8,20 @@
       "name": "Python Debugger: Server",
       "type": "debugpy",
       "request": "launch",
+      "module": "dembrane.main",
+      "cwd": "${workspaceFolder}/server"
+    },
+    {
+      "name": "image_utils",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "dembrane.image_utils",
+      "cwd": "${workspaceFolder}/server"
+    },
+    {
+      "name": "quote_utils",
+      "type": "debugpy",
+      "request": "launch",
       "module": "dembrane.quote_utils",
       "cwd": "${workspaceFolder}/server"
     }

@@ -54,6 +54,7 @@ export const ProjectLibraryView = () => {
             cols={{
               sm: 2,
               md: 3,
+              xl: 5,
             }}
             spacing="md"
           >

@@ -363,10 +363,28 @@ export const createProjectTag = async (payload: {
   });
 };
 
-export const requestProjectAnalysis = async (payload: {
+export const generateProjectLibrary = async (payload: {
   projectId: string;
 }) => {
-  return api.post<unknown, unknown>(
-    `/projects/${payload.projectId}/request-analysis`,
+  return api.post<unknown, TTask>(
+    `/projects/${payload.projectId}/create-library`,
   );
+};
+
+export const generateProjectView = async (payload: {
+  projectId: string;
+  query: string;
+  additionalContext?: string;
+}) => {
+  return api.post<unknown, TTask>(
+    `/projects/${payload.projectId}/create-view`,
+    {
+      query: payload.query,
+      additional_context: payload.additionalContext,
+    },
+  );
+};
+
+export const getTaskById = async (taskId: string) => {
+  return api.get<unknown, TTask>(`/tasks/${taskId}`);
 };

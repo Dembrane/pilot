@@ -1,12 +1,13 @@
 import { Breadcrumbs } from "@/components/breadcrumbs/Breadcrumbs";
 import { Insight } from "@/components/insight/Insight";
+import { Task } from "@/components/task/Task";
 import { ViewExpandedCard } from "@/components/view/View";
 import { Icons } from "@/icons";
 import {
   useConversationsByProjectId,
   useProjectInsights,
   useProjectViews,
-  useRequestProjectAnalysisMutation,
+  useGenerateProjectLibraryMutation,
 } from "@/lib/query";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import {
@@ -72,7 +73,7 @@ export const ProjectLibrary = () => {
     false,
   );
 
-  const requestProjectAnalysisMutation = useRequestProjectAnalysisMutation();
+  const requestProjectLibraryMutation = useGenerateProjectLibraryMutation();
   const [sortBy, setSortBy] = useState<SortBy>("relevance");
   const toggleSort = useCallback(() => {
     setSortBy(sortBy === "default" ? "relevance" : "default");
@@ -153,6 +154,10 @@ export const ProjectLibrary = () => {
         </>
       )}
 
+      {requestProjectLibraryMutation.isSuccess && (
+        <Task task={requestProjectLibraryMutation.data} />
+      )}
+
       {!insightsExist && (
         <>
           <Alert variant="light" icon={<IconInfoCircle />}>
@@ -165,13 +170,13 @@ export const ProjectLibrary = () => {
               <Box>
                 <Button
                   onClick={() =>
-                    requestProjectAnalysisMutation.mutate({
+                    requestProjectLibraryMutation.mutate({
                       projectId: projectId ?? "",
                     })
                   }
                   leftSection={<IconPlus />}
-                  loading={requestProjectAnalysisMutation.isPending}
-                  disabled={requestProjectAnalysisMutation.isPending}
+                  loading={requestProjectLibraryMutation.isPending}
+                  disabled={requestProjectLibraryMutation.isPending}
                 >
                   Create Library
                 </Button>
@@ -181,7 +186,12 @@ export const ProjectLibrary = () => {
         </>
       )}
 
-      <Title order={2}>Your Views</Title>
+      <Group justify="space-between">
+        <Title order={2}>Your Views</Title>
+        <Button leftSection={<IconPlus />} disabled>
+          Create View
+        </Button>
+      </Group>
       {!viewsExist && <DummyViews />}
 
       <Stack>

@@ -52,18 +52,18 @@ DEFAULT_WHISPER_PROMPTS = {
 }
 
 
-def transcribe_conversation_chunk(conversation_chunk_id: str):
+def transcribe_conversation_chunk(conversation_chunk_id: str) -> None:
     """Process conversation chunk for transcription"""
     with DatabaseSession() as db:
         try:
             chunk = db.get(ConversationChunkModel, conversation_chunk_id)
 
             if chunk is None:
-                return None
+                return
 
             if not chunk.path:
                 logger.info(f"Chunk {conversation_chunk_id} has no path")
-                return None
+                return
 
             if not os.path.exists(chunk.path):
                 raise FileNotFoundError(f"File not found: {chunk.path}")
@@ -84,7 +84,7 @@ def transcribe_conversation_chunk(conversation_chunk_id: str):
             db.commit()
 
             logger.debug(f"Processed chunk: {conversation_chunk_id}")
-            return conversation_chunk_id
+            return
 
         except Exception as exc:
             logger.error(f"Unexpected error: {exc}")

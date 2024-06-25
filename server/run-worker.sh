@@ -28,12 +28,11 @@ terminate_processes() {
 WORKER_PIDS=()
 
 # Launch the workers
-launch_worker "worker.high" "high"
 launch_worker "worker.normal" "normal"
-launch_worker "worker.low" "low"
 
 # Launch Flower
 echo "Launching Flower"
+export FLOWER_UNAUTHENTICATED_API=True
 celery -A dembrane.tasks flower &
 FLOWER_PID=$!
 

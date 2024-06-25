@@ -93,6 +93,10 @@ def split_audio_chunk(db: Session, original_chunk_id: str) -> List[ConversationC
 
     original_chunk = db.get(ConversationChunkModel, original_chunk_id)
 
+    if original_chunk is None:
+        logger.error(f"Chunk not found: {original_chunk_id}")
+        raise ValueError(f"Chunk not found: {original_chunk_id}")
+
     logger.debug(f"Splitting audio chunk: {original_chunk.id}")
     if original_chunk.path is None:
         raise FileNotFoundError("File path is not found")

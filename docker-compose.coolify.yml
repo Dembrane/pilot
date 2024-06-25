@@ -6,8 +6,47 @@ x-logging: &default-logging
     tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 services:
+  redis:
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - redis_data:/bitnami/redis/data
+
+  postgres:
+    image: pgvector/pgvector:0.6.2-pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dembrane
+      POSTGRES_USER: dembrane
+      POSTGRES_PASSWORD: dembrane
+    networks:
+      - default
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    logging: *default-logging
+
+  rabbitmq:
+    image: rabbitmq:3.13
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=dembrane
+      - RABBITMQ_DEFAULT_PASS=dembrane
+    networks:
+      - default
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    logging: *default-logging
+
   directus:
-    image: directus/directus:10.12.1
+    build: 
+      context: ./directus
+      dockerfile: Dockerfile
+    ports:
+      - 8055:8055
+    depends_on:
+      - postgres
+      - redis
     environment:
       PORT: 8055
       SECRET: ${DIRECTUS_SECRET}
@@ -20,32 +59,12 @@ services:
       DB_USER: dembrane
       DB_PASSWORD: dembrane
       DB_DATABASE: dembrane
-      PUBLIC_URL: https://directus.test.findcommonground.app
-
-  postgres:
-    image: pgvector/pgvector:0.6.2-pg16
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: dembrane
-      POSTGRES_USER: dembrane
-      POSTGRES_PASSWORD: dembrane
-    networks:
-      - default
+      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL}
+      TELEMETRY: false
+      REDIS_ENABLED: true
+      REDIS: redis://redis:6379
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
-    logging: *default-logging
-
-  rabbitmq:
-    image: rabbitmq:3.13
-    restart: unless-stopped
-    environment:
-      - RABBITMQ_DEFAULT_USER=dembrane
-      - RABBITMQ_DEFAULT_PASS=dembrane
-    networks:
-      - default
-    volumes:
-      - ./rabbitmq_data:/var/lib/rabbitmq
-    logging: *default-logging
+      - ./directus/uploads:/directus/uploads
 
   api-server:
     build:
@@ -61,6 +80,7 @@ services:
     environment:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
+      - REDIS_URL=redis://redis:6379
       - ADMIN_BASE_URL=https://${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
@@ -73,6 +93,7 @@ services:
     networks:
       - default
     depends_on:
+      - directus
       - postgres
       - rabbitmq
     logging: *default-logging
@@ -85,6 +106,7 @@ services:
     environment:
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
+      - REDIS_URL=redis://redis:6379
       - ADMIN_BASE_URL=https://${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=https://${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
@@ -115,7 +137,6 @@ services:
     logging: *default-logging
     labels:
       - caddy_0.basicauth.0_dembrane=${CADDY_HASHED_PASSWORD}
-
 
   participant-frontend:
     build:
@@ -181,6 +202,9 @@ services:
 volumes:
   loki_data:
   grafana_data:
+  postgres_data:
+  rabbitmq_data:
+  redis_data:
 
 networks:
   default:

@@ -4,7 +4,6 @@ import json
 import random
 import logging
 from typing import Dict, List, Optional
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import numpy as np
 import pandas as pd
@@ -24,11 +23,10 @@ from dembrane.database import (
     AspectModel,
     InsightModel,
     DatabaseSession,
-    ConversationModel,
     ConversationChunkModel,
-    ProjectAnalysisRunModel,
 )
 from dembrane.embedding import EMBEDDING_DIM, embed_text
+from dembrane.image_utils import brilliant_image_generator_3000
 
 logger = logging.getLogger("quote_utils")
 logger.setLevel(logging.DEBUG)
@@ -109,7 +107,9 @@ BACKWARD_MERGE_UPPER_WORD_LIMIT = 35
 LONG_SENTENCE_LIMIT = 75
 
 
-def generate_quotes(db: Session, project_analysis_run_id: Optional[str], conversation_id: str) -> List[QuoteModel]:
+def generate_quotes(
+    db: Session, project_analysis_run_id: Optional[str], conversation_id: str
+) -> List[QuoteModel]:
     """Generate quotes"""
     logger = logging.getLogger("generate_quotes")
 
@@ -123,17 +123,27 @@ def generate_quotes(db: Session, project_analysis_run_id: Optional[str], convers
         .all()
     )
 
+    chunk_id_text = dict()
+    for chunk in chunks:
+        chunk_id_text[chunk.id] = chunk.transcript
+
     logger.debug(f"chunks found: {len(chunks)}")
 
     if len(chunks) == 0:
         logger.debug(f"no conversation_chunks found for conversation {conversation_id}")
         return []
 
-    conversation_transcript = join_transcript_chunks([anonymize_sentence(chunk.transcript) for chunk in chunks])
+    conversation_transcript = join_transcript_chunks(
+        [anonymize_sentence(chunk.transcript) for chunk in chunks]
+    )
 
-    split_conversation_transcript = re.split(SENTENCE_ENDING_PUNTUATION_REGEX, conversation_transcript)
+    split_conversation_transcript = re.split(
+        SENTENCE_ENDING_PUNTUATION_REGEX, conversation_transcript
+    )
 
-    logger.debug(f"after joining chunks and splitting into sentences: {len(split_conversation_transcript)} sentences")
+    logger.debug(
+        f"after joining chunks and splitting into sentences: {len(split_conversation_transcript)} sentences"
+    )
 
     quote_strs = []
     buffer: List[str] = []
@@ -161,7 +171,11 @@ def generate_quotes(db: Session, project_analysis_run_id: Optional[str], convers
     i = len(quote_strs) - 1
 
     while i >= 0:
-        if i > 0 and len(quote_strs[i].split()) + len(quote_strs[i - 1].split()) <= BACKWARD_MERGE_UPPER_WORD_LIMIT:
+        if (
+            i > 0
+            and len(quote_strs[i].split()) + len(quote_strs[i - 1].split())
+            <= BACKWARD_MERGE_UPPER_WORD_LIMIT
+        ):
             merged_quote = quote_strs[i - 1] + " " + quote_strs[i]
             if len(merged_quote.split()) <= LONG_SENTENCE_LIMIT:
                 final_quotes.append(merged_quote)
@@ -179,22 +193,41 @@ def generate_quotes(db: Session, project_analysis_run_id: Optional[str], convers
 
     for quote_str in final_quotes:
         try:
+            closest_chunk_id = None
+
+            # substring check
+            # sometimes quote will be a substring of the chunk
+            # sometimes a quote may be span over multiple chunks
+            # FIXME
+            for chunk_id, chunk_text in chunk_id_text.items():
+                if quote_str in chunk_text:
+                    closest_chunk_id = chunk_id
+                    break
+
+            closest_chunk = db.query(ConversationChunkModel).filter_by(id=closest_chunk_id).first()
+
             quote = QuoteModel(
                 id=generate_uuid(),
                 created_at=get_utc_timestamp(),
-                project_analysis_run_id=project_analysis_run_id if project_analysis_run_id else None,
+                project_analysis_run_id=project_analysis_run_id
+                if project_analysis_run_id
+                else None,
                 conversation_id=conversation_id,
                 text=quote_str,
                 embedding=embed_text(quote_str),
             )
+
+            db.add(quote)
+            db.commit()
+
+            # if closest_chunk:
+            #     quote.conversation_chunks.append(closest_chunk)
+
         except Exception as e:
             logger.error(f"Error embedding text {quote_str}: {str(e)}")
             continue
 
         quotes.append(quote)
-
-    db.add_all(quotes)
-    db.commit()
 
     return quotes
 
@@ -224,7 +257,9 @@ def get_random_sample_quotes(
 
     # Step 1: Select quotes ensuring at least one quote per conversation
     conversation_ids = db.scalars(
-        select(QuoteModel.conversation_id).filter_by(project_analysis_run_id=project_analysis_run_id).distinct()
+        select(QuoteModel.conversation_id)
+        .filter_by(project_analysis_run_id=project_analysis_run_id)
+        .distinct()
     ).all()
 
     selected_quotes = []
@@ -292,8 +327,11 @@ def get_random_sample_quotes(
     return selected_quotes
 
 
-def generate_view(
-    db: Session, project_analysis_run_id: str, user_input: str, initial_aspects: Optional[str] = None
+def initialize_view(
+    db: Session,
+    project_analysis_run_id: str,
+    user_input: str,
+    initial_aspects: Optional[str] = None,
 ) -> ViewModel:
     """
     Generate a list of draft aspects based on user input.
@@ -367,7 +405,6 @@ Output:"""
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=messages,  # type: ignore
-        temperature=0.2,
         # response_format={"type": "json_object"},
     )
 
@@ -447,52 +484,30 @@ def format_json_string_to_list(json_string: str) -> List[str]:
     return formatted_sample_quotes
 
 
-def assign_aspect_centroids_and_cluster_quotes(
-    db: Session, project_analysis_run_id: str, view_id: str
-) -> Dict[str, List[str]]:
-    """
-    Args:
-    - db: Database session
-    - project_analysis_run_id: The ID of the project analysis run.
+def assign_aspect_centroid(db: Session, aspect_id: str):
+    aspect = db.get(AspectModel, aspect_id)
 
-    Returns:
-    - A dictionary with aspect names as keys and lists of sample quotes as values.
-    """
-    logger = logging.getLogger("assign_aspect_centroids_and_cluster_quotes")
+    if not aspect:
+        logger.error(f"Aspect with ID {aspect_id} not found")
+        return
 
-    view = db.query(ViewModel).filter_by(id=view_id, project_analysis_run_id=project_analysis_run_id).first()
+    sample_quotes = get_random_sample_quotes(
+        db, aspect.project_analysis_run_id, context_limit=100000
+    )
 
-    if not view:
-        raise ValueError(f"View with ID {view_id} not found for project analysis run {project_analysis_run_id}")
-
-    # Fetch aspects for the given project analysis run and VIEW
-    aspects = view.aspects
-    logger.debug(f"Aspects found: {len(aspects)}")
-
-    for aspect in aspects:
-        logger.debug(f"Aspect: {aspect.name}")
-
-    # Fetch all quotes for the given project analysis run
-    quotes = db.scalars(select(QuoteModel).filter_by(project_analysis_run_id=project_analysis_run_id)).all()
-
-    logger.debug(f"Quotes found: {len(quotes)}")
-
-    # Generate sample quotes for each aspect and calculate centroids
-    sample_quotes = get_random_sample_quotes(db, project_analysis_run_id, context_limit=100000)
     sample_quotes_texts = [quote.text for quote in sample_quotes]
-    sample_quotes_per_aspect = {}
 
-    logger.debug(f"Sampled quotes: {len(sample_quotes_texts)}")
+    logger.debug(f"trying for aspect:  {aspect.name}")
 
-    for aspect in aspects:
-        logger.debug("trying for aspect: ", aspect.name)
+    aspect_name = aspect.name
+    aspect_description = aspect.description
 
-        aspect_name = aspect.name
-        aspect_description = aspect.description
+    view = aspect.view
+    aspects = view.aspects
 
-        random_sample_quotes = "\n".join([f'"{quote}"' for quote in sample_quotes_texts])
+    random_sample_quotes = "\n".join([f'"{quote}"' for quote in sample_quotes_texts])
 
-        prompt = f"""\
+    prompt = f"""\
 This is a part of an analysis of a dataset for a user's query about "{view.name}".
 A user is requesting sample quotes for the aspect: {aspect_name}. 
 Given the aspect description: {aspect_description}, provide a list of all the quotes that match the aspect.
@@ -532,66 +547,86 @@ Contextual data to analyze:
 
 Output:"""
 
-        messages = [{"role": "user", "content": prompt}]
+    messages = [{"role": "user", "content": prompt}]
 
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=messages,  # type: ignore
-            temperature=0.3,
-            # max_tokens=4096,
-        )
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=messages,  # type: ignore
+        # max_tokens=4096,
+    )
 
-        sample_quotes_json_string = response.choices[0].message.content
-        formatted_sample_quotes = format_json_string_to_list(
-            sample_quotes_json_string if sample_quotes_json_string else "[]"
-        )
+    sample_quotes_json_string = response.choices[0].message.content
+    formatted_sample_quotes = format_json_string_to_list(
+        sample_quotes_json_string if sample_quotes_json_string else "[]"
+    )
 
-        sample_quotes_per_aspect[aspect_name] = formatted_sample_quotes
+    # gather representative quotes:
+    representative_quote_ids = []
+    for quote in sample_quotes:
+        if any(
+            re.search(re.escape(quote_text), quote.text, re.IGNORECASE)
+            for quote_text in formatted_sample_quotes
+        ):
+            representative_quote_ids.append(quote.id)
 
-        # gather representative quotes:
-        representative_quote_ids = []
-        for quote in quotes:
+    representative_quotes = (
+        db.query(QuoteModel).filter(QuoteModel.id.in_(representative_quote_ids)).all()
+    )
+
+    logger.debug(f"Representative quotes for aspect {aspect_name}: {len(representative_quotes)}")
+
+    aspect.representative_quotes = representative_quotes
+    db.commit()
+
+    # Calculate centroid using the returned sample quotes
+    selected_quotes = [quote for quote in sample_quotes if quote.text in formatted_sample_quotes]
+
+    # TODO: we should also store these "representative quotes"
+
+    logger.debug(f"Selected quotes for aspect {aspect_name}: {len(selected_quotes)}")
+
+    if not selected_quotes:
+        selected_quotes = [
+            quote
+            for quote in sample_quotes
             if any(
-                re.search(re.escape(quote_text), quote.text, re.IGNORECASE) for quote_text in formatted_sample_quotes
-            ):
-                representative_quote_ids.append(quote.id)
+                re.search(re.escape(quote_text), quote.text, re.IGNORECASE)
+                for quote_text in formatted_sample_quotes
+            )
+        ]
 
-        representative_quotes = db.query(QuoteModel).filter(QuoteModel.id.in_(representative_quote_ids)).all()
+    embeddings_list = [
+        embed_text(aspect.name + ". " + (aspect_description if aspect_description else ""))
+    ]
 
-        logger.debug(f"Representative quotes for aspect {aspect_name}: {len(representative_quotes)}")
+    if selected_quotes:
+        logger.debug(f"Quotes found for aspect {aspect_name}: {len(selected_quotes)}")
+        embeddings_list.extend([quote.embedding for quote in selected_quotes])
+    else:
+        logger.debug(f"No quotes found for aspect {aspect_name}")
 
-        aspect.representative_quotes = representative_quotes
-        db.commit()
+    centroid = calculate_centroid(embeddings_list)
+    logger.debug(f"Setting centroid for aspect {aspect_name}")
+    aspect.centroid_embedding = centroid
+    db.commit()
 
-        # Calculate centroid using the returned sample quotes
-        selected_quotes = [quote for quote in quotes if quote.text in formatted_sample_quotes]
 
-        # TODO: we should also store these "representative quotes"
+def cluster_quotes_using_aspect_centroids(db: Session, view_id: str) -> None:
+    view = db.get(ViewModel, view_id)
 
-        logger.debug(f"Selected quotes for aspect {aspect_name}: {len(selected_quotes)}")
+    if not view:
+        logger.error(f"View with ID {view_id} not found")
+        return
 
-        if not selected_quotes:
-            selected_quotes = [
-                quote
-                for quote in quotes
-                if any(
-                    re.search(re.escape(quote_text), quote.text, re.IGNORECASE)
-                    for quote_text in formatted_sample_quotes
-                )
-            ]
+    aspects = view.aspects
 
-        embeddings_list = [embed_text(aspect.name + ". " + (aspect_description if aspect_description else ""))]
+    if not aspects:
+        logger.error(f"No aspects found for view {view_id}")
+        return
 
-        if selected_quotes:
-            logger.debug(f"Quotes found for aspect {aspect_name}: {len(selected_quotes)}")
-            embeddings_list.extend([quote.embedding for quote in selected_quotes])
-        else:
-            logger.debug(f"No quotes found for aspect {aspect_name}")
-
-        centroid = calculate_centroid(embeddings_list)
-        logger.debug(f"Setting centroid for aspect {aspect_name}")
-        aspect.centroid_embedding = centroid
-        db.commit()
+    quotes = (
+        db.query(QuoteModel).filter_by(project_analysis_run_id=view.project_analysis_run_id).all()
+    )
 
     # Assign each quote to the closest centroid
     aspect_centroids = {aspect.id: aspect.centroid_embedding for aspect in aspects}
@@ -611,29 +646,30 @@ Output:"""
         # and the centroids of different aspects using the min() function and the np.linalg.norm() function
         closest_aspect_id = min(
             aspect_centroids.keys(),
-            key=lambda aspect_id: np.linalg.norm(np.array(quote.embedding) - np.array(aspect_centroids[aspect_id])),
+            key=lambda aspect_id: np.linalg.norm(
+                np.array(quote.embedding) - np.array(aspect_centroids[aspect_id])
+            ),
         )
 
         closest_aspect = (
             db.query(AspectModel)
-            .filter_by(id=closest_aspect_id, project_analysis_run_id=project_analysis_run_id, view_id=view_id)
+            .filter_by(
+                id=closest_aspect_id,
+                project_analysis_run_id=view.project_analysis_run_id,
+                view_id=view_id,
+            )
             .first()
         )
-
-        logger.debug("quote:", quote.text)
 
         if closest_aspect:
             logger.debug(f"Closest aspect: {closest_aspect.name}")
             closest_aspect.quotes.append(quote)
-            db.add(closest_aspect)
+            db.commit()
         else:
             logger.debug(f"No closest aspect found for quote {quote.id}")
 
-    db.commit()
-    return sample_quotes_per_aspect
 
-
-def generate_aspect_summary(db: Session, aspect_id: str) -> AspectModel:
+def generate_aspect_summary(db: Session, aspect_id: str) -> None:
     aspect = db.query(AspectModel).filter_by(id=aspect_id).first()
 
     if not aspect:
@@ -646,7 +682,7 @@ def generate_aspect_summary(db: Session, aspect_id: str) -> AspectModel:
 
     prompt = f"""\
 You will be provided with some context and a list of quotes related to that context.
-Your task is to write a concise summary of the key points from the quotes and how they relate to the given context.
+Your task is to write a concise text of the key points from the quotes and how they relate to the given context.
 Here is the context. Never repeat information in the context in your final output.
 
 <context>
@@ -660,21 +696,20 @@ And here are the quotes:
 </quotes>`
 
 Please read the context and quotes carefully. 
-Then, think about how you could summarize the main points from the quotes in a way that relates them to the context.
-The summary should be information-dense and avoid redundancy with the context, since this context will also be shown to the reader.
-Don't mention "quotes" or "context" in your summary.
-After planning your summary, please write a very short version within 30-50 words only.
-Remember, do not repeat things already stated in the context, as that will also be shown. 
+Then, think about how you could capture the main points from the quotes in a way that relates them to the context.
+The generated text should be information-dense and avoid redundancy with the context, since this context will also be shown to the reader.
+Don't mention any "quotes" or "context" in your text.
 Focus on highlighting the key takeaways from the quotes and how they build upon or relate to the context.
+Please write a very short version within 1 sentence only.
+Remember, do not repeat things already stated in the context, as that will also be shown. 
 
-Summary:"""
+Text:"""
 
     messages = [{"role": "user", "content": prompt}]
 
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=messages,  # type: ignore
-        temperature=0.2,
     )
 
     summary = response.choices[0].message.content
@@ -683,12 +718,13 @@ Summary:"""
 
     prompt = f"""
 You will be given context and a list of quotes related to that context.
-Your task is to write a concise summary of the key points from the quotes and their relation to the given context.
-Here is the context. Do not repeat the information in the context in your summary.
+Your task is to write a concise text of the key points from the quotes and their relation to the given context.
+Here is the context. Do not repeat the information in the context in your text.
 
 <context>
 User's Query: {view_name}
 Aspect under consideration: {aspect.name} ({aspect.description})
+Additional context: {aspect.short_summary}
 </context>
 
 Here are the quotes:
@@ -697,19 +733,14 @@ Here are the quotes:
 </quotes>
 
 Carefully read the context and quotes.
-Summarize the main points from the quotes in a way that ties them to the context.
-The summary should be information-dense and avoid redundancy with the context, which will be shown to the reader.
+Capture the main points from the quotes in a way that ties them to the context.
+The text should be information-dense and avoid redundancy with the context, which will be shown to the reader.
 Emphasize the key takeaways from the quotes and how they build upon or relate to the context.
-
-Short Summary:
-{aspect.short_summary}
-
-Please write a longer version below.
-The summary should be concise yet ensure everyone quoted feels heard and represented.
+The text should be concise yet ensure everyone quoted feels heard and represented.
 Capture all key points while keeping it brief.
-You may use markdown to format your response. Output only the longer version below.
+You may use markdown to format your response. Keep your response within 70-100 words.
 
-Summary:
+Text:
 """
 
     messages = [{"role": "user", "content": prompt}]
@@ -717,14 +748,13 @@ Summary:
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=messages,  # type: ignore
-        temperature=0.2,
     )
 
     summary = response.choices[0].message.content
     aspect.long_summary = summary
     db.commit()
 
-    return aspect
+    return
 
 
 def generate_aspect_image(db: Session, aspect_id: str) -> AspectModel:
@@ -734,52 +764,97 @@ def generate_aspect_image(db: Session, aspect_id: str) -> AspectModel:
     if not aspect:
         raise ValueError(f"Aspect with ID {aspect_id} not found")
 
-    prompt = f"""\
+    response = None
+
+    try:
+        use_model = "MODEST"
+
+        view = aspect.view
+        if not view:
+            raise ValueError("View not found")
+
+        project_analysis_run = view.project_analysis_run
+        if not project_analysis_run:
+            raise ValueError("Project analysis run not found")
+
+        project = project_analysis_run.project
+        if not project:
+            raise ValueError("Project not found")
+
+        use_model = project.image_generation_model or "MODEST"
+
+        logger.debug(f"using image generation model: {use_model}")
+
+    except Exception as e:
+        logger.error(f"Error getting image generation model: {e}")
+        use_model = "MODEST"
+
+    if use_model == "MODEST":
+        try:
+            prompt = f"""\
 in a impressionism style painting, represent the theme of the following context and summary.
 use shades of neon turquoise, light blue and light pink. always capture the essence of the text from a larger perspective.
 NEVER INCLUDE text in the image. I REPEAT, don't include any text in the image.
 what the image should be about: "{aspect.name}"
-summary of ideas: "{aspect.description}"
-"""
+summary of ideas: "{aspect.description}\""""
 
-    response = None
-    try:
-        response = client.images.generate(
-            model="dall-e-3",
-            prompt=prompt,
-            size="1024x1024",
-            quality="standard",
-            n=1,
-        )
-    except Exception as e:
-        logger.debug(f"Error generating image: {e}")
-        additional_info = "edit the prompt so that it is in compliance with security guidelines."
-        try:
             response = client.images.generate(
                 model="dall-e-3",
-                prompt=prompt + additional_info,
+                prompt=prompt,
                 size="1024x1024",
                 quality="standard",
                 n=1,
             )
         except Exception as e:
-            logger.debug(f"Error generating image even after update prompt: {e}")
+            logger.debug(f"Error generating image: {e}")
+            additional_info = (
+                "edit the prompt so that it is in compliance with security guidelines."
+            )
+            try:
+                response = client.images.generate(
+                    model="dall-e-3",
+                    prompt=prompt + additional_info,
+                    size="1024x1024",
+                    quality="standard",
+                    n=1,
+                )
+            except Exception as e:
+                logger.debug(f"Error generating image even after update prompt: {e}")
 
-    try:
-        if response:
-            image_url = response.data[0].url
-            if image_url:
-                logger.debug("saving the image and getting the public url")
-                image_url = download_image_and_get_public_url(image_url)
-        else:
-            image_url = None
-    except Exception as e:
-        logger.error(f"Error downloading image: {e}")
+        try:
+            if response:
+                image_url = response.data[0].url
+                if image_url:
+                    logger.debug("saving the image and getting the public url")
+                    image_url = download_image_and_get_public_url(image_url)
+            else:
+                image_url = None
+        except Exception as e:
+            logger.error(f"Error downloading image: {e}")
+    elif use_model == "EXTRAVAGANT":
+        image_url = brilliant_image_generator_3000(f"{aspect.name}\n{aspect.short_summary}")
+    else:
+        logger.info(f"Image generation model not found: {use_model}")
+        image_url = None
 
     logger.debug(f"setting image URL to aspect: {image_url}")
     aspect.image_url = image_url
 
     db.commit()
+
+    return aspect
+
+
+def generate_aspect_extras(db: Session, aspect_id: str) -> AspectModel | None:
+    """aspect summary, aspect image"""
+    aspect = db.query(AspectModel).filter_by(id=aspect_id).first()
+
+    if not aspect:
+        logger.error(f"Aspect with ID {aspect_id} not found")
+        return
+
+    generate_aspect_summary(db, aspect.id)
+    generate_aspect_image(db, aspect.id)
 
     return aspect
 
@@ -790,10 +865,6 @@ def generate_view_extras(db: Session, view_id: str) -> ViewModel:
 
     if not view:
         raise ValueError(f"View with ID {view_id} not found")
-
-    for aspect in view.aspects:
-        generate_aspect_summary(db, aspect.id)
-        generate_aspect_image(db, aspect.id)
 
     formatted_aspects = "\n\n".join(
         [
@@ -809,7 +880,7 @@ Summary: {aspect.long_summary}
 
     prompt = f"""\
 You will be provided with list of aspects and context that are used to answer a user's query.
-Your task is to write a concise summary of the key points from the aspects and how they relate to the user's query.
+Your task is to write a concise text of the key takeaways from the aspects and how they relate to the user's query.
 Here is the context. Never repeat information in the context in your final output.
 
 <context>
@@ -820,21 +891,19 @@ And here are the aspects:
 
 </context>
 
-Please read the context and quotes carefully. 
-Then, think about how you could summarize the main points from the aspects in a way that relates them to the context.
+Please read the aspects carefully. 
+Then, think about how you could present the main points from the aspects in a way that relates them to the context.
 The summary should be information-dense and avoid redundancy with the context, since this context will also be shown to the reader.
-After planning your summary, please write a short version.
 Remember, do not repeat things already stated in the context, as that will also be shown. 
 Focus on highlighting the key takeaways from the quotes and how they build upon or relate to the context.
 
-Summary:"""
+Text:"""
 
     messages = [{"role": "user", "content": prompt}]
 
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=messages,  # type: ignore
-        temperature=0.2,
     )
 
     summary = response.choices[0].message.content
@@ -846,33 +915,83 @@ Summary:"""
     return view
 
 
-def generate_insights(db: Session, project_analysis_run_id: str) -> None:
+def generate_insight_extras(db: Session, insight_id: str) -> None:
+    """Generate insight extras for a given cluster."""
+    insight = db.query(InsightModel).filter_by(id=insight_id).first()
+
+    if not insight:
+        logger.error(f"Insight with ID {insight_id} not found")
+        return
+
+    quotes = insight.quotes
+
+    quote_text_joined = "\n".join([f'"{quote.text}"' for quote in quotes])
+
+    messages = [
+        {
+            "role": "user",
+            "content": f'What do the following text have in common? Generate a short title (4-5 words) based on the theme of the given text. Do not enclose your response in quotes or other special characters. Only output text.\n\nText:\n"""\n{quote_text_joined}\n"""\n\nTitle:',
+        }
+    ]
+
+    title_response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=messages,  # type: ignore
+    )
+
+    title = title_response.choices[0].message.content
+
+    messages = [
+        {
+            "role": "user",
+            "content": f'What do the following text have in common? Generate a brief (3-3 sentences) text and explanation of the theme based on the given texts. Use aspects like sentiment, similarities-dissimilarities, theme and critically analyse perspectives, assumptions, biases found in the texts to form your text. Do not enclose your response in quotes or other special characters. Only output text.\n\nTexts:\n"""\n{quote_text_joined}\n"""\n\nTheme: {title}\n\nText:',
+        }
+    ]
+
+    summary_response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=messages,  # type: ignore
+    )
+
+    summary = summary_response.choices[0].message.content
+
+    insight.title = title
+    insight.summary = summary
+    db.commit()
+
+    return
+
+
+def initialize_insights(db: Session, project_analysis_run_id: str) -> List[str]:
     """Generate insights"""
 
     quotes = (
         db.query(QuoteModel)
-        .with_entities(QuoteModel.id, QuoteModel.text, QuoteModel.embedding)
+        .with_entities(QuoteModel.id, QuoteModel.embedding)
         .filter(QuoteModel.project_analysis_run_id == project_analysis_run_id)
         .all()
     )
+
+    if not quotes:
+        logger.error(f"No quotes found for project analysis run {project_analysis_run_id}")
+        return []
 
     df = pd.DataFrame(
         [
             {
                 "id": quote.id,
-                "text": quote.text,
                 "embedding": quote.embedding,
             }
             for quote in quotes
         ]
     )
 
-    df["embedding"] = df.embedding.apply(np.array)
+    df["embedding"] = df.get("embedding").apply(lambda x: np.array(x))
 
-    matrix = np.vstack(df.embedding.values)  # type: ignore
+    matrix = np.vstack(df["embedding"].values)  # type: ignore
     logger.debug(f"matrix shape {matrix.shape}")
 
-    n_clusters = len(quotes) // 3
+    n_clusters = len(quotes) // 4
     logger.debug(f"n_clusters, {n_clusters}")
     logger.debug(f"quotes, {len(quotes)}")
 
@@ -880,91 +999,25 @@ def generate_insights(db: Session, project_analysis_run_id: str) -> None:
     kmeans.fit(matrix)
     labels = kmeans.labels_
     df["Cluster"] = labels
-    logger.debug(df.head())
 
-    df.groupby("Cluster")
+    insight_ids = []
 
-    def process_cluster(cluster_index):
-        with DatabaseSession() as db:
-            logger.debug(f"Cluster {cluster_index} Theme:")
+    for cluster_index in range(n_clusters):
+        insight = InsightModel(
+            id=generate_uuid(),
+            project_analysis_run_id=project_analysis_run_id,
+        )
 
-            quote_text_joined = "\n".join(df[df.Cluster == cluster_index].text.values)
+        quote_ids = df[df.Cluster == cluster_index].id.values
 
-            messages = [
-                {
-                    "role": "user",
-                    "content": f'What do the following text have in common? Generate a short theme based on the given text. Do not enclose your response in quotes or other special characters. Only output text.\n\nText:\n"""\n{quote_text_joined}\n"""\n\nTheme:',
-                }
-            ]
+        quotes_list = db.query(QuoteModel).filter(QuoteModel.id.in_(quote_ids)).all()
+        insight.quotes.extend(quotes_list)
 
-            title_response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=messages,  # type: ignore
-                temperature=0,
-                max_tokens=64,
-                top_p=1,
-                frequency_penalty=0,
-                presence_penalty=0,
-            )
+        insight_ids.append(insight.id)
+        db.add(insight)
+        db.commit()
 
-            title = title_response.choices[0].message.content
-
-            logger.debug(title)
-
-            messages = [
-                {
-                    "role": "user",
-                    "content": f'What do the following text have in common? Generate a brief(4-5 sentences) summary and explanation of the theme based on the given texts. Use aspects like sentiment, similarities and dissimilarities between the texts to form your summary. Do not enclose your response in quotes or other special characters. Only output text.\n\nTexts:\n"""\n{quote_text_joined}\n"""\n\nTheme: {title}\n\nSummary:',
-                }
-            ]
-
-            summary_response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=messages,  # type: ignore
-                temperature=0,
-                max_tokens=256,
-                top_p=1,
-                frequency_penalty=0,
-                presence_penalty=0,
-            )
-
-            summary = summary_response.choices[0].message.content
-
-            logger.debug(summary)
-
-            insight = InsightModel(
-                id=generate_uuid(),
-                project_analysis_run_id=project_analysis_run_id,
-                title=title,
-                summary=summary,
-            )
-
-            quote_ids = df[df.Cluster == cluster_index].id.values
-
-            quotes_list = db.query(QuoteModel).filter(QuoteModel.id.in_(quote_ids)).all()
-            insight.quotes.extend(quotes_list)
-
-            db.add(insight)
-            db.commit()
-
-    # Determine the number of CPU cores
-    cpu_cores = os.cpu_count()
-
-    # Adjust max_workers based on the type of task and CPU cores
-    if cpu_cores is not None:
-        max_workers = min(n_clusters, cpu_cores * 2)  # Adjust this multiplier based on task nature
-    else:
-        max_workers = 10  # Fallback to a default value if CPU count is not available
-
-    logger.debug(f"Using {max_workers} workers for concurrent processing")
-
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = [executor.submit(process_cluster, i) for i in range(n_clusters)]
-        for future in as_completed(futures):  # noqa: F821
-            try:
-                future.result()
-            except Exception as e:
-                logger.error(f"Error processing cluster: {e}")
+    return insight_ids
 
 
 if __name__ == "__main__":
@@ -972,9 +1025,9 @@ if __name__ == "__main__":
 
     db = next(get_db())
 
-    project_id = "261ec4f1-d2ad-4bb8-b640-e2bd0d911e1f"
+    project_id = "a817a3d5-4ec7-4dfb-8ed2-159268ceab92"
 
-    analysis_id = "27857ef4-8659-4cb7-8b7e-99468b71841b"
+    analysis_id = "460ef51a-c698-4c0a-bd24-824785b2f982"
 
     # project_analysis_run = ProjectAnalysisRunModel(id=generate_uuid(), project_id=project_id, processing_status="DONE")
 
@@ -992,25 +1045,24 @@ if __name__ == "__main__":
     #     quotes = generate_quotes(db, project_analysis_run.id, conversation.id)
     #     logger.debug(f"quotes generated: {len(quotes)}")
 
-    # logger.debug("quotes are generated")
+    generate_aspect_image(db, "d9d4eb70-2965-4f68-911f-de7606ed0cf7")
+
+    logger.debug("quotes are generated")
 
     # view = generate_view(db, analysis_id, "Make a plan to restructure the TUE Governance", "Make it a detailed plan")
     # assign_aspect_centroids_and_cluster_quotes(db, analysis_id, view.id)
     # generate_view_extras(db, view.id)
     # logger.debug(view.id)
 
-    view = generate_view(db, analysis_id, "Sentiment", "Use only 3")
-    assign_aspect_centroids_and_cluster_quotes(db, analysis_id, view.id)
-    generate_view_extras(db, view.id)
-    logger.debug(view.id)
-
-    # view = generate_view(
-    #     db, analysis_id, "Recurring Themes", "Use around 15-20 themes. It would help me make an interesting report!"
-    # )
+    # view = initialize_view(db, analysis_id, "Sentiment", "Use only 3")
     # assign_aspect_centroids_and_cluster_quotes(db, analysis_id, view.id)
+
+    # aspects = view.aspects
+    # for aspect in aspects:
+    #     generate_aspect_extras(db, aspect.id)
+
     # generate_view_extras(db, view.id)
+
     # logger.debug(view.id)
 
-    # generate_view_extras(db, "aa2d3e5e-0285-4379-9520-c13881fe9987")
-
-    generate_insights(db, id)
+    # generate_insights(db, id)

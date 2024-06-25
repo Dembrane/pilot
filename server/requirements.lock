@@ -205,6 +205,8 @@ pyyaml==6.0.1
     # via langchain-core
     # via transformers
     # via uvicorn
+redis==5.0.6
+    # via celery
 regex==2024.5.15
     # via sacremoses
     # via tiktoken

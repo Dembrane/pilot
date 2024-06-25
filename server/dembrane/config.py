@@ -65,6 +65,10 @@ RABBITMQ_URL = os.environ.get("RABBITMQ_URL")
 assert RABBITMQ_URL, "RABBITMQ_URL environment variable is not set"
 logger.debug("RABBITMQ_URL: set")
 
+REDIS_URL = os.environ.get("REDIS_URL")
+assert REDIS_URL, "REDIS_URL environment variable is not set"
+logger.debug("REDIS_URL: set")
+
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is not set"
 logger.debug("OPENAI_API: set")

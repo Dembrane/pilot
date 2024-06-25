@@ -24,13 +24,15 @@ import {
   getTagsByProjectId,
   initiateAndUploadConversationChunk,
   initiateConversation,
-  requestProjectAnalysis,
+  generateProjectLibrary as generateProjectLibrary,
   updateConversationById,
   updateProjectById,
   updateResourceById,
   uploadConversationChunk,
   uploadConversationText,
   uploadResourceByProjectId,
+  getTaskById,
+  generateProjectView,
 } from "./api";
 import { toast } from "@/components/Toaster";
 import { AxiosError } from "axios";
@@ -305,7 +307,7 @@ export const useConversationsByProjectId = (
       projectId,
       load_chunks ? "all" : "all/no_chunks",
     ],
-    queryFn: () => getConversationsByProjectId(projectId),
+    queryFn: () => getConversationsByProjectId(projectId, load_chunks),
     refetchInterval: 30000,
   });
 };
@@ -490,11 +492,28 @@ export const useProjectTags = (projectId: string) => {
   });
 };
 
-export const useRequestProjectAnalysisMutation = () => {
+export const useGenerateProjectLibraryMutation = () => {
   return useMutation({
-    mutationFn: requestProjectAnalysis,
+    mutationFn: generateProjectLibrary,
     onSuccess: () => {
       toast.success("Analysis requested successfully");
     },
+  });
+};
+
+export const useGenerateProjectViewMutation = () => {
+  return useMutation({
+    mutationFn: generateProjectView,
+    onSuccess: () => {
+      toast.success("Analysis requested successfully");
+    },
+  });
+};
+
+export const useTaskStatus = (taskId: string) => {
+  return useQuery({
+    queryKey: ["task", taskId],
+    queryFn: () => getTaskById(taskId),
+    refetchInterval: 10000,
   });
 };

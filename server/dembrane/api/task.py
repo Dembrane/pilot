@@ -14,6 +14,9 @@ logger = logging.getLogger("task")
 async def get_task_status(task_id: str) -> TaskSchema:
     logger.debug("Getting task %s", task_id)
 
+    if not task_id:
+        raise HTTPException(status_code=404, detail="Task not found")
+
     result = celery_app.AsyncResult(task_id)
 
     if not result:

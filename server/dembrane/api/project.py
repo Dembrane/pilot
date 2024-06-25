@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session, selectinload
 from fastapi.responses import StreamingResponse
 
-# from dembrane.tasks import process_project
+from dembrane.tasks import task_create_view, task_create_project_library
 from dembrane.utils import generate_uuid, get_safe_filename, generate_4_digit_pin, generate_6_digit_pin
 from dembrane.config import AUDIO_CHUNKS_DIR, RESOURCE_UPLOADS_DIR
 from dembrane.schemas import (
@@ -18,6 +18,7 @@ from dembrane.schemas import (
     ViewSchema,
     InsightSchema,
     ProjectSchema,
+    TaskStateEnum,
     ResourceSchema,
     ProjectTagSchema,
     ConversationSchema,
@@ -518,29 +519,6 @@ async def delete_project_tag(
     return tag
 
 
-# @ProjectRouter.post(
-#     "/{project_id}/request-analysis",
-#     response_model=TaskSchema,
-#     status_code=HTTPStatus.ACCEPTED,
-# )
-# async def request_project_analysis(
-#     project_id: str,
-#     _session: DependencyRequireSession,
-#     db: DependencyInjectDatabase,
-# ) -> TaskSchema:
-#     project = await get_project(
-#         db=db,
-#         project_id=project_id,
-#     )
-
-#     task = process_project.si(project.id).delay()
-
-#     logger.info(f"Task {task.id} created for project {project.id}")
-#     task_status = await get_task_status(task.id)
-
-#     return task_status
-
-
 def get_latest_project_analysis_run(db: DependencyInjectDatabase, project_id: str) -> Optional[ProjectAnalysisRunModel]:
     return (
         db.query(ProjectAnalysisRunModel)
@@ -548,6 +526,65 @@ def get_latest_project_analysis_run(db: DependencyInjectDatabase, project_id: st
         .order_by(ProjectAnalysisRunModel.created_at.desc())
         .first()
     )
+
+
+@ProjectRouter.post(
+    "/{project_id}/create-library",
+    response_model=TaskSchema,
+    status_code=HTTPStatus.ACCEPTED,
+)
+async def post_create_project_library(
+    project_id: str,
+    _session: DependencyRequireSession,
+    db: DependencyInjectDatabase,
+) -> TaskSchema:
+    project = await get_project(
+        db=db,
+        project_id=project_id,
+    )
+
+    analysis_run = get_latest_project_analysis_run(db, project.id)
+
+    if analysis_run and analysis_run.task_id:
+        task_status = await get_task_status(analysis_run.task_id)
+
+        if task_status.state in [TaskStateEnum.PENDING, TaskStateEnum.STARTED, TaskStateEnum.PROGRESS]:
+            raise HTTPException(
+                status_code=409,
+                detail="Analysis is already in progress",
+            )
+
+    result = task_create_project_library.si(project_id).apply_async()
+
+    logger.info(f"Task {result.id} created for project {project.id}")
+    task_status = await get_task_status(result.id)
+
+    return task_status
+
+
+class CreateViewRequestBodySchema(BaseModel):
+    query: str
+    additional_context: Optional[str] = ""
+
+
+@ProjectRouter.post("/{project_id}/create-view", response_model=TaskSchema, status_code=HTTPStatus.ACCEPTED)
+async def post_create_view(
+    project_id: str,
+    body: CreateViewRequestBodySchema,
+    db: DependencyInjectDatabase,
+    _session: DependencyRequireSession,
+) -> TaskSchema:
+    project_analysis_run = get_latest_project_analysis_run(db, project_id)
+
+    if not project_analysis_run:
+        raise HTTPException(status_code=404, detail="No analysis found for this project")
+
+    result = task_create_view.si(project_analysis_run.project_id, body.query, body.additional_context).apply_async()
+
+    logger.info(f"Task {result.id} created for project {project_id}")
+    task_status = await get_task_status(result.id)
+
+    return task_status
 
 
 @ProjectRouter.get("/{project_id}/insights", response_model=List[InsightSchema])

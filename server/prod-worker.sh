@@ -1,3 +1,3 @@
 #!/bin/sh
 echo "Starting worker"
-celery -A dembrane.tasks worker --loglevel=info 
+celery -A dembrane.tasks worker -l INFO -n worker.normal -Q normal

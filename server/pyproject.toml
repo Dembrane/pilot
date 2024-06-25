@@ -8,7 +8,7 @@ dependencies = [
     "fastapi==0.109.*",
     "uvicorn[standard]==0.27.*",
     "python-multipart==0.0.*",
-    "celery==5.4.*",
+    "celery[redis]>=5.4.0",
     # Langchain
     "langchain==0.1.*",
     "langchain-community==0.0.*",
@@ -83,7 +83,7 @@ warn_required_dynamic_aliases = true
 warn_untyped_fields = true
 
 [tool.ruff]
-line-length = 120
+line-length = 100
 output-format = "grouped"
 target-version = "py311"
 select = []

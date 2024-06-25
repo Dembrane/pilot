@@ -12,6 +12,7 @@ type Aspect = {
   name: string;
   project_analysis_run_id?: string | null;
   quotes: any[] | QuoteAspect[];
+  quotes_count?: number | null;
   representative_quotes: any[] | QuoteAspect1[];
   short_summary?: string | null;
   updated_at: string;

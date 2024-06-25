@@ -1,9 +1,8 @@
-import os
 import re
 import json
 import random
 import logging
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
@@ -18,12 +17,11 @@ from langchain_experimental.text_splitter import SemanticChunker
 from dembrane.ner import anonymize_sentence
 from dembrane.utils import generate_uuid, get_utc_timestamp, download_image_and_get_public_url
 from dembrane.database import (
-    ProcessingStatusEnum,
     ViewModel,
     QuoteModel,
     AspectModel,
     InsightModel,
-    DatabaseSession,
+    ProcessingStatusEnum,
     ConversationChunkModel,
 )
 from dembrane.embedding import EMBEDDING_DIM, embed_text
@@ -206,6 +204,7 @@ def generate_quotes(
                     break
 
             closest_chunk = db.query(ConversationChunkModel).filter_by(id=closest_chunk_id).first()
+            logger.debug(f"closest_chunk: {closest_chunk}")
 
             quote = QuoteModel(
                 id=generate_uuid(),

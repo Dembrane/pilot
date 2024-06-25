@@ -23,14 +23,12 @@ from dembrane.schemas import (
     ViewSchema,
     InsightSchema,
     ProjectSchema,
-    TaskStateEnum,
     ResourceSchema,
     ProjectTagSchema,
     ConversationSchema,
 )
 from dembrane.api.task import get_task_status
 from dembrane.database import (
-    ProcessingStatusEnum,
     ViewModel,
     AspectModel,
     InsightModel,
@@ -38,6 +36,7 @@ from dembrane.database import (
     ResourceModel,
     ProjectTagModel,
     ConversationModel,
+    ProcessingStatusEnum,
     ProjectAnalysisRunModel,
     DependencyInjectDatabase,
 )

@@ -1,6 +1,5 @@
 # mypy: disable-error-code="no-untyped-def"
-from math import floor
-from typing import Any, List, Optional
+from typing import List
 
 from celery import Celery, chain, chord, group  # type: ignore
 from sentry_sdk import capture_exception
@@ -10,26 +9,25 @@ import dembrane.tasks_config
 from dembrane.utils import generate_uuid, get_utc_timestamp
 from dembrane.config import REDIS_URL, RABBITMQ_URL
 from dembrane.database import (
+    ViewModel,
     AspectModel,
-    InsightModel,
     DatabaseSession,
     ConversationModel,
-    ConversationChunkModel,
     ProcessingStatusEnum,
+    ConversationChunkModel,
     ProjectAnalysisRunModel,
-    ViewModel,
 )
 from dembrane.transcribe import transcribe_conversation_chunk
 from dembrane.audio_utils import split_audio_chunk
 from dembrane.quote_utils import (
-    assign_aspect_centroid,
-    cluster_quotes_using_aspect_centroids,
     generate_quotes,
     initialize_view,
     initialize_insights,
     generate_view_extras,
+    assign_aspect_centroid,
     generate_aspect_extras,
     generate_insight_extras,
+    cluster_quotes_using_aspect_centroids,
 )
 
 logger = get_task_logger("celery_tasks")

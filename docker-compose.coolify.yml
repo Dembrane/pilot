@@ -65,6 +65,8 @@ services:
       TELEMETRY: false
       REDIS_ENABLED: true
       REDIS: redis://redis:6379
+      CORS_ENABLED: true
+      CORS_ORIGIN: "*"
     volumes:
       - ./directus/uploads:/directus/uploads
 

@@ -1,0 +1,2 @@
+- uncheck from .env all the things related to roles
+- npx directus schema apply ./snapshot.yaml

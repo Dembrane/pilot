@@ -270,7 +270,10 @@ export const ProjectLibrary = () => {
             leftSection={<IconPlus />}
             onClick={handleCreateLibrary}
             loading={requestProjectLibraryMutation.isPending}
-            disabled={requestProjectLibraryMutation.isPending}
+            disabled={
+              requestProjectLibraryMutation.isPending ||
+              latestRun?.processing_status === "PROCESSING"
+            }
           >
             Create Library
           </Button>

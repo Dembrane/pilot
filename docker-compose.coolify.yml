@@ -47,7 +47,8 @@ services:
     ports:
       - 8055:8055
     depends_on:
-      - api-server
+      - postgres
+      - rabbitmq
     environment:
       PORT: 8055
       SECRET: ${DIRECTUS_SECRET}
@@ -101,8 +102,6 @@ services:
       - default
     depends_on:
       - directus
-      - postgres
-      - rabbitmq
     logging: *default-logging
 
   worker:

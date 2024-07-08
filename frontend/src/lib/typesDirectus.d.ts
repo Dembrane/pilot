@@ -53,8 +53,9 @@ type Conversation = {
   processing_error?: string | null;
   processing_started_at?: string | null;
   processing_status: string;
-  project_id: string | Project;
-  tags: any[] | ConversationProjectTag[];
+  project_id: string;
+  tags?: null | ConversationProjectTag[];
+  chunks?: ConversationChunk[];
   title?: string | null;
   updated_at: string;
 };
@@ -468,6 +469,7 @@ type Insight = {
 };
 
 type Project = {
+  conversations_count?: number;
   context?: string | null;
   conversations: any[] | Conversation[];
   created_at: string;

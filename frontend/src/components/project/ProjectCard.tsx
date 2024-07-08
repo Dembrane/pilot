@@ -7,12 +7,12 @@ import { Link } from "react-router-dom";
 export const ProjectCard = ({
   project,
 }: PropsWithChildren<{
-  project: TProject;
+  project: Project;
 }>) => {
   return (
-    <Paper p="md">
-      <Stack>
-        <Group justify="space-between">
+    <Paper p="md" className="h-full">
+      <Stack className="h-full">
+        <Group justify="space-between" wrap="nowrap" className="grow">
           <Group align="center">
             <Icons.Calendar />
             {project.name}

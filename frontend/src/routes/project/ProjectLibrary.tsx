@@ -270,7 +270,10 @@ export const ProjectLibrary = () => {
             leftSection={<IconPlus />}
             onClick={handleCreateLibrary}
             loading={requestProjectLibraryMutation.isPending}
-            disabled={requestProjectLibraryMutation.isPending}
+            disabled={
+              requestProjectLibraryMutation.isPending ||
+              latestRun?.processing_status === "PROCESSING"
+            }
           >
             Create Library
           </Button>
@@ -290,7 +293,7 @@ export const ProjectLibrary = () => {
 
       {!latestRun && (
         <>
-          <Alert variant="light" icon={<IconInfoCircle />}>
+          <Alert>
             <Text>
               This is your project library. Currently,{" "}
               {conversationsQuery.data?.length ?? 0} conversations are waiting

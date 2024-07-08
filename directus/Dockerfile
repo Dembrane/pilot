@@ -1,9 +1,9 @@
-FROM directus/directus:10.12.1
+FROM directus/directus:10.13
 
 # COPY ./migrations/ ./migrations/
 # COPY ./extensions/ ./extensions/
 
-COPY ./snapshot-20240626.yaml ./snapshot.yaml
+COPY ./snapshot-20240708.yaml ./snapshot.yaml
 
 # https://github.com/directus/directus/blob/main/Dockerfile
 CMD : \

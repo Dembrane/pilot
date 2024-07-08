@@ -24,7 +24,7 @@ export const Quote = ({ data }: { data: Quote | TQuote }) => {
       </Text>
       {data.conversation_id && (
         <Link
-          to={`/projects/${projectId}/conversation/${data.conversation_id}/transcript`}
+          to={`/projects/${projectId}/conversation/${(data.conversation_id as unknown as Conversation).id}/transcript`}
         >
           <Pill>
             {((data as any).conversation_id as Conversation).participant_name ??

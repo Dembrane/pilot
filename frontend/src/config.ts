@@ -5,7 +5,7 @@ export const PARTICIPANT_BASE_URL =
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
 export const DIRECTUS_PUBLIC_URL =
-  import.meta.env.VITE_DIRECTUS_PUBLIC_URL ?? "/directus";
+  import.meta.env.VITE_DIRECTUS_PUBLIC_URL ?? "http://localhost:8055";
 
 export const DISABLE_SENTRY = import.meta.env.VITE_DISABLE_SENTRY === "1";
 

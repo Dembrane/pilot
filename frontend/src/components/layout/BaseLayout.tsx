@@ -21,7 +21,7 @@ export const BaseLayout = ({ children }: PropsWithChildren) => {
         </Group>
       </Paper>
 
-      <main className="relative h-[calc(100vh-60px)] overflow-y-auto">
+      <main className="min-h-[calc(100vh-60px)]">
         <Outlet />
         {children}
       </main>

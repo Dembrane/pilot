@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
 import { I18nProvider } from "./components/I18nProvider";
 import { mainRouter, participantRouter } from "./Router";
-import { IconChevronRight } from "@tabler/icons-react";
+import { IconChevronRight, IconInfoCircle } from "@tabler/icons-react";
 import { USE_PARTICIPANT_ROUTER } from "./config";
 
 const theme = createTheme({
@@ -33,6 +33,12 @@ const theme = createTheme({
   },
   primaryColor: "primary",
   components: {
+    Alert: {
+      defaultProps: {
+        variant: "light",
+        icon: <IconInfoCircle />,
+      },
+    },
     Breadcrumbs: {
       defaultProps: {
         separator: <IconChevronRight />,

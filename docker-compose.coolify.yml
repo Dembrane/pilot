@@ -47,8 +47,7 @@ services:
     ports:
       - 8055:8055
     depends_on:
-      - postgres
-      - redis
+      - api-server
     environment:
       PORT: 8055
       SECRET: ${DIRECTUS_SECRET}
@@ -82,16 +81,17 @@ services:
       timeout: 10s
       retries: 3
     environment:
-      - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
-      - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
-      - REDIS_URL=redis://redis:6379
+      - DIRECTUS_PUBLIC_URL=${DIRECTUS_PUBLIC_URL}
       - ADMIN_BASE_URL=${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
+      - REDIS_URL=redis://redis:6379
+      - DISABLE_REDACTION=1
+      - DATABASE_URL=${DATABSE_URL:-postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane}
       - DISABLE_SENTRY=${DISABLE_SENTRY:-0}
       - SERVE_API_DOCS=${SERVE_API_DOCS:-0}
-      - DISABLE_REDACTION=1
     env_file:
       - ./server/.env
     volumes:
@@ -111,16 +111,17 @@ services:
       dockerfile: Dockerfile
     command: /bin/sh /code/server/prod-worker.sh
     environment:
-      - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
-      - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
-      - REDIS_URL=redis://redis:6379
+      - DIRECTUS_PUBLIC_URL=${DIRECTUS_PUBLIC_URL}
       - ADMIN_BASE_URL=${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
+      - REDIS_URL=redis://redis:6379
+      - DISABLE_REDACTION=1
+      - DATABASE_URL=${DATABSE_URL:-postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane}
       - DISABLE_SENTRY=${DISABLE_SENTRY:-0}
       - SERVE_API_DOCS=${SERVE_API_DOCS:-0}
-      - DISABLE_REDACTION=1
     env_file:
       - ./server/.env
     volumes:

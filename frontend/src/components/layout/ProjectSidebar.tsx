@@ -24,6 +24,7 @@ import {
   UnstyledButton,
   UnstyledButtonProps,
   Checkbox,
+  Paper,
 } from "@mantine/core";
 import { PropsWithChildren, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -32,6 +33,7 @@ import { apiCommonConfig } from "@/lib/api";
 import { IconExternalLink } from "@tabler/icons-react";
 import { ENABLE_EXPERIMENTAL_FEATURES } from "@/config";
 import { UploadConversationDropzone } from "../dropzone/UploadConversationDropzone";
+import clsx from "clsx";
 
 const ResourceAccordionLabelIcon = ({ resource }: { resource: TResource }) => {
   if (resource.is_processed) {
@@ -132,30 +134,44 @@ const ResourceAccordionDetail = ({
 
 const ConversationAccordionLabel = ({
   conversation,
-}: PropsWithChildren<{ conversation: TConversation }>) => {
+  highlight = false,
+}: PropsWithChildren<{ conversation: Conversation; highlight?: boolean }>) => {
   return (
-    <Stack gap="xs">
-      <Group wrap="nowrap" align="center" justify="between" className="w-full">
-        <Title order={4} className="font-normal text-sm">
-          {conversation.participant_email ?? conversation.participant_name}
-        </Title>
-      </Group>
-      <Group gap="sm" pr="sm">
-        {conversation.tags &&
-          conversation.tags.length > 0 &&
-          conversation.tags.map((tag) => (
-            <Pill key={tag.id} size="sm">
-              {tag.text}
-            </Pill>
-          ))}
-      </Group>
-    </Stack>
+    <Paper
+      p="sm"
+      className={clsx(
+        highlight ? "!border-primary-400" : "hover:!border-primary-400",
+      )}
+      bg="transparent"
+    >
+      <Stack gap="xs">
+        <Group
+          wrap="nowrap"
+          align="center"
+          justify="between"
+          className="w-full"
+        >
+          <Title order={4} className="font-normal text-sm">
+            {conversation.participant_email ?? conversation.participant_name}
+          </Title>
+        </Group>
+        <Group gap="sm" pr="sm">
+          {conversation.tags &&
+            conversation.tags.length > 0 &&
+            conversation.tags.map((tag) => (
+              <Pill key={tag.id} size="sm">
+                {(tag?.project_tag_id as unknown as ProjectTag).text}
+              </Pill>
+            ))}
+        </Group>
+      </Stack>
+    </Paper>
   );
 };
 
 const ConversationAccordionDetail = ({
   conversation,
-}: PropsWithChildren<{ conversation: TConversation }>) => {
+}: PropsWithChildren<{ conversation: Conversation }>) => {
   return (
     <Stack gap="xs">
       {/* {!conversation.is_processed && conversation.processing_error == null && (
@@ -192,6 +208,7 @@ const ConversationAccordionDetail = ({
           <Text size="xs">{conversation.title}</Text>
         </Box>
       )}
+
       {/* {conversation.description && (
         <Box>
           <Text size="sm">
@@ -200,13 +217,14 @@ const ConversationAccordionDetail = ({
           <Text size="xs">{conversation.description}</Text>
         </Box>
       )} */}
-      <Link
+
+      {/* <Link
         to={`/projects/${conversation.project_id}/conversation/${conversation.id}/overview`}
       >
         <Button component="a" fullWidth autoContrast>
           <Trans>Open</Trans>
         </Button>
-      </Link>
+      </Link> */}
     </Stack>
   );
 };
@@ -217,42 +235,13 @@ const ProjectAccordion = ({ projectId }: { projectId: string }) => {
   const resourcesQuery = useResourcesByProjectId(projectId);
   const resources = resourcesQuery.data;
 
-  const conversationsQuery = useConversationsByProjectId(projectId);
-
-  const allConversations = useMemo(
-    () => conversationsQuery.data ?? [],
-    [conversationsQuery.data],
+  const conversationsQuery = useConversationsByProjectId(
+    projectId,
+    false,
+    hideConversationsWithoutContent,
   );
 
-  const conversationsWithContent = useMemo(
-    () =>
-      allConversations?.filter((conversation) => {
-        if (conversation.chunks && conversation.chunks.length > 0)
-          return conversation.chunks[0].transcript != null;
-        return null;
-      }) ?? [],
-    [allConversations],
-  );
-
-  const conversationsWithoutContent = useMemo(
-    () =>
-      allConversations.filter(
-        (conversation) => conversation.chunks?.length === 0,
-      ) ?? [],
-    [allConversations],
-  );
-
-  const filteredConversations = useMemo(
-    () =>
-      hideConversationsWithoutContent
-        ? conversationsWithContent
-        : allConversations,
-    [
-      conversationsWithContent,
-      allConversations,
-      hideConversationsWithoutContent,
-    ],
-  );
+  const { conversationId: activeConversationId } = useParams();
 
   const [parent] = useAutoAnimate();
   const [parent2] = useAutoAnimate();
@@ -297,8 +286,8 @@ const ProjectAccordion = ({ projectId }: { projectId: string }) => {
 
         <Accordion.Panel>
           <Accordion variant="separated" radius="md">
-            <LoadingOverlay visible={resourcesQuery.isLoading} />
-            <div ref={parent}>
+            <div ref={parent} className="relative">
+              <LoadingOverlay visible={resourcesQuery.isLoading} />
               {resources?.length === 0 && (
                 <Text size="sm" px="md">
                   <Trans>
@@ -351,47 +340,44 @@ const ProjectAccordion = ({ projectId }: { projectId: string }) => {
         </Accordion.Control>
 
         <Accordion.Panel>
-          <Accordion variant="separated" radius="md">
+          <div ref={parent2} className="relative">
             <LoadingOverlay visible={conversationsQuery.isLoading} />
-            <div ref={parent2}>
-              <Box pl="md" pb="md">
-                <Checkbox
-                  label={`Hide Conversations Without Content (${conversationsWithoutContent.length})`}
-                  checked={hideConversationsWithoutContent}
-                  onChange={() =>
-                    setHideConversationsWithoutContent((prev) => !prev)
-                  }
-                />
-              </Box>
+            <Box pl="md" pb="md">
+              <Checkbox
+                disabled={conversationsQuery.isRefetching}
+                label={`Hide Conversations Without Content`}
+                checked={hideConversationsWithoutContent}
+                onChange={() =>
+                  setHideConversationsWithoutContent((prev) => !prev)
+                }
+              />
+            </Box>
 
-              {filteredConversations?.length === 0 && (
-                <Text size="sm" px="md" py="md">
-                  <Trans>
-                    No conversations found. Start a conversation using the
-                    participation invite link from the{" "}
-                    <Link to={`/projects/${projectId}/overview`}>
-                      <Anchor>project overview.</Anchor>
-                    </Link>
-                  </Trans>
-                </Text>
-              )}
+            {conversationsQuery.data?.length === 0 && (
+              <Text size="sm" px="md" py="md">
+                <Trans>
+                  No conversations found. Start a conversation using the
+                  participation invite link from the{" "}
+                  <Link to={`/projects/${projectId}/overview`}>
+                    <Anchor>project overview.</Anchor>
+                  </Link>
+                </Trans>
+              </Text>
+            )}
 
-              {filteredConversations?.map((item: TConversation) => (
-                <Accordion.Item
-                  key={item.id}
-                  value={item.id}
-                  className="overflow-hidden"
+            <Stack gap="xs">
+              {conversationsQuery.data?.map((item) => (
+                <Link
+                  to={`/projects/${projectId}/conversation/${item.id}/overview`}
                 >
-                  <Accordion.Control>
-                    <ConversationAccordionLabel conversation={item} />
-                  </Accordion.Control>
-                  <Accordion.Panel>
-                    <ConversationAccordionDetail conversation={item} />
-                  </Accordion.Panel>
-                </Accordion.Item>
+                  <ConversationAccordionLabel
+                    highlight={item.id === activeConversationId}
+                    conversation={item as Conversation}
+                  />
+                </Link>
               ))}
-            </div>
-          </Accordion>
+            </Stack>
+          </div>
         </Accordion.Panel>
       </Accordion.Item>
     </Accordion>

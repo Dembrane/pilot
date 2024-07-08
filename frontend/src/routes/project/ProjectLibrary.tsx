@@ -293,7 +293,7 @@ export const ProjectLibrary = () => {
 
       {!latestRun && (
         <>
-          <Alert variant="light" icon={<IconInfoCircle />}>
+          <Alert>
             <Text>
               This is your project library. Currently,{" "}
               {conversationsQuery.data?.length ?? 0} conversations are waiting

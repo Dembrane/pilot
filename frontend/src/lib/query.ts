@@ -38,6 +38,8 @@ import {
 } from "./api";
 import { toast } from "@/components/Toaster";
 import { AxiosError } from "axios";
+import { directus } from "./directus";
+import { readItems } from "@directus/sdk";
 
 export const useCurrentSession = () => {
   return useQuery({
@@ -312,15 +314,54 @@ export const useDeleteConversationChunkByIdMutation = () => {
 
 export const useConversationsByProjectId = (
   projectId: string,
-  load_chunks?: boolean,
+  loadChunks?: boolean,
+  loadConversationsWithTranscript?: boolean,
 ) => {
   return useQuery({
     queryKey: [
       "conversation",
       projectId,
-      load_chunks ? "all" : "all/no_chunks",
+      loadChunks ? "chunks" : "no-chunks",
+      loadConversationsWithTranscript ? "transcript" : "no-transcript",
     ],
-    queryFn: () => getConversationsByProjectId(projectId, load_chunks),
+    queryFn: () =>
+      directus.request(
+        readItems("conversation", {
+          sort: "-updated_at",
+          fields: [
+            "*",
+            {
+              tags: [
+                {
+                  project_tag_id: ["id", "text", "created_at"],
+                },
+              ],
+            },
+            { chunks: ["*"] },
+          ],
+          deep: {
+            // @ts-ignore
+            chunks: {
+              _limit: loadChunks ? 1000 : 1,
+            },
+          },
+          filter: {
+            project_id: {
+              _eq: projectId,
+            },
+            chunks: {
+              ...(loadConversationsWithTranscript && {
+                _some: {
+                  transcript: {
+                    _nempty: true,
+                  },
+                },
+              }),
+            },
+          },
+          limit: 1000,
+        }),
+      ),
     refetchInterval: 30000,
   });
 };

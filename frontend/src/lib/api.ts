@@ -25,16 +25,41 @@ apiNoAuth.interceptors.response.use(
 
 export const api = axios.create(apiCommonConfig);
 
-export const doInitiateSession = async (sessionId?: number | "new") => {
-  const url = sessionId
-    ? `/session/initiate?session_id=${sessionId}`
-    : "/session/initiate";
-  return api.get(url);
-};
-
 interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   _retry?: boolean;
 }
+
+export const getParticipantProjectById = async (projectId: string) => {
+  return apiNoAuth.get<unknown, TProject>(`/participant/projects/${projectId}`);
+};
+
+export const getParticipantConversation = async (
+  projectId: string,
+  conversationId: string,
+) => {
+  return apiNoAuth.get<unknown, TConversation>(
+    `/participant/projects/${projectId}/conversations/${conversationId}`,
+  );
+};
+
+export const getParticipantConversationChunks = async (
+  projectId: string,
+  conversationId: string,
+) => {
+  return apiNoAuth.get<unknown, TConversationChunk[]>(
+    `participant/projects/${projectId}/conversations/${conversationId}/chunks`,
+  );
+};
+
+export const deleteParticipantConversationChunk = async (
+  projectId: string,
+  conversationId: string,
+  chunkId: string,
+) => {
+  return apiNoAuth.delete(
+    `/participant/projects/${projectId}/conversations/${conversationId}/chunks/${chunkId}`,
+  );
+};
 
 api.interceptors.response.use(
   (response) => response.data,
@@ -51,7 +76,7 @@ api.interceptors.response.use(
       try {
         if (!USE_PARTICIPANT_ROUTER) {
           // go to /login
-          window.location.assign("/login");
+          // window.location.assign("/login");
         }
         return api(config);
       } catch (e) {
@@ -64,128 +89,6 @@ api.interceptors.response.use(
     throw error;
   },
 );
-
-export const uploadResourceByProjectId = async (payload: {
-  projectId: string;
-  files: File[];
-}) => {
-  const formData = new FormData();
-
-  payload.files.forEach((file) => {
-    formData.append("files", file);
-  });
-
-  return api.post<unknown, TResource[]>(
-    `/projects/${payload.projectId}/resources/upload`,
-    formData,
-    {
-      timeout: 60000,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    },
-  );
-};
-
-export const getAllSessions = async () => {
-  return apiNoAuth.get<unknown, TSession[]>("/session/all");
-};
-
-export const getCurrentSession = async () => {
-  return apiNoAuth.get<unknown, TSession>("/session/current");
-};
-
-export const getAllProjects = async () => {
-  return api.get<unknown, TProject[]>("/projects");
-};
-
-export const createProject = async (payload: Partial<TProject>) => {
-  return api.post<unknown, TProject>("/projects", payload);
-};
-
-export const getProjectById = async (projectId: string) => {
-  return api.get<unknown, TProject>(`/projects/${projectId}`);
-};
-
-export const getProjectInsights = async (projectId: string) => {
-  return api.get<unknown, TInsight[]>(`/projects/${projectId}/insights`);
-};
-
-export const getProjectViews = async (projectId: string) => {
-  const project_analysis_run =
-    await getLatestProjectAnalysisRunByProjectId(projectId);
-
-  if (!project_analysis_run) {
-    return [];
-  }
-
-  return directus.request<View[]>(
-    readItems("view", {
-      fields: ["*", { aspects: ["*", "count(quotes)"] }],
-      deep: {
-        aspects: {
-          _sort: "name",
-        } as any,
-      },
-      filter: {
-        project_analysis_run_id: project_analysis_run?.id,
-      },
-      sort: "-created_at",
-    }),
-  );
-};
-
-export const getViewById = async (viewId: string) => {
-  return directus.request<View>(
-    readItem("view", viewId, {
-      fields: ["*", { aspects: ["*", "count(quotes)"] }],
-      deep: {
-        aspects: {
-          _sort: "name",
-        } as any,
-      },
-    }),
-  );
-};
-
-export const getAspectById = async (aspectId: string) => {
-  return directus.request<Aspect>(
-    readItem("aspect", aspectId, {
-      fields: [
-        "*",
-        {
-          quotes: [
-            {
-              quote_id: [
-                "id",
-                "text",
-                "created_at",
-                {
-                  conversation_id: ["id", "participant_name", "created_at"],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    }),
-  );
-};
-
-export const getProjectTranscriptsLink = (projectId: string) =>
-  `${apiCommonConfig.baseURL}/projects/${projectId}/transcripts`;
-
-export const updateProjectById = async (payload: {
-  update: Partial<TProject>;
-  id: string;
-}) => {
-  console.log("updateProjectById", payload);
-  return api.put<unknown, TProject>(`/projects/${payload.id}`, payload.update);
-};
-
-export const deleteProjectById = async (projectId: string) => {
-  return api.delete(`/projects/${projectId}`);
-};
 
 export const getResourcesByProjectId = async (projectId: string) => {
   return api.get<unknown, TResource[]>(`/projects/${projectId}/resources`);
@@ -209,6 +112,109 @@ export const deleteResourceById = async (resourceId: string) => {
   return api.delete(`/resources/${resourceId}`);
 };
 
+export const uploadResourceByProjectId = async (payload: {
+  projectId: string;
+  files: File[];
+}) => {
+  const formData = new FormData();
+
+  payload.files.forEach((file) => {
+    formData.append("files", file);
+  });
+
+  return api.post<unknown, TResource[]>(
+    `/projects/${payload.projectId}/resources/upload`,
+    formData,
+    {
+      timeout: 60000,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+};
+
+export const getLatestProjectAnalysisRunByProjectId = async (
+  projectId: string,
+) => {
+  const data = await directus.request<ProjectAnalysisRun[]>(
+    readItems("project_analysis_run", {
+      filter: {
+        project_id: projectId,
+      },
+      sort: "-created_at",
+    }),
+  );
+
+  if (!data || data.length === 0) {
+    return null;
+  }
+
+  return data[0];
+};
+
+export const getProjectViews = async (projectId: string) => {
+  const project_analysis_run =
+    await getLatestProjectAnalysisRunByProjectId(projectId);
+
+  if (!project_analysis_run) {
+    return [];
+  }
+
+  return directus.request<View[]>(
+    readItems("view", {
+      fields: [
+        "*",
+        { aspects: ["*", "count(quotes)", "quotes", "representative_quotes"] },
+      ],
+      deep: {
+        aspects: {
+          _sort: "name",
+        } as any,
+      },
+      filter: {
+        project_analysis_run_id: project_analysis_run?.id,
+      },
+      sort: "-created_at",
+    }),
+  );
+};
+
+export const getProjectInsights = async (projectId: string) => {
+  const project_analysis_run =
+    await getLatestProjectAnalysisRunByProjectId(projectId);
+
+  if (!project_analysis_run) {
+    return [];
+  }
+
+  return directus.request<Insight[]>(
+    readItems("insight", {
+      fields: [
+        "*",
+        {
+          quotes: [
+            "id",
+            "text",
+            "timestamp",
+            {
+              conversation_id: ["id", "participant_name"],
+            },
+          ],
+        },
+        "count(quotes)",
+      ],
+      filter: {
+        project_analysis_run_id: project_analysis_run?.id,
+      },
+      sort: "-created_at",
+    }),
+  );
+};
+
+export const getProjectTranscriptsLink = (projectId: string) =>
+  `${apiCommonConfig.baseURL}/projects/${projectId}/transcripts`;
+
 export const initiateConversation = async (payload: {
   projectId: string;
   email?: string;
@@ -217,7 +223,7 @@ export const initiateConversation = async (payload: {
   tagIdList: string[];
 }) => {
   return apiNoAuth.post<unknown, TConversation>(
-    `/projects/${payload.projectId}/conversations/initiate`,
+    `/participant/projects/${payload.projectId}/conversations/initiate`,
     {
       email: payload.email ?? undefined,
       name: payload.name,
@@ -240,28 +246,6 @@ export const getConversationById = async (
       },
     },
   );
-};
-
-export const getConversationQuotes = async (conversationId: string) => {
-  return api.get<unknown, TQuote[]>(`/conversations/${conversationId}/quotes`);
-};
-
-export const updateConversationById = async (payload: {
-  id: string;
-  update: Partial<TConversation>;
-}) => {
-  return api.put<unknown, TConversation>(
-    `/conversations/${payload.id}`,
-    payload.update,
-  );
-};
-
-export const deleteConversationById = async (conversationId: string) => {
-  return api.delete(`/conversations/${conversationId}`);
-};
-
-export const deleteConversationChunkById = async (chunkId: string) => {
-  return api.delete(`/conversation-chunks/${chunkId}`);
 };
 
 export const getConversationsByProjectId = async (
@@ -297,7 +281,7 @@ export const uploadConversationChunk = async (payload: {
   formData.append("timestamp", payload.timestamp.toISOString());
 
   return apiNoAuth.post<unknown, TConversationChunk[]>(
-    `/conversations/${payload.conversationId}/upload-chunk`,
+    `/participant/conversations/${payload.conversationId}/upload-chunk`,
     formData,
     {
       // 10 min
@@ -318,7 +302,7 @@ export const uploadConversationText = async (payload: {
   timestamp: Date;
 }) => {
   return apiNoAuth.post<unknown, TConversationChunk>(
-    `/conversations/${payload.conversationId}/upload-text`,
+    `/participant/conversations/${payload.conversationId}/upload-text`,
     {
       content: payload.content,
       timestamp: payload.timestamp.toISOString(),
@@ -386,12 +370,6 @@ export const initiateAndUploadConversationChunk = async (payload: {
   return Promise.all(promises);
 };
 
-export const getConversationChunks = async (conversationId: string) => {
-  return api.get<unknown, TConversationChunk[]>(
-    `/conversations/${conversationId}/chunks`,
-  );
-};
-
 export const getConversationContentLink = (conversationId: string) =>
   `${apiCommonConfig.baseURL}/conversations/${conversationId}/content`;
 
@@ -400,23 +378,6 @@ export const getConversationChunkContentLink = (
   chunkId: string,
 ) =>
   `${apiCommonConfig.baseURL}/conversations/${conversationId}/chunks/${chunkId}/content`;
-
-export const getTagsByProjectId = async (projectId: string) => {
-  return apiNoAuth.get<unknown, TProjectTag[]>(`/projects/${projectId}/tag`);
-};
-
-export const deleteTagById = async (tagId: string) => {
-  return api.delete(`/tag/${tagId}`);
-};
-
-export const createProjectTag = async (payload: {
-  projectId: string;
-  text: string;
-}) => {
-  return api.post<unknown, TProjectTag>(`/projects/${payload.projectId}/tag`, {
-    text: payload.text,
-  });
-};
 
 export const generateProjectLibrary = async (payload: {
   projectId: string;
@@ -438,27 +399,4 @@ export const generateProjectView = async (payload: {
       additional_context: payload.additionalContext,
     },
   );
-};
-
-export const getTaskById = async (taskId: string) => {
-  return api.get<unknown, TTask>(`/tasks/${taskId}`);
-};
-
-export const getLatestProjectAnalysisRunByProjectId = async (
-  projectId: string,
-) => {
-  const data = await directus.request<ProjectAnalysisRun[]>(
-    readItems("project_analysis_run", {
-      filter: {
-        project_id: projectId,
-      },
-      sort: "-created_at",
-    }),
-  );
-
-  if (!data || data.length === 0) {
-    return null;
-  }
-
-  return data[0];
 };

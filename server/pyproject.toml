@@ -44,6 +44,7 @@ dependencies = [
     "ffmpeg-python>=0.2.0",
     "types-requests>=2.32.0.20240602",
     "flower>=2.0.1",
+    "python-jose[cryptography]>=3.3.0",
 ]
 
 [tool.setuptools]

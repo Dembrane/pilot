@@ -199,39 +199,39 @@ async def get_conversation_chunk_content(
     return StreamingResponse(stream_audio(file_paths), media_type=mime_type)
 
 
-class PutConversationRequestBodySchema(BaseModel):
-    title: Optional[str]
-    description: Optional[str]
-    context: Optional[str]
+# class PutConversationRequestBodySchema(BaseModel):
+#     title: Optional[str]
+#     description: Optional[str]
+#     context: Optional[str]
 
 
-@ConversationRouter.put("/{conversation_id}", response_model=ConversationSchema)
-async def update_conversation(
-    conversation_id: str,
-    body: PutConversationRequestBodySchema,
-    _session: DependencyRequireSession,
-    db: DependencyInjectDatabase,
-) -> ConversationModel:
-    conversation = await get_conversation(conversation_id, db, load_chunks=False)
+# @ConversationRouter.put("/{conversation_id}", response_model=ConversationSchema)
+# async def update_conversation(
+#     conversation_id: str,
+#     body: PutConversationRequestBodySchema,
+#     _session: DependencyRequireSession,
+#     db: DependencyInjectDatabase,
+# ) -> ConversationModel:
+#     conversation = await get_conversation(conversation_id, db, load_chunks=False)
 
-    conversation.title = body.title
-    conversation.description = body.description
-    conversation.context = body.context
+#     conversation.title = body.title
+#     conversation.description = body.description
+#     conversation.context = body.context
 
-    db.commit()
-    return conversation
+#     db.commit()
+#     return conversation
 
 
-@ConversationRouter.delete("/{conversation_id}", response_model=ConversationSchema)
-async def delete_conversation(
-    conversation_id: str,
-    _session: DependencyRequireSession,
-    db: DependencyInjectDatabase,
-) -> ConversationModel:
-    conversation = await get_conversation(conversation_id, db, load_chunks=False)
-    db.delete(conversation)
-    db.commit()
-    return conversation
+# @ConversationRouter.delete("/{conversation_id}", response_model=ConversationSchema)
+# async def delete_conversation(
+#     conversation_id: str,
+#     _session: DependencyRequireSession,
+#     db: DependencyInjectDatabase,
+# ) -> ConversationModel:
+#     conversation = await get_conversation(conversation_id, db, load_chunks=False)
+#     db.delete(conversation)
+#     db.commit()
+#     return conversation
 
 
 class UploadConversationBodySchema(BaseModel):
@@ -299,39 +299,39 @@ async def upload_conversation_chunk(
     return [chunk]
 
 
-@ConversationRouter.get("/{conversation_id}/quotes", response_model=List[QuoteSchema])
-async def get_conversation_quotes(
-    conversation_id: str,
-    db: DependencyInjectDatabase,
-    _session: DependencyRequireSession,
-) -> List[QuoteModel]:
-    conversation = await get_conversation(conversation_id, db, load_chunks=False)
+# @ConversationRouter.get("/{conversation_id}/quotes", response_model=List[QuoteSchema])
+# async def get_conversation_quotes(
+#     conversation_id: str,
+#     db: DependencyInjectDatabase,
+#     _session: DependencyRequireSession,
+# ) -> List[QuoteModel]:
+#     conversation = await get_conversation(conversation_id, db, load_chunks=False)
 
-    project_id = conversation.project_id
+#     project_id = conversation.project_id
 
-    latest_project_analysis = (
-        db.query(ProjectAnalysisRunModel)
-        .filter(ProjectAnalysisRunModel.project_id == project_id)
-        .order_by(ProjectAnalysisRunModel.created_at.desc())
-        .first()
-    )
+#     latest_project_analysis = (
+#         db.query(ProjectAnalysisRunModel)
+#         .filter(ProjectAnalysisRunModel.project_id == project_id)
+#         .order_by(ProjectAnalysisRunModel.created_at.desc())
+#         .first()
+#     )
 
-    if not latest_project_analysis:
-        return []
+#     if not latest_project_analysis:
+#         return []
 
-    quotes = (
-        db.query(QuoteModel)
-        .options(selectinload(QuoteModel.conversation_chunks))
-        .filter(
-            QuoteModel.conversation_id == conversation_id,
-            QuoteModel.project_analysis_run_id == latest_project_analysis.id,
-        )
-        .order_by(QuoteModel.created_at.asc())
-        .all()
-    )
+#     quotes = (
+#         db.query(QuoteModel)
+#         .options(selectinload(QuoteModel.conversation_chunks))
+#         .filter(
+#             QuoteModel.conversation_id == conversation_id,
+#             QuoteModel.project_analysis_run_id == latest_project_analysis.id,
+#         )
+#         .order_by(QuoteModel.created_at.asc())
+#         .all()
+#     )
 
-    quotes.sort(
-        key=lambda quote: quote.conversation_chunks[0].timestamp if quote.conversation_chunks else quote.created_at
-    )
+#     quotes.sort(
+#         key=lambda quote: quote.conversation_chunks[0].timestamp if quote.conversation_chunks else quote.created_at
+#     )
 
-    return quotes
+#     return quotes

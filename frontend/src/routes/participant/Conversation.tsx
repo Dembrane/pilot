@@ -2,9 +2,6 @@ import WelcomeImage from "@/assets/participant-welcome-pattern.png";
 import { Logo } from "@/components/Logo";
 import { Markdown } from "@/components/Markdown";
 import {
-  useConversationById,
-  useConversationChunks,
-  useDeleteConversationChunkByIdMutation,
   useUploadConversationChunk,
   useUploadConversationTextChunk,
 } from "@/lib/query";
@@ -45,24 +42,18 @@ import {
   useState,
 } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-// import {
-//   ReactRealTimeVADOptions,
-//   useMicVAD,
-//   utils,
-// } from "@ricky0123/vad-react";
-// import * as ort from "onnxruntime-web";
+
 import { useLanguage } from "@/lib/useLanguage";
 import { useWakeLock } from "@/lib/useWakeLock";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Trans, t } from "@lingui/macro";
 import clsx from "clsx";
-
-// ort.env.wasm.wasmPaths = {
-//   "ort-wasm-simd-threaded.wasm": "/ort-wasm-simd-threaded.wasm",
-//   "ort-wasm-simd.wasm": "/ort-wasm-simd.wasm",
-//   "ort-wasm.wasm": "/ort-wasm.wasm",
-//   "ort-wasm-threaded.wasm": "/ort-wasm-threaded.wasm",
-// };
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  deleteParticipantConversationChunk,
+  getParticipantConversation,
+  getParticipantConversationChunks,
+} from "@/lib/api";
 
 const preferredMimeTypes = ["audio/webm", "audio/wav", "video/mp4"];
 
@@ -94,24 +85,6 @@ const checkPermissionError = async () => {
     return "error" as const;
   }
 };
-
-// const useSelectAudioDevice = () => {
-//   const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
-//   const [selectedAudioDevice, setSelectedAudioDevice] =
-//     useState<MediaDeviceInfo | null>(null);
-
-//   useEffect(() => {
-//     navigator.mediaDevices.enumerateDevices().then((devices) => {
-//       setAudioDevices(devices.filter((device) => device.kind === "audioinput"));
-//     });
-//   }, []);
-
-//   return {
-//     audioDevices,
-//     selectedAudioDevice,
-//     setSelectedAudioDevice,
-//   };
-// };
 
 interface UseAudioRecorderOptions {
   onChunk: (chunk: Blob) => void;
@@ -187,55 +160,6 @@ const useChunkedAudioRecorder = ({
     };
   }, []);
 
-  const handleAudioProcessorMessages = (event: MessageEvent) => {
-    // log("Not Handled: Received audio processor message", event.data);
-    return;
-
-    log("Received audio processor message", event.data);
-    const { action } = event.data;
-
-    // Use the current state from refs
-    const currentIsRecording = isRecordingRef.current;
-    const currentIsPaused = isPausedRef.current;
-    const currentUserPaused = userPausedRef.current;
-
-    if (action === "pause" && isRecordingRef.current && !isPausedRef.current) {
-      log("System-initiated pause");
-      pauseRecording();
-    } else if (
-      action === "resume" &&
-      isPausedRef.current &&
-      !userPausedRef.current
-    ) {
-      log("System-initiated resume");
-      resumeRecording();
-    } else {
-      log("Unhandled audio processor message", {
-        action,
-        currentIsRecording,
-        currentIsPaused,
-        currentUserPaused,
-      });
-
-      // Detailed logging for unhandled cases
-      if (action === "pause") {
-        log(
-          "unhandled because action is pause, isRecording, isPaused, userPaused",
-          currentIsRecording,
-          currentIsPaused,
-          currentUserPaused,
-        );
-      } else if (action === "resume") {
-        log(
-          "unhandled because action is resume, isRecording, isPaused, userPaused",
-          currentIsRecording,
-          currentIsPaused,
-          currentUserPaused,
-        );
-      }
-    }
-  };
-
   const updateRecordingTime = useCallback(() => {
     setRecordingTime((prev) => prev + 1);
   }, []);
@@ -294,23 +218,6 @@ const useChunkedAudioRecorder = ({
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       log("Access to microphone granted.", { stream });
-
-      // Setup audio context and processor for silence detection
-      // audioContextRef.current = new AudioContext();
-      // log("Loading audio worklet module...");
-      // await audioContextRef.current.audioWorklet.addModule("/processor.js"); // Your worklet processor file
-      // audioProcessorRef.current = new AudioWorkletNode(
-      //   audioContextRef.current,
-      //   "silence-detector",
-      // );
-      // log("Audio worklet module loaded", audioProcessorRef.current);
-      // audioProcessorRef.current.port.onmessage = handleAudioProcessorMessages;
-
-      // Connect the stream to the audio context
-      // log("Connecting audio stream to audio processor");
-      // const source = audioContextRef.current.createMediaStreamSource(stream);
-      // source.connect(audioProcessorRef.current);
-      // audioProcessorRef.current.connect(audioContextRef.current.destination);
 
       log("Creating MediaRecorder instance");
 
@@ -621,106 +528,32 @@ const useAudioRecorder = ({
   };
 };
 
-// const useVADAudioRecorder = (
-//   props: UseAudioRecorderOptions,
-// ): UseAudioRecorderResult => {
-//   const vadOptions: Partial<ReactRealTimeVADOptions> = {
-//     redemptionFrames: 20,
-//     minSpeechFrames: 5,
-//     startOnLoad: false,
-//     submitUserSpeechOnPause: true,
-//     workletURL: "/vad.worklet.bundle.min.js",
-//     modelURL: "/silero_vad.onnx",
-//     // additionalAudioConstraints: {
-//     //   deviceId: ""
-//     // },
-//     onVADMisfire: () => {
-//       console.log("Vad misfire");
-//     },
-//     onSpeechStart: () => {
-//       console.log("Speech start");
-//     },
-//     onSpeechEnd: (audio) => {
-//       console.log("Speech ended");
-//       const buffer = utils.encodeWAV(audio);
-//       const blob = new Blob([buffer], { type: "audio/wav" });
-//       props.onChunk(blob);
-//     },
-//   };
+// Common hooks
+const useConversationQuery = (
+  projectId: string | undefined,
+  conversationId: string | undefined,
+) => {
+  return useQuery({
+    queryKey: ["participant", "conversation", projectId, conversationId],
+    queryFn: () =>
+      getParticipantConversation(projectId ?? "", conversationId ?? ""),
+    enabled: !!conversationId,
+    refetchInterval: 30000,
+  });
+};
 
-//   const vad = useMicVAD(vadOptions);
-
-//   const [isRecording, setIsRecording] = useState(false);
-//   const [isPaused, setIsPaused] = useState(false);
-
-//   const [recordingTime, setRecordingTime] = useState(0);
-//   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-//   const updateRecordingTime = useCallback(() => {
-//     setRecordingTime((prev) => prev + 1);
-//   }, []);
-
-//   const startRecording = useCallback(() => {
-//     console.log("Starting recording");
-//     setIsRecording(true);
-//     setIsPaused(false);
-//     setRecordingTime(0);
-//     vad.start();
-//     if (intervalRef.current) {
-//       clearInterval(intervalRef.current);
-//     }
-//     intervalRef.current = setInterval(updateRecordingTime, 1000);
-//   }, [vad, setIsPaused]);
-
-//   const stopRecording = useCallback(() => {
-//     vad.pause();
-//     setIsRecording(false);
-//     setIsPaused(false);
-//     if (intervalRef.current) {
-//       clearInterval(intervalRef.current);
-//     }
-//     setRecordingTime(0);
-//   }, [vad, setIsPaused]);
-
-//   const pauseRecording = useCallback(() => {
-//     vad.pause();
-//     setIsPaused(true);
-//     if (intervalRef.current) {
-//       clearInterval(intervalRef.current);
-//     }
-//   }, [vad, setIsPaused]);
-
-//   const resumeRecording = useCallback(() => {
-//     vad.start();
-//     setIsPaused(false);
-//     if (intervalRef.current) {
-//       clearInterval(intervalRef.current);
-//     }
-//     intervalRef.current = setInterval(updateRecordingTime, 1000);
-//   }, [vad, setIsPaused]);
-
-//   useEffect(() => {
-//     return () => {
-//       if (intervalRef.current) {
-//         clearInterval(intervalRef.current);
-//       }
-//     };
-//   }, []);
-
-//   return {
-//     startRecording,
-//     stopRecording,
-//     pauseRecording,
-//     resumeRecording,
-//     isRecording,
-//     isPaused,
-//     recordingTime,
-//     errored: vad.errored,
-//     loading: vad.loading,
-//     // TODO: Not Implemented
-//     permissionError: null,
-//   };
-// };
+const useConversationChunksQuery = (
+  projectId: string | undefined,
+  conversationId: string | undefined,
+) => {
+  return useQuery({
+    queryKey: ["participant", "conversation_chunks", conversationId],
+    queryFn: () =>
+      getParticipantConversationChunks(projectId ?? "", conversationId ?? ""),
+    enabled: !!conversationId,
+    refetchInterval: 15000,
+  });
+};
 
 const ParticipantHeader = () => {
   return (
@@ -734,12 +567,56 @@ const ParticipantHeader = () => {
 };
 
 const UserChunkMessage = ({ chunk }: { chunk?: TConversationChunk }) => {
-  const deleteChunkMutation = useDeleteConversationChunkByIdMutation();
+  const { projectId, conversationId } = useParams();
+  const queryClient = useQueryClient();
+
+  const deleteChunkMutation = useMutation({
+    mutationFn: ({
+      projectId,
+      conversationId,
+      chunkId,
+    }: {
+      projectId: string;
+      conversationId: string;
+      chunkId: string;
+    }) =>
+      deleteParticipantConversationChunk(
+        projectId ?? "",
+        conversationId ?? "",
+        chunkId ?? "",
+      ),
+    onMutate: (vars) => {
+      queryClient.cancelQueries({
+        queryKey: ["participant", "conversation_chunks", conversationId ?? ""],
+      });
+      const previousValue = queryClient.getQueryData([
+        "participant",
+        "conversation_chunks",
+        conversationId ?? "",
+      ]);
+      queryClient.setQueryData(
+        ["participant", "conversation_chunks", conversationId ?? ""],
+
+        (old: TConversationChunk[] | undefined) =>
+          old?.filter((c) => c.id !== vars.chunkId),
+      );
+      return previousValue;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["participant", "conversation_chunks", conversationId ?? ""],
+      });
+    },
+  });
 
   if (!chunk) return <></>;
 
   const handleDelete = () => {
-    deleteChunkMutation.mutate(chunk.id);
+    deleteChunkMutation.mutate({
+      projectId: projectId ?? "",
+      conversationId: conversationId ?? "",
+      chunkId: chunk.id,
+    });
   };
 
   return (
@@ -808,10 +685,12 @@ const ParticipantBody = ({
 }: PropsWithChildren<{
   conversation?: TConversation;
 }>) => {
+  const { projectId } = useParams();
   const [ref] = useAutoAnimate();
   const [chatRef] = useAutoAnimate();
   const bottomRef = useRef<HTMLDivElement>(null);
-  const chunksQuery = useConversationChunks(conversation?.id ?? "");
+
+  const chunksQuery = useConversationChunksQuery(projectId, conversation?.id);
 
   useEffect(() => {
     if (bottomRef.current) {
@@ -878,10 +757,8 @@ export const ParticipantConversationChunkedAudioRoute = () =>
   // }
   {
     const { projectId, conversationId } = useParams();
-    const conversationQuery = useConversationById(
-      conversationId as string,
-      false,
-    );
+    const conversationQuery = useConversationQuery(projectId, conversationId);
+    const chunks = useConversationChunksQuery(projectId, conversationId);
     const uploadChunkMutation = useUploadConversationChunk();
 
     const onChunk = (chunk: Blob) => {
@@ -929,8 +806,6 @@ export const ParticipantConversationChunkedAudioRoute = () =>
         );
       }
     };
-
-    const chunks = useConversationChunks(conversationId as string, 10000);
 
     if (conversationQuery.isLoading || loading) {
       return <LoadingOverlay visible />;
@@ -1107,10 +982,8 @@ export const ParticipantConversationAudioRoute = ({
   // }
   {
     const { projectId, conversationId } = useParams();
-    const conversationQuery = useConversationById(
-      conversationId as string,
-      false,
-    );
+    const conversationQuery = useConversationQuery(projectId, conversationId);
+    const chunks = useConversationChunksQuery(projectId, conversationId);
     const uploadChunkMutation = useUploadConversationChunk();
 
     const [uploadInProgress, updatedUploadInProgress] = useState(false);
@@ -1183,8 +1056,6 @@ export const ParticipantConversationAudioRoute = ({
         );
       }
     };
-
-    const chunks = useConversationChunks(conversationId as string, 10000);
 
     if (conversationQuery.isLoading || loading) {
       return <LoadingOverlay visible />;
@@ -1408,10 +1279,8 @@ export const ParticipantConversationAudioRoute = ({
 
 export const ParticipantConversationTextRoute = () => {
   const { projectId, conversationId } = useParams();
-  const conversationQuery = useConversationById(
-    conversationId as string,
-    false,
-  );
+  const conversationQuery = useConversationQuery(projectId, conversationId);
+  const chunks = useConversationChunksQuery(projectId, conversationId);
   const uploadChunkMutation = useUploadConversationTextChunk();
 
   const [text, setText] = useState("");
@@ -1432,8 +1301,6 @@ export const ParticipantConversationTextRoute = () => {
 
   const navigate = useNavigate();
   const { language } = useLanguage();
-
-  const chunks = useConversationChunks(conversationId as string, 10000);
 
   const audioModeUrl = `/${language}/${projectId}/conversation/${conversationId}`;
   const finishUrl = `/${language}/${projectId}/conversation/${conversationId}/finish`;

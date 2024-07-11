@@ -13,7 +13,7 @@ interface BreadcrumbsProps {
 
 export const Breadcrumbs = ({ items }: BreadcrumbsProps) => {
   return (
-    <MantineBreadcrumbs>
+    <MantineBreadcrumbs className="flex-wrap">
       {items.map((item, index) => {
         if (item.link) {
           return (

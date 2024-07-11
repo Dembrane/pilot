@@ -10,3 +10,4 @@ appsmith_data
 redis_data
 directus/uploads
 directus/.env
+*.sql

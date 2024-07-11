@@ -1,6 +1,5 @@
 import { I18nProvider as I18nP } from "@lingui/react";
 import { PropsWithChildren, useEffect } from "react";
-import { useCurrentSession } from "../lib/query";
 import { LoadingOverlay } from "@mantine/core";
 import { useLanguage } from "@/lib/useLanguage";
 

@@ -28,6 +28,9 @@ logger.debug(f"ADMIN_BASE_URL: {ADMIN_BASE_URL}")
 PARTICIPANT_BASE_URL = os.environ.get("PARTICIPANT_BASE_URL", "http://localhost:3001")
 logger.debug(f"PARTICIPANT_BASE_URL: {PARTICIPANT_BASE_URL}")
 
+DIRECTUS_BASE_URL = os.environ.get("DIRECTUS_BASE_URL", "http://localhost:8055")
+logger.debug(f"DIRECTUS_BASE_URL: {DIRECTUS_BASE_URL}")
+
 DISABLE_REDACTION = os.environ.get("DISABLE_REDACTION", "false").lower() in ["true", "1"]
 logger.debug(f"DISABLE_REDACTION: {DISABLE_REDACTION}")
 
@@ -56,6 +59,10 @@ logger.debug(f"EMBEDDINGS_CACHE_DIR: {EMBEDDINGS_CACHE_DIR}")
 
 TRANKIT_CACHE_DIR = os.path.join(BASE_DIR, "trankit_cache")
 logger.debug(f"TRANKIT_CACHE_DIR: {TRANKIT_CACHE_DIR}")
+
+DIRECTUS_SECRET = os.environ.get("DIRECTUS_SECRET")
+assert DIRECTUS_SECRET, "DIRECTUS_SECRET environment variable is not set"
+logger.debug("DIRECTUS_SECRET: set")
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 assert DATABASE_URL, "DATABASE_URL environment variable is not set"

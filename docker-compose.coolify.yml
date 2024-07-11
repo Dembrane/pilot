@@ -50,6 +50,7 @@ services:
       - postgres
       - rabbitmq
     environment:
+      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL}
       PORT: 8055
       SECRET: ${DIRECTUS_SECRET}
       ADMIN_EMAIL: admin@dembrane.com
@@ -61,12 +62,14 @@ services:
       DB_USER: dembrane
       DB_PASSWORD: dembrane
       DB_DATABASE: dembrane
-      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL}
       TELEMETRY: false
       REDIS_ENABLED: true
       REDIS: redis://redis:6379
       CORS_ENABLED: true
       CORS_ORIGIN: "*"
+      CORS_CREDENTIALS: true
+      SESSION_COOKIE_SECURE: false
+      SESSION_COOKIE_SAME_SITE: lax
     volumes:
       - ./directus/uploads:/directus/uploads
 
@@ -83,6 +86,7 @@ services:
       retries: 3
     environment:
       - DIRECTUS_PUBLIC_URL=${DIRECTUS_PUBLIC_URL}
+      - DIRECTUS_SECRET=${DIRECTUS_SECRET}
       - ADMIN_BASE_URL=${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
@@ -111,6 +115,7 @@ services:
     command: /bin/sh /code/server/prod-worker.sh
     environment:
       - DIRECTUS_PUBLIC_URL=${DIRECTUS_PUBLIC_URL}
+      - DIRECTUS_SECRET=${DIRECTUS_SECRET}
       - ADMIN_BASE_URL=${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
@@ -138,6 +143,7 @@ services:
       dockerfile: Dockerfile
       args:
         - VITE_API_BASE_URL=${API_BASE_URL}/api
+        - VITE_ADMIN_BASE_URL=${ADMIN_BASE_URL}
         - VITE_PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
         - VITE_BUILD_VERSION=${BUILD_VERSION}
         - VITE_USE_PARTICIPANT_ROUTER=0

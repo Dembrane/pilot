@@ -1,4 +1,3 @@
-import { Breadcrumbs } from "@/components/breadcrumbs/Breadcrumbs";
 import { Icons } from "@/icons";
 import {
   Divider,
@@ -10,17 +9,33 @@ import {
   Container,
 } from "@mantine/core";
 import { useParams } from "react-router-dom";
-import { Quote } from "./ProjectLibraryInsight";
+import { Quote } from "../../components/quote/Quote";
 import { Markdown } from "@/components/Markdown";
 import { useAspectById } from "@/lib/query";
+import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 
 export const ProjectLibraryAspect = () => {
-  const { projectId, viewId, aspectId } = useParams();
+  const { projectId, viewId, aspectId, sessionId } = useParams();
 
   const { data: aspect, isLoading } = useAspectById(
     projectId ?? "",
     aspectId ?? "",
   );
+
+  // in quotes not in representative quotes
+  console.log("quotes", aspect?.quotes);
+  console.log("representative_quotes", aspect?.representative_quotes);
+  const deltaQuotes =
+    aspect?.quotes?.filter(
+      (quote: QuoteAspect) =>
+        // Check if the current quote is not in representative_quotes
+        !aspect?.representative_quotes?.some(
+          (repQuote: QuoteAspect) =>
+            (repQuote.quote_id as Quote).id === (quote.quote_id as Quote).id,
+        ),
+    ) ?? []; // If quotes is undefined or null, use an empty array
+
+  console.log("deltaQuotes", deltaQuotes);
 
   return (
     <Stack className="py-6 px-4 relative">
@@ -28,15 +43,15 @@ export const ProjectLibraryAspect = () => {
         items={[
           {
             label: <Icons.Sidebar />,
-            link: `/projects/${projectId}/overview`,
+            link: `/workspaces/${sessionId}/projects/${projectId}/overview`,
           },
           {
             label: "Library",
-            link: `/projects/${projectId}/library`,
+            link: `/workspaces/${sessionId}/projects/${projectId}/library`,
           },
           {
             label: "View",
-            link: `/projects/${projectId}/library/views/${viewId}`,
+            link: `/workspaces/${sessionId}/projects/${projectId}/library/views/${viewId}`,
           },
           {
             label: "Aspect",
@@ -48,13 +63,7 @@ export const ProjectLibraryAspect = () => {
       <Stack gap="md" className="relative">
         <LoadingOverlay visible={isLoading} />
         <img
-          src={
-            aspect?.image_url ??
-            "https://loremflickr.com/320/240/" +
-              "nature" +
-              "?random=" +
-              aspect?.id // data.image_url
-          }
+          src={aspect?.image_url ?? "/placeholder.png"}
           alt={aspect?.name}
           className="w-full h-[400px] object-cover"
         />
@@ -67,8 +76,17 @@ export const ProjectLibraryAspect = () => {
       </Stack>
 
       <Stack>
-        <Title order={2}>Quotes</Title>
-        {aspect?.quotes.map((quote: QuoteAspect) => (
+        {aspect?.representative_quotes?.length != 0 && (
+          <Title order={2}>Representative Quotes</Title>
+        )}
+        {aspect?.representative_quotes?.map((quote: QuoteAspect) => (
+          <Quote key={quote.id} data={quote.quote_id as Quote} />
+        ))}
+
+        {deltaQuotes.length != 0 && (
+          <Title order={2}>Other Relevant Quotes</Title>
+        )}
+        {deltaQuotes.map((quote: QuoteAspect) => (
           <Quote key={quote.id} data={quote.quote_id as Quote} />
         ))}
       </Stack>

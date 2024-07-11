@@ -3,7 +3,7 @@ import { Logo } from "../Logo";
 import { Toaster } from "../Toaster";
 import { PropsWithChildren } from "react";
 import { Outlet } from "react-router-dom";
-import { ProjectSidebar } from "./ProjectSidebar";
+import { ProjectSidebar } from "../project/ProjectSidebar";
 
 // can be rendered inside BaseLayout
 export const ProjectLayout = () => {

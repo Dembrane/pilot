@@ -1,18 +1,14 @@
-import { ProjectTagsInput } from "@/components/project/ProjectTagsInput";
 import { PARTICIPANT_BASE_URL } from "@/config";
 import { Icons } from "@/icons";
 import { getProjectTranscriptsLink } from "@/lib/api";
 import {
   useConversationsByProjectId,
-  useDeleteProjectByIdMutation,
   useProjectById,
   useGenerateProjectLibraryMutation,
-  useResourcesByProjectId,
   useUpdateProjectByIdMutation,
 } from "@/lib/query";
 import { Trans } from "@lingui/macro";
 import {
-  Anchor,
   Box,
   Button,
   Checkbox,
@@ -21,13 +17,11 @@ import {
   Group,
   LoadingOverlay,
   NativeSelect,
-  Paper,
   SimpleGrid,
   Stack,
   Tabs,
   Text,
   TextInput,
-  Textarea,
   Title,
   Tooltip,
   rem,
@@ -36,241 +30,23 @@ import {
   IconCheck,
   IconCopy,
   IconDownload,
-  IconTrash,
+  IconShare,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import QRCode from "react-qr-code";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import useSessionStorageState from "use-session-storage-state";
-
-const ProjectDangerZone = ({ project }: { project: TProject }) => {
-  const deleteProjectByIdMutation = useDeleteProjectByIdMutation();
-  const navigate = useNavigate();
-
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this project?")) {
-      deleteProjectByIdMutation.mutate(project.id);
-      navigate("/projects/home");
-    }
-  };
-
-  return (
-    <Stack>
-      <Title order={2}>Danger Zone</Title>
-      <Box>
-        <Button
-          onClick={handleDelete}
-          color="red"
-          variant="outline"
-          rightSection={<IconTrash />}
-        >
-          Delete Project
-        </Button>
-      </Box>
-    </Stack>
-  );
-};
-
-type ProjectEditFormValues = {
-  name: string;
-  context: string;
-  language: "en" | "nl" | "multi";
-  default_conversation_title?: string;
-  default_conversation_description?: string;
-  default_conversation_context?: string;
-  default_conversation_finish_text?: string;
-};
-
-const ProjectEdit = ({ project }: { project: TProject }) => {
-  const defaultValues: ProjectEditFormValues = {
-    name: project.name ?? "",
-    context: project.context ?? "",
-    language: (project.language as ProjectEditFormValues["language"]) ?? "en",
-    default_conversation_title: project.default_conversation_title ?? "",
-    default_conversation_description:
-      project.default_conversation_description ?? "",
-    default_conversation_context: project.default_conversation_context ?? "",
-    default_conversation_finish_text:
-      project.default_conversation_finish_text ?? "",
-  };
-
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitSuccessful, isDirty },
-    reset,
-    getValues,
-  } = useForm<ProjectEditFormValues>({
-    defaultValues,
-  });
-
-  const { isSuccess, ...updateProjectMutation } =
-    useUpdateProjectByIdMutation();
-
-  const onSubmit = (data: ProjectEditFormValues) => {
-    updateProjectMutation.mutate({
-      id: project.id,
-      update: data,
-    });
-  };
-
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      reset(getValues());
-    }
-  }, [isSubmitSuccessful, getValues, reset]);
-
-  return (
-    <Stack>
-      <Group>
-        <Title order={2}>
-          <Trans>Edit Project</Trans>
-        </Title>
-        {isDirty && <Trans>Unsaved changes</Trans>}
-      </Group>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Stack>
-          <TextInput label="Title" {...register("name")} />
-
-          <Textarea
-            label="Additional Context"
-            rows={5}
-            {...register("context")}
-            placeholder="Additional Context"
-          />
-          <NativeSelect
-            label="Language"
-            description="Changing this will affect the language of transcripts for new conversations"
-            {...register("language")}
-            data={[
-              {
-                label: "English",
-                value: "en",
-              },
-              {
-                label: "Dutch",
-                value: "nl",
-              },
-              {
-                label: "Multilingual (Experimental)",
-                value: "multi",
-              },
-            ]}
-          />
-
-          <Divider />
-
-          <Box>
-            <Title order={3}>Default Conversation Settings</Title>
-            <Text size="sm">
-              The following settings will be used as defaults for new
-              conversations. These can also be changed per conversation using
-              the conversation settings. These will be exposed to participants.
-            </Text>
-          </Box>
-
-          <ProjectTagsInput projectId={project.id} />
-
-          <TextInput
-            label="Title"
-            {...register("default_conversation_title")}
-            placeholder="Conversation Title"
-          />
-
-          <Textarea
-            label="Description"
-            description="Markdown is allowed here."
-            rows={5}
-            {...register("default_conversation_description")}
-            placeholder="Conversation Description"
-          />
-
-          <Textarea
-            label="Post Conversation Text"
-            description="This will be shown to participants after they finish a conversation. Markdown is allowed here. The following variables are supported. {{CONVERSATION_ID}}, {{PROJECT_ID}}"
-            rows={5}
-            {...register("default_conversation_finish_text")}
-            placeholder="Post Conversation Text"
-          />
-
-          <Box>
-            <Title order={4}>Advanced Settings</Title>
-            <Text size="sm">
-              These are not exposed to participants but will be used to improve
-              the quality of the transcripts for new conversations
-            </Text>
-          </Box>
-
-          <Textarea
-            label="Context"
-            description={
-              <Text size="xs">
-                Use this field to add context about the session. You may choose
-                to include proper nouns, names, or other information that may be
-                relevant to the conversation. This will be used to improve the
-                quality of the transcripts.{" "}
-                <Anchor
-                  href="https://cookbook.openai.com/examples/whisper_prompting_guide"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Link to Prompting Guide
-                </Anchor>
-              </Text>
-            }
-            rows={5}
-            {...register("default_conversation_context")}
-            placeholder="Conversation Additional Context"
-          />
-
-          <Group>
-            <Button
-              type="submit"
-              loading={updateProjectMutation.isPending}
-              disabled={!isDirty}
-            >
-              <Trans>Save</Trans>
-            </Button>
-            <Button
-              type="reset"
-              variant="outline"
-              onClick={() => reset(defaultValues)}
-              disabled={!isDirty}
-            >
-              <Trans>Cancel</Trans>
-            </Button>
-          </Group>
-        </Stack>
-      </form>
-    </Stack>
-  );
-};
-
-type ProjectOverviewSummaryItem = {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  loading?: boolean;
-};
-
-const ProjectOverviewSummaryCard = (props: ProjectOverviewSummaryItem) => {
-  return (
-    <Paper p="md" shadow="0">
-      <LoadingOverlay visible={props.loading} />
-      <Stack>
-        {props.icon}
-        <span>{props.label}</span>
-        <span>{props.value}</span>
-      </Stack>
-    </Paper>
-  );
-};
+import { ProjectDangerZone } from "./ProjectDangerZone";
+import { SummaryCard } from "@/components/common/SummaryCard";
+import { ProjectEdit } from "./ProjectEdit";
+import { useDocumentTitle } from "@mantine/hooks";
 
 export const ProjectOverviewRoute = () => {
   const projectId = useParams().projectId;
-  const projectQuery = useProjectById(projectId ?? "");
-  const resourcesQuery = useResourcesByProjectId(projectId ?? "");
+  const projectQuery = useProjectById({
+    projectId: projectId ?? "",
+  });
+  // const resourcesQuery = useResourcesByProjectId(projectId ?? "");
   const conversationsQuery = useConversationsByProjectId(projectId ?? "");
   const updateProjectMutation = useUpdateProjectByIdMutation();
   const requestProjectAnalysisMutation = useGenerateProjectLibraryMutation();
@@ -298,8 +74,11 @@ export const ProjectOverviewRoute = () => {
     `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data?.pin}&transcription=${getTranscriptionType(isTranscriptionLive)}`,
   );
 
+  useDocumentTitle("Dembrane | Project Overview");
+
   useEffect(() => {
     if (projectQuery.data) {
+      document.title = "Dembrane | " + projectQuery.data.name;
       setSharingLink(
         `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data.pin}&transcription=${getTranscriptionType(isTranscriptionLive)}`,
       );
@@ -317,7 +96,7 @@ export const ProjectOverviewRoute = () => {
   ) => {
     updateProjectMutation.mutate({
       id: projectId ?? "",
-      update: {
+      payload: {
         is_conversation_allowed: e.target.checked,
       },
     });
@@ -335,10 +114,12 @@ export const ProjectOverviewRoute = () => {
       value: projectQuery.data?.is_conversation_allowed ? "Yes" : "No",
     },
     {
-      loading: resourcesQuery.isLoading,
+      loading: false,
+      // loading: resourcesQuery.isLoading,
       icon: <Icons.DocumentOutline />,
       label: "Resources",
-      value: `${resourcesQuery.data?.length ?? 0}`,
+      // value: `${resourcesQuery.data?.length ?? 0}`,
+      value: "0",
     },
     {
       laoding: conversationsQuery.isLoading,
@@ -383,7 +164,7 @@ export const ProjectOverviewRoute = () => {
   ];
 
   return (
-    <Stack className="py-6 px-2">
+    <Stack className="py-6 px-2 relative">
       <LoadingOverlay visible={projectQuery.isLoading} />
       <Title order={1}>
         <Trans>Overview</Trans>
@@ -396,7 +177,7 @@ export const ProjectOverviewRoute = () => {
         }}
       >
         {summaryItems.map((item, index) => (
-          <ProjectOverviewSummaryCard key={index} {...item} />
+          <SummaryCard key={index} {...item} />
         ))}
       </SimpleGrid>
       <Divider />
@@ -496,6 +277,7 @@ export const ProjectOverviewRoute = () => {
                           position="right"
                         >
                           <Button
+                            variant="outline"
                             onClick={copy}
                             rightSection={
                               copied ? (
@@ -510,6 +292,32 @@ export const ProjectOverviewRoute = () => {
                         </Tooltip>
                       )}
                     </CopyButton>
+                    {navigator.canShare &&
+                      navigator.canShare({
+                        title: `Join ${projectQuery.data?.default_conversation_title} on Dembrane`,
+                        url: sharingLink,
+                      }) && (
+                        <Button
+                          rightSection={
+                            <IconShare style={{ width: rem(16) }} />
+                          }
+                          variant="outline"
+                          onClick={async () => {
+                            try {
+                              await navigator.share({
+                                title: `Join ${projectQuery.data?.default_conversation_title} on Dembrane`,
+                                url: sharingLink,
+                              });
+                              console.log("Data was shared successfully");
+                            } catch (err) {
+                              console.error("Share failed:", err);
+                              alert("Share failed");
+                            }
+                          }}
+                        >
+                          Share
+                        </Button>
+                      )}
                   </Group>
                 </Box>{" "}
                 <Box>
@@ -517,7 +325,7 @@ export const ProjectOverviewRoute = () => {
                   <Box className="h-auto max-w-32 w-full">
                     <QRCode value={sharingLink} className="h-full w-full" />
                   </Box>
-                </Box>{" "}
+                </Box>
                 <Divider />
                 <Title order={2}>Export</Title>
                 <Box>
@@ -526,6 +334,7 @@ export const ProjectOverviewRoute = () => {
                     href={getProjectTranscriptsLink(projectId ?? "")}
                     download={`${projectQuery.data.name ?? "Project"}-Transcripts.zip`}
                     rightSection={<IconDownload />}
+                    variant="outline"
                   >
                     Download All Transcripts
                   </Button>

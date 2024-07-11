@@ -1,6 +1,7 @@
 import { Logo } from "@/components/Logo";
 import { Markdown } from "@/components/Markdown";
 import { PARTICIPANT_BASE_URL } from "@/config";
+import { getParticipantProjectById } from "@/lib/api";
 import { useProjectById } from "@/lib/query";
 import { useLanguage } from "@/lib/useLanguage";
 import { Trans } from "@lingui/macro";
@@ -14,11 +15,16 @@ import {
   Text,
   Title,
 } from "@mantine/core";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 
 export const ParticipantPostConversation = () => {
   const { projectId, conversationId } = useParams();
-  const project = useProjectById(projectId ?? "");
+  const project = useQuery({
+    queryKey: ["participant", "project", projectId],
+    queryFn: () => getParticipantProjectById(projectId as string),
+    enabled: !!projectId,
+  });
 
   const { language } = useLanguage();
 

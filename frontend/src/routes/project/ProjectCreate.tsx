@@ -1,5 +1,5 @@
 import { Icons } from "@/icons";
-import { useCreateProject } from "@/lib/query";
+import { useCreateProjectMutation } from "@/lib/query";
 import {
   Breadcrumbs,
   Button,
@@ -11,7 +11,7 @@ import {
   Textarea,
   Title,
 } from "@mantine/core";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import EditableTextBox from "@/components/EditableTextBox";
 
@@ -28,10 +28,15 @@ export const ProjectsCreateRoute = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<FormValues>();
-  const createProjectMutation = useCreateProject();
+  const createProjectMutation = useCreateProjectMutation();
+
+  const { sessionId } = useParams();
 
   const onSubmit = (data: FormValues) => {
-    createProjectMutation.mutate(data);
+    createProjectMutation.mutate({
+      ...data,
+      session_id: Number(sessionId),
+    });
   };
 
   return (
@@ -40,7 +45,7 @@ export const ProjectsCreateRoute = () => {
         <Group className="sticky top-0" justify="space-between">
           <Group>
             <Breadcrumbs>
-              <Link to="/projects/home">
+              <Link to={`/workspaces/${sessionId}/projects`}>
                 <Icons.Home />
               </Link>
               <Title order={1}>
@@ -64,7 +69,7 @@ export const ProjectsCreateRoute = () => {
           <LoadingOverlay visible={createProjectMutation.isPending} />
           {createProjectMutation.data && (
             <Navigate
-              to={`/projects/${createProjectMutation.data.id}/overview`}
+              to={`/workspaces/${sessionId}/projects/${createProjectMutation.data.id}/overview`}
             />
           )}
           <Textarea

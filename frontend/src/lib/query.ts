@@ -1,149 +1,244 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  createProject,
-  createProjectTag,
-  deleteConversationById,
-  deleteConversationChunkById,
-  deleteProjectById,
-  deleteResourceById,
-  deleteTagById,
-  doInitiateSession,
-  getAllProjects,
-  getAllSessions,
-  getConversationById,
-  getConversationChunks,
-  getConversationQuotes,
-  getConversationsByProjectId,
-  getCurrentSession,
-  getProjectById,
-  getProjectInsights,
-  getViewById,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  UseQueryOptions,
+} from "@tanstack/react-query";
+import {
   getProjectViews,
-  getResourceById,
-  getResourcesByProjectId,
-  getTagsByProjectId,
   initiateAndUploadConversationChunk,
   initiateConversation,
   generateProjectLibrary as generateProjectLibrary,
-  updateConversationById,
-  updateProjectById,
-  updateResourceById,
   uploadConversationChunk,
   uploadConversationText,
   uploadResourceByProjectId,
-  getTaskById,
   generateProjectView,
   getLatestProjectAnalysisRunByProjectId,
-  getAspectById,
+  getProjectInsights,
+  getResourceById,
+  getResourcesByProjectId,
+  updateResourceById,
+  deleteResourceById,
+  api,
 } from "./api";
 import { toast } from "@/components/Toaster";
-import { AxiosError } from "axios";
 import { directus } from "./directus";
-import { readItems } from "@directus/sdk";
+import {
+  createItem,
+  deleteItem,
+  Query,
+  readItem,
+  readItems,
+  readUser,
+  registerUser,
+  updateItem,
+} from "@directus/sdk";
+import { useNavigate } from "react-router-dom";
 
-export const useCurrentSession = () => {
+export const useAllSessions = ({
+  query,
+}: {
+  query?: Partial<Query<CustomDirectusTypes, Session>>;
+} = {}) => {
   return useQuery({
-    queryKey: ["session", "current"],
-    queryFn: getCurrentSession,
-    retry: (failureCount, err) => {
-      if (err instanceof AxiosError) {
-        if (err.response?.status === 401) {
-          return false;
-        }
-      }
-      const defaultRetry = 3;
-      return Number.isSafeInteger(defaultRetry)
-        ? failureCount < (defaultRetry ?? 0)
-        : false;
+    queryKey: ["sessions"],
+    queryFn: () =>
+      directus.request<Session[]>(
+        readItems("session", {
+          fields: ["id", "created_at", "count(projects)", "uuid"],
+          ...query,
+        }),
+      ),
+  });
+};
+
+export const useCreateSessionMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: Partial<Session>) =>
+      directus.request<Session>(createItem("session", payload)),
+    onSuccess: () => {
+      toast.success("Session created successfully");
+      queryClient.invalidateQueries({ queryKey: ["sessions"] });
     },
   });
 };
 
-export const useAllSessions = () => {
+export const useProjects = ({
+  query,
+}: {
+  query: Partial<Query<CustomDirectusTypes, Project>>;
+}) => {
   return useQuery({
-    queryKey: ["session", "all"],
-    queryFn: getAllSessions,
+    queryKey: ["projects", query],
+    queryFn: () =>
+      directus.request(
+        readItems("project", {
+          fields: [
+            "*",
+            {
+              tags: ["*"],
+            },
+          ],
+          ...query,
+        }),
+      ),
   });
 };
 
-export const useInitiateSessionById = () => {
+export const useCreateProjectMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: doInitiateSession,
-    onSuccess: () => {
-      // queryClient.invalidateQueries({ queryKey: ["document"] });
-      queryClient.invalidateQueries({ queryKey: ["session"] });
-      queryClient.resetQueries();
-      queryClient.clear();
-      toast.success("Session updated successfully");
+    mutationFn: (payload: Partial<Project>) => {
+      return api.post<unknown, TProject>("/projects", payload);
     },
-  });
-};
-
-export const useProjects = () => {
-  return useQuery({
-    queryKey: ["project", "all"],
-    queryFn: getAllProjects,
-  });
-};
-
-export const useCreateProject = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: createProject,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["project"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
       toast.success("Project created successfully");
     },
   });
 };
 
-export const useProjectById = (projectId: string) => {
+export const useLoginMutation = () => {
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof directus.login>) =>
+      directus.login(...payload),
+    onSuccess: () => {
+      toast.success("Login successful");
+    },
+  });
+};
+
+export const useRegisterMutation = () => {
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof registerUser>) =>
+      directus.request(registerUser(...payload)),
+    onSuccess: () => {
+      toast.success("User registered successfully");
+    },
+  });
+};
+
+export const useLogoutMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ next: _ }: { next?: string; doRedirect: boolean }) => {
+      await directus.logout();
+    },
+    onMutate: async ({ next, doRedirect }) => {
+      queryClient.resetQueries();
+      if (doRedirect) {
+        window.location.href =
+          "/login" + (next ? `?next=${encodeURIComponent(next)}` : "");
+      }
+    },
+  });
+};
+
+export const useProjectById = ({
+  projectId,
+  query = {
+    fields: [
+      "*",
+      {
+        tags: ["id", "created_at", "text"],
+      },
+    ],
+  },
+}: {
+  projectId: string;
+  query?: Partial<Query<CustomDirectusTypes, Project>>;
+}) => {
   return useQuery({
-    queryKey: ["project", projectId],
-    queryFn: () => getProjectById(projectId),
+    queryKey: ["projects", projectId],
+    queryFn: () =>
+      directus.request<Project>(readItem("project", projectId, query)),
   });
 };
 
 export const useProjectInsights = (projectId: string) => {
   return useQuery({
-    queryKey: ["project", projectId, "insights"],
+    queryKey: ["projects", projectId, "insights"],
     queryFn: () => getProjectInsights(projectId),
-    refetchInterval: 10000,
   });
 };
 
 export const useProjectViews = (projectId: string) => {
   return useQuery({
-    queryKey: ["project", projectId, "views"],
+    queryKey: ["projects", projectId, "views"],
     queryFn: () => getProjectViews(projectId),
-    refetchInterval: 10000,
+    refetchInterval: 20000,
   });
 };
 
 export const useViewById = (projectId: string, viewId: string) => {
   return useQuery({
-    queryKey: ["project", projectId, "views", viewId],
-    queryFn: () => getViewById(viewId),
-    refetchInterval: 10000,
+    queryKey: ["projects", projectId, "views", viewId],
+    queryFn: () =>
+      directus.request<View>(
+        readItem("view", viewId, {
+          fields: ["*", { aspects: ["*", "count(quotes)"] }],
+          deep: {
+            aspects: {
+              _sort: "name",
+            } as any,
+          },
+        }),
+      ),
   });
 };
 
-export const useAspectById = (projectId: string, aspect_id: string) => {
+export const useAspectById = (projectId: string, aspectId: string) => {
   return useQuery({
-    queryKey: ["project", projectId, "aspects", aspect_id],
-    queryFn: () => getAspectById(aspect_id),
-    refetchInterval: 10000,
+    queryKey: ["projects", projectId, "aspects", aspectId],
+    queryFn: () =>
+      directus.request<Aspect>(
+        readItem("aspect", aspectId, {
+          fields: [
+            "*",
+            {
+              quotes: [
+                {
+                  quote_id: [
+                    "id",
+                    "text",
+                    "created_at",
+                    {
+                      conversation_id: ["id", "participant_name", "created_at"],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              representative_quotes: [
+                {
+                  quote_id: [
+                    "id",
+                    "text",
+                    "created_at",
+                    {
+                      conversation_id: ["id", "participant_name", "created_at"],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ),
   });
 };
 
 export const useUpdateProjectByIdMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: updateProjectById,
+    mutationFn: ({ id, payload }: { id: string; payload: Partial<Project> }) =>
+      directus.request<Project>(updateItem("project", id, payload)),
     onSuccess: (_values, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["project", variables.id],
+        queryKey: ["projects", variables.id],
       });
       toast.success("Project updated successfully");
     },
@@ -153,10 +248,11 @@ export const useUpdateProjectByIdMutation = () => {
 export const useDeleteProjectByIdMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: deleteProjectById,
+    mutationFn: (projectId: string) =>
+      directus.request(deleteItem("project", projectId)),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["project"],
+        queryKey: ["projects"],
       });
       queryClient.resetQueries();
       toast.success("Project deleted successfully");
@@ -164,11 +260,17 @@ export const useDeleteProjectByIdMutation = () => {
   });
 };
 
+export const useResourceById = (resourceId: string) => {
+  return useQuery({
+    queryKey: ["resources", resourceId],
+    queryFn: () => getResourceById(resourceId),
+  });
+};
+
 export const useResourcesByProjectId = (projectId: string) => {
   return useQuery({
-    queryKey: ["project", projectId, "resources"],
+    queryKey: ["projects", projectId, "resources"],
     queryFn: () => getResourcesByProjectId(projectId),
-    refetchInterval: 15000,
   });
 };
 
@@ -180,17 +282,10 @@ export const useUploadResourceByProjectIdMutation = () => {
     onSuccess: (_values, variables) => {
       const projectId = variables.projectId;
       queryClient.invalidateQueries({
-        queryKey: ["project", projectId, "resources"],
+        queryKey: ["projects", projectId, "resources"],
       });
       toast.success("Resource uploaded successfully");
     },
-  });
-};
-
-export const useResourceById = (resourceId: string) => {
-  return useQuery({
-    queryKey: ["resource", resourceId],
-    queryFn: () => getResourceById(resourceId),
   });
 };
 
@@ -200,10 +295,10 @@ export const useUpdateResourceByIdMutation = () => {
     mutationFn: updateResourceById,
     onSuccess: (_values, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["resource", variables.id],
+        queryKey: ["resources", variables.id],
       });
       queryClient.invalidateQueries({
-        queryKey: ["project"],
+        queryKey: ["projects"],
       });
       toast.success("Resource updated successfully");
     },
@@ -216,10 +311,10 @@ export const useDeleteResourceByIdMutation = () => {
     mutationFn: deleteResourceById,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["project"],
+        queryKey: ["projects"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["resource"],
+        queryKey: ["resources"],
       });
       toast.success("Resource deleted successfully");
     },
@@ -238,32 +333,74 @@ export const useInitiateConversationMutation = () => {
   });
 };
 
-export const useConversationById = (
-  conversationId: string,
-  loadChunks?: boolean,
-) => {
-  return useQuery({
-    queryKey: ["conversation", loadChunks, conversationId],
-    queryFn: () => getConversationById(conversationId, loadChunks),
+export const useConversationById = ({
+  conversationId,
+  loadConversationChunks = false,
+  query = {},
+  useQueryOpts = {
     refetchInterval: 10000,
+  },
+}: {
+  conversationId: string;
+  loadConversationChunks?: boolean;
+  // query overrides the default query and loadChunks
+  query?: Partial<Query<CustomDirectusTypes, Conversation>>;
+  useQueryOpts?: Partial<UseQueryOptions<Conversation>>;
+}) => {
+  return useQuery({
+    queryKey: ["conversations", conversationId, loadConversationChunks, query],
+    queryFn: () =>
+      directus.request<Conversation>(
+        readItem("conversation", conversationId, {
+          fields: [
+            "*",
+            {
+              tags: [
+                {
+                  project_tag_id: ["id", "text", "created_at"],
+                },
+              ],
+            },
+            ...(loadConversationChunks ? [{ chunks: ["*"] as any }] : []),
+          ],
+          ...query,
+        }),
+      ),
+    ...useQueryOpts,
   });
 };
 
 export const useConversationQuotes = (conversationId: string) => {
   return useQuery({
-    queryKey: ["conversation", conversationId, "quotes"],
-    queryFn: () => getConversationQuotes(conversationId),
+    queryKey: ["conversations", conversationId, "quotes"],
+    queryFn: () =>
+      directus.request(
+        readItems("quote", {
+          filter: {
+            conversation_id: {
+              _eq: conversationId,
+            },
+          },
+        }),
+      ),
   });
 };
 
 export const useUpdateConversationByIdMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: updateConversationById,
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: Partial<Conversation>;
+    }) =>
+      directus.request<Conversation>(updateItem("conversation", id, payload)),
     onSuccess: (values, variables) => {
       queryClient.setQueryData(
-        ["conversation", variables.id],
-        (oldData: TConversation | undefined) => {
+        ["conversations", variables.id],
+        (oldData: Conversation | undefined) => {
           return {
             ...oldData,
             ...values,
@@ -271,11 +408,11 @@ export const useUpdateConversationByIdMutation = () => {
         },
       );
       queryClient.invalidateQueries({
-        queryKey: ["conversation", variables.id],
+        queryKey: ["conversations", variables.id],
       });
-      queryClient.invalidateQueries({
-        queryKey: ["conversation", "all"],
-      });
+      // queryClient.invalidateQueries({
+      //   queryKey: ["conversationd", "all"],
+      // });
       toast.success("Conversation updated successfully");
     },
   });
@@ -284,16 +421,14 @@ export const useUpdateConversationByIdMutation = () => {
 export const useDeleteConversationByIdMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: deleteConversationById,
+    mutationFn: (conversationId: string) =>
+      directus.request(deleteItem("conversation", conversationId)),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["project"],
+        queryKey: ["projects"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["conversation"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["all"],
+        queryKey: ["conversations"],
       });
       toast.success("Conversation deleted successfully");
     },
@@ -303,10 +438,11 @@ export const useDeleteConversationByIdMutation = () => {
 export const useDeleteConversationChunkByIdMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: deleteConversationChunkById,
+    mutationFn: (chunkId: string) =>
+      directus.request(deleteItem("conversation_chunk", chunkId)),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["conversation"],
+        queryKey: ["conversations"],
       });
     },
   });
@@ -315,14 +451,16 @@ export const useDeleteConversationChunkByIdMutation = () => {
 export const useConversationsByProjectId = (
   projectId: string,
   loadChunks?: boolean,
-  loadConversationsWithTranscript?: boolean,
+  loadWhereTranscriptExists?: boolean,
+  query?: Partial<Query<CustomDirectusTypes, Conversation>>,
 ) => {
   return useQuery({
     queryKey: [
-      "conversation",
+      "conversations",
       projectId,
       loadChunks ? "chunks" : "no-chunks",
-      loadConversationsWithTranscript ? "transcript" : "no-transcript",
+      loadWhereTranscriptExists ? "transcript" : "no-transcript",
+      query,
     ],
     queryFn: () =>
       directus.request(
@@ -350,7 +488,7 @@ export const useConversationsByProjectId = (
               _eq: projectId,
             },
             chunks: {
-              ...(loadConversationsWithTranscript && {
+              ...(loadWhereTranscriptExists && {
                 _some: {
                   transcript: {
                     _nempty: true,
@@ -360,6 +498,7 @@ export const useConversationsByProjectId = (
             },
           },
           limit: 1000,
+          ...query,
         }),
       ),
     refetchInterval: 30000,
@@ -377,31 +516,58 @@ export const useUploadConversationChunk = () => {
       // Cancel any outgoing refetches
       // (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({
-        queryKey: ["conversation", variables.conversationId, "chunks"],
+        queryKey: ["conversations", variables.conversationId, "chunks"],
+      });
+
+      await queryClient.cancelQueries({
+        queryKey: [
+          "participant",
+          "conversation_chunks",
+          variables.conversationId,
+        ],
       });
 
       // Snapshot the previous value
       const previousChunks = queryClient.getQueryData([
-        "conversation",
+        "conversations",
         variables.conversationId,
         "chunks",
       ]);
 
       // Optimistically update to the new value
       queryClient.setQueryData(
-        ["conversation", variables.conversationId, "chunks"],
-        (oldData: TConversationChunk[] | undefined) => {
+        ["conversations", variables.conversationId, "chunks"],
+        (oldData: ConversationChunk[] | undefined) => {
           return oldData
             ? [
                 ...oldData,
                 {
                   id: "optimistic-" + Date.now(),
                   conversation_id: variables.conversationId,
-                  created_at: new Date(),
-                  timestamp: new Date(),
-                  updated_at: new Date(),
+                  created_at: new Date().toISOString(),
+                  timestamp: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
                   transcript: undefined,
-                } as TConversationChunk,
+                } as ConversationChunk,
+              ]
+            : [];
+        },
+      );
+
+      queryClient.setQueryData(
+        ["participant", "conversation_chunks", variables.conversationId],
+        (oldData: ConversationChunk[] | undefined) => {
+          return oldData
+            ? [
+                ...oldData,
+                {
+                  id: "optimistic-" + Date.now(),
+                  conversation_id: variables.conversationId,
+                  created_at: new Date().toISOString(),
+                  timestamp: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                  transcript: undefined,
+                } as ConversationChunk,
               ]
             : [];
         },
@@ -414,14 +580,22 @@ export const useUploadConversationChunk = () => {
     // use the context returned from onMutate to roll back
     onError: (_err, variables, context) => {
       queryClient.setQueryData(
-        ["conversation", variables.conversationId, "chunks"],
+        ["conversations", variables.conversationId, "chunks"],
         context?.previousChunks,
       );
     },
     // Always refetch after error or success:
     onSettled: (_data, _error, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["conversation", variables.conversationId, "chunks"],
+        queryKey: ["conversations", variables.conversationId, "chunks"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: [
+          "participant",
+          "conversation_chunks",
+          variables.conversationId,
+        ],
       });
     },
   });
@@ -438,31 +612,58 @@ export const useUploadConversationTextChunk = () => {
       // Cancel any outgoing refetches
       // (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({
-        queryKey: ["conversation", variables.conversationId, "chunks"],
+        queryKey: ["conversations", variables.conversationId, "chunks"],
+      });
+
+      await queryClient.cancelQueries({
+        queryKey: [
+          "participant",
+          "conversation_chunks",
+          variables.conversationId,
+        ],
       });
 
       // Snapshot the previous value
       const previousChunks = queryClient.getQueryData([
-        "conversation",
+        "conversations",
         variables.conversationId,
         "chunks",
       ]);
 
       // Optimistically update to the new value
       queryClient.setQueryData(
-        ["conversation", variables.conversationId, "chunks"],
-        (oldData: TConversationChunk[] | undefined) => {
+        ["conversations", variables.conversationId, "chunks"],
+        (oldData: ConversationChunk[] | undefined) => {
           return oldData
             ? [
                 ...oldData,
                 {
                   id: "optimistic-" + Date.now(),
                   conversation_id: variables.conversationId,
-                  created_at: new Date(),
-                  timestamp: new Date(),
-                  updated_at: new Date(),
-                  transcript: variables.content,
-                } as TConversationChunk,
+                  created_at: new Date().toISOString(),
+                  timestamp: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                  transcript: undefined,
+                } as ConversationChunk,
+              ]
+            : [];
+        },
+      );
+
+      queryClient.setQueryData(
+        ["participant", "conversation_chunks", variables.conversationId],
+        (oldData: ConversationChunk[] | undefined) => {
+          return oldData
+            ? [
+                ...oldData,
+                {
+                  id: "optimistic-" + Date.now(),
+                  conversation_id: variables.conversationId,
+                  created_at: new Date().toISOString(),
+                  timestamp: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                  transcript: undefined,
+                } as ConversationChunk,
               ]
             : [];
         },
@@ -475,14 +676,22 @@ export const useUploadConversationTextChunk = () => {
     // use the context returned from onMutate to roll back
     onError: (_err, variables, context) => {
       queryClient.setQueryData(
-        ["conversation", variables.conversationId, "chunks"],
+        ["conversations", variables.conversationId, "chunks"],
         context?.previousChunks,
       );
     },
     // Always refetch after error or success:
     onSettled: (_data, _error, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["conversation", variables.conversationId, "chunks"],
+        queryKey: ["conversations", variables.conversationId, "chunks"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: [
+          "participant",
+          "conversation_chunks",
+          variables.conversationId,
+        ],
       });
     },
   });
@@ -494,7 +703,7 @@ export const useUploadConversation = () => {
     mutationFn: initiateAndUploadConversationChunk,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["conversation"],
+        queryKey: ["conversations"],
       });
       toast.success("Conversation(s) uploaded successfully");
     },
@@ -507,19 +716,31 @@ export const useConversationChunks = (
   refetchInterval: number = 10000,
 ) => {
   return useQuery({
-    queryKey: ["conversation", conversationId, "chunks"],
-    queryFn: () => getConversationChunks(conversationId),
+    queryKey: ["conversations", conversationId, "chunks"],
+    queryFn: () =>
+      directus.request(
+        readItems("conversation_chunk", {
+          filter: {
+            conversation_id: {
+              _eq: conversationId,
+            },
+          },
+          sort: "timestamp",
+        }),
+      ),
     refetchInterval,
   });
 };
 
 export const useDeleteTagByIdMutation = () => {
   const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: deleteTagById,
+    mutationFn: (tagId: string) =>
+      directus.request(deleteItem("project_tag", tagId)),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["project"],
+        queryKey: ["projects"],
       });
       toast.success("Tag deleted successfully");
     },
@@ -529,20 +750,14 @@ export const useDeleteTagByIdMutation = () => {
 export const useCreateProjectTagMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: createProjectTag,
-    onSuccess: () => {
+    mutationFn: (payload: Partial<ProjectTag>) =>
+      directus.request(createItem("project_tag", payload)),
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["project"],
+        queryKey: ["projects", variables.project_id],
       });
       toast.success("Tag created successfully");
     },
-  });
-};
-
-export const useProjectTags = (projectId: string) => {
-  return useQuery({
-    queryKey: ["project", projectId, "tags"],
-    queryFn: () => getTagsByProjectId(projectId),
   });
 };
 
@@ -552,7 +767,7 @@ export const useGenerateProjectLibraryMutation = () => {
     mutationFn: generateProjectLibrary,
     onSuccess: (_, variables) => {
       toast.success("Analysis requested successfully");
-      client.invalidateQueries({ queryKey: ["project", variables.projectId] });
+      client.invalidateQueries({ queryKey: ["projects", variables.projectId] });
     },
   });
 };
@@ -566,18 +781,16 @@ export const useGenerateProjectViewMutation = () => {
   });
 };
 
-export const useTaskStatus = (taskId: string) => {
-  return useQuery({
-    queryKey: ["task", taskId],
-    queryFn: () => getTaskById(taskId),
-    refetchInterval: 10000,
-  });
-};
-
 export const useLatestProjectAnalysisRunByProjectId = (projectId: string) => {
   return useQuery({
-    queryKey: ["project", projectId, "latest_analysis"],
+    queryKey: ["projects", projectId, "latest_analysis"],
     queryFn: () => getLatestProjectAnalysisRunByProjectId(projectId),
     refetchInterval: 10000,
   });
 };
+
+export const useCurrentUser = () =>
+  useQuery({
+    queryKey: ["users", "me"],
+    queryFn: () => directus.request(readUser("me")),
+  });

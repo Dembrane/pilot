@@ -1,5 +1,7 @@
 export const USE_PARTICIPANT_ROUTER =
   import.meta.env.VITE_USE_PARTICIPANT_ROUTER === "1";
+export const ADMIN_BASE_URL =
+  import.meta.env.VITE_ADMIN_BASE_URL ?? window.location.origin;
 export const PARTICIPANT_BASE_URL =
   import.meta.env.VITE_PARTICIPANT_BASE_URL ?? window.location.origin;
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
@@ -8,11 +10,6 @@ export const DIRECTUS_PUBLIC_URL =
   import.meta.env.VITE_DIRECTUS_PUBLIC_URL ?? "http://localhost:8055";
 
 export const DISABLE_SENTRY = import.meta.env.VITE_DISABLE_SENTRY === "1";
-
-export const ENABLE_EXPERIMENTAL_FEATURES =
-  // import.meta.env.VITE_ENABLE_EXPERIMENTAL_FEATURES === "1";
-  // false;
-  true;
 
 export const BUILD_VERSION = import.meta.env.VITE_BUILD_VERSION ?? "dev";
 

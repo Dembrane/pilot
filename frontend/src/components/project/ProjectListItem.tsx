@@ -3,19 +3,22 @@ import { ActionIcon, Button, Group, Paper, Stack, Text } from "@mantine/core";
 import { IconExternalLink } from "@tabler/icons-react";
 import { formatRelative } from "date-fns";
 import { PropsWithChildren } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 export const ProjectListItem = ({
   project,
 }: PropsWithChildren<{
   project: Project;
 }>) => {
+  const { sessionId } = useParams();
+  const link = `/workspaces/${sessionId}/projects/${project.id}/overview`;
+
   return (
-    <Link to={`/projects/${project.id}/overview`}>
+    <Link to={link}>
       <Paper
         component="a"
-        bg="transparent"
         p="sm"
+        bg="transparent"
         className="relative hover:!border-primary-400"
       >
         <Group justify="space-between">
@@ -32,20 +35,6 @@ export const ProjectListItem = ({
               {formatRelative(new Date(project.updated_at), new Date())}
             </Text>
           </Stack>
-          {/* <Group>
-        <Link to={`/projects/${project.id}/overview`}>
-          <Button
-            rightSection={<IconExternalLink size={20} />}
-            className="w-full"
-            c="gray"
-            bg="gray"
-            variant="light"
-            component="a"
-          >
-            Open
-          </Button>
-        </Link>
-      </Group> */}
         </Group>
       </Paper>
     </Link>

@@ -33,12 +33,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - 8055:8055
-    env_file:
-      - ../directus/.env
     volumes:
       - ../directus/migrations:/directus/migrations
       - ../directus/extensions:/directus/extensions
       - ../directus/uploads:/directus/uploads
+      - ../directus/.env:/directus/.env
     depends_on:
       - postgres
       - redis

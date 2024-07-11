@@ -3,28 +3,20 @@ import { Logo } from "../Logo";
 import { Toaster } from "../Toaster";
 import { Outlet } from "react-router-dom";
 import { PropsWithChildren } from "react";
+import { Header } from "../common/Header";
 
 export const BaseLayout = ({ children }: PropsWithChildren) => {
   return (
-    <Box className="min-h-screen relative">
-      <Paper
-        bg="white"
-        component="header"
-        p="xs"
-        shadow="xs"
-        className="h-[60px] sticky top-0 z-10"
-      >
-        <Group justify="space-between" align="center" className="h-full w-full">
-          <Group gap="md">
-            <Logo />
-          </Group>
-        </Group>
-      </Paper>
+    <Box className="min-h-screen">
+      <Box className="h-[60px] w-full fixed top-0 z-10">
+        <Header />
+      </Box>
 
-      <main className="min-h-[calc(100vh-60px)]">
+      <main className="w-full pt-[60px] h-[calc(100%-60px)]">
         <Outlet />
         {children}
       </main>
+
       <Toaster />
     </Box>
   );

@@ -53,7 +53,7 @@ export const RegisterRoute = () => {
         {
           first_name: data.first_name,
           last_name: data.last_name,
-          verification_url: `${ADMIN_BASE_URL}/verify-email`,
+          // verification_url: `${ADMIN_BASE_URL}/verify-email`,
         },
       ]);
       await loginMutation.mutateAsync([data.email, data.password]);

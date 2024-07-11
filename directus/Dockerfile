@@ -3,7 +3,7 @@ FROM directus/directus:10.13
 # COPY ./migrations/ ./migrations/
 # COPY ./extensions/ ./extensions/
 
-COPY ./snapshots/snapshot-20240712.yaml ./snapshot.yaml
+COPY ./snapshots/20240712-snapshot.yaml ./snapshot.yaml
 
 # https://github.com/directus/directus/blob/main/Dockerfile
 CMD : \

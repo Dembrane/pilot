@@ -1385,7 +1385,7 @@ fields:
       table: chat_message
       data_type: character varying
       default_value: null
-      max_length: -5
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: false

@@ -37,9 +37,7 @@ from dembrane.database import (
 #     ProcessResourceTaskQueueItem,
 #     process_resource_queue,
 # )
-from dembrane.api.session import DependencyRequireSession
 from dembrane.api.exceptions import (
-    ProjectNotFoundException,
     ResourceFailedToSaveFileException,
     ResourceInvalidFileFormatException,
     ProjectLanguageNotSupportedException,
@@ -97,8 +95,9 @@ async def create_project(
 
     session = db.get(SessionModel, body.session_id)
 
+    assert session is not None
+    assert session.user_id is not None
     if session.user_id != uid:
-        logger.error(f"User {uid} does not have access to session {session.id}")
         raise HTTPException(status_code=403, detail="User does not have access to this session")
 
     project = ProjectModel(
@@ -175,14 +174,19 @@ async def cleanup_files(zip_file_name: str, filenames: List[str]) -> None:
 @ProjectRouter.get("/{project_id}/transcripts")
 async def get_project_transcripts(
     project_id: str,
-    session: DependencyRequireSession,
     db: DependencyInjectDatabase,
+    uid: DependencyDirectusUid,
     background_tasks: BackgroundTasks,
 ) -> StreamingResponse:
     project = db.get(ProjectModel, project_id)
 
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+
+    session = db.get(SessionModel, project.session_id)
+
+    if not session or session.user_id != uid:
+        raise HTTPException(status_code=403, detail="User does not have access to this project")
 
     conversations = (
         db.query(ConversationModel).filter(ConversationModel.project_id == project_id).all()
@@ -288,11 +292,8 @@ async def get_project_transcripts(
     "/{project_id}/resources", response_model=List[ResourceSchema], tags=["resource"]
 )
 async def get_all_resources_for_project(
-    project_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
+    project_id: str, db: DependencyInjectDatabase
 ) -> List[ResourceModel]:
-    if not ProjectModel.belongs_to_session(project_id, session.id):
-        raise ProjectNotFoundException
-
     return db.query(ResourceModel).filter(ResourceModel.project_id == project_id).all()
 
 
@@ -304,7 +305,6 @@ async def get_all_resources_for_project(
 async def upload_resources(
     files: List[UploadFile],
     project_id: str,
-    _session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> List[ResourceModel]:
     resources = []
@@ -460,8 +460,8 @@ def get_latest_project_analysis_run(
 )
 async def post_create_project_library(
     db: DependencyInjectDatabase,
-    project_id: str,
     user_id: DependencyDirectusUid,
+    project_id: str,
 ) -> None:
     project = db.get(ProjectModel, project_id)
 
@@ -501,12 +501,20 @@ async def post_create_view(
     project_id: str,
     body: CreateViewRequestBodySchema,
     db: DependencyInjectDatabase,
-    _session: DependencyRequireSession,
+    user_id: DependencyDirectusUid,
 ) -> None:
     project_analysis_run = get_latest_project_analysis_run(db, project_id)
 
     if not project_analysis_run:
         raise HTTPException(status_code=404, detail="No analysis found for this project")
+
+    project = db.get(ProjectModel, project_id)
+
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    if project.session.user_id != user_id:
+        raise HTTPException(status_code=403, detail="User does not have access to this project")
 
     result = task_create_view.si(
         project_analysis_run.id, body.query, body.additional_context

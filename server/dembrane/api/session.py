@@ -20,7 +20,6 @@ async def require_session(request: Request, db: DependencyInjectDatabase) -> Ses
     session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
 
     if not session:
-        print("HERE: session not found. add DIRECTUS AUTH")
         raise SessionInvalidException
 
     return session

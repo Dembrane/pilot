@@ -871,7 +871,7 @@ def generate_aspect_extras(db: Session, aspect_id: str) -> AspectModel | None:
 
     if not aspect:
         logger.error(f"Aspect with ID {aspect_id} not found")
-        return
+        return None
 
     generate_aspect_summary(db, aspect.id)
     generate_aspect_image(db, aspect.id)

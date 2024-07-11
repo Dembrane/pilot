@@ -1,14 +1,5 @@
 from fastapi import APIRouter
 
-from dembrane.schemas import (
-    ConversationChunkSchema,
-)
-from dembrane.database import (
-    ConversationChunkModel,
-    DependencyInjectDatabase,
-)
-from dembrane.api.exceptions import ConversationNotFoundException
-
 ConversationChunkRouter = APIRouter()
 
 

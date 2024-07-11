@@ -1,9 +1,6 @@
 import logging
 
-from fastapi import APIRouter, HTTPException
-
-from dembrane.tasks import celery_app
-from dembrane.schemas import TaskSchema, TaskStateEnum
+from fastapi import APIRouter
 
 TaskRouter = APIRouter()
 

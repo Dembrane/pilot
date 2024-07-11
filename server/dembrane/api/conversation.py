@@ -12,18 +12,14 @@ from dembrane.tasks import task_process_conversation_chunk
 from dembrane.utils import generate_uuid
 from dembrane.config import AUDIO_CHUNKS_DIR
 from dembrane.schemas import (
-    QuoteSchema,
     ConversationSchema,
     ConversationChunkSchema,
 )
 from dembrane.database import (
-    QuoteModel,
     ConversationModel,
     ConversationChunkModel,
-    ProjectAnalysisRunModel,
     DependencyInjectDatabase,
 )
-from dembrane.api.session import DependencyRequireSession
 from dembrane.audio_utils import get_mime_type_from_file_path
 from dembrane.api.exceptions import (
     NoContentFoundException,

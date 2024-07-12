@@ -22,7 +22,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 
 export const RegisterRoute = () => {
-  useDocumentTitle("Dembrane | Register");
+  useDocumentTitle("Register | Dembrane");
   const { register, reset, handleSubmit } = useForm<{
     email: string;
     password: string;

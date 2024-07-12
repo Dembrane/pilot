@@ -48,7 +48,7 @@ const LoginWithProvider = ({
 };
 
 export const LoginRoute = () => {
-  useDocumentTitle("Dembrane | Login");
+  useDocumentTitle("Login | Dembrane");
   const { register, reset, handleSubmit } = useForm<{
     email: string;
     password: string;

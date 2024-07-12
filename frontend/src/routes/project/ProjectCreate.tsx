@@ -14,6 +14,7 @@ import {
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import EditableTextBox from "@/components/EditableTextBox";
+import { useDocumentTitle } from "@mantine/hooks";
 
 type FormValues = {
   language: "en" | "nl" | "multi";
@@ -28,6 +29,7 @@ export const ProjectsCreateRoute = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<FormValues>();
+  useDocumentTitle("New Project | Dembrane");
   const createProjectMutation = useCreateProjectMutation();
 
   const { sessionId } = useParams();

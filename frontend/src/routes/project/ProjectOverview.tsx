@@ -74,11 +74,11 @@ export const ProjectOverviewRoute = () => {
     `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data?.pin}&transcription=${getTranscriptionType(isTranscriptionLive)}`,
   );
 
-  useDocumentTitle("Dembrane | Project Overview");
+  useDocumentTitle("Project Overview | Dembrane");
 
   useEffect(() => {
     if (projectQuery.data) {
-      document.title = "Dembrane | " + projectQuery.data.name;
+      document.title = projectQuery.data.name + " | Dembrane";
       setSharingLink(
         `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data.pin}&transcription=${getTranscriptionType(isTranscriptionLive)}`,
       );

@@ -45,7 +45,7 @@ import { useState } from "react";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 
 export const ProjectsHomeRoute = () => {
-  useDocumentTitle("Dembrane | Projects");
+  useDocumentTitle("Projects | Dembrane");
   const { sessionId } = useParams();
 
   const [gridParent] = useAutoAnimate();
@@ -82,7 +82,7 @@ export const ProjectsHomeRoute = () => {
               items={[
                 { label: <Icons.Home />, link: "/workspaces" },
                 {
-                  label: <Title order={1}>Projects</Title>,
+                  label: <Title order={1}>Workspace Home</Title>,
                 },
               ]}
             />

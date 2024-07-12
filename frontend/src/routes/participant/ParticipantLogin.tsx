@@ -25,7 +25,7 @@ import { useInitiateConversationMutation } from "@/lib/query";
 import { AxiosError } from "axios";
 import { Trans, t } from "@lingui/macro";
 import { useLanguage } from "@/lib/useLanguage";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useDocumentTitle } from "@mantine/hooks";
 import { Markdown } from "@/components/Markdown";
 import { PRIVACY_POLICY_URL } from "@/config";
 import { getParticipantProjectById } from "@/lib/api";

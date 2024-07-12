@@ -1,4 +1,4 @@
-import { Navigate, Outlet, createBrowserRouter } from "react-router-dom";
+import { Navigate, createBrowserRouter } from "react-router-dom";
 import { BaseLayout } from "./components/layout/BaseLayout";
 import { ProjectsHomeRoute } from "./routes/project/ProjectsHome";
 import { ProjectsCreateRoute } from "./routes/project/ProjectCreate";
@@ -7,7 +7,7 @@ import { ProjectLayout } from "./components/layout/ProjectLayout";
 import { ProjectResourceLayout } from "./components/layout/ProjectResourceLayout";
 import { ProjectResourceOverviewRoute } from "./routes/project/ProjectResourceOverview";
 import { ProjectResourceAnalysisRoute } from "./routes/project/ProjectResourceAnalysis";
-import { ParticipantLayout } from "./components/layout/ParticipantLayout";
+import { LanguageLayout } from "./components/layout/LanguageLayout";
 import { ParticipantLoginRoute } from "./routes/participant/ParticipantLogin";
 import {
   ParticipantConversationAudioRoute,
@@ -33,7 +33,7 @@ import { AuthLayout } from "./components/layout/AuthLayout";
 export const mainRouter = createBrowserRouter([
   {
     path: "/:language?",
-    element: <Outlet />,
+    element: <LanguageLayout />,
     children: [
       {
         path: "",
@@ -77,7 +77,6 @@ export const mainRouter = createBrowserRouter([
         path: "workspaces/:sessionId/projects",
         element: (
           <Protected>
-            {" "}
             <BaseLayout />
           </Protected>
         ),
@@ -177,7 +176,7 @@ export const mainRouter = createBrowserRouter([
 export const participantRouter = createBrowserRouter([
   {
     path: "/:language?/:projectId",
-    element: <ParticipantLayout />,
+    element: <LanguageLayout />,
     errorElement: <NotFoundRoute />,
     children: [
       {
@@ -187,14 +186,12 @@ export const participantRouter = createBrowserRouter([
       {
         path: "conversation/:conversationId",
         element: <ParticipantConversationAudioRoute isTranscriptionLive />,
-        // element: <ParticipantConversationChunkedAudioRoute />,
       },
       {
         path: "conversation/:conversationId/async",
         element: (
           <ParticipantConversationAudioRoute isTranscriptionLive={false} />
         ),
-        // element: <ParticipantConversationChunkedAudioRoute />,
       },
       {
         path: "conversation/:conversationId/text",

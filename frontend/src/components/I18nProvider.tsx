@@ -4,20 +4,6 @@ import { LoadingOverlay } from "@mantine/core";
 import { useLanguage } from "@/lib/useLanguage";
 
 export const I18nProvider = ({ children }: PropsWithChildren) => {
-  // const session = useCurrentSession();
-
-  // useEffect(() => {
-  //   if (session.data) {
-  //     // i18n.activate(session.data.language);
-  //   } else {
-  //     // i18n.activate(defaultLocale);
-  //   }
-  // }, [session.data]);
-
-  // if (session.isLoading) {
-  //   return <LoadingOverlay visible />;
-  // } const session = useCurrentSession();
-
   const { i18n, loading } = useLanguage();
 
   if (loading) {

@@ -51,6 +51,9 @@ services:
       - rabbitmq
     environment:
       PUBLIC_URL: ${DIRECTUS_PUBLIC_URL}
+      SESSION_COOKIE_DOMAIN: ${DIRECTUS_SESSION_COOKIE_DOMAIN}
+      SESSION_COOKIE_SAME_SITE: lax
+      SESSION_COOKIE_SECURE: true
       PORT: 8055
       SECRET: ${DIRECTUS_SECRET}
       ADMIN_EMAIL: admin@dembrane.com
@@ -68,8 +71,6 @@ services:
       CORS_ENABLED: true
       CORS_ORIGIN: ${DIRECTUS_CORS_ORIGIN}
       CORS_CREDENTIALS: true
-      SESSION_COOKIE_SECURE: false
-      SESSION_COOKIE_SAME_SITE: lax
     volumes:
       - ./directus/uploads:/directus/uploads
 

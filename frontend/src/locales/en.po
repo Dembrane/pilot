@@ -17,11 +17,11 @@ msgstr ""
 #~ msgid "*At Dembrane, privacy is super important! We make sure nothing can be traced back to you, even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]"
 #~ msgstr ""
 
-#: src/routes/participant/Login.tsx:145
+#: src/routes/participant/ParticipantLogin.tsx:152
 msgid "*At Dembrane, privacy is super important!*"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:150
+#: src/routes/participant/ParticipantLogin.tsx:157
 msgid "*Oh, we don't have a cookie statement because we don't use cookies! We eat them.*"
 msgstr ""
 
@@ -37,15 +37,15 @@ msgstr ""
 #~ msgid "*Transcribing*"
 #~ msgstr ""
 
-#: src/routes/participant/Conversation.tsx:769
+#: src/routes/participant/Conversation.tsx:646
 msgid "*Transcription in progress.*"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:147
+#: src/routes/participant/ParticipantLogin.tsx:154
 msgid "*We make sure nothing can be traced back to you, and even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:464
+#: src/routes/project/ProjectOverview.tsx:254
 msgid "Access Code"
 msgstr ""
 
@@ -53,7 +53,7 @@ msgstr ""
 #~ msgid "Active"
 #~ msgstr ""
 
-#: src/routes/participant/Login.tsx:209
+#: src/routes/participant/ParticipantLogin.tsx:216
 msgid "Add all that apply"
 msgstr ""
 
@@ -73,8 +73,7 @@ msgstr ""
 #~ msgid "All documents are uploaded and ready now. What research question are you interested in asking? Optionally, you can now open an individual analysis chat for each document."
 #~ msgstr ""
 
-#: src/components/layout/ProjectConversationLayout.tsx:64
-#: src/components/layout/ProjectResourceLayout.tsx:55
+#: src/components/project/ProjectResourceLayout.tsx:57
 msgid "Analysis"
 msgstr ""
 
@@ -82,7 +81,7 @@ msgstr ""
 #~ msgid "Analyze!"
 #~ msgstr ""
 
-#: src/routes/participant/Login.tsx:137
+#: src/routes/participant/ParticipantLogin.tsx:144
 msgid "Are you ready? Then press \"Ready!\""
 msgstr ""
 
@@ -90,13 +89,13 @@ msgstr ""
 #~ msgid "Are you sure you want to delete this document?"
 #~ msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1326
+#: src/routes/participant/Conversation.tsx:1203
 msgid "Are you sure you want to delete this recording?"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:940
-#: src/routes/participant/Conversation.tsx:1191
-#: src/routes/participant/Conversation.tsx:1433
+#: src/routes/participant/Conversation.tsx:818
+#: src/routes/participant/Conversation.tsx:1068
+#: src/routes/participant/Conversation.tsx:1309
 msgid "Are you sure you want to finish?"
 msgstr ""
 
@@ -124,29 +123,33 @@ msgstr ""
 #~ msgid "Attach as many documents as you like to analyse"
 #~ msgstr ""
 
-#: src/routes/project/ProjectConversationOverview.tsx:176
-#: src/routes/project/ProjectOverview.tsx:241
+#: src/routes/project/ProjectConversationOverview.tsx:172
+#: src/routes/project/ProjectEdit.tsx:186
 #: src/routes/project/ProjectResourceOverview.tsx:150
 msgid "Cancel"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:988
-#: src/routes/participant/Conversation.tsx:1239
+#: src/routes/participant/Conversation.tsx:866
+#: src/routes/participant/Conversation.tsx:1116
 msgid "Check microphone access"
 msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:321
+#: src/components/project/ProjectAccordion.tsx:269
 msgid "Conversations"
 msgstr ""
 
 #: src/components/session/SelectSession.tsx:89
-msgid "Create a new session"
+#~ msgid "Create a new session"
+#~ msgstr ""
+
+#: src/components/session/SessionSelection.tsx:33
+msgid "Create a new workspace"
 msgstr ""
 
 #: src/components/layout/ProjectSidebar.tsx:110
 #: src/components/layout/ProjectSidebar.tsx:181
-msgid "Created on"
-msgstr ""
+#~ msgid "Created on"
+#~ msgstr ""
 
 #: src/components/Documents.tsx:208
 #~ msgid "Delete document"
@@ -157,16 +160,16 @@ msgstr ""
 #~ msgstr ""
 
 #: src/components/layout/ProjectSidebar.tsx:117
-msgid "Description"
-msgstr ""
+#~ msgid "Description"
+#~ msgstr ""
 
 #: src/components/Message.tsx:82
 #~ msgid "Document AI Assistant"
 #~ msgstr ""
 
 #: src/components/layout/ProjectSidebar.tsx:77
-msgid "Document is being processed"
-msgstr ""
+#~ msgid "Document is being processed"
+#~ msgstr ""
 
 #: src/components/Documents.tsx:199
 #~ msgid "Document was deleted"
@@ -180,11 +183,11 @@ msgstr ""
 #~ msgid "Drag documents here or select files"
 #~ msgstr ""
 
-#: src/routes/project/ProjectConversationOverview.tsx:109
+#: src/routes/project/ProjectConversationOverview.tsx:105
 msgid "Edit Conversation"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:128
+#: src/routes/project/ProjectEdit.tsx:73
 msgid "Edit Project"
 msgstr ""
 
@@ -192,7 +195,7 @@ msgstr ""
 msgid "Edit Resource"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:190
+#: src/routes/participant/ParticipantLogin.tsx:197
 msgid "Enter your access code"
 msgstr ""
 
@@ -200,7 +203,7 @@ msgstr ""
 #~ msgid "Export"
 #~ msgstr ""
 
-#: src/routes/participant/Login.tsx:133
+#: src/routes/participant/ParticipantLogin.tsx:140
 msgid "First we ask some short questions, and then you can start recording."
 msgstr ""
 
@@ -225,7 +228,11 @@ msgstr ""
 #~ msgid "Hello, I'm your research assistant today. To get started, upload the documents you want to analyze."
 #~ msgstr ""
 
-#: src/routes/participant/Login.tsx:127
+#: src/components/session/SessionSelection.tsx:50
+msgid "Here you can create new workspaces to organize your projects. Click \"Create\" to get started!"
+msgstr ""
+
+#: src/routes/participant/ParticipantLogin.tsx:134
 msgid "Hi, Thanks for sharing!"
 msgstr ""
 
@@ -246,7 +253,7 @@ msgstr ""
 #~ msgid "Input global context"
 #~ msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:473
+#: src/routes/project/ProjectOverview.tsx:263
 msgid "Invite Link"
 msgstr ""
 
@@ -255,23 +262,23 @@ msgstr ""
 #~ msgstr ""
 
 #: src/components/session/SelectSession.tsx:87
-msgid "Login with Session"
-msgstr ""
+#~ msgid "Login with Session"
+#~ msgstr ""
 
-#: src/routes/participant/Conversation.tsx:925
-#: src/routes/participant/Conversation.tsx:1176
+#: src/routes/participant/Conversation.tsx:805
+#: src/routes/participant/Conversation.tsx:1055
 msgid "Microphone access is still denied. Please check your settings and try again."
 msgstr ""
 
-#: src/routes/participant/Login.tsx:182
+#: src/routes/participant/ParticipantLogin.tsx:189
 msgid "Name"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:226
+#: src/routes/participant/ParticipantLogin.tsx:233
 msgid "Next"
 msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:350
+#: src/components/project/ProjectAccordion.tsx:325
 msgid "No conversations found. Start a conversation using the participation invite link from the <0><1>project overview.</1></0>"
 msgstr ""
 
@@ -279,26 +286,30 @@ msgstr ""
 #~ msgid "No documents uploaded yet"
 #~ msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:285
-msgid "No resources found. Add resources using the button above."
+#: src/components/project/ProjectAccordion.tsx:232
+msgid "No resources found."
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:961
-#: src/routes/participant/Conversation.tsx:1212
+#: src/components/layout/ProjectSidebar.tsx:285
+#~ msgid "No resources found. Add resources using the button above."
+#~ msgstr ""
+
+#: src/routes/participant/Conversation.tsx:839
+#: src/routes/participant/Conversation.tsx:1089
 msgid "Oops! It looks like microphone access was denied. No worries, though! We've got a handy troubleshooting guide for you. Feel free to check it out. Once you've resolved the issue, come back and visit this page again to check if your microphone is ready."
 msgstr ""
 
 #: src/components/layout/ProjectSidebar.tsx:126
 #: src/components/layout/ProjectSidebar.tsx:207
-msgid "Open"
-msgstr ""
+#~ msgid "Open"
+#~ msgstr ""
 
 #: src/components/Documents.tsx:126
 #~ msgid "Open Document Chat ✨"
 #~ msgstr ""
 
-#: src/routes/participant/Conversation.tsx:979
-#: src/routes/participant/Conversation.tsx:1230
+#: src/routes/participant/Conversation.tsx:857
+#: src/routes/participant/Conversation.tsx:1107
 msgid "Open troubleshooting guide"
 msgstr ""
 
@@ -306,23 +317,22 @@ msgstr ""
 #~ msgid "Original filename"
 #~ msgstr ""
 
-#: src/components/layout/ProjectConversationLayout.tsx:58
-#: src/components/layout/ProjectResourceLayout.tsx:52
-#: src/routes/project/ProjectOverview.tsx:389
+#: src/components/project/ProjectResourceLayout.tsx:54
+#: src/routes/project/ProjectOverview.tsx:170
 msgid "Overview"
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:408
-#: src/routes/project/ProjectOverview.tsx:418
+#: src/routes/project/ProjectOverview.tsx:189
+#: src/routes/project/ProjectOverview.tsx:199
 msgid "Participation"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1073
-#: src/routes/participant/Conversation.tsx:1381
+#: src/routes/participant/Conversation.tsx:951
+#: src/routes/participant/Conversation.tsx:1258
 msgid "Pause"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1274
+#: src/routes/participant/Conversation.tsx:1151
 msgid "Please do not close your browser"
 msgstr ""
 
@@ -330,7 +340,7 @@ msgstr ""
 #~ msgid "Please enter a message"
 #~ msgstr ""
 
-#: src/routes/participant/Conversation.tsx:847
+#: src/routes/participant/Conversation.tsx:726
 msgid "Please record your response by clicking the \"Start Recording\" button below. You may also choose to respond in text by clicking the text icon."
 msgstr ""
 
@@ -340,29 +350,29 @@ msgstr ""
 #~ msgid "Please record your response to the prompt by clicking the \"Start Recording\" button below. You may also choose to respond in text by clicking the text icon."
 #~ msgstr ""
 
-#: src/routes/participant/Login.tsx:235
+#: src/components/common/Footer.tsx:8
 msgid "Privacy Statements"
 msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:432
+#: src/components/project/ProjectSidebar.tsx:56
 msgid "Project Overview"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:141
+#: src/routes/participant/ParticipantLogin.tsx:148
 msgid "Ready!"
 msgstr ""
 
-#: src/routes/participant/PostConversation.tsx:70
+#: src/routes/participant/PostConversation.tsx:76
 msgid "Record another conversation"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1064
-#: src/routes/participant/Conversation.tsx:1372
+#: src/routes/participant/Conversation.tsx:942
+#: src/routes/participant/Conversation.tsx:1249
 msgid "Resume"
 msgstr ""
 
-#: src/routes/project/ProjectConversationOverview.tsx:168
-#: src/routes/project/ProjectOverview.tsx:233
+#: src/routes/project/ProjectConversationOverview.tsx:164
+#: src/routes/project/ProjectEdit.tsx:178
 #: src/routes/project/ProjectResourceOverview.tsx:142
 msgid "Save"
 msgstr ""
@@ -376,37 +386,37 @@ msgstr ""
 #~ msgid "Select your group"
 #~ msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:411
+#: src/routes/project/ProjectOverview.tsx:192
 msgid "Settings"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:173
+#: src/routes/participant/ParticipantLogin.tsx:180
 msgid "Something went wrong"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1341
+#: src/routes/participant/Conversation.tsx:1218
 msgid "Something went wrong. Please try again."
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1031
-#: src/routes/participant/Conversation.tsx:1289
+#: src/routes/participant/Conversation.tsx:909
+#: src/routes/participant/Conversation.tsx:1166
 msgid "Start Recording"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1084
-#: src/routes/participant/Conversation.tsx:1392
+#: src/routes/participant/Conversation.tsx:962
+#: src/routes/participant/Conversation.tsx:1269
 msgid "Stop"
 msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1467
+#: src/routes/participant/Conversation.tsx:1343
 msgid "Submit"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:208
+#: src/routes/participant/ParticipantLogin.tsx:215
 msgid "Tags"
 msgstr ""
 
-#: src/routes/participant/PostConversation.tsx:57
+#: src/routes/participant/PostConversation.tsx:63
 msgid "Thank you for participating!"
 msgstr ""
 
@@ -422,17 +432,17 @@ msgstr ""
 #~ "*At Dembrane, privacy is really important. We make sure nothing is traceable to individuals, and even if you might accidentally say someone’s name, we delete this before we analyse the data. By using this tool, you agree to our privacy policy. Do you want to know more? Feel free to read our [privacy statement]"
 #~ msgstr ""
 
-#: src/routes/participant/Login.tsx:131
+#: src/routes/participant/ParticipantLogin.tsx:138
 msgid "This is a very simple tool where you can record conversations or stories to make your voice heard."
 msgstr ""
 
 #: src/components/layout/ProjectSidebar.tsx:190
-msgid "Title"
-msgstr ""
+#~ msgid "Title"
+#~ msgstr ""
 
 #: src/components/layout/ProjectConversationLayout.tsx:61
-msgid "Transcript"
-msgstr ""
+#~ msgid "Transcript"
+#~ msgstr ""
 
 #: src/routes/participant/Login.tsx:101
 #~ msgid "Transcript Name"
@@ -447,12 +457,12 @@ msgstr ""
 #~ msgid "Type context here..."
 #~ msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1455
+#: src/routes/participant/Conversation.tsx:1331
 msgid "Type your response here"
 msgstr ""
 
-#: src/routes/project/ProjectConversationOverview.tsx:111
-#: src/routes/project/ProjectOverview.tsx:130
+#: src/routes/project/ProjectConversationOverview.tsx:107
+#: src/routes/project/ProjectEdit.tsx:75
 #: src/routes/project/ProjectResourceOverview.tsx:114
 msgid "Unsaved changes"
 msgstr ""
@@ -461,11 +471,11 @@ msgstr ""
 #~ msgid "Upload documents"
 #~ msgstr ""
 
-#: src/routes/participant/Conversation.tsx:1273
+#: src/routes/participant/Conversation.tsx:1150
 msgid "Upload in progress"
 msgstr ""
 
-#: src/components/layout/ProjectSidebar.tsx:269
+#: src/components/project/ProjectAccordion.tsx:216
 msgid "Upload resources"
 msgstr ""
 
@@ -477,8 +487,8 @@ msgstr ""
 #~ msgid "We don't have a cookie banner because we don't use cookies! We just eat them."
 #~ msgstr ""
 
-#: src/routes/participant/Conversation.tsx:827
-#: src/routes/participant/Conversation.tsx:831
+#: src/routes/participant/Conversation.tsx:706
+#: src/routes/participant/Conversation.tsx:710
 msgid "Welcome"
 msgstr ""
 
@@ -486,11 +496,15 @@ msgstr ""
 #~ msgid "What kind of question do you want to ask for this document?"
 #~ msgstr ""
 
+#: src/components/session/SessionSelection.tsx:31
+msgid "Workspaces"
+msgstr ""
+
 #: src/components/BaseMessage.tsx:32
 msgid "You"
 msgstr ""
 
-#: src/routes/participant/Login.tsx:135
+#: src/routes/participant/ParticipantLogin.tsx:142
 msgid "You can use this by yourself to share your own story, or you can record a conversation between several people, which can often be fun and insightful!"
 msgstr ""
 
@@ -498,14 +512,14 @@ msgstr ""
 #~ msgid "You can use this by yourself to share your own story, or you can record a conversation between several people, which can often be fun and insightful! Are you ready? Then press \"Ready!\""
 #~ msgstr ""
 
-#: src/routes/participant/PostConversation.tsx:64
+#: src/routes/participant/PostConversation.tsx:70
 msgid "You may also choose to record another conversation."
 msgstr ""
 
-#: src/routes/project/ProjectOverview.tsx:467
+#: src/routes/project/ProjectOverview.tsx:257
 msgid "Your code is"
 msgstr ""
 
-#: src/routes/participant/PostConversation.tsx:61
+#: src/routes/participant/PostConversation.tsx:67
 msgid "Your response has been recorded. You may now close this tab."
 msgstr ""

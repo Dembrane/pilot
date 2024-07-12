@@ -310,8 +310,8 @@ export const ProjectOverviewRoute = () => {
                               });
                               console.log("Data was shared successfully");
                             } catch (err) {
-                              console.error("Share failed:", err);
-                              alert("Share failed");
+                              // console.error("Share failed:", err);
+                              // alert("Share failed");
                             }
                           }}
                         >

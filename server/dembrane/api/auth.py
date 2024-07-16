@@ -12,7 +12,19 @@ logger = getLogger("api.session")
 DIRECTUS_COOKIE_KEY = "directus_session_token"
 
 
-async def require_directus_uid(request: Request) -> str:
+class DirectusSession:
+    def __init__(self, user_id: str, is_admin: bool):
+        self.user_id = user_id
+        self.is_admin = is_admin
+
+    def __str__(self) -> str:
+        return f"DirectusSession(user_id={self.user_id}, is_admin={self.is_admin})"
+
+    def __repr__(self) -> str:
+        return str(self)
+
+
+async def require_directus_session(request: Request) -> DirectusSession:
     """
     Returns user id if user is authenticated, otherwise raises an exception
     """
@@ -29,8 +41,9 @@ async def require_directus_uid(request: Request) -> str:
         raise SessionInvalidException from exc
 
     user_id = decoded.get("id")
+    is_admin = decoded.get("admin_access")
 
-    return str(user_id)
+    return DirectusSession(str(user_id), bool(is_admin))
 
 
-DependencyDirectusUid = Annotated[str, Depends(require_directus_uid)]
+DependencyDirectusSession = Annotated[DirectusSession, Depends(require_directus_session)]

@@ -18,11 +18,10 @@ from dembrane.utils import (
 )
 from dembrane.config import AUDIO_CHUNKS_DIR, RESOURCE_UPLOADS_DIR
 from dembrane.schemas import (
-    TaskSchema,
     ProjectSchema,
     ResourceSchema,
 )
-from dembrane.api.auth import DependencyDirectusUid
+from dembrane.api.auth import DependencyDirectusSession
 from dembrane.database import (
     ProjectModel,
     SessionModel,
@@ -82,7 +81,7 @@ class CreateProjectRequestSchema(BaseModel):
 async def create_project(
     body: CreateProjectRequestSchema,
     db: DependencyInjectDatabase,
-    uid: DependencyDirectusUid,
+    auth: DependencyDirectusSession,
 ) -> ProjectModel:
     if body.language is not None and body.language not in PROJECT_ALLOWED_LANGUAGES:
         raise ProjectLanguageNotSupportedException
@@ -96,8 +95,7 @@ async def create_project(
     session = db.get(SessionModel, body.session_id)
 
     assert session is not None
-    assert session.user_id is not None
-    if session.user_id != uid:
+    if not auth.is_admin and session.user_id != auth.user_id:
         raise HTTPException(status_code=403, detail="User does not have access to this session")
 
     project = ProjectModel(
@@ -175,7 +173,7 @@ async def cleanup_files(zip_file_name: str, filenames: List[str]) -> None:
 async def get_project_transcripts(
     project_id: str,
     db: DependencyInjectDatabase,
-    uid: DependencyDirectusUid,
+    auth: DependencyDirectusSession,
     background_tasks: BackgroundTasks,
 ) -> StreamingResponse:
     project = db.get(ProjectModel, project_id)
@@ -185,7 +183,10 @@ async def get_project_transcripts(
 
     session = db.get(SessionModel, project.session_id)
 
-    if not session or session.user_id != uid:
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    if not auth.is_admin and session.user_id != auth.user_id:
         raise HTTPException(status_code=403, detail="User does not have access to this project")
 
     conversations = (
@@ -460,7 +461,7 @@ def get_latest_project_analysis_run(
 )
 async def post_create_project_library(
     db: DependencyInjectDatabase,
-    user_id: DependencyDirectusUid,
+    auth: DependencyDirectusSession,
     project_id: str,
 ) -> None:
     project = db.get(ProjectModel, project_id)
@@ -468,7 +469,7 @@ async def post_create_project_library(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    if project.session.user_id != user_id:
+    if not auth.is_admin and project.session.user_id != auth.user_id:
         raise HTTPException(status_code=403, detail="User does not have access to this project")
 
     analysis_run = get_latest_project_analysis_run(db, project.id)
@@ -494,14 +495,12 @@ class CreateViewRequestBodySchema(BaseModel):
     additional_context: Optional[str] = ""
 
 
-@ProjectRouter.post(
-    "/{project_id}/create-view", response_model=TaskSchema, status_code=HTTPStatus.ACCEPTED
-)
+@ProjectRouter.post("/{project_id}/create-view", status_code=HTTPStatus.ACCEPTED)
 async def post_create_view(
     project_id: str,
     body: CreateViewRequestBodySchema,
     db: DependencyInjectDatabase,
-    user_id: DependencyDirectusUid,
+    auth: DependencyDirectusSession,
 ) -> None:
     project_analysis_run = get_latest_project_analysis_run(db, project_id)
 
@@ -513,7 +512,7 @@ async def post_create_view(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    if project.session.user_id != user_id:
+    if not auth.is_admin and project.session.user_id != auth.user_id:
         raise HTTPException(status_code=403, detail="User does not have access to this project")
 
     result = task_create_view.si(

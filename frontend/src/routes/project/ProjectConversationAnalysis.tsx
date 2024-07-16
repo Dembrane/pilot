@@ -8,8 +8,6 @@ export const ProjectConversationAnalysis = () => {
   const { conversationId, projectId, sessionId } = useParams();
   const quotesQuery = useConversationQuotes(conversationId ?? "");
 
-  console.log(quotesQuery.data);
-
   return (
     <Stack>
       <Title order={2}>Quotes</Title>
@@ -24,7 +22,9 @@ export const ProjectConversationAnalysis = () => {
         </>
       )}
       {quotesQuery.data &&
-        quotesQuery.data.map((quote) => <Quote key={quote.id} data={quote} />)}
+        quotesQuery.data.map((quote) => (
+          <Quote key={quote.id} data={quote as Quote} />
+        ))}
       {quotesQuery.data && quotesQuery.data.length === 0 && (
         <Text>
           No quotes available. Generate quotes for this conversation by visiting{" "}

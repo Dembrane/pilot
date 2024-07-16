@@ -7,12 +7,24 @@ import {
   Text,
   Box,
   Container,
+  Skeleton,
 } from "@mantine/core";
 import { useParams } from "react-router-dom";
 import { Quote } from "../../components/quote/Quote";
 import { Markdown } from "@/components/Markdown";
 import { useAspectById } from "@/lib/query";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+
+const dedupeQuotes = (quotes: QuoteAspect[]): QuoteAspect[] => {
+  const seen = new Set();
+  return quotes.filter((quote) => {
+    if (seen.has((quote.quote_id as Quote).id)) {
+      return false;
+    }
+    seen.add((quote.quote_id as Quote).id);
+    return true;
+  });
+};
 
 export const ProjectLibraryAspect = () => {
   const { projectId, viewId, aspectId, sessionId } = useParams();
@@ -21,21 +33,6 @@ export const ProjectLibraryAspect = () => {
     projectId ?? "",
     aspectId ?? "",
   );
-
-  // in quotes not in representative quotes
-  console.log("quotes", aspect?.quotes);
-  console.log("representative_quotes", aspect?.representative_quotes);
-  const deltaQuotes =
-    aspect?.quotes?.filter(
-      (quote: QuoteAspect) =>
-        // Check if the current quote is not in representative_quotes
-        !aspect?.representative_quotes?.some(
-          (repQuote: QuoteAspect) =>
-            (repQuote.quote_id as Quote).id === (quote.quote_id as Quote).id,
-        ),
-    ) ?? []; // If quotes is undefined or null, use an empty array
-
-  console.log("deltaQuotes", deltaQuotes);
 
   return (
     <Stack className="py-6 px-4 relative">
@@ -76,19 +73,20 @@ export const ProjectLibraryAspect = () => {
       </Stack>
 
       <Stack>
-        {aspect?.representative_quotes?.length != 0 && (
-          <Title order={2}>Representative Quotes</Title>
+        <Title order={2}>Quotes</Title>
+        {!isLoading ? (
+          <>
+            {" "}
+            {dedupeQuotes([
+              ...(aspect?.representative_quotes ?? []),
+              ...(aspect?.quotes ?? []),
+            ]).map((quote: QuoteAspect) => (
+              <Quote key={quote.id} data={quote.quote_id as Quote} />
+            ))}{" "}
+          </>
+        ) : (
+          <Skeleton height={100} />
         )}
-        {aspect?.representative_quotes?.map((quote: QuoteAspect) => (
-          <Quote key={quote.id} data={quote.quote_id as Quote} />
-        ))}
-
-        {deltaQuotes.length != 0 && (
-          <Title order={2}>Other Relevant Quotes</Title>
-        )}
-        {deltaQuotes.map((quote: QuoteAspect) => (
-          <Quote key={quote.id} data={quote.quote_id as Quote} />
-        ))}
       </Stack>
     </Stack>
   );

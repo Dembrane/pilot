@@ -96,6 +96,10 @@ export const useCreateProjectMutation = () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       toast.success("Project created successfully");
     },
+    onError: (e) => {
+      console.error(e);
+      toast.error("Error creating project");
+    },
   });
 };
 
@@ -199,6 +203,7 @@ export const useAspectById = (projectId: string, aspectId: string) => {
             "*",
             {
               quotes: [
+                "*",
                 {
                   quote_id: [
                     "id",
@@ -213,6 +218,7 @@ export const useAspectById = (projectId: string, aspectId: string) => {
             },
             {
               representative_quotes: [
+                "*",
                 {
                   quote_id: [
                     "id",
@@ -376,6 +382,7 @@ export const useConversationQuotes = (conversationId: string) => {
     queryFn: () =>
       directus.request(
         readItems("quote", {
+          fields: ["*", { conversation_id: ["id", "participant_name"] }],
           filter: {
             conversation_id: {
               _eq: conversationId,

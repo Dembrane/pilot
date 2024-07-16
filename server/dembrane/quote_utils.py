@@ -696,7 +696,11 @@ def generate_aspect_summary(db: Session, aspect_id: str) -> None:
         raise ValueError(f"Aspect with ID {aspect_id} not found")
 
     quotes = aspect.quotes
-    formatted_quotes = "\n".join([f'"{quote.text}"' for quote in quotes])
+    representative_quotes = aspect.representative_quotes
+
+    dedupe_quotes = list(set(representative_quotes + quotes))
+
+    formatted_quotes = "\n".join([f'"{quote.text}"' for quote in dedupe_quotes])
 
     view_name = aspect.view.name if aspect.view else ""
 

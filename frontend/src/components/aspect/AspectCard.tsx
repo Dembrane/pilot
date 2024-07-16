@@ -66,7 +66,7 @@ export const AspectCard = ({
                   <Pill>
                     <Group>
                       <Text className="font-semibold">
-                        {new Set([...data.representative_quotes]).size} Quotes
+                        {data.quotes_count} Quotes
                       </Text>
                     </Group>
                   </Pill>

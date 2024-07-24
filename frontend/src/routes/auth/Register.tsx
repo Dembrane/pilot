@@ -1,10 +1,5 @@
 import { ADMIN_BASE_URL } from "@/config";
-import {
-  useCreateProjectMutation,
-  useCreateSessionMutation,
-  useLoginMutation,
-  useRegisterMutation,
-} from "@/lib/query";
+import { useRegisterMutation } from "@/lib/query";
 import {
   Alert,
   Button,
@@ -23,7 +18,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 export const RegisterRoute = () => {
   useDocumentTitle("Register | Dembrane");
-  const { register, reset, handleSubmit } = useForm<{
+  const { register, handleSubmit } = useForm<{
     email: string;
     password: string;
     confirmPassword: string;
@@ -31,13 +26,9 @@ export const RegisterRoute = () => {
     last_name: string;
   }>();
 
-  const navigate = useNavigate();
   const [error, setError] = useState("");
 
   const registerMutation = useRegisterMutation();
-  const loginMutation = useLoginMutation();
-  const createSessionMutation = useCreateSessionMutation();
-  const createProjectMutation = useCreateProjectMutation();
 
   const onSubmit = handleSubmit(async (data) => {
     if (data.password !== data.confirmPassword) {
@@ -45,33 +36,15 @@ export const RegisterRoute = () => {
       return;
     }
 
-    try {
-      setError("");
-      await registerMutation.mutateAsync([
-        data.email,
-        data.password,
-        {
-          first_name: data.first_name,
-          last_name: data.last_name,
-          // verification_url: `${ADMIN_BASE_URL}/verify-email`,
-        },
-      ]);
-      await loginMutation.mutateAsync([data.email, data.password]);
-      const session = await createSessionMutation.mutateAsync({});
-      const project = await createProjectMutation.mutateAsync({
-        session_id: session.id,
-        name: "New Project",
-      });
-      navigate(`/workspaces/${session.id}/projects/${project.id}/overview`);
-    } catch (error) {
-      try {
-        if ((error as any).errors[0].message != "") {
-          setError((error as any).errors[0].message);
-        }
-      } catch {
-        setError("Something went wrong");
-      }
-    }
+    registerMutation.mutate([
+      data.email,
+      data.password,
+      {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        verification_url: `${ADMIN_BASE_URL}/verify-email`,
+      },
+    ]);
   });
 
   return (
@@ -83,6 +56,9 @@ export const RegisterRoute = () => {
           <form onSubmit={onSubmit}>
             <Stack>
               {error && <Alert color="red">{error}</Alert>}
+              {registerMutation.error && (
+                <Alert color="red">{registerMutation.error.message}</Alert>
+              )}
               <SimpleGrid
                 cols={{
                   xs: 1,

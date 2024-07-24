@@ -2,6 +2,7 @@ FROM directus/directus:10.13
 
 # COPY ./migrations/ ./migrations/
 # COPY ./extensions/ ./extensions/
+COPY ./templates ./templates/
 
 COPY ./snapshots/20240712-snapshot.yaml ./snapshot.yaml
 

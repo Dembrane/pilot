@@ -29,6 +29,10 @@ import { RegisterRoute } from "./routes/auth/Register";
 import { Protected } from "./components/common/Protected";
 import { WorkspacesHomeRoute } from "./routes/workspaces/WorkspacesHome";
 import { AuthLayout } from "./components/layout/AuthLayout";
+import { CheckYourEmailRoute } from "./routes/auth/CheckYourEmail";
+import { VerifyEmailRoute } from "./routes/auth/VerifyEmail";
+import { PasswordResetRoute } from "./routes/auth/PasswordReset";
+import { RequestPasswordResetRoute } from "./routes/auth/RequestPasswordReset";
 
 export const mainRouter = createBrowserRouter([
   {
@@ -55,14 +59,39 @@ export const mainRouter = createBrowserRouter([
           </AuthLayout>
         ),
       },
-      // {
-      //   path: "welcome",
-      //   element: <CheckYourEmailRoute />,
-      // },
-      // {
-      //   path: "check-your-email",
-      //   element: <CheckYourEmailRoute />,
-      // },
+      {
+        path: "check-your-email",
+        element: (
+          <AuthLayout>
+            <CheckYourEmailRoute />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "password-reset",
+        element: (
+          <AuthLayout>
+            <PasswordResetRoute />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "request-password-reset",
+        element: (
+          <AuthLayout>
+            <RequestPasswordResetRoute />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "verify-email",
+        element: (
+          <AuthLayout>
+            <VerifyEmailRoute />
+          </AuthLayout>
+        ),
+      },
+
       {
         path: "workspaces",
         element: (
@@ -75,6 +104,7 @@ export const mainRouter = createBrowserRouter([
       },
       {
         path: "workspaces/:sessionId/projects",
+        // path: "projects",
         element: (
           <Protected>
             <BaseLayout />

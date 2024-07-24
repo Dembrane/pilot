@@ -37,6 +37,7 @@ services:
       - ../directus/migrations:/directus/migrations
       - ../directus/extensions:/directus/extensions
       - ../directus/uploads:/directus/uploads
+      - ../directus/templates:/directus/templates
       - ../directus/.env:/directus/.env
     depends_on:
       - postgres

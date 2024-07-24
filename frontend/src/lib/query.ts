@@ -26,14 +26,18 @@ import { directus } from "./directus";
 import {
   createItem,
   deleteItem,
+  passwordRequest,
+  passwordReset,
   Query,
   readItem,
   readItems,
   readUser,
   registerUser,
+  registerUserVerify,
   updateItem,
 } from "@directus/sdk";
 import { useNavigate } from "react-router-dom";
+import { ADMIN_BASE_URL } from "@/config";
 
 export const useAllSessions = ({
   query,
@@ -103,10 +107,12 @@ export const useCreateProjectMutation = () => {
   });
 };
 
+// todo: add redirection logic here
 export const useLoginMutation = () => {
   return useMutation({
-    mutationFn: (payload: Parameters<typeof directus.login>) =>
-      directus.login(...payload),
+    mutationFn: (payload: Parameters<typeof directus.login>) => {
+      return directus.login(...payload);
+    },
     onSuccess: () => {
       toast.success("Login successful");
     },
@@ -114,11 +120,96 @@ export const useLoginMutation = () => {
 };
 
 export const useRegisterMutation = () => {
+  const navigate = useNavigate();
   return useMutation({
-    mutationFn: (payload: Parameters<typeof registerUser>) =>
-      directus.request(registerUser(...payload)),
+    mutationFn: async (payload: Parameters<typeof registerUser>) => {
+      try {
+        const response = await directus.request(registerUser(...payload));
+        return response;
+      } catch (e) {
+        try {
+          // @ts-ignore
+          throw new Error(e.errors[0].message);
+        } catch (e) {
+          throw new Error("Something went wrong");
+        }
+      }
+    },
     onSuccess: () => {
-      toast.success("User registered successfully");
+      toast.success("Please check your email to verify your account.");
+      navigate("/check-your-email");
+    },
+    onError: (e) => {
+      toast.error(e.message);
+    },
+  });
+};
+
+export const useVerifyMutation = (doRedirect: boolean = true) =>
+  useMutation({
+    mutationFn: async (data: { token: string }) => {
+      return directus.request(registerUserVerify(data.token));
+    },
+    onSuccess: () => {
+      toast.success("Email verified successfully");
+      if (doRedirect) {
+        setTimeout(() => {
+          window.location.href = `/login?new=true`;
+        }, 4500);
+      }
+    },
+    onError: (e) => {
+      try {
+        // @ts-ignore
+        toast.error(e.errors[0].message);
+      } catch (e) {
+        toast.error("Error verifying email. Please contact support.");
+      }
+    },
+  });
+
+export const useRequestPasswordResetMutation = () => {
+  const navigate = useNavigate();
+  return useMutation({
+    mutationFn: (email: string) =>
+      directus.request(
+        passwordRequest(email, `${ADMIN_BASE_URL}/password-reset`),
+      ),
+    onSuccess: () => {
+      toast.success("Password reset email sent successfully");
+      navigate("/check-your-email");
+    },
+    onError: (e) => {
+      try {
+        // @ts-ignore
+        toast.error(e.errors[0].message);
+      } catch (e) {
+        toast.error(
+          "Error sending password reset email. Please contact support.",
+        );
+      }
+    },
+  });
+};
+
+export const useResetPasswordMutation = () => {
+  const navigate = useNavigate();
+  return useMutation({
+    mutationFn: ({ token, password }: { token: string; password: string }) =>
+      directus.request(passwordReset(token, password)),
+    onSuccess: () => {
+      toast.success(
+        "Password reset successfully. Please login with new password.",
+      );
+      navigate("/login");
+    },
+    onError: (e) => {
+      try {
+        // @ts-ignore
+        toast.error(e.errors[0].message);
+      } catch (e) {
+        toast.error("Error resetting password. Please contact support.");
+      }
     },
   });
 };

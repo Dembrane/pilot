@@ -1,8 +1,11 @@
 import { DIRECTUS_PUBLIC_URL } from "@/config";
 import { directus } from "@/lib/directus";
-import { useLoginMutation } from "@/lib/query";
-import { useAuthenticated } from "@/lib/useAuthenticated";
-import { readProviders } from "@directus/sdk";
+import {
+  useCreateProjectMutation,
+  useCreateSessionMutation,
+  useLoginMutation,
+} from "@/lib/query";
+import { readItems, readProviders } from "@directus/sdk";
 import {
   Alert,
   Anchor,
@@ -10,6 +13,7 @@ import {
   Container,
   Divider,
   PasswordInput,
+  Text,
   Stack,
   TextInput,
   Title,
@@ -19,7 +23,8 @@ import { IconBrandGoogle, IconLogin2 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 
 const LoginWithProvider = ({
   provider,
@@ -49,12 +54,12 @@ const LoginWithProvider = ({
 
 export const LoginRoute = () => {
   useDocumentTitle("Login | Dembrane");
-  const { register, reset, handleSubmit } = useForm<{
+  const { register, handleSubmit } = useForm<{
     email: string;
     password: string;
   }>();
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _setSearchParams] = useSearchParams();
 
   const providerQuery = useQuery({
     queryKey: ["auth-providers"],
@@ -62,7 +67,8 @@ export const LoginRoute = () => {
   });
 
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthenticated(false);
+  const createSessionMutation = useCreateSessionMutation();
+  const createProjectMutation = useCreateProjectMutation();
 
   const [error, setError] = useState("");
   const loginMutation = useLoginMutation();
@@ -71,6 +77,25 @@ export const LoginRoute = () => {
     try {
       setError("");
       await loginMutation.mutateAsync([data.email, data.password]);
+
+      const projectsCount = await directus.request<Project[]>(
+        readItems("project", { limit: 1 }),
+      );
+      const isNewAccount =
+        searchParams.get("new") === "true" && projectsCount.length === 0;
+
+      if (Boolean(isNewAccount)) {
+        toast("Setting up your first project");
+        await loginMutation.mutateAsync([data.email, data.password]);
+        const session = await createSessionMutation.mutateAsync({});
+        const project = await createProjectMutation.mutateAsync({
+          session_id: session.id,
+          name: "New Project",
+        });
+        navigate(`/workspaces/${session.id}/projects/${project.id}/overview`);
+        return;
+      }
+
       const next = searchParams.get("next");
       if (!!next && next !== "/login") {
         window.location.href = next;
@@ -91,11 +116,16 @@ export const LoginRoute = () => {
   return (
     <Container size="sm" className="!h-full">
       <Stack className="h-full">
-        <Stack className="flex-grow">
+        <Stack className="flex-grow" gap="md">
           <Title order={1}>Welcome!</Title>
 
+          {(searchParams.get("new") === "true" ||
+            !!searchParams.get("redirect")) && (
+            <Text>Please login to continue.</Text>
+          )}
+
           <form onSubmit={onSubmit}>
-            <Stack>
+            <Stack gap="sm">
               {error && <Alert color="red">{error}</Alert>}
 
               <TextInput
@@ -113,15 +143,11 @@ export const LoginRoute = () => {
                 placeholder="Password"
                 required
               />
-              {/* <Link to="/reset-password"> */}
-              <Anchor
-                ta="right"
-                variant="outline"
-                onClick={() => alert("Please contact support.")}
-              >
-                Forgot your password?
-              </Anchor>
-              {/* </Link> */}
+              <div className="w-full text-right">
+                <Link to="/request-password-reset">
+                  <Anchor variant="outline">Forgot your password?</Anchor>
+                </Link>
+              </div>
               <Button size="lg" type="submit" loading={loginMutation.isPending}>
                 Login
               </Button>

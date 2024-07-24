@@ -51,9 +51,6 @@ services:
       - rabbitmq
     environment:
       PUBLIC_URL: ${DIRECTUS_PUBLIC_URL}
-      SESSION_COOKIE_DOMAIN: ${DIRECTUS_SESSION_COOKIE_DOMAIN}
-      SESSION_COOKIE_SAME_SITE: lax
-      SESSION_COOKIE_SECURE: true
       PORT: 8055
       SECRET: ${DIRECTUS_SECRET}
       ADMIN_EMAIL: admin@dembrane.com
@@ -71,6 +68,18 @@ services:
       CORS_ENABLED: true
       CORS_ORIGIN: ${DIRECTUS_CORS_ORIGIN}
       CORS_CREDENTIALS: true
+      SESSION_COOKIE_DOMAIN: ${DIRECTUS_SESSION_COOKIE_DOMAIN}
+      SESSION_COOKIE_SAME_SITE: lax
+      SESSION_COOKIE_SECURE: true
+      EMAIL_TRANSPORT: smtp
+      EMAIL_FROM: ${SMTP_FROM:-DoNotReply@c1f65324-81a8-41de-abe3-2c1cbf52ba1a.azurecomm.net}
+      EMAIL_SMTP_HOST: ${SMTP_HOST:-smtp.azurecomm.net}
+      EMAIL_SMTP_PORT: ${SMTP_POST:-587}
+      EMAIL_SMTP_USER: ${SMTP_USER:-Communication-Services-Pilot.062b802b-0df6-407b-8bd4-ecb66ec67c32.0e14b809-b0c5-474b-81ed-6c06d141123a}
+      EMAIL_SMTP_PASSWORD: ${SMTP_PASSWORD}
+      USER_REGISTER_URL_ALLOW_LIST: ${ADMIN_BASE_URL}/verify-email
+      PASSWORD_RESET_URL_ALLOW_LIST: ${ADMIN_BASE_URL}/password-reset
+      USER_INVITE_URL_ALLOW_LIST: ${ADMIN_BASE_URL}/invite
     volumes:
       - ./directus/uploads:/directus/uploads
 

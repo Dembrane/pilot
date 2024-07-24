@@ -3,6 +3,7 @@ import { Footer } from "../common/Footer";
 import { Header } from "../common/Header";
 import { Outlet } from "react-router-dom";
 import { PropsWithChildren } from "react";
+import { Toaster } from "../Toaster";
 
 export const AuthLayout = (props: PropsWithChildren) => {
   return (
@@ -16,6 +17,7 @@ export const AuthLayout = (props: PropsWithChildren) => {
       <div className="p-2">
         <Footer />
       </div>
+      <Toaster />
     </div>
   );
 };

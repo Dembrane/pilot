@@ -39,6 +39,29 @@ import {
 import { useNavigate } from "react-router-dom";
 import { ADMIN_BASE_URL } from "@/config";
 
+// always throws a error with a message
+function throwWithMessage(e: unknown): never {
+  if (
+    e &&
+    typeof e === "object" &&
+    "errors" in e &&
+    Array.isArray((e as any).errors)
+  ) {
+    // Handle Directus error format
+    const message = (e as any).errors[0].message;
+    console.log(message);
+    throw new Error(message);
+  } else if (e instanceof Error) {
+    // Handle generic errors
+    console.log(e.message);
+    throw new Error(e.message);
+  } else {
+    // Handle unknown errors
+    console.log("An unknown error occurred");
+    throw new Error("Something went wrong");
+  }
+}
+
 export const useAllSessions = ({
   query,
 }: {
@@ -128,10 +151,15 @@ export const useRegisterMutation = () => {
         return response;
       } catch (e) {
         try {
-          // @ts-ignore
-          throw new Error(e.errors[0].message);
-        } catch (e) {
-          throw new Error("Something went wrong");
+          throwWithMessage(e);
+        } catch (inner) {
+          if (inner instanceof Error) {
+            if (inner.message === "You don't have permission to access this.") {
+              throw new Error(
+                "Oops! It seems your email is not eligible for registration at this time. Please consider joining our waitlist for future updates!",
+              );
+            }
+          }
         }
       }
     },
@@ -148,10 +176,15 @@ export const useRegisterMutation = () => {
 export const useVerifyMutation = (doRedirect: boolean = true) =>
   useMutation({
     mutationFn: async (data: { token: string }) => {
-      return directus.request(registerUserVerify(data.token));
+      try {
+        const response = await directus.request(registerUserVerify(data.token));
+        return response;
+      } catch (e) {
+        throwWithMessage(e);
+      }
     },
     onSuccess: () => {
-      toast.success("Email verified successfully");
+      toast.success("Email verified successfully.");
       if (doRedirect) {
         setTimeout(() => {
           window.location.href = `/login?new=true`;
@@ -159,35 +192,29 @@ export const useVerifyMutation = (doRedirect: boolean = true) =>
       }
     },
     onError: (e) => {
-      try {
-        // @ts-ignore
-        toast.error(e.errors[0].message);
-      } catch (e) {
-        toast.error("Error verifying email. Please contact support.");
-      }
+      toast.error(e.message);
     },
   });
 
 export const useRequestPasswordResetMutation = () => {
   const navigate = useNavigate();
   return useMutation({
-    mutationFn: (email: string) =>
-      directus.request(
-        passwordRequest(email, `${ADMIN_BASE_URL}/password-reset`),
-      ),
+    mutationFn: async (email: string) => {
+      try {
+        const response = await directus.request(
+          passwordRequest(email, `${ADMIN_BASE_URL}/password-reset`),
+        );
+        return response;
+      } catch (e) {
+        throwWithMessage(e);
+      }
+    },
     onSuccess: () => {
       toast.success("Password reset email sent successfully");
       navigate("/check-your-email");
     },
     onError: (e) => {
-      try {
-        // @ts-ignore
-        toast.error(e.errors[0].message);
-      } catch (e) {
-        toast.error(
-          "Error sending password reset email. Please contact support.",
-        );
-      }
+      toast.error(e.message);
     },
   });
 };
@@ -195,8 +222,20 @@ export const useRequestPasswordResetMutation = () => {
 export const useResetPasswordMutation = () => {
   const navigate = useNavigate();
   return useMutation({
-    mutationFn: ({ token, password }: { token: string; password: string }) =>
-      directus.request(passwordReset(token, password)),
+    mutationFn: async ({
+      token,
+      password,
+    }: {
+      token: string;
+      password: string;
+    }) => {
+      try {
+        const response = await directus.request(passwordReset(token, password));
+        return response;
+      } catch (e) {
+        throwWithMessage(e);
+      }
+    },
     onSuccess: () => {
       toast.success(
         "Password reset successfully. Please login with new password.",
@@ -205,8 +244,7 @@ export const useResetPasswordMutation = () => {
     },
     onError: (e) => {
       try {
-        // @ts-ignore
-        toast.error(e.errors[0].message);
+        toast.error(e.message);
       } catch (e) {
         toast.error("Error resetting password. Please contact support.");
       }

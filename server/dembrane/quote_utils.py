@@ -426,7 +426,6 @@ Output:"""
         else:
             aspect = AspectModel(
                 id=generate_uuid(),
-                project_analysis_run_id=project_analysis_run_id,
                 view_id=view.id,
                 name=aspect["name"],
                 description=aspect["description"],
@@ -487,16 +486,26 @@ def format_json_string_to_list(json_string: str) -> List[str]:
     return formatted_sample_quotes
 
 
-def assign_aspect_centroid(db: Session, aspect_id: str):
+def assign_aspect_centroid(db: Session, aspect_id: str) -> None:
     aspect = db.get(AspectModel, aspect_id)
 
     if not aspect:
         logger.error(f"Aspect with ID {aspect_id} not found")
         return
 
-    sample_quotes = get_random_sample_quotes(
-        db, aspect.project_analysis_run_id, context_limit=100000
-    )
+    view = aspect.view
+
+    if not view:
+        logger.error(f"View not found for aspect {aspect_id}")
+        return
+
+    project_analysis_run_id = view.project_analysis_run_id
+
+    if not project_analysis_run_id:
+        logger.error(f"Project analysis run ID not found for view {view.id}")
+        return
+
+    sample_quotes = get_random_sample_quotes(db, project_analysis_run_id, context_limit=100000)
 
     sample_quotes_texts = [quote.text for quote in sample_quotes]
 
@@ -506,7 +515,16 @@ def assign_aspect_centroid(db: Session, aspect_id: str):
     aspect_description = aspect.description
 
     view = aspect.view
+
+    if not view:
+        logger.error(f"View not found for aspect {aspect_id}")
+        return
+
     aspects = view.aspects
+
+    if not aspects:
+        logger.error(f"No aspects found for view {view.id}")
+        return
 
     random_sample_quotes = "\n".join([f'"{quote}"' for quote in sample_quotes_texts])
 
@@ -658,7 +676,6 @@ def cluster_quotes_using_aspect_centroids(db: Session, view_id: str) -> None:
             db.query(AspectModel)
             .filter_by(
                 id=closest_aspect_id,
-                project_analysis_run_id=view.project_analysis_run_id,
                 view_id=view_id,
             )
             .first()
@@ -679,7 +696,11 @@ def generate_aspect_summary(db: Session, aspect_id: str) -> None:
         raise ValueError(f"Aspect with ID {aspect_id} not found")
 
     quotes = aspect.quotes
-    formatted_quotes = "\n".join([f'"{quote.text}"' for quote in quotes])
+    representative_quotes = aspect.representative_quotes
+
+    dedupe_quotes = list(set(representative_quotes + quotes))
+
+    formatted_quotes = "\n".join([f'"{quote.text}"' for quote in dedupe_quotes])
 
     view_name = aspect.view.name if aspect.view else ""
 
@@ -854,7 +875,7 @@ def generate_aspect_extras(db: Session, aspect_id: str) -> AspectModel | None:
 
     if not aspect:
         logger.error(f"Aspect with ID {aspect_id} not found")
-        return
+        return None
 
     generate_aspect_summary(db, aspect.id)
     generate_aspect_image(db, aspect.id)
@@ -989,9 +1010,9 @@ def initialize_insights(db: Session, project_analysis_run_id: str) -> List[str]:
         ]
     )
 
-    df["embedding"] = df.get("embedding").apply(lambda x: np.array(x))
-
+    df["embedding"] = df.get("embedding").apply(lambda x: np.array(x))  # type: ignore
     matrix = np.vstack(df["embedding"].values)  # type: ignore
+
     logger.debug(f"matrix shape {matrix.shape}")
 
     n_clusters = len(quotes) // 4

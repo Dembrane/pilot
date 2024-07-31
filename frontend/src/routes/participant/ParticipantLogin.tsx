@@ -21,13 +21,16 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useEffect, useMemo } from "react";
-import { useInitiateConversationMutation, useProjectTags } from "@/lib/query";
+import { useInitiateConversationMutation } from "@/lib/query";
 import { AxiosError } from "axios";
 import { Trans, t } from "@lingui/macro";
 import { useLanguage } from "@/lib/useLanguage";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useDocumentTitle } from "@mantine/hooks";
 import { Markdown } from "@/components/Markdown";
 import { PRIVACY_POLICY_URL } from "@/config";
+import { getParticipantProjectById } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { Footer } from "@/components/common/Footer";
 
 const FormSchema = z.object({
   // email: z.string().email("Must be a valid email address.").optional(),
@@ -43,7 +46,11 @@ export const ParticipantLoginRoute = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const tagsQuery = useProjectTags(projectId as string);
+  const projectQuery = useQuery({
+    queryKey: ["participant", "project", projectId],
+    queryFn: () => getParticipantProjectById(projectId as string),
+    enabled: !!projectId,
+  });
 
   const [opened, { open, close }] = useDisclosure(true);
 
@@ -202,13 +209,13 @@ export const ParticipantLoginRoute = () => {
                   </Box>
                 )}
                 <Box className="relative">
-                  {tagsQuery.isLoading && <LoadingOverlay />}
-                  {tagsQuery.data && tagsQuery.data.length > 0 && (
+                  {projectQuery.isLoading && <LoadingOverlay />}
+                  {projectQuery.data && projectQuery.data.tags.length > 0 && (
                     <MultiSelect
                       label={t`Tags`}
                       placeholder={t`Add all that apply`}
                       size="lg"
-                      data={tagsQuery.data.map((tag) => ({
+                      data={projectQuery.data.tags.map((tag) => ({
                         value: tag.id,
                         label: tag.text,
                       }))}
@@ -230,12 +237,7 @@ export const ParticipantLoginRoute = () => {
           </Stack>
           <Stack>
             <Divider />
-            <Stack gap="xs" justify="center" align="center">
-              <Anchor size="sm" target="_blank" href={PRIVACY_POLICY_URL}>
-                <Trans>Privacy Statements</Trans>
-              </Anchor>
-              <Text size="sm">Dembrane B.V. 2024, all rights reserved.</Text>
-            </Stack>
+            <Footer />
           </Stack>
         </Stack>
       </div>

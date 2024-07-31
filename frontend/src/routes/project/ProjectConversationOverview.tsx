@@ -30,16 +30,16 @@ import { apiCommonConfig } from "@/lib/api";
 const ConversationDangerZone = ({
   conversation,
 }: {
-  conversation: TConversation;
+  conversation: Conversation;
 }) => {
   const deleteConversationByIdMutation = useDeleteConversationByIdMutation();
   const navigate = useNavigate();
-  const { projectId } = useParams();
+  const { projectId, sessionId } = useParams();
 
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this conversation?")) {
       deleteConversationByIdMutation.mutate(conversation.id);
-      navigate("/projects/" + projectId + "/overview");
+      navigate(`/workspaces/${sessionId}/projects/` + projectId + "/overview");
     }
   };
 
@@ -66,11 +66,7 @@ type ConversationEditFormValues = {
   context: string;
 };
 
-const ConversationEdit = ({
-  conversation,
-}: {
-  conversation: TConversation;
-}) => {
+const ConversationEdit = ({ conversation }: { conversation: Conversation }) => {
   const updateConversationMutation = useUpdateConversationByIdMutation();
 
   const defaultValues: ConversationEditFormValues = {
@@ -98,7 +94,7 @@ const ConversationEdit = ({
   const onSubmit = (data: ConversationEditFormValues) => {
     updateConversationMutation.mutate({
       id: conversation.id,
-      update: data,
+      payload: data,
     });
   };
 
@@ -184,8 +180,12 @@ const ConversationEdit = ({
 
 export const ProjectConversationOverviewRoute = () => {
   const { conversationId } = useParams();
-  const conversationQuery = useConversationById(conversationId ?? "");
+  const conversationQuery = useConversationById({
+    conversationId: conversationId ?? "",
+  });
   const conversationChunksQuery = useConversationChunks(conversationId ?? "");
+
+  console.log("tags", conversationQuery.data?.tags);
 
   return (
     <Stack className="relative">
@@ -254,7 +254,7 @@ export const ProjectConversationOverviewRoute = () => {
                 conversationQuery.data?.tags.length > 0 &&
                 conversationQuery.data?.tags.map((tag) => (
                   <Pill key={tag.id} size="sm">
-                    {tag.text}
+                    {(tag.project_tag_id as ProjectTag).text}
                   </Pill>
                 ))}
             </Group>

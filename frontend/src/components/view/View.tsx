@@ -9,7 +9,7 @@ import {
   Spoiler,
 } from "@mantine/core";
 import { IconArrowsDiagonal } from "@tabler/icons-react";
-import { AspectCard } from "../aspect/Aspect";
+import { AspectCard } from "../aspect/AspectCard";
 import { Link, useParams } from "react-router-dom";
 import { Markdown } from "../Markdown";
 
@@ -33,7 +33,7 @@ export const ViewCard = ({ data }: { data: TView }) => {
 };
 
 export const ViewExpandedCard = ({ data }: { data: View }) => {
-  const { projectId } = useParams();
+  const { projectId, sessionId } = useParams();
 
   return (
     <Paper p="md">
@@ -44,7 +44,9 @@ export const ViewExpandedCard = ({ data }: { data: View }) => {
             <Text className="font-semibold">View</Text>
           </Group>
 
-          <Link to={`/projects/${projectId}/library/views/${data.id}`}>
+          <Link
+            to={`/workspaces/${sessionId}/projects/${projectId}/library/views/${data.id}`}
+          >
             <ActionIcon component="a" variant="transparent" c="gray">
               <IconArrowsDiagonal />
             </ActionIcon>

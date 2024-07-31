@@ -65,7 +65,7 @@ type ConversationChunk = {
   created_at: string;
   id: string;
   path?: string | null;
-  quotes: any[] | QuoteConversationChunk[];
+  quotes?: string[] | QuoteConversationChunk[];
   task_id?: string | null;
   timestamp: string;
   transcript?: string | null;
@@ -466,12 +466,13 @@ type Insight = {
   summary?: string | null;
   title?: string | null;
   updated_at: string;
+  quotes: string[] | Quote[];
 };
 
 type Project = {
   conversations_count?: number;
   context?: string | null;
-  conversations: any[] | Conversation[];
+  conversations: null | any[] | Conversation[];
   created_at: string;
   default_conversation_context?: string | null;
   default_conversation_description?: string | null;
@@ -483,10 +484,11 @@ type Project = {
   language: string;
   name?: string | null;
   pin: string;
-  project_analysis_runs: any[] | ProjectAnalysisRun[];
+  project_analysis_runs?: any[] | ProjectAnalysisRun[];
   session_id: number;
-  tags: any[] | ProjectTag[];
+  tags: null | any[] | ProjectTag[];
   updated_at: string;
+  directus_user: string;
 };
 
 type ProjectAnalysisRun = {
@@ -515,9 +517,8 @@ type ProjectTag = {
 
 type Quote = {
   aspects: any[] | QuoteAspect[];
-  conversation?: string | Conversation | null;
+  conversation_id?: string | Conversation | null;
   conversation_chunks: any[] | QuoteConversationChunk[];
-  conversation_id: string;
   created_at: string;
   embedding: string;
   id: string;
@@ -550,7 +551,11 @@ type QuoteConversationChunk = {
 type Session = {
   created_at: string;
   id: number;
+  uuid?: string;
   updated_at: string;
+  user_id: DirectusUser | string;
+  projects?: string[] | Project[];
+  projects_count?: number;
 };
 
 type View = {

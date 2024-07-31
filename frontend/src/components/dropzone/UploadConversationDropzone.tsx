@@ -14,7 +14,10 @@ export const UploadConversationDropzone = (
   }>,
 ) => {
   const uploadConversationMutation = useUploadConversation();
-  const projectQuery = useProjectById(props.projectId);
+
+  const projectQuery = useProjectById({
+    projectId: props.projectId,
+  });
 
   if (projectQuery.isLoading) {
     return <LoadingOverlay visible />;

@@ -20,8 +20,7 @@ server_setup() {
   echo 'source "$HOME/.rye/env"' >> ~/.bashrc
   . $HOME/.rye/env
   cd server
-  rye sync
-  alembic upgrade head
+  # rye sync
   pip install mypy
 }
 

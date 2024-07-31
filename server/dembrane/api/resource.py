@@ -9,7 +9,6 @@ from fastapi.responses import StreamingResponse
 from dembrane.utils import iter_file_content
 from dembrane.schemas import ResourceSchema
 from dembrane.database import ResourceModel, DependencyInjectDatabase
-from dembrane.api.session import DependencyRequireSession
 from dembrane.api.exceptions import (
     ResourceNotFoundException,
     ResourceContentNotFoundException,
@@ -23,9 +22,7 @@ ResourceRouter = APIRouter(tags=["resource"])
 
 
 @ResourceRouter.get("/{resource_id}", response_model=ResourceSchema)
-async def get_resource(
-    resource_id: str, _session: DependencyRequireSession, db: DependencyInjectDatabase
-) -> ResourceModel:
+async def get_resource(resource_id: str, db: DependencyInjectDatabase) -> ResourceModel:
     resource = (
         db.query(ResourceModel)
         .filter(
@@ -39,9 +36,7 @@ async def get_resource(
 
 
 @ResourceRouter.get("/{resource_id}/content", response_model=ResourceSchema)
-async def get_resource_content(
-    resource_id: str, _session: DependencyRequireSession, db: DependencyInjectDatabase
-) -> StreamingResponse:
+async def get_resource_content(resource_id: str, db: DependencyInjectDatabase) -> StreamingResponse:
     resource = (
         db.query(ResourceModel)
         .filter(
@@ -74,10 +69,9 @@ class PutResourceRequestBodySchema(BaseModel):
 async def update_resource(
     resource_id: str,
     body: PutResourceRequestBodySchema,
-    session: DependencyRequireSession,
     db: DependencyInjectDatabase,
 ) -> ResourceModel:
-    resource = await get_resource(resource_id, session, db)
+    resource = await get_resource(resource_id, db)
 
     resource.title = body.title or resource.title
     resource.description = body.description or resource.description
@@ -88,10 +82,8 @@ async def update_resource(
 
 
 @ResourceRouter.delete("/{resource_id}", response_model=ResourceSchema)
-async def delete_resource(
-    resource_id: str, session: DependencyRequireSession, db: DependencyInjectDatabase
-) -> ResourceModel:
-    resource = await get_resource(resource_id, session, db)
+async def delete_resource(resource_id: str, db: DependencyInjectDatabase) -> ResourceModel:
+    resource = await get_resource(resource_id, db)
     db.delete(resource)
     db.commit()
     return resource

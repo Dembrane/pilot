@@ -21,7 +21,7 @@ import { IconDownload } from "@tabler/icons-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 
-const Chunk = ({ chunk }: { chunk: TConversationChunk }) => {
+const Chunk = ({ chunk }: { chunk: ConversationChunk }) => {
   const src = getConversationChunkContentLink(chunk.conversation_id, chunk.id);
   return (
     <BaseMessage
@@ -57,7 +57,10 @@ const Chunk = ({ chunk }: { chunk: TConversationChunk }) => {
 
 export const ProjectConversationTranscript = () => {
   const { conversationId } = useParams();
-  const conversationQuery = useConversationById(conversationId ?? "");
+  const conversationQuery = useConversationById({
+    conversationId: conversationId ?? "",
+    loadConversationChunks: true,
+  });
   const conversationChunksQuery = useConversationChunks(conversationId ?? "");
 
   const [opened, { open, close }] = useDisclosure(false);

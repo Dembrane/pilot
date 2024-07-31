@@ -79,14 +79,19 @@ class ProcessingStatusEnum(Enum):
 class SessionModel(Base):
     __tablename__ = "session"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    uuid: Mapped[str] = mapped_column(UUID(as_uuid=False), unique=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
     projects: Mapped[List["ProjectModel"]] = relationship(
-        "ProjectModel", back_populates="session", cascade="all, delete-orphan"
+        "ProjectModel", back_populates="session"
     )
+    user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("directus_user.id"))
 
+class UserModel(Base):
+    __tablename__ = "directus_user"
+    id: Mapped[str]= mapped_column(UUID(as_uuid=False), primary_key=True)
 
 class ProjectModel(Base):
     __tablename__ = "project"
@@ -165,9 +170,6 @@ class ProjectAnalysisRunModel(Base):
     )
     insights: Mapped[List["InsightModel"]] = relationship(
         "InsightModel", back_populates="project_analysis_run"
-    )
-    aspects: Mapped[List["AspectModel"]] = relationship(
-        "AspectModel", back_populates="project_analysis_run"
     )
     views: Mapped[List["ViewModel"]] = relationship(
         "ViewModel", back_populates="project_analysis_run"
@@ -444,14 +446,6 @@ class AspectModel(Base):
     )
 
     centroid_embedding: Mapped[List[float]] = mapped_column(Vector(EMBEDDING_DIM), nullable=True)
-
-    project_analysis_run_id: Mapped[Optional[str]] = mapped_column(
-        UUID(as_uuid=False), ForeignKey("project_analysis_run.id")
-    )
-    project_analysis_run: Mapped[Optional["ProjectAnalysisRunModel"]] = relationship(
-        ProjectAnalysisRunModel, back_populates="aspects"
-    )
-
 
 ## Depracated
 class InsightModel(Base):

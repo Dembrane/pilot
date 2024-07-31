@@ -1,43 +1,19 @@
-import { useConversationById, useProjectInsights } from "@/lib/query";
+import { useProjectInsights } from "@/lib/query";
 import {
   Divider,
   Text,
   LoadingOverlay,
   Stack,
   Title,
-  Paper,
   Group,
-  Pill,
-  Breadcrumbs,
   ActionIcon,
 } from "@mantine/core";
 import { IconArrowBack, IconChevronLeft } from "@tabler/icons-react";
 import { Link, useParams } from "react-router-dom";
-
-export const Quote = ({ data }: { data: Quote | TQuote }) => {
-  const { projectId } = useParams();
-
-  return (
-    <Paper p="sm">
-      <Text size="sm" pb="xs">
-        "{data.text}"
-      </Text>
-      {data.conversation_id && (
-        <Link
-          to={`/projects/${projectId}/conversation/${(data.conversation_id as unknown as Conversation).id}/transcript`}
-        >
-          <Pill>
-            {((data as any).conversation_id as Conversation).participant_name ??
-              ""}
-          </Pill>
-        </Link>
-      )}
-    </Paper>
-  );
-};
+import { Quote } from "../../components/quote/Quote";
 
 export const ProjectLibraryInsight = () => {
-  const { projectId, insightId } = useParams();
+  const { projectId, insightId, sessionId } = useParams();
   const insightsQuery = useProjectInsights(projectId ?? "");
 
   if (insightsQuery.isLoading) {
@@ -73,7 +49,7 @@ export const ProjectLibraryInsight = () => {
   return (
     <Stack className="py-6 px-2">
       <Group align="baseline">
-        <Link to={`/projects/${projectId}/library`}>
+        <Link to={`/workspaces/${sessionId}/projects/${projectId}/library`}>
           <ActionIcon variant="light">
             <IconChevronLeft />
           </ActionIcon>
@@ -88,7 +64,7 @@ export const ProjectLibraryInsight = () => {
       <Title order={2}>Quotes</Title>
       <Stack>
         {quotes.map((quote) => (
-          <Quote key={quote.id} data={quote} />
+          <Quote key={(quote as Quote).id} data={quote as Quote} />
         ))}
       </Stack>
     </Stack>

@@ -40,7 +40,7 @@ celery_app = Celery("tasks", broker=RABBITMQ_URL, result_backend=REDIS_URL + "/0
 celery_app.config_from_object(dembrane.tasks_config)
 
 
-class BaseTask(celery_app.Task):
+class BaseTask(celery_app.Task):  # type: ignore
     """Abstract base class for all tasks in my app."""
 
     abstract = True
@@ -337,6 +337,11 @@ def task_generate_view_extras(self, view_id: str):
     with DatabaseSession() as db:
         try:
             view = db.get(ViewModel, view_id)
+
+            if view is None:
+                logger.error(f"View not found: {view_id}")
+                return None
+
             view.processing_message = "Analysing aspects"
             db.commit()
             generate_view_extras(db, view_id)
@@ -436,6 +441,11 @@ def task_create_view(_self, project_analysis_run_id: str, user_query: str, user_
 def task_finalize_project_library(_self, project_analysis_run_id: str):
     with DatabaseSession() as db:
         project_analysis_run = db.get(ProjectAnalysisRunModel, project_analysis_run_id)
+
+        if project_analysis_run is None:
+            logger.error(f"Project analysis run not found: {project_analysis_run_id}")
+            return None
+
         project_analysis_run.processing_status = ProcessingStatusEnum.DONE
         project_analysis_run.processing_message = "Project library created"
         project_analysis_run.processing_completed_at = get_utc_timestamp()

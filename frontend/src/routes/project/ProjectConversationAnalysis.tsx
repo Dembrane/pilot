@@ -2,13 +2,11 @@ import { BaseMessage } from "@/components/BaseMessage";
 import { useConversationQuotes } from "@/lib/query";
 import { Stack, Title, Text, Skeleton, Anchor } from "@mantine/core";
 import { Link, useParams } from "react-router-dom";
-import { Quote } from "./ProjectLibraryInsight";
+import { Quote } from "../../components/quote/Quote";
 
 export const ProjectConversationAnalysis = () => {
-  const { conversationId, projectId } = useParams();
+  const { conversationId, projectId, sessionId } = useParams();
   const quotesQuery = useConversationQuotes(conversationId ?? "");
-
-  console.log(quotesQuery.data);
 
   return (
     <Stack>
@@ -24,11 +22,13 @@ export const ProjectConversationAnalysis = () => {
         </>
       )}
       {quotesQuery.data &&
-        quotesQuery.data.map((quote) => <Quote key={quote.id} data={quote} />)}
+        quotesQuery.data.map((quote) => (
+          <Quote key={quote.id} data={quote as Quote} />
+        ))}
       {quotesQuery.data && quotesQuery.data.length === 0 && (
         <Text>
           No quotes available. Generate quotes for this conversation by visiting{" "}
-          <Link to={`/projects/${projectId}/library`}>
+          <Link to={`/workspaces/${sessionId}/projects/${projectId}/library`}>
             <Anchor>the project library.</Anchor>
           </Link>
         </Text>

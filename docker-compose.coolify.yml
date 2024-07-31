@@ -50,6 +50,7 @@ services:
       - postgres
       - rabbitmq
     environment:
+      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL}
       PORT: 8055
       SECRET: ${DIRECTUS_SECRET}
       ADMIN_EMAIL: admin@dembrane.com
@@ -61,12 +62,24 @@ services:
       DB_USER: dembrane
       DB_PASSWORD: dembrane
       DB_DATABASE: dembrane
-      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL}
       TELEMETRY: false
       REDIS_ENABLED: true
       REDIS: redis://redis:6379
       CORS_ENABLED: true
-      CORS_ORIGIN: "*"
+      CORS_ORIGIN: ${DIRECTUS_CORS_ORIGIN}
+      CORS_CREDENTIALS: true
+      SESSION_COOKIE_DOMAIN: ${DIRECTUS_SESSION_COOKIE_DOMAIN}
+      SESSION_COOKIE_SAME_SITE: lax
+      SESSION_COOKIE_SECURE: true
+      EMAIL_TRANSPORT: smtp
+      EMAIL_FROM: ${SMTP_FROM:-DoNotReply@c1f65324-81a8-41de-abe3-2c1cbf52ba1a.azurecomm.net}
+      EMAIL_SMTP_HOST: ${SMTP_HOST:-smtp.azurecomm.net}
+      EMAIL_SMTP_PORT: ${SMTP_POST:-587}
+      EMAIL_SMTP_USER: ${SMTP_USER:-Communication-Services-Pilot.062b802b-0df6-407b-8bd4-ecb66ec67c32.0e14b809-b0c5-474b-81ed-6c06d141123a}
+      EMAIL_SMTP_PASSWORD: ${SMTP_PASSWORD}
+      USER_REGISTER_URL_ALLOW_LIST: ${ADMIN_BASE_URL}/verify-email
+      PASSWORD_RESET_URL_ALLOW_LIST: ${ADMIN_BASE_URL}/password-reset
+      USER_INVITE_URL_ALLOW_LIST: ${ADMIN_BASE_URL}/invite
     volumes:
       - ./directus/uploads:/directus/uploads
 
@@ -83,6 +96,7 @@ services:
       retries: 3
     environment:
       - DIRECTUS_PUBLIC_URL=${DIRECTUS_PUBLIC_URL}
+      - DIRECTUS_SECRET=${DIRECTUS_SECRET}
       - ADMIN_BASE_URL=${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
@@ -111,6 +125,7 @@ services:
     command: /bin/sh /code/server/prod-worker.sh
     environment:
       - DIRECTUS_PUBLIC_URL=${DIRECTUS_PUBLIC_URL}
+      - DIRECTUS_SECRET=${DIRECTUS_SECRET}
       - ADMIN_BASE_URL=${ADMIN_BASE_URL}
       - PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
@@ -138,6 +153,7 @@ services:
       dockerfile: Dockerfile
       args:
         - VITE_API_BASE_URL=${API_BASE_URL}/api
+        - VITE_ADMIN_BASE_URL=${ADMIN_BASE_URL}
         - VITE_PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
         - VITE_BUILD_VERSION=${BUILD_VERSION}
         - VITE_USE_PARTICIPANT_ROUTER=0
@@ -146,8 +162,6 @@ services:
     depends_on:
       - api-server
     logging: *default-logging
-    labels:
-      - caddy_0.basicauth.0_dembrane=${CADDY_HASHED_PASSWORD}
 
   participant-frontend:
     build:

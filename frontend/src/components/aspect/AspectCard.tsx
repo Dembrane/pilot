@@ -19,12 +19,12 @@ export const AspectCard = ({
   data: Aspect;
   className?: string;
 }) => {
-  const { projectId } = useParams();
+  const { projectId, sessionId } = useParams();
 
   return (
     <Box className="place-self-stretch">
       <Link
-        to={`/projects/${projectId}/library/views/${data.view_id}/aspects/${data.id}`}
+        to={`/workspaces/${sessionId}/projects/${projectId}/library/views/${data.view_id}/aspects/${data.id}`}
       >
         <Paper
           bg="white"
@@ -44,13 +44,7 @@ export const AspectCard = ({
               </Button>
             </Box>
             <img
-              src={
-                data.image_url ??
-                "https://loremflickr.com/320/240/" +
-                  "nature" +
-                  "?random=" +
-                  data.id // data.image_url
-              }
+              src={data.image_url ?? "/placeholder.png"}
               alt={data.name}
               className="w-full h-[200px] object-cover"
             />

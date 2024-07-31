@@ -1,7 +1,6 @@
-import { Breadcrumbs } from "@/components/breadcrumbs/Breadcrumbs";
+import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { Insight } from "@/components/insight/Insight";
 import { ProjectAnalysisRunStatus } from "@/components/project/ProjectAnalysisRunStatus";
-import { Task } from "@/components/task/Task";
 import { ViewExpandedCard } from "@/components/view/View";
 import { Icons } from "@/icons";
 import {
@@ -162,7 +161,7 @@ const CreateView = ({
 };
 
 export const ProjectLibrary = () => {
-  const { projectId } = useParams();
+  const { sessionId, projectId } = useParams();
 
   const viewsQuery = useProjectViews(projectId ?? "");
   const insightsQuery = useProjectInsights(projectId ?? "");
@@ -187,13 +186,15 @@ export const ProjectLibrary = () => {
 
   if (conversationsQuery.isLoading) {
     return (
-      <Stack className="relative py-6 px-2">
-        <LoadingOverlay visible />
-      </Stack>
+      <Container>
+        <Stack className="relative py-6 px-2 h-[400px]">
+          <LoadingOverlay visible />
+        </Stack>
+      </Container>
     );
   }
 
-  const sortInsights = (data: TInsight[], sortBy: SortBy) => {
+  const sortInsights = (data: Insight[], sortBy: SortBy) => {
     try {
       if (sortBy === "default") {
         return data.sort(
@@ -205,10 +206,10 @@ export const ProjectLibrary = () => {
         // Relevance - Measured by the number of quotes present in each insight.
         return data.sort((a, b) => {
           const uniqueConversationsA = new Set(
-            a.quotes.map((quote) => quote.conversation_id),
+            a.quotes.map((quote) => (quote as Quote).conversation_id),
           ).size;
           const uniqueConversationsB = new Set(
-            b.quotes.map((quote) => quote.conversation_id),
+            b.quotes.map((quote) => (quote as Quote).conversation_id),
           ).size;
 
           // primary sort on the number of unique conversations
@@ -243,16 +244,20 @@ export const ProjectLibrary = () => {
   };
 
   return (
-    <Stack className="py-6 px-4">
+    <Stack className="py-6 px-4 relative">
       <Group justify="space-between">
         <Breadcrumbs
           items={[
             {
               label: <Icons.Sidebar />,
-              link: `/projects/${projectId}/overview`,
+              link: `/workspaces/${sessionId}/projects/${projectId}/overview`,
             },
             {
-              label: <Title order={1}>Library</Title>,
+              label: (
+                <Title order={1} size="md">
+                  Library
+                </Title>
+              ),
             },
           ]}
         />
@@ -281,13 +286,6 @@ export const ProjectLibrary = () => {
       </Group>
 
       <Divider />
-
-      {insightsQuery.isLoading && (
-        <>
-          <Skeleton height={100} />
-          <Skeleton height={100} />
-        </>
-      )}
 
       <ProjectAnalysisRunStatus projectId={projectId ?? ""} />
 
@@ -366,10 +364,16 @@ export const ProjectLibrary = () => {
           </Group>
 
           <div ref={parent} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {insightsQuery.isLoading && (
+              <>
+                <Skeleton height={100} />
+                <Skeleton height={100} />
+              </>
+            )}
             {insightsQuery.data &&
               insightsQuery.data.length > 0 &&
               sortInsights(insightsQuery.data, sortBy).map((insight) => (
-                <Insight key={insight.id} data={insight} />
+                <Insight key={insight.id} data={insight as Insight} />
               ))}
           </div>
         </>

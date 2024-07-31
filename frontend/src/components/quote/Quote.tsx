@@ -1,0 +1,24 @@
+import { Paper, Pill, Text } from "@mantine/core";
+import { useParams, Link } from "react-router-dom";
+
+export const Quote = ({ data }: { data: Quote }) => {
+  const { projectId, sessionId } = useParams();
+
+  return (
+    <Paper p="sm">
+      <Text size="sm" pb="xs">
+        "{data.text}"
+      </Text>
+      {data.conversation_id && (
+        <Link
+          to={`/workspaces/${sessionId}/projects/${projectId}/conversation/${(data.conversation_id as unknown as Conversation).id}/transcript`}
+        >
+          <Pill>
+            {((data as any).conversation_id as Conversation).participant_name ??
+              ""}
+          </Pill>
+        </Link>
+      )}
+    </Paper>
+  );
+};

@@ -1,4 +1,3 @@
-import { Breadcrumbs } from "@/components/breadcrumbs/Breadcrumbs";
 import { Icons } from "@/icons";
 import {
   Divider,
@@ -8,14 +7,27 @@ import {
   Text,
   Box,
   Container,
+  Skeleton,
 } from "@mantine/core";
 import { useParams } from "react-router-dom";
-import { Quote } from "./ProjectLibraryInsight";
+import { Quote } from "../../components/quote/Quote";
 import { Markdown } from "@/components/Markdown";
 import { useAspectById } from "@/lib/query";
+import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+
+const dedupeQuotes = (quotes: QuoteAspect[]): QuoteAspect[] => {
+  const seen = new Set();
+  return quotes.filter((quote) => {
+    if (seen.has((quote.quote_id as Quote).id)) {
+      return false;
+    }
+    seen.add((quote.quote_id as Quote).id);
+    return true;
+  });
+};
 
 export const ProjectLibraryAspect = () => {
-  const { projectId, viewId, aspectId } = useParams();
+  const { projectId, viewId, aspectId, sessionId } = useParams();
 
   const { data: aspect, isLoading } = useAspectById(
     projectId ?? "",
@@ -28,15 +40,15 @@ export const ProjectLibraryAspect = () => {
         items={[
           {
             label: <Icons.Sidebar />,
-            link: `/projects/${projectId}/overview`,
+            link: `/workspaces/${sessionId}/projects/${projectId}/overview`,
           },
           {
             label: "Library",
-            link: `/projects/${projectId}/library`,
+            link: `/workspaces/${sessionId}/projects/${projectId}/library`,
           },
           {
             label: "View",
-            link: `/projects/${projectId}/library/views/${viewId}`,
+            link: `/workspaces/${sessionId}/projects/${projectId}/library/views/${viewId}`,
           },
           {
             label: "Aspect",
@@ -48,13 +60,7 @@ export const ProjectLibraryAspect = () => {
       <Stack gap="md" className="relative">
         <LoadingOverlay visible={isLoading} />
         <img
-          src={
-            aspect?.image_url ??
-            "https://loremflickr.com/320/240/" +
-              "nature" +
-              "?random=" +
-              aspect?.id // data.image_url
-          }
+          src={aspect?.image_url ?? "/placeholder.png"}
           alt={aspect?.name}
           className="w-full h-[400px] object-cover"
         />
@@ -68,9 +74,19 @@ export const ProjectLibraryAspect = () => {
 
       <Stack>
         <Title order={2}>Quotes</Title>
-        {aspect?.quotes.map((quote: QuoteAspect) => (
-          <Quote key={quote.id} data={quote.quote_id as Quote} />
-        ))}
+        {!isLoading ? (
+          <>
+            {" "}
+            {dedupeQuotes([
+              ...(aspect?.representative_quotes ?? []),
+              ...(aspect?.quotes ?? []),
+            ]).map((quote: QuoteAspect) => (
+              <Quote key={quote.id} data={quote.quote_id as Quote} />
+            ))}{" "}
+          </>
+        ) : (
+          <Skeleton height={100} />
+        )}
       </Stack>
     </Stack>
   );

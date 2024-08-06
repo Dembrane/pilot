@@ -16,6 +16,7 @@ export const UploadResourceDropzone = (
 
   return (
     <Dropzone
+      p="sm"
       onDrop={(files) => {
         uploadDocumentsMutation.mutate({
           projectId: props.projectId,

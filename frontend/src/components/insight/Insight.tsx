@@ -9,16 +9,14 @@ export const Insight = ({
   // use this to override the project id
   overrideProjectId?: string;
 }) => {
-  let { projectId, sessionId } = useParams();
+  let { projectId } = useParams();
 
   if (overrideProjectId) {
     projectId = overrideProjectId;
   }
 
   return (
-    <Link
-      to={`/workspaces/${sessionId}/projects/${projectId}/library/insights/${data.id}`}
-    >
+    <Link to={`/projects/${projectId}/library/insights/${data.id}`}>
       <Paper
         component="a"
         className="p-4 h-full place-content-start text-left hover:-translate-y-1 hover:border-opacity-70 border-2 border-opacity-0 border-primary-300 transition-all"

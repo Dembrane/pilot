@@ -3,7 +3,7 @@ import { Group, LoadingOverlay, rem } from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { IconUpload, IconX } from "@tabler/icons-react";
 import { PropsWithChildren } from "react";
-import { toast } from "../Toaster";
+import { toast } from "../common/Toaster";
 
 export const UploadConversationDropzone = (
   props: PropsWithChildren<{
@@ -25,6 +25,7 @@ export const UploadConversationDropzone = (
 
   return (
     <Dropzone
+      p="sm"
       onDrop={(files) => {
         uploadConversationMutation.mutate({
           projectId: props.projectId,

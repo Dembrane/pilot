@@ -10,18 +10,18 @@ import {
   Title,
   Tooltip,
 } from "@mantine/core";
-import { useAllSessions, useCreateSessionMutation } from "../../lib/query";
+// import { useAllSessions, useCreateSessionMutation } from "../../lib/query";
 import { IconInfoCircle, IconPlus } from "@tabler/icons-react";
 import { Trans, t } from "@lingui/macro";
 import { SessionCard } from "./SessionCard";
 
 export const SessionSelection = () => {
-  const allSessionsQuery = useAllSessions();
-  const createSessionMutation = useCreateSessionMutation();
+  // const allSessionsQuery = useAllSessions();
+  // const createSessionMutation = useCreateSessionMutation();
 
-  const handleCreateNewSession = () => {
-    createSessionMutation.mutate({});
-  };
+  // const handleCreateNewSession = () => {
+  //   createSessionMutation.mutate({});
+  // };
 
   return (
     <Container>
@@ -32,8 +32,8 @@ export const SessionSelection = () => {
           </Title>
           <Tooltip label={t`Create a new workspace`}>
             <Button
-              loading={createSessionMutation.isPending}
-              onClick={handleCreateNewSession}
+              // loading={createSessionMutation.isPending}
+              // onClick={handleCreateNewSession}
               variant="outline"
               rightSection={<IconPlus size="16" />}
             >
@@ -42,7 +42,7 @@ export const SessionSelection = () => {
           </Tooltip>
         </Group>
         <Divider />
-        {!allSessionsQuery.data?.length && (
+        {/* {!allSessionsQuery.data?.length && (
           <Alert
             title={"Welcome to Your Workspaces!"}
             icon={<IconInfoCircle />}
@@ -70,8 +70,9 @@ export const SessionSelection = () => {
                 height={100}
                 className="col-span-12 md:col-span-6 lg:col-span-4"
               />
-            ))}
+            ))} 
         </div>
+        */}
       </Stack>
     </Container>
   );

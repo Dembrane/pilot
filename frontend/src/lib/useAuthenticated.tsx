@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { directus } from "@/lib/directus";
 import { useLogoutMutation } from "@/lib/query";
 
 export const useAuthenticated = (doRedirect = false) => {
-  const navigate = useNavigate();
   const logoutMutation = useLogoutMutation();
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const checkAuth = async () => {
     try {
@@ -18,6 +18,7 @@ export const useAuthenticated = (doRedirect = false) => {
       setIsAuthenticated(false);
       await logoutMutation.mutateAsync({
         next: location.pathname,
+        reason: searchParams.get("reason") ?? "",
         doRedirect,
       });
     }

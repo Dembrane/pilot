@@ -1,4 +1,4 @@
-import { toast } from "@/components/Toaster";
+import { toast } from "@/components/common/Toaster";
 import { API_BASE_URL, USE_PARTICIPANT_ROUTER } from "@/config";
 import axios, {
   AxiosError,

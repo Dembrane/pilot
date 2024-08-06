@@ -9,8 +9,7 @@ export const ProjectCard = ({
 }: PropsWithChildren<{
   project: Project;
 }>) => {
-  const { sessionId } = useParams();
-  const link = `/workspaces/${sessionId}/projects/${project.id}/overview`;
+  const link = `/projects/${project.id}/overview`;
 
   return (
     <Paper p="md" className="h-full">

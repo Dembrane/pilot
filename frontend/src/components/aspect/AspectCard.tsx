@@ -19,12 +19,12 @@ export const AspectCard = ({
   data: Aspect;
   className?: string;
 }) => {
-  const { projectId, sessionId } = useParams();
+  const { projectId } = useParams();
 
   return (
     <Box className="place-self-stretch">
       <Link
-        to={`/workspaces/${sessionId}/projects/${projectId}/library/views/${data.view_id}/aspects/${data.id}`}
+        to={`/projects/${projectId}/library/views/${data.view_id}/aspects/${data.id}`}
       >
         <Paper
           bg="white"

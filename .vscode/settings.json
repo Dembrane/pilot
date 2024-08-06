@@ -1,5 +1,6 @@
 {
   "mypy.runUsingActiveInterpreter": true,
+  "python.defaultInterpreterPath": "./server/.venv/bin/python",
   "mypy.targets": ["./server/dembrane"],
   "mypy.configFile": "./server/pyproject.toml",
   "[typescript]": {

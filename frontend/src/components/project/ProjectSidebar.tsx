@@ -1,5 +1,5 @@
 import { Icons } from "@/icons";
-import { useProjectById } from "@/lib/query";
+import { useProjectById, useUpdateProjectByIdMutation } from "@/lib/query";
 import { t } from "@lingui/macro";
 import {
   ActionIcon,
@@ -15,7 +15,7 @@ import { SidebarButton } from "../common/SidebarButton";
 import { Breadcrumbs } from "../common/Breadcrumbs";
 
 export const ProjectSidebar = () => {
-  const { projectId, sessionId } = useParams();
+  const { projectId } = useParams();
 
   const projectQuery = useProjectById({ projectId: projectId ?? "" });
 
@@ -31,30 +31,20 @@ export const ProjectSidebar = () => {
           items={[
             {
               label: <Icons.Home />,
-              // link: `/workspaces`,
-              link: `/workspaces/${sessionId}/projects`,
+              link: `/projects`,
             },
-            // {
-            //   label: (
-            //     <Title order={2} size="sm">
-            //       Projects
-            //     </Title>
-            //   ),
-            //   link: `/workspaces/${sessionId}/projects`,
-            // },
             {
               label: (
                 <Title order={2} size="sm">
                   {projectQuery.data?.name}
                 </Title>
               ),
-              // link: `/workspaces/${sessionId}/projects/${projectId}/overview`,
             },
           ]}
         />
 
         <Tooltip label={t`Project Overview`}>
-          <Link to={`/workspaces/${sessionId}/projects/${projectId}/overview`}>
+          <Link to={`/projects/${projectId}/overview`}>
             <ActionIcon
               component="a"
               variant="transparent"
@@ -66,16 +56,16 @@ export const ProjectSidebar = () => {
         </Tooltip>
       </Group>
 
-      <Link to={`/workspaces/${sessionId}/projects/${projectId}/library`}>
+      <Link to={`/projects/${projectId}/chat`}>
         <SidebarButton
           component="a"
           icon={<Icons.Stars className="fill-black" />}
         >
-          Analysis
+          Ask
         </SidebarButton>
       </Link>
 
-      <Link to={`/workspaces/${sessionId}/projects/${projectId}/library`}>
+      <Link to={`/projects/${projectId}/library`}>
         <SidebarButton component="a" icon={<Icons.LightBulb />}>
           Library
         </SidebarButton>

@@ -4,7 +4,6 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Trans, t } from "@lingui/macro";
 import {
   Accordion,
-  Box,
   Group,
   LoadingOverlay,
   Stack,
@@ -23,8 +22,7 @@ import { Link, useParams } from "react-router-dom";
 import { UploadResourceDropzone } from "../dropzone/UploadResourceDropzone";
 import { UploadConversationDropzone } from "../dropzone/UploadConversationDropzone";
 import clsx from "clsx";
-import { useDebouncedState, useDebouncedValue } from "@mantine/hooks";
-import { setQuarter } from "date-fns";
+import { useDebouncedValue } from "@mantine/hooks";
 import { IconSearch, IconX } from "@tabler/icons-react";
 
 // const ResourceAccordionLabelIcon = ({ resource }: { resource: TResource }) => {
@@ -165,7 +163,7 @@ export const ProjectAccordion = ({ projectId }: { projectId: string }) => {
   // const resourcesQuery = useResourcesByProjectId(projectId);
   const resources = [];
 
-  const { conversationId: activeConversationId, sessionId } = useParams();
+  const { conversationId: activeConversationId } = useParams();
 
   const [conversationSearch, setConversationSearch] = useState("");
   const [debouncedConversationSearchValue] = useDebouncedValue(
@@ -205,14 +203,19 @@ export const ProjectAccordion = ({ projectId }: { projectId: string }) => {
         },
         panel: {
           backgroundColor: "transparent",
-          padding: 0,
+          paddingLeft: "48px",
         },
       }}
     >
       <Accordion.Item value="resources">
         <Accordion.Control>
           <Group justify="space-between">
-            <Title order={3}>Resources</Title>
+            <Title order={3}>
+              <span className="font-normal text-gray-500 pr-2 min-w-[48px]">
+                {resources.length}
+              </span>
+              Resources
+            </Title>
             <Tooltip label={t`Upload resources`}>
               <div>
                 <UploadResourceDropzone projectId={projectId}>
@@ -266,6 +269,9 @@ export const ProjectAccordion = ({ projectId }: { projectId: string }) => {
         <Accordion.Control>
           <Group justify="space-between">
             <Title order={3}>
+              <span className="font-normal text-gray-500 pr-2 min-w-[48px]">
+                {conversationsQuery.data?.length ?? 0}
+              </span>
               <Trans>Conversations</Trans>
             </Title>
 
@@ -280,7 +286,7 @@ export const ProjectAccordion = ({ projectId }: { projectId: string }) => {
         </Accordion.Control>
 
         <Accordion.Panel>
-          <Stack ref={parent2} className="relative">
+          <Stack ref={parent2} className="relative" py="sm">
             <LoadingOverlay visible={conversationsQuery.isLoading} />
             {!(
               conversationsQuery.data &&
@@ -321,13 +327,11 @@ export const ProjectAccordion = ({ projectId }: { projectId: string }) => {
             />
 
             {conversationsQuery.data?.length === 0 && (
-              <Text size="sm" px="md" py="md">
+              <Text size="sm">
                 <Trans>
                   No conversations found. Start a conversation using the
                   participation invite link from the{" "}
-                  <Link
-                    to={`/workspaces/${sessionId}/projects/${projectId}/overview`}
-                  >
+                  <Link to={`/projects/${projectId}/overview`}>
                     <Anchor>project overview.</Anchor>
                   </Link>
                 </Trans>
@@ -337,7 +341,7 @@ export const ProjectAccordion = ({ projectId }: { projectId: string }) => {
             <Stack gap="xs">
               {conversationsQuery.data?.map((item) => (
                 <Link
-                  to={`/workspaces/${sessionId}/projects/${projectId}/conversation/${item.id}/overview`}
+                  to={`/projects/${projectId}/conversation/${item.id}/overview`}
                 >
                   <ConversationAccordionLabel
                     highlight={item.id === activeConversationId}

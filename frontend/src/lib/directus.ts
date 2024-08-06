@@ -30,3 +30,29 @@ export const wsDirectus = createDirectus<CustomDirectusTypes>(
 wsDirectus.connect().then(() => {
   console.log("Connected to realtime");
 });
+
+export const getDirectusErrorString = (error: any) => {
+  // {"errors":[{"message":"You don't have permission to access this.","extensions":{"code":"FORBIDDEN"}}],"response":{}}
+
+  if (error.errors && error.errors.length > 0) {
+    return error.errors[0].message;
+  }
+
+  if (error.response?.status === 401) {
+    return "You are not authenticated";
+  }
+
+  if (error.response?.status === 403) {
+    return "You don't have permission to access this.";
+  }
+
+  if (error.response?.status === 404) {
+    return "Resource not found";
+  }
+
+  if (error.response?.status === 500) {
+    return "Server error";
+  }
+
+  return "Something went wrong";
+};

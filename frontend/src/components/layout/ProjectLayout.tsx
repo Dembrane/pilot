@@ -1,6 +1,6 @@
 import { Box, Group, Paper } from "@mantine/core";
-import { Logo } from "../Logo";
-import { Toaster } from "../Toaster";
+import { Logo } from "../common/Logo";
+import { Toaster } from "../common/Toaster";
 import { PropsWithChildren } from "react";
 import { Outlet } from "react-router-dom";
 import { ProjectSidebar } from "../project/ProjectSidebar";

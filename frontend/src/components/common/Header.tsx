@@ -1,5 +1,5 @@
 import { Paper, Group, ActionIcon } from "@mantine/core";
-import { Logo } from "../Logo";
+import { Logo } from "./Logo";
 import { IconLogout } from "@tabler/icons-react";
 import { useLogoutMutation } from "@/lib/query";
 import { useAuthenticated } from "@/lib/useAuthenticated";

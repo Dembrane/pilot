@@ -34,12 +34,12 @@ const ConversationDangerZone = ({
 }) => {
   const deleteConversationByIdMutation = useDeleteConversationByIdMutation();
   const navigate = useNavigate();
-  const { projectId, sessionId } = useParams();
+  const { projectId } = useParams();
 
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this conversation?")) {
       deleteConversationByIdMutation.mutate(conversation.id);
-      navigate(`/workspaces/${sessionId}/projects/` + projectId + "/overview");
+      navigate(`/projects/` + projectId + "/overview");
     }
   };
 

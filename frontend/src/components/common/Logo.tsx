@@ -1,5 +1,5 @@
 import { Group, GroupProps, Title } from "@mantine/core";
-import logo from "../assets/dembrane-logo-hq.png";
+import logo from "@/assets/dembrane-logo-hq.png";
 
 type LogoProps = {
   hideTitle?: boolean;

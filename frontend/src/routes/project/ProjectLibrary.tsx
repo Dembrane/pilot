@@ -161,7 +161,7 @@ const CreateView = ({
 };
 
 export const ProjectLibrary = () => {
-  const { sessionId, projectId } = useParams();
+  const { projectId } = useParams();
 
   const viewsQuery = useProjectViews(projectId ?? "");
   const insightsQuery = useProjectInsights(projectId ?? "");
@@ -250,7 +250,7 @@ export const ProjectLibrary = () => {
           items={[
             {
               label: <Icons.Sidebar />,
-              link: `/workspaces/${sessionId}/projects/${projectId}/overview`,
+              link: `/projects/${projectId}/overview`,
             },
             {
               label: (

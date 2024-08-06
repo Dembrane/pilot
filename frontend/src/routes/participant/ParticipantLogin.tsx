@@ -1,4 +1,4 @@
-import { Logo } from "@/components/Logo";
+import { Logo } from "@/components/common/Logo";
 import {
   Alert,
   Anchor,
@@ -26,7 +26,7 @@ import { AxiosError } from "axios";
 import { Trans, t } from "@lingui/macro";
 import { useLanguage } from "@/lib/useLanguage";
 import { useDisclosure, useDocumentTitle } from "@mantine/hooks";
-import { Markdown } from "@/components/Markdown";
+import { Markdown } from "@/components/common/Markdown";
 import { PRIVACY_POLICY_URL } from "@/config";
 import { getParticipantProjectById } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";

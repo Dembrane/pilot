@@ -13,7 +13,7 @@ import { Link, useParams } from "react-router-dom";
 import { Quote } from "../../components/quote/Quote";
 
 export const ProjectLibraryInsight = () => {
-  const { projectId, insightId, sessionId } = useParams();
+  const { projectId, insightId } = useParams();
   const insightsQuery = useProjectInsights(projectId ?? "");
 
   if (insightsQuery.isLoading) {
@@ -49,7 +49,7 @@ export const ProjectLibraryInsight = () => {
   return (
     <Stack className="py-6 px-2">
       <Group align="baseline">
-        <Link to={`/workspaces/${sessionId}/projects/${projectId}/library`}>
+        <Link to={`/projects/${projectId}/library`}>
           <ActionIcon variant="light">
             <IconChevronLeft />
           </ActionIcon>

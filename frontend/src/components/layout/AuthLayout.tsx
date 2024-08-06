@@ -3,7 +3,7 @@ import { Footer } from "../common/Footer";
 import { Header } from "../common/Header";
 import { Outlet } from "react-router-dom";
 import { PropsWithChildren } from "react";
-import { Toaster } from "../Toaster";
+import { Toaster } from "../common/Toaster";
 
 export const AuthLayout = (props: PropsWithChildren) => {
   return (

@@ -14,7 +14,7 @@ import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 
 export const ProjectResourceLayout = () => {
   const navigate = useNavigate();
-  const { sessionId, resourceId, projectId } = useParams();
+  const { resourceId, projectId } = useParams();
   const resourceQuery = useResourceById(resourceId ?? "");
   const location = useLocation();
 
@@ -37,9 +37,7 @@ export const ProjectResourceLayout = () => {
   }, [location.pathname]);
 
   const handleTabChange = (value: string | null) => {
-    navigate(
-      `/workspaces/${sessionId}/projects/${projectId}/resources/${resourceId}/${value}`,
-    );
+    navigate(`/projects/${projectId}/resources/${resourceId}/${value}`);
     setActiveTab(value);
   };
 

@@ -27,12 +27,12 @@ import { apiCommonConfig } from "@/lib/api";
 const ResourceDangerZone = ({ resource }: { resource: TResource }) => {
   const deleteResourceByIdMutation = useDeleteResourceByIdMutation();
   const navigate = useNavigate();
-  const { projectId, sessionId } = useParams();
+  const { projectId } = useParams();
 
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this resource?")) {
       deleteResourceByIdMutation.mutate(resource.id);
-      navigate(`/workspaces/${sessionId}/projects/` + projectId + "/overview");
+      navigate(`/projects/` + projectId + "/overview");
     }
   };
 

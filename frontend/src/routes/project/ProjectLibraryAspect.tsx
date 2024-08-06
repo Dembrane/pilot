@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { useParams } from "react-router-dom";
 import { Quote } from "../../components/quote/Quote";
-import { Markdown } from "@/components/Markdown";
+import { Markdown } from "@/components/common/Markdown";
 import { useAspectById } from "@/lib/query";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 
@@ -27,7 +27,7 @@ const dedupeQuotes = (quotes: QuoteAspect[]): QuoteAspect[] => {
 };
 
 export const ProjectLibraryAspect = () => {
-  const { projectId, viewId, aspectId, sessionId } = useParams();
+  const { projectId, viewId, aspectId } = useParams();
 
   const { data: aspect, isLoading } = useAspectById(
     projectId ?? "",
@@ -40,15 +40,15 @@ export const ProjectLibraryAspect = () => {
         items={[
           {
             label: <Icons.Sidebar />,
-            link: `/workspaces/${sessionId}/projects/${projectId}/overview`,
+            link: `/projects/${projectId}/overview`,
           },
           {
             label: "Library",
-            link: `/workspaces/${sessionId}/projects/${projectId}/library`,
+            link: `/projects/${projectId}/library`,
           },
           {
             label: "View",
-            link: `/workspaces/${sessionId}/projects/${projectId}/library/views/${viewId}`,
+            link: `/projects/${projectId}/library/views/${viewId}`,
           },
           {
             label: "Aspect",

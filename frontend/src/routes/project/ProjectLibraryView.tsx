@@ -1,4 +1,4 @@
-import { Markdown } from "@/components/Markdown";
+import { Markdown } from "@/components/common/Markdown";
 import { AspectCard } from "@/components/aspect/AspectCard";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { Icons } from "@/icons";
@@ -18,7 +18,7 @@ import {
 import { Link, useParams } from "react-router-dom";
 
 export const ProjectLibraryView = () => {
-  const { projectId, viewId, sessionId } = useParams();
+  const { projectId, viewId } = useParams();
 
   const view = useViewById(projectId ?? "", viewId ?? "");
 
@@ -28,11 +28,11 @@ export const ProjectLibraryView = () => {
         items={[
           {
             label: <Icons.Sidebar />,
-            link: `/workspaces/${sessionId}/projects/${projectId}/overview`,
+            link: `/projects/${projectId}/overview`,
           },
           {
             label: "Library",
-            link: `/workspaces/${sessionId}/projects/${projectId}/library`,
+            link: `/projects/${projectId}/library`,
           },
           {
             label: "View",

@@ -76,18 +76,18 @@ class ProcessingStatusEnum(Enum):
     ERROR = "ERROR"
 
 
-class SessionModel(Base):
-    __tablename__ = "session"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    uuid: Mapped[str] = mapped_column(UUID(as_uuid=False), unique=False, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
-    projects: Mapped[List["ProjectModel"]] = relationship(
-        "ProjectModel", back_populates="session"
-    )
-    user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("directus_user.id"))
+# class SessionModel(Base):
+#     __tablename__ = "session"
+    # id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    # uuid: Mapped[str] = mapped_column(UUID(as_uuid=False), unique=False, nullable=False)
+    # created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # updated_at: Mapped[datetime] = mapped_column(
+    #     DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    # )
+    # projects: Mapped[List["ProjectModel"]] = relationship(
+    #     "ProjectModel", back_populates="session"
+    # )
+    # user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("directus_user.id"))
 
 class UserModel(Base):
     __tablename__ = "directus_user"
@@ -104,8 +104,11 @@ class ProjectModel(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    session_id: Mapped[int] = mapped_column(Integer, ForeignKey("session.id"))
-    session: Mapped["SessionModel"] = relationship("SessionModel", back_populates="projects")
+    # session_id: Mapped[int] = mapped_column(Integer, ForeignKey("session.id"))
+    # session: Mapped["SessionModel"] = relationship("SessionModel", back_populates="projects")
+
+    directus_user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("directus_user.id"))
+    directus_user: Mapped["UserModel"] = relationship("UserModel")
 
     pin: Mapped[str] = mapped_column(String, unique=True)
 
@@ -141,14 +144,14 @@ class ProjectModel(Base):
         cascade="all, delete-orphan",
     )
 
-    @staticmethod
-    def belongs_to_session(project_id: str, session_id: int) -> bool:
-        return (
-            db.query(ProjectModel)
-            .filter(ProjectModel.id == project_id, ProjectModel.session_id == session_id)
-            .first()
-            is not None
-        )
+    # @staticmethod
+    # def belongs_to_session(project_id: str, session_id: int) -> bool:
+    #     return (
+    #         db.query(ProjectModel)
+    #         .filter(ProjectModel.id == project_id, ProjectModel.session_id == session_id)
+    #         .first()
+    #         is not None
+    #     )
 
 
 class ProjectAnalysisRunModel(Base):

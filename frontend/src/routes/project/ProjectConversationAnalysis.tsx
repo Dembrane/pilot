@@ -5,7 +5,7 @@ import { Link, useParams } from "react-router-dom";
 import { Quote } from "../../components/quote/Quote";
 
 export const ProjectConversationAnalysis = () => {
-  const { conversationId, projectId, sessionId } = useParams();
+  const { conversationId, projectId } = useParams();
   const quotesQuery = useConversationQuotes(conversationId ?? "");
 
   return (
@@ -28,7 +28,7 @@ export const ProjectConversationAnalysis = () => {
       {quotesQuery.data && quotesQuery.data.length === 0 && (
         <Text>
           No quotes available. Generate quotes for this conversation by visiting{" "}
-          <Link to={`/workspaces/${sessionId}/projects/${projectId}/library`}>
+          <Link to={`/projects/${projectId}/library`}>
             <Anchor>the project library.</Anchor>
           </Link>
         </Text>

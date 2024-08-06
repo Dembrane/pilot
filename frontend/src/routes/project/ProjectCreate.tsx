@@ -13,7 +13,7 @@ import {
 } from "@mantine/core";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import EditableTextBox from "@/components/EditableTextBox";
+import EditableTextBox from "@/components/common/EditableTextBox";
 import { useDocumentTitle } from "@mantine/hooks";
 
 type FormValues = {
@@ -32,12 +32,9 @@ export const ProjectsCreateRoute = () => {
   useDocumentTitle("New Project | Dembrane");
   const createProjectMutation = useCreateProjectMutation();
 
-  const { sessionId } = useParams();
-
   const onSubmit = (data: FormValues) => {
     createProjectMutation.mutate({
       ...data,
-      session_id: Number(sessionId),
     });
   };
 
@@ -47,13 +44,13 @@ export const ProjectsCreateRoute = () => {
         <Group className="sticky top-0" justify="space-between">
           <Group>
             <Breadcrumbs>
-              <Link to={`/workspaces/${sessionId}/projects`}>
+              <Link to={`/projects`}>
                 <Icons.Home />
               </Link>
               <Title order={1}>
                 <EditableTextBox
-                  initialValue="New Event Title"
-                  onSave={(value) => setValue("name", value)}
+                  value="New Event Title"
+                  onChange={async (value) => setValue("name", value)}
                   disabled={createProjectMutation.isPending}
                 />
               </Title>
@@ -71,7 +68,7 @@ export const ProjectsCreateRoute = () => {
           <LoadingOverlay visible={createProjectMutation.isPending} />
           {createProjectMutation.data && (
             <Navigate
-              to={`/workspaces/${sessionId}/projects/${createProjectMutation.data.id}/overview`}
+              to={`/projects/${createProjectMutation.data.id}/overview`}
             />
           )}
           <Textarea

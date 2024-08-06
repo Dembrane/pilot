@@ -2,7 +2,7 @@ import { DIRECTUS_PUBLIC_URL } from "@/config";
 import { directus } from "@/lib/directus";
 import {
   useCreateProjectMutation,
-  useCreateSessionMutation,
+  // useCreateSessionMutation,
   useLoginMutation,
 } from "@/lib/query";
 import { readItems, readProviders } from "@directus/sdk";
@@ -17,11 +17,12 @@ import {
   Stack,
   TextInput,
   Title,
+  Box,
 } from "@mantine/core";
 import { useDocumentTitle } from "@mantine/hooks";
-import { IconBrandGoogle, IconLogin2 } from "@tabler/icons-react";
+import { IconBrandGoogle } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -39,8 +40,9 @@ const LoginWithProvider = ({
     <Button
       component="a"
       href={`${DIRECTUS_PUBLIC_URL}/auth/login/${provider}?redirect=${encodeURIComponent(
-        window.location.origin + "/workspaces",
+        window.location.origin + "/projects",
       )}`}
+      size="lg"
       c="gray"
       color="gray.6"
       variant="outline"
@@ -67,7 +69,6 @@ export const LoginRoute = () => {
   });
 
   const navigate = useNavigate();
-  const createSessionMutation = useCreateSessionMutation();
   const createProjectMutation = useCreateProjectMutation();
 
   const [error, setError] = useState("");
@@ -84,15 +85,13 @@ export const LoginRoute = () => {
       const isNewAccount =
         searchParams.get("new") === "true" && projectsCount.length === 0;
 
-      if (Boolean(isNewAccount)) {
+      if (isNewAccount) {
         toast("Setting up your first project");
         await loginMutation.mutateAsync([data.email, data.password]);
-        const session = await createSessionMutation.mutateAsync({});
         const project = await createProjectMutation.mutateAsync({
-          session_id: session.id,
           name: "New Project",
         });
-        navigate(`/workspaces/${session.id}/projects/${project.id}/overview`);
+        navigate(`/projects/${project.id}/overview`);
         return;
       }
 
@@ -100,7 +99,7 @@ export const LoginRoute = () => {
       if (!!next && next !== "/login") {
         window.location.href = next;
       } else {
-        window.location.href = "/workspaces";
+        window.location.href = "/projects";
       }
     } catch (error) {
       try {
@@ -113,6 +112,18 @@ export const LoginRoute = () => {
     }
   });
 
+  useEffect(() => {
+    if (searchParams.get("reason") === "INVALID_CREDENTIALS") {
+      setError("Invalid credentials.");
+    }
+
+    if (searchParams.get("reason") === "INVALID_PROVIDER") {
+      setError(
+        "You must login with the same provider you used to sign up. If you face any issues, please contact support.",
+      );
+    }
+  }, [searchParams]);
+
   return (
     <Container size="sm" className="!h-full">
       <Stack className="h-full">
@@ -120,7 +131,7 @@ export const LoginRoute = () => {
           <Title order={1}>Welcome!</Title>
 
           {(searchParams.get("new") === "true" ||
-            !!searchParams.get("redirect")) && (
+            !!searchParams.get("next")) && (
             <Text>Please login to continue.</Text>
           )}
 
@@ -162,21 +173,19 @@ export const LoginRoute = () => {
             </Button>
           </Link>
 
-          {providerQuery.data && providerQuery.data.length > 0 && (
-            <Divider variant="dashed" label="or" labelPosition="center" />
-          )}
+          <Box>
+            {providerQuery.data?.find(
+              (provider) => provider.name === "google",
+            ) && (
+              <LoginWithProvider
+                provider="google"
+                icon={<IconBrandGoogle />}
+                label="Sign in with Google"
+              />
+            )}
+          </Box>
 
-          {providerQuery.data?.find(
-            (provider) => provider.name === "google",
-          ) && (
-            <LoginWithProvider
-              provider="google"
-              icon={<IconBrandGoogle />}
-              label="Sign in with Google"
-            />
-          )}
-
-          {providerQuery.data?.find(
+          {/* {providerQuery.data?.find(
             (provider) => provider.name === "outseta",
           ) && (
             <LoginWithProvider
@@ -184,7 +193,7 @@ export const LoginRoute = () => {
               icon={<IconLogin2 />}
               label="Login"
             />
-          )}
+          )} */}
         </Stack>
       </Stack>
     </Container>

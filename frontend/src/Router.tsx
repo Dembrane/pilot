@@ -27,12 +27,13 @@ import { ProjectLibraryAspect } from "./routes/project/ProjectLibraryAspect";
 import { LoginRoute } from "./routes/auth/Login";
 import { RegisterRoute } from "./routes/auth/Register";
 import { Protected } from "./components/common/Protected";
-import { WorkspacesHomeRoute } from "./routes/workspaces/WorkspacesHome";
+// import { WorkspacesHomeRoute } from "./routes/workspaces/WorkspacesHome";
 import { AuthLayout } from "./components/layout/AuthLayout";
 import { CheckYourEmailRoute } from "./routes/auth/CheckYourEmail";
 import { VerifyEmailRoute } from "./routes/auth/VerifyEmail";
 import { PasswordResetRoute } from "./routes/auth/PasswordReset";
 import { RequestPasswordResetRoute } from "./routes/auth/RequestPasswordReset";
+import { Text } from "@mantine/core";
 
 export const mainRouter = createBrowserRouter([
   {
@@ -92,24 +93,28 @@ export const mainRouter = createBrowserRouter([
         ),
       },
 
+      // {
+      //   path: "workspaces",
+      //   element: (
+      //     <Protected>
+      //       <BaseLayout>
+      //         <WorkspacesHomeRoute />
+      //       </BaseLayout>
+      //     </Protected>
+      //   ),
+      // },
+
       {
-        path: "workspaces",
-        element: (
-          <Protected>
-            <BaseLayout>
-              <WorkspacesHomeRoute />
-            </BaseLayout>
-          </Protected>
-        ),
-      },
-      {
-        path: "workspaces/:sessionId/projects",
+        // path: "workspaces/:sessionId/projects",
+        path: "projects",
+
         // path: "projects",
         element: (
           <Protected>
             <BaseLayout />
           </Protected>
         ),
+
         children: [
           {
             index: true,
@@ -154,7 +159,9 @@ export const mainRouter = createBrowserRouter([
                   },
                   {
                     path: "chat",
-                    element: <></>,
+                    element: (
+                      <Text className="py-20">Dembrane Chat coming soon!</Text>
+                    ),
                   },
                   {
                     path: "resources/:resourceId",

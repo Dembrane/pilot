@@ -11,7 +11,7 @@ import {
 import { IconArrowsDiagonal } from "@tabler/icons-react";
 import { AspectCard } from "../aspect/AspectCard";
 import { Link, useParams } from "react-router-dom";
-import { Markdown } from "../Markdown";
+import { Markdown } from "../common/Markdown";
 
 export const ViewCard = ({ data }: { data: TView }) => {
   return (
@@ -33,7 +33,7 @@ export const ViewCard = ({ data }: { data: TView }) => {
 };
 
 export const ViewExpandedCard = ({ data }: { data: View }) => {
-  const { projectId, sessionId } = useParams();
+  const { projectId } = useParams();
 
   return (
     <Paper p="md">
@@ -44,9 +44,7 @@ export const ViewExpandedCard = ({ data }: { data: View }) => {
             <Text className="font-semibold">View</Text>
           </Group>
 
-          <Link
-            to={`/workspaces/${sessionId}/projects/${projectId}/library/views/${data.id}`}
-          >
+          <Link to={`/projects/${projectId}/library/views/${data.id}`}>
             <ActionIcon component="a" variant="transparent" c="gray">
               <IconArrowsDiagonal />
             </ActionIcon>

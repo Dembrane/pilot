@@ -21,7 +21,7 @@ import {
   deleteResourceById,
   api,
 } from "./api";
-import { toast } from "@/components/Toaster";
+import { toast } from "@/components/common/Toaster";
 import { directus } from "./directus";
 import {
   createItem,
@@ -62,34 +62,34 @@ function throwWithMessage(e: unknown): never {
   }
 }
 
-export const useAllSessions = ({
-  query,
-}: {
-  query?: Partial<Query<CustomDirectusTypes, Session>>;
-} = {}) => {
-  return useQuery({
-    queryKey: ["sessions"],
-    queryFn: () =>
-      directus.request<Session[]>(
-        readItems("session", {
-          fields: ["id", "created_at", "count(projects)", "uuid"],
-          ...query,
-        }),
-      ),
-  });
-};
+// export const useAllSessions = ({
+//   query,
+// }: {
+//   query?: Partial<Query<CustomDirectusTypes, Session>>;
+// } = {}) => {
+//   return useQuery({
+//     queryKey: ["sessions"],
+//     queryFn: () =>
+//       directus.request<Session[]>(
+//         readItems("session", {
+//           fields: ["id", "created_at", "count(projects)", "uuid"],
+//           ...query,
+//         }),
+//       ),
+//   });
+// };
 
-export const useCreateSessionMutation = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: Partial<Session>) =>
-      directus.request<Session>(createItem("session", payload)),
-    onSuccess: () => {
-      toast.success("Session created successfully");
-      queryClient.invalidateQueries({ queryKey: ["sessions"] });
-    },
-  });
-};
+// export const useCreateSessionMutation = () => {
+//   const queryClient = useQueryClient();
+//   return useMutation({
+//     mutationFn: (payload: Partial<Session>) =>
+//       directus.request<Session>(createItem("session", payload)),
+//     onSuccess: () => {
+//       toast.success("Session created successfully");
+//       queryClient.invalidateQueries({ queryKey: ["sessions"] });
+//     },
+//   });
+// };
 
 export const useProjects = ({
   query,
@@ -256,14 +256,22 @@ export const useLogoutMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ next: _ }: { next?: string; doRedirect: boolean }) => {
+    mutationFn: async ({
+      next: _,
+    }: {
+      next?: string;
+      reason?: string;
+      doRedirect: boolean;
+    }) => {
       await directus.logout();
     },
-    onMutate: async ({ next, doRedirect }) => {
+    onMutate: async ({ next, reason, doRedirect }) => {
       queryClient.resetQueries();
       if (doRedirect) {
         window.location.href =
-          "/login" + (next ? `?next=${encodeURIComponent(next)}` : "");
+          "/login" +
+          (next ? `?next=${encodeURIComponent(next)}` : "") +
+          (reason ? `&reason=${reason}` : "");
       }
     },
   });

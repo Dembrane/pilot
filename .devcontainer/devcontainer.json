@@ -15,15 +15,12 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        // frontend
         "esbenp.prettier-vscode",
         "YoavBls.pretty-ts-errors",
         "bradlc.vscode-tailwindcss",
-        // python
         "ms-python.python",
         "charliermarsh.ruff",
         "matangover.mypy",
-        // other tools
         "ms-azuretools.vscode-docker",
         "jebbs.plantuml",
         "EthanSK.restore-terminals",

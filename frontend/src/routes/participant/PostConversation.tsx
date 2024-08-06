@@ -1,5 +1,5 @@
-import { Logo } from "@/components/Logo";
-import { Markdown } from "@/components/Markdown";
+import { Logo } from "@/components/common/Logo";
+import { Markdown } from "@/components/common/Markdown";
 import { PARTICIPANT_BASE_URL } from "@/config";
 import { getParticipantProjectById } from "@/lib/api";
 import { useProjectById } from "@/lib/query";

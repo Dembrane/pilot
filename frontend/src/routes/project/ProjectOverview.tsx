@@ -17,6 +17,7 @@ import {
   Group,
   LoadingOverlay,
   NativeSelect,
+  Paper,
   SimpleGrid,
   Stack,
   Tabs,
@@ -32,13 +33,13 @@ import {
   IconDownload,
   IconShare,
 } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
-import QRCode from "react-qr-code";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import useSessionStorageState from "use-session-storage-state";
 import { ProjectDangerZone } from "./ProjectDangerZone";
 import { SummaryCard } from "@/components/common/SummaryCard";
 import { ProjectEdit } from "./ProjectEdit";
+import { QRCode } from "@/components/common/QRCode";
 import { useDocumentTitle } from "@mantine/hooks";
 
 export const ProjectOverviewRoute = () => {
@@ -46,10 +47,8 @@ export const ProjectOverviewRoute = () => {
   const projectQuery = useProjectById({
     projectId: projectId ?? "",
   });
-  // const resourcesQuery = useResourcesByProjectId(projectId ?? "");
   const conversationsQuery = useConversationsByProjectId(projectId ?? "");
   const updateProjectMutation = useUpdateProjectByIdMutation();
-  const requestProjectAnalysisMutation = useGenerateProjectLibraryMutation();
 
   const [language, setLanguage] = useSessionStorageState<string>(
     `settings/${projectId}/sharingLanguage`,
@@ -58,17 +57,18 @@ export const ProjectOverviewRoute = () => {
     },
   );
 
-  // TODO: Move this to server state
   const [isTranscriptionLive, setIsTranscriptionLive] =
     useSessionStorageState<boolean>(
-      `settings/${projectId}/isTranscriptionLive`,
+      `settings/${projectId}/isTranscriptionLiveDefault`,
       {
-        defaultValue: false,
+        defaultValue: true,
       },
     );
 
   const getTranscriptionType = (isTranscriptionLive: boolean) =>
-    isTranscriptionLive ? "live" : "async";
+    // isTranscriptionLive ? "live" : "async";
+    // FIXME: until the issue with async transcription is resolved
+    isTranscriptionLive ? "live" : "live";
 
   const [sharingLink, setSharingLink] = useState(
     `${PARTICIPANT_BASE_URL}/${language}/${projectId}/login?pin=${projectQuery.data?.pin}&transcription=${getTranscriptionType(isTranscriptionLive)}`,
@@ -104,46 +104,6 @@ export const ProjectOverviewRoute = () => {
 
   const summaryItems = [
     {
-      loading: projectQuery.isLoading,
-      icon: (
-        <Icons.Signal
-          fill={projectQuery.data?.is_conversation_allowed ? "green" : "gray"}
-        />
-      ),
-      label: "Open for Participation?",
-      value: projectQuery.data?.is_conversation_allowed ? "Yes" : "No",
-    },
-    {
-      loading: false,
-      // loading: resourcesQuery.isLoading,
-      icon: <Icons.DocumentOutline />,
-      label: "Resources",
-      // value: `${resourcesQuery.data?.length ?? 0}`,
-      value: "0",
-    },
-    {
-      laoding: conversationsQuery.isLoading,
-      icon: <Icons.Phone />,
-      label: "Total Conversations",
-      value: `${conversationsQuery.data?.length ?? 0}`,
-    },
-    {
-      loading: conversationsQuery.isLoading,
-      icon: <Icons.Phone fill="green" />,
-      label: "Total Conversations with Content",
-      value: `${
-        conversationsQuery.data?.filter(
-          (conversation) =>
-            conversation.chunks &&
-            conversation.chunks.length > 0 &&
-            conversation.chunks[0].transcript != null,
-        ).length ?? 0
-      }`,
-    },
-    /**
-     * Active conversations = currently receiving data (last chunk.timestamp within 5 mins)
-     */
-    {
       loading: conversationsQuery.isLoading,
       icon: <Icons.Phone fill="green" />,
       label: "Ongoing Conversations",
@@ -173,9 +133,49 @@ export const ProjectOverviewRoute = () => {
       <SimpleGrid
         cols={{
           sm: 1,
-          md: 3,
+          md: 2,
         }}
       >
+        <Paper p="md">
+          {projectQuery.data && projectQuery.data.is_conversation_allowed ? (
+            <Group>
+              <Box className="h-auto max-w-32 w-full p-2 bg-white rounded-lg">
+                <QRCode value={sharingLink} />
+              </Box>
+              <Stack gap="sm">
+                <Text>Share</Text>
+                <CopyButton value={sharingLink} timeout={2000}>
+                  {({ copied, copy }) => (
+                    <Tooltip
+                      label={copied ? "Copied" : "Copy"}
+                      withArrow
+                      position="right"
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        c="gray"
+                        color="gray"
+                        onClick={copy}
+                        rightSection={
+                          copied ? (
+                            <IconCheck style={{ width: rem(16) }} />
+                          ) : (
+                            <IconCopy style={{ width: rem(16) }} />
+                          )
+                        }
+                      >
+                        {copied ? "Copied" : "Copy link"}
+                      </Button>
+                    </Tooltip>
+                  )}
+                </CopyButton>
+              </Stack>
+            </Group>
+          ) : (
+            <Text size="sm">Please enable participation to enable sharing</Text>
+          )}
+        </Paper>
         {summaryItems.map((item, index) => (
           <SummaryCard key={index} {...item} />
         ))}
@@ -211,19 +211,27 @@ export const ProjectOverviewRoute = () => {
             </Box>
             <Box>
               <Checkbox
-                checked={isTranscriptionLive}
-                disabled={
-                  projectQuery.data?.is_conversation_allowed ||
-                  updateProjectMutation.isPending ||
-                  projectQuery.isFetching
+                checked={
+                  // FIXME: until the issue with async transcription is resolved
+                  true
+                  // isTranscriptionLive
                 }
-                onChange={() => setIsTranscriptionLive(!isTranscriptionLive)}
+                disabled={
+                  // FIXME: until the issue with async transcription is resolved
+                  true
+                  // projectQuery.data?.is_conversation_allowed ||
+                  // updateProjectMutation.isPending ||
+                  // projectQuery.isFetching
+                }
+                // onChange={() => setIsTranscriptionLive(!isTranscriptionLive)}
                 label="Live Transcription"
                 description={
-                  (projectQuery.data?.is_conversation_allowed
-                    ? 'Please uncheck the "Open for Participation" to modify this setting as the sharing link will be updated. '
-                    : "") +
-                  "Select this option for immediate live transcription. If you prefer higher quality transcription, leave this option unchecked."
+                  // FIXME: until the issue with async transcription is resolved
+                  "This option is currently disabled. Select this option for immediate live transcription. If you prefer higher quality transcription, leave this option unchecked."
+                  // (projectQuery.data?.is_conversation_allowed
+                  //   ? 'Please uncheck the "Open for Participation" to modify this setting as the sharing link will be updated. '
+                  //   : "") +
+                  // "Select this option for immediate live transcription. If you prefer higher quality transcription, leave this option unchecked."
                 }
               />
             </Box>
@@ -323,7 +331,7 @@ export const ProjectOverviewRoute = () => {
                 <Box>
                   <Text size="md">QR Code</Text>
                   <Box className="h-auto max-w-32 w-full">
-                    <QRCode value={sharingLink} className="h-full w-full" />
+                    <QRCode value={sharingLink} />
                   </Box>
                 </Box>
                 <Divider />
@@ -342,7 +350,7 @@ export const ProjectOverviewRoute = () => {
               </>
             ) : (
               <Text size="sm">
-                Please enable participation to generate a sharing link
+                Please enable participation to enable sharing
               </Text>
             )}
           </Stack>

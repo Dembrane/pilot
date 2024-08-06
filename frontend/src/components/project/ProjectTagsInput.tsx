@@ -7,12 +7,10 @@ import {
   Box,
   Button,
   Group,
-  InputLabel,
   LoadingOverlay,
   Pill,
   Skeleton,
   Stack,
-  TagsInput,
   Text,
   TextInput,
   Title,
@@ -64,7 +62,7 @@ export const ProjectTagsInput = (props: { projectId: string }) => {
       <Box>
         <Title order={4}>Tags</Title>
         <Group gap="sm">
-          {projectQuery.data?.tags?.length === 0 && (
+          {(projectQuery.data?.tags?.length ?? 0) === 0 && (
             <Text size="sm">
               No tags have been added to this project yet. Add a tag using the
               text input below to get started.
@@ -75,9 +73,9 @@ export const ProjectTagsInput = (props: { projectId: string }) => {
           ))}
         </Group>
       </Box>
-      <form>
+      <form onSubmit={handleSubmit}>
         {createTagMutation.isError && (
-          <Text color="red" size="sm">
+          <Text c="red" size="sm">
             {createTagMutation.error.message}
           </Text>
         )}
@@ -91,7 +89,6 @@ export const ProjectTagsInput = (props: { projectId: string }) => {
           <Button
             type="submit"
             variant="outline"
-            onClick={handleSubmit}
             disabled={createTagMutation.isPending || !tagInput.trim()}
           >
             Add Tag

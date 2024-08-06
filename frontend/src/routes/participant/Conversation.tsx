@@ -1,6 +1,6 @@
 import WelcomeImage from "@/assets/participant-welcome-pattern.png";
-import { Logo } from "@/components/Logo";
-import { Markdown } from "@/components/Markdown";
+import { Logo } from "@/components/common/Logo";
+import { Markdown } from "@/components/common/Markdown";
 import {
   useUploadConversationChunk,
   useUploadConversationTextChunk,
@@ -58,7 +58,7 @@ import {
 const preferredMimeTypes = ["audio/webm", "audio/wav", "video/mp4"];
 
 const getSupportedMimeType = () => {
-  for (let mimeType of preferredMimeTypes) {
+  for (const mimeType of preferredMimeTypes) {
     if (MediaRecorder.isTypeSupported(mimeType)) {
       return mimeType;
     }
@@ -164,7 +164,7 @@ const useChunkedAudioRecorder = ({
     setRecordingTime((prev) => prev + 1);
   }, []);
 
-  let chunkBufferRef = useRef<Blob[]>([]);
+  const chunkBufferRef = useRef<Blob[]>([]);
 
   const startRecordingChunk = useCallback(() => {
     log("startRecordingChunk", {
@@ -387,7 +387,7 @@ const useAudioRecorder = ({
     setRecordingTime((prev) => prev + 1);
   }, []);
 
-  let chunkBufferRef = useRef<Blob[]>([]);
+  const chunkBufferRef = useRef<Blob[]>([]);
 
   const startRecordingChunk = useCallback(() => {
     log("startRecordingChunk", {

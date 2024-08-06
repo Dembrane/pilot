@@ -24,7 +24,6 @@ from dembrane.schemas import (
 from dembrane.api.auth import DependencyDirectusSession
 from dembrane.database import (
     ProjectModel,
-    SessionModel,
     ResourceModel,
     ConversationModel,
     ProcessingStatusEnum,
@@ -66,7 +65,6 @@ PROJECT_ALLOWED_LANGUAGES = ["en", "nl", "multi"]
 
 
 class CreateProjectRequestSchema(BaseModel):
-    session_id: int
     name: Optional[str] = None
     context: Optional[str] = None
     language: Optional[str] = None
@@ -92,15 +90,9 @@ async def create_project(
     # pin generation
     pin = generate_4_digit_pin()
 
-    session = db.get(SessionModel, body.session_id)
-
-    assert session is not None
-    if not auth.is_admin and session.user_id != auth.user_id:
-        raise HTTPException(status_code=403, detail="User does not have access to this session")
-
     project = ProjectModel(
         id=generate_uuid(),
-        session_id=body.session_id,
+        directus_user_id=auth.user_id,
         pin=pin,
         name=name,
         context=context,
@@ -181,12 +173,7 @@ async def get_project_transcripts(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    session = db.get(SessionModel, project.session_id)
-
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
-
-    if not auth.is_admin and session.user_id != auth.user_id:
+    if not auth.is_admin and project.directus_user_id != auth.user_id:
         raise HTTPException(status_code=403, detail="User does not have access to this project")
 
     conversations = (
@@ -469,7 +456,7 @@ async def post_create_project_library(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    if not auth.is_admin and project.session.user_id != auth.user_id:
+    if not auth.is_admin and project.directus_user_id != auth.user_id:
         raise HTTPException(status_code=403, detail="User does not have access to this project")
 
     analysis_run = get_latest_project_analysis_run(db, project.id)
@@ -512,7 +499,7 @@ async def post_create_view(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    if not auth.is_admin and project.session.user_id != auth.user_id:
+    if not auth.is_admin and project.directus_user_id != auth.user_id:
         raise HTTPException(status_code=403, detail="User does not have access to this project")
 
     result = task_create_view.si(

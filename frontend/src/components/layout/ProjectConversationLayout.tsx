@@ -1,7 +1,7 @@
 import { useConversationById } from "@/lib/query";
 import { Stack, Title } from "@mantine/core";
 import { useParams } from "react-router-dom";
-import { TabsWithRouter } from "../common/TabsWithRouter";
+import { TabsWithRouter } from "./TabsWithRouter";
 
 export const ProjectConversationLayout = () => {
   const { conversationId } = useParams();
@@ -19,7 +19,7 @@ export const ProjectConversationLayout = () => {
         {conversationQuery.data?.participant_name ?? "Conversation"}
       </Title>
       <TabsWithRouter
-        basePath="/workspaces/:sessionId/projects/:projectId/conversation/:conversationId"
+        basePath="/projects/:projectId/conversation/:conversationId"
         tabs={[
           { value: "overview", label: "Overview" },
           { value: "transcript", label: "Transcript" },

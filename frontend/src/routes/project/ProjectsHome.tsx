@@ -1,21 +1,15 @@
 import { ProjectCard } from "@/components/project/ProjectCard";
 import { ProjectListItem } from "@/components/project/ProjectListItem";
 import { Icons } from "@/icons";
-import { directus } from "@/lib/directus";
+import { getDirectusErrorString } from "@/lib/directus";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import {
-  useCurrentUser,
-  useProjects,
-  useUploadConversationChunk,
-} from "@/lib/query";
-import { readItems, readUser } from "@directus/sdk";
+import { useProjects } from "@/lib/query";
 import {
   Text,
   Box,
   Button,
   Container,
   Group,
-  LoadingOverlay,
   Stack,
   Title,
   Alert,
@@ -25,28 +19,23 @@ import {
   TextInput,
 } from "@mantine/core";
 import {
-  useDebouncedState,
   useDebouncedValue,
   useDocumentTitle,
   useSessionStorage,
 } from "@mantine/hooks";
 import {
-  IconCross,
-  IconGrid3x3,
   IconInfoCircle,
   IconLayoutGrid,
   IconLayoutList,
   IconSearch,
   IconX,
 } from "@tabler/icons-react";
-import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 
 export const ProjectsHomeRoute = () => {
   useDocumentTitle("Projects | Dembrane");
-  const { sessionId } = useParams();
 
   const [gridParent] = useAutoAnimate();
   const [listParent] = useAutoAnimate();
@@ -59,11 +48,6 @@ export const ProjectsHomeRoute = () => {
     query: {
       fields: ["count(conversations)", "*"],
       sort: "-updated_at",
-      filter: {
-        session_id: {
-          _eq: Number(sessionId ?? -1),
-        },
-      },
       search: debouncedSearchValue,
     },
   });
@@ -80,14 +64,18 @@ export const ProjectsHomeRoute = () => {
           <Group align="center">
             <Breadcrumbs
               items={[
-                { label: <Icons.Home />, link: "/workspaces" },
                 {
-                  label: <Title order={1}>Workspace Home</Title>,
+                  label: (
+                    <Group>
+                      <Icons.Home />
+                      <Title order={1}>Home</Title>
+                    </Group>
+                  ),
                 },
               ]}
             />
           </Group>
-          <Link to={`/workspaces/${sessionId}/projects/create`}>
+          <Link to={`/projects/create`}>
             <Button
               component="a"
               size="md"
@@ -178,6 +166,12 @@ export const ProjectsHomeRoute = () => {
               No projects found for search term <i>{debouncedSearchValue}</i>
             </Text>
           )}
+
+        {projectsQuery.isError && (
+          <Alert color="red" title="Error">
+            {getDirectusErrorString(projectsQuery.error)}
+          </Alert>
+        )}
 
         <Box className="relative">
           {view === "grid" && (

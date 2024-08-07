@@ -6,6 +6,12 @@ Use Directus schema migrations to manage the database schema.
 1. Save Snapshot: `npx directus schema snapshot --yes ./snapshot.yaml`
 1. Update in `./directus/Dockerfile` to use the new snapshot.
 
+1. To apply the changes, run the following command:
+
+```
+npx directus schema apply ./snapshot.yaml
+```
+
 ---
 
 Outdated (using alembic for migrations)

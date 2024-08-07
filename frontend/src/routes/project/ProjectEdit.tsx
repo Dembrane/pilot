@@ -131,7 +131,7 @@ export const ProjectEdit = ({ project }: { project: Project }) => {
             </Text>
           </Box>
 
-          <ProjectTagsInput projectId={project.id} />
+          <ProjectTagsInput project={project} />
 
           <TextInput
             label="Title"

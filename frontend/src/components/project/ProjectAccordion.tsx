@@ -341,6 +341,7 @@ export const ProjectAccordion = ({ projectId }: { projectId: string }) => {
             <Stack gap="xs">
               {conversationsQuery.data?.map((item) => (
                 <Link
+                  key={item.id}
                   to={`/projects/${projectId}/conversation/${item.id}/overview`}
                 >
                   <ConversationAccordionLabel

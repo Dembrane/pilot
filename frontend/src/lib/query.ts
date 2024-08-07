@@ -62,35 +62,6 @@ function throwWithMessage(e: unknown): never {
   }
 }
 
-// export const useAllSessions = ({
-//   query,
-// }: {
-//   query?: Partial<Query<CustomDirectusTypes, Session>>;
-// } = {}) => {
-//   return useQuery({
-//     queryKey: ["sessions"],
-//     queryFn: () =>
-//       directus.request<Session[]>(
-//         readItems("session", {
-//           fields: ["id", "created_at", "count(projects)", "uuid"],
-//           ...query,
-//         }),
-//       ),
-//   });
-// };
-
-// export const useCreateSessionMutation = () => {
-//   const queryClient = useQueryClient();
-//   return useMutation({
-//     mutationFn: (payload: Partial<Session>) =>
-//       directus.request<Session>(createItem("session", payload)),
-//     onSuccess: () => {
-//       toast.success("Session created successfully");
-//       queryClient.invalidateQueries({ queryKey: ["sessions"] });
-//     },
-//   });
-// };
-
 export const useProjects = ({
   query,
 }: {
@@ -894,13 +865,54 @@ export const useDeleteTagByIdMutation = () => {
 export const useCreateProjectTagMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: Partial<ProjectTag>) =>
-      directus.request(createItem("project_tag", payload)),
+    mutationFn: (payload: {
+      project_id: {
+        id: string;
+        directus_user_id: string;
+      };
+      text: string;
+    }) => directus.request(createItem("project_tag", payload as any)),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["projects", variables.project_id],
+        queryKey: ["projects", variables.project_id.id],
       });
       toast.success("Tag created successfully");
+    },
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches
+      // (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({
+        queryKey: ["projects", variables.project_id.id],
+      });
+
+      // Snapshot the previous value
+      const previousTags = queryClient.getQueryData([
+        "projects",
+        variables.project_id.id,
+      ]);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(
+        ["projects", variables.project_id.id],
+        (oldData: Project | undefined) => {
+          return oldData
+            ? {
+                ...oldData,
+                tags: [
+                  ...(oldData.tags ?? []),
+                  {
+                    id: "optimistic-" + Date.now(),
+                    text: variables.text,
+                    created_at: new Date().toISOString(),
+                  },
+                ],
+              }
+            : oldData;
+        },
+      );
+
+      // Return a context object with the snapshotted value
+      return { previousTags };
     },
   });
 };

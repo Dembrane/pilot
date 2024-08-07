@@ -33,16 +33,18 @@ export const ProjectTagPill = ({ tag }: { tag: ProjectTag }) => {
   );
 };
 
-export const ProjectTagsInput = (props: { projectId: string }) => {
-  const projectQuery = useProjectById({ projectId: props.projectId });
+export const ProjectTagsInput = (props: { project: Project }) => {
+  const projectQuery = useProjectById({ projectId: props.project.id });
   const createTagMutation = useCreateProjectTagMutation();
 
   const [tagInput, setTagInput] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     createTagMutation.mutate({
-      project_id: props.projectId,
+      project_id: {
+        id: props.project.id,
+        directus_user_id: props.project.directus_user_id,
+      },
       text: tagInput,
     });
     setTagInput("");
@@ -73,7 +75,7 @@ export const ProjectTagsInput = (props: { projectId: string }) => {
           ))}
         </Group>
       </Box>
-      <form onSubmit={handleSubmit}>
+      <Box>
         {createTagMutation.isError && (
           <Text c="red" size="sm">
             {createTagMutation.error.message}
@@ -84,17 +86,22 @@ export const ProjectTagsInput = (props: { projectId: string }) => {
             label="Add Tag"
             description="Participants will be able to select tags when creating conversations"
             value={tagInput}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
             onChange={(e) => setTagInput(e.currentTarget.value)}
           />
           <Button
-            type="submit"
+            onClick={handleSubmit}
             variant="outline"
             disabled={createTagMutation.isPending || !tagInput.trim()}
           >
             Add Tag
           </Button>
         </Group>
-      </form>
+      </Box>
     </Stack>
   );
 };

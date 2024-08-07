@@ -488,7 +488,7 @@ type Project = {
   session_id: number;
   tags: null | any[] | ProjectTag[];
   updated_at: string;
-  directus_user: string;
+  directus_user_id: string;
 };
 
 type ProjectAnalysisRun = {

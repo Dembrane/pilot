@@ -10,7 +10,7 @@ import {
   Skeleton,
 } from "@mantine/core";
 import { useParams } from "react-router-dom";
-import { Quote } from "../../components/quote/Quote";
+import { Quote } from "../../../components/quote/Quote";
 import { Markdown } from "@/components/common/Markdown";
 import { useAspectById } from "@/lib/query";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";

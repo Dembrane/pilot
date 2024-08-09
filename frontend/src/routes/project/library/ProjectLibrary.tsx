@@ -160,7 +160,7 @@ const CreateView = ({
   );
 };
 
-export const ProjectLibrary = () => {
+export const ProjectLibraryRoute = () => {
   const { projectId } = useParams();
 
   const viewsQuery = useProjectViews(projectId ?? "");

@@ -25,6 +25,7 @@ from dembrane.api.exceptions import (
     NoContentFoundException,
     ConversationNotFoundException,
 )
+from dembrane.quote_utils import count_tokens
 
 logger = getLogger("api.conversation")
 ConversationRouter = APIRouter(tags=["conversation"])
@@ -67,7 +68,9 @@ async def get_conversation(
 
 
 @ConversationRouter.get("/{conversation_id}/chunks", response_model=List[ConversationChunkSchema])
-async def get_conversation_chunks(conversation_id: str, db: DependencyInjectDatabase) -> List[ConversationChunkModel]:
+async def get_conversation_chunks(
+    conversation_id: str, db: DependencyInjectDatabase
+) -> List[ConversationChunkModel]:
     conversation = await get_conversation(conversation_id, db, load_chunks=False)
 
     chunks = (
@@ -82,7 +85,9 @@ async def get_conversation_chunks(conversation_id: str, db: DependencyInjectData
     return chunks
 
 
-async def stream_audio(file_paths: List[str], start: int = 0, end: Optional[int] = None) -> AsyncGenerator[bytes, None]:
+async def stream_audio(
+    file_paths: List[str], start: int = 0, end: Optional[int] = None
+) -> AsyncGenerator[bytes, None]:
     current_position = 0
 
     for file_path in file_paths:
@@ -230,6 +235,45 @@ async def get_conversation_chunk_content(
 #     return conversation
 
 
+# @FnRouter.post("/count-tokens")
+# async def post_count_tokens(body: CountTokensBodySchema, db: DependencyInjectDatabase) -> int:
+#     if body.model == "openai":
+#         if body.text is not None:
+#             return count_tokens(body.text)
+
+#         if body.conversation_id is not None:
+#             conversation = db.get(ConversationModel, body.conversation_id)
+
+#             if not conversation:
+#                 raise HTTPException(status_code=404, detail="Conversation not found")
+
+#             return count_tokens(conversation.transcript)
+
+#     else:
+#         raise HTTPException(status_code=400, detail="Model not supported")
+
+
+@ConversationRouter.get("/{conversation_id}/transcript")
+async def get_conversation_transcript(conversation_id: str, db: DependencyInjectDatabase) -> str:
+    conversation_chunks = await get_conversation_chunks(conversation_id, db)
+    transcript = []
+
+    for chunk in conversation_chunks:
+        if chunk.transcript:
+            transcript.append(chunk.transcript)
+
+    return "\n".join(transcript)
+
+
+@ConversationRouter.get("/{conversation_id}/token-count")
+async def get_conversation_token_count(
+    conversation_id: str,
+    db: DependencyInjectDatabase,
+) -> int:
+    transcript = await get_conversation_transcript(conversation_id, db)
+    return count_tokens(transcript)
+
+
 class UploadConversationBodySchema(BaseModel):
     timestamp: datetime
     content: str
@@ -257,7 +301,9 @@ async def upload_conversation_text(
     return chunk
 
 
-@ConversationRouter.post("/{conversation_id}/upload-chunk", response_model=List[ConversationChunkSchema])
+@ConversationRouter.post(
+    "/{conversation_id}/upload-chunk", response_model=List[ConversationChunkSchema]
+)
 async def upload_conversation_chunk(
     conversation_id: str,
     chunk: UploadFile,

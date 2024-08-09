@@ -19,7 +19,7 @@ export const Insight = ({
     <Link to={`/projects/${projectId}/library/insights/${data.id}`}>
       <Paper
         component="a"
-        className="p-4 h-full place-content-start text-left hover:-translate-y-1 hover:border-opacity-70 border-2 border-opacity-0 border-primary-300 transition-all"
+        className="h-full place-content-start border-2 border-primary-300 border-opacity-0 p-4 text-left transition-all hover:border-opacity-70"
       >
         <Stack className="h-full">
           <Text size="md" className="font-semibold">

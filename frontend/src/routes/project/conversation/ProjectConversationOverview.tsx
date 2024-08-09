@@ -185,15 +185,22 @@ export const ProjectConversationOverviewRoute = () => {
   });
   const conversationChunksQuery = useConversationChunks(conversationId ?? "");
 
-  console.log("tags", conversationQuery.data?.tags);
-
   return (
     <Stack className="relative">
       <LoadingOverlay visible={conversationQuery.isLoading} />
       {conversationChunksQuery.data &&
         conversationChunksQuery.data?.length > 0 && (
           <Stack>
-            <Group>
+            {conversationQuery.data?.summary && (
+              <>
+                <Title order={2}>Summary</Title>
+
+                <Text>{conversationQuery.data?.summary}</Text>
+                <Divider />
+              </>
+            )}
+
+            <Group align="center">
               <Title order={2}>Audio Recording</Title>
               <Tooltip label="Download audio">
                 <a
@@ -246,25 +253,29 @@ export const ProjectConversationOverviewRoute = () => {
         </Text>
       </Box>
       {conversationQuery.data?.tags &&
-        conversationQuery.data.tags.length > 0 && (
+        conversationQuery.data.tags.filter(
+          (t) => !!(t.project_tag_id as ProjectTag)?.text,
+        ).length > 0 && (
           <Box>
             <Text size="md">Tags</Text>
             <Group gap="sm" pr="sm">
               {conversationQuery.data?.tags &&
                 conversationQuery.data?.tags.length > 0 &&
-                conversationQuery.data?.tags.map((tag) => (
-                  <Pill key={tag.id} size="sm">
-                    {(tag.project_tag_id as ProjectTag).text}
-                  </Pill>
-                ))}
+                conversationQuery.data?.tags.map((tag) =>
+                  (tag.project_tag_id as ProjectTag)?.text ? (
+                    <Pill key={tag.id} size="sm">
+                      {(tag.project_tag_id as ProjectTag)?.text}
+                    </Pill>
+                  ) : null,
+                )}
             </Group>
           </Box>
         )}
       <Divider />
       {conversationQuery.data && (
         <>
-          <ConversationEdit conversation={conversationQuery.data} />
-          <Divider />
+          {/* <ConversationEdit conversation={conversationQuery.data} />
+          <Divider /> */}
           <ConversationDangerZone conversation={conversationQuery.data} />
         </>
       )}

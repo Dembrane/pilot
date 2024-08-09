@@ -212,6 +212,46 @@ export const getProjectInsights = async (projectId: string) => {
   );
 };
 
+export const getQuotesByConversationId = async (conversationId: string) => {
+  const conversation = await directus.request<Conversation>(
+    readItem("conversation", conversationId, {
+      fields: ["project_id"],
+    }),
+  );
+
+  if (!conversation) {
+    return [];
+  }
+
+  const project_analysis_run = await getLatestProjectAnalysisRunByProjectId(
+    conversation.project_id,
+  );
+
+  if (!project_analysis_run) {
+    return [];
+  }
+
+  const data = await directus.request<Quote[]>(
+    readItems("quote", {
+      fields: [
+        "*",
+        {
+          conversation_id: ["id", "participant_name"],
+        },
+      ],
+      sort: "order",
+      filter: {
+        conversation_id: {
+          _eq: conversationId,
+        },
+        project_analysis_run_id: project_analysis_run?.id,
+      },
+    }),
+  );
+
+  return data;
+};
+
 export const getProjectTranscriptsLink = (projectId: string) =>
   `${apiCommonConfig.baseURL}/projects/${projectId}/transcripts`;
 
@@ -230,34 +270,6 @@ export const initiateConversation = async (payload: {
       pin: payload.pin,
       tag_id_list: payload.tagIdList,
       user_agent: navigator.userAgent ?? undefined,
-    },
-  );
-};
-
-export const getConversationById = async (
-  conversationId: string,
-  loadChunks?: boolean,
-) => {
-  return apiNoAuth.get<unknown, TConversation>(
-    `/conversations/${conversationId}`,
-    {
-      params: {
-        load_chunks: loadChunks,
-      },
-    },
-  );
-};
-
-export const getConversationsByProjectId = async (
-  projectId: string,
-  load_chunks?: boolean,
-) => {
-  return api.get<unknown, TConversation[]>(
-    `/projects/${projectId}/conversations`,
-    {
-      params: {
-        load_chunks,
-      },
     },
   );
 };
@@ -398,5 +410,19 @@ export const generateProjectView = async (payload: {
       query: payload.query,
       additional_context: payload.additionalContext,
     },
+  );
+};
+
+export const getConversationTranscriptString = async (
+  conversationId: string,
+) => {
+  return api.get<unknown, string>(
+    `/conversations/${conversationId}/transcript`,
+  );
+};
+
+export const getConversationTokenCount = async (conversationId: string) => {
+  return api.get<unknown, number>(
+    `/conversations/${conversationId}/token-count`,
   );
 };

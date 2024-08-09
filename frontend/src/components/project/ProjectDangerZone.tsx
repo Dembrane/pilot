@@ -1,7 +1,7 @@
 import { useDeleteProjectByIdMutation } from "@/lib/query";
 import { Stack, Title, Box, Button } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export const ProjectDangerZone = ({ project }: { project: Project }) => {
   const deleteProjectByIdMutation = useDeleteProjectByIdMutation();

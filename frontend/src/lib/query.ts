@@ -20,6 +20,9 @@ import {
   updateResourceById,
   deleteResourceById,
   api,
+  getConversationTranscriptString,
+  getConversationTokenCount,
+  getQuotesByConversationId,
 } from "./api";
 import { toast } from "@/components/common/Toaster";
 import { directus } from "./directus";
@@ -276,6 +279,28 @@ export const useProjectInsights = (projectId: string) => {
   });
 };
 
+export const useInsight = (insightId: string) => {
+  return useQuery({
+    queryKey: ["insights", insightId],
+    queryFn: () =>
+      directus.request<Insight>(
+        readItem("insight", insightId, {
+          fields: [
+            "*",
+            {
+              quotes: [
+                "*",
+                {
+                  conversation_id: ["id", "participant_name", "created_at"],
+                },
+              ],
+            },
+          ],
+        }),
+      ),
+  });
+};
+
 export const useProjectViews = (projectId: string) => {
   return useQuery({
     queryKey: ["projects", projectId, "views"],
@@ -487,17 +512,7 @@ export const useConversationById = ({
 export const useConversationQuotes = (conversationId: string) => {
   return useQuery({
     queryKey: ["conversations", conversationId, "quotes"],
-    queryFn: () =>
-      directus.request(
-        readItems("quote", {
-          fields: ["*", { conversation_id: ["id", "participant_name"] }],
-          filter: {
-            conversation_id: {
-              _eq: conversationId,
-            },
-          },
-        }),
-      ),
+    queryFn: () => getQuotesByConversationId(conversationId),
   });
 };
 
@@ -878,42 +893,6 @@ export const useCreateProjectTagMutation = () => {
       });
       toast.success("Tag created successfully");
     },
-    onMutate: async (variables) => {
-      // Cancel any outgoing refetches
-      // (so they don't overwrite our optimistic update)
-      await queryClient.cancelQueries({
-        queryKey: ["projects", variables.project_id.id],
-      });
-
-      // Snapshot the previous value
-      const previousTags = queryClient.getQueryData([
-        "projects",
-        variables.project_id.id,
-      ]);
-
-      // Optimistically update to the new value
-      queryClient.setQueryData(
-        ["projects", variables.project_id.id],
-        (oldData: Project | undefined) => {
-          return oldData
-            ? {
-                ...oldData,
-                tags: [
-                  ...(oldData.tags ?? []),
-                  {
-                    id: "optimistic-" + Date.now(),
-                    text: variables.text,
-                    created_at: new Date().toISOString(),
-                  },
-                ],
-              }
-            : oldData;
-        },
-      );
-
-      // Return a context object with the snapshotted value
-      return { previousTags };
-    },
   });
 };
 
@@ -950,3 +929,37 @@ export const useCurrentUser = () =>
     queryKey: ["users", "me"],
     queryFn: () => directus.request(readUser("me")),
   });
+
+export const useConversationTranscriptString = (conversationId: string) => {
+  return useQuery({
+    queryKey: ["conversations", conversationId, "transcript"],
+    queryFn: () => getConversationTranscriptString(conversationId),
+  });
+};
+
+export const useConversationTokenCount = (conversationId: string) => {
+  return useQuery({
+    queryKey: ["conversations", conversationId, "token_count"],
+    queryFn: () => getConversationTokenCount(conversationId),
+  });
+};
+
+export const useInsightsByConversationId = (conversationId: string) => {
+  return useQuery({
+    queryKey: ["conversations", conversationId, "insights"],
+    queryFn: () =>
+      directus.request(
+        readItems("insight", {
+          filter: {
+            quotes: {
+              _some: {
+                conversation_id: {
+                  _eq: conversationId,
+                },
+              },
+            },
+          },
+        }),
+      ),
+  });
+};

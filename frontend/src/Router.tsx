@@ -5,8 +5,8 @@ import { ProjectsCreateRoute } from "./routes/project/ProjectCreate";
 import { ProjectOverviewRoute } from "./routes/project/ProjectOverview";
 import { ProjectLayout } from "./components/layout/ProjectLayout";
 import { ProjectResourceLayout } from "./components/layout/ProjectResourceLayout";
-import { ProjectResourceOverviewRoute } from "./routes/project/ProjectResourceOverview";
-import { ProjectResourceAnalysisRoute } from "./routes/project/ProjectResourceAnalysis";
+import { ProjectResourceOverviewRoute } from "./routes/project/resource/ProjectResourceOverview";
+import { ProjectResourceAnalysisRoute } from "./routes/project/resource/ProjectResourceAnalysis";
 import { LanguageLayout } from "./components/layout/LanguageLayout";
 import { ParticipantLoginRoute } from "./routes/participant/ParticipantLogin";
 import {
@@ -14,16 +14,16 @@ import {
   ParticipantConversationTextRoute,
 } from "./routes/participant/Conversation";
 import { ProjectConversationLayout } from "./components/layout/ProjectConversationLayout";
-import { ProjectConversationOverviewRoute } from "./routes/project/ProjectConversationOverview";
-import { ProjectConversationTranscript } from "./routes/project/ProjectConversationTranscript";
-import { ProjectConversationAnalysis } from "./routes/project/ProjectConversationAnalysis";
+import { ProjectConversationOverviewRoute } from "./routes/project/conversation/ProjectConversationOverview";
+import { ProjectConversationTranscript } from "./routes/project/conversation/ProjectConversationTranscript";
+import { ProjectConversationAnalysis } from "./routes/project/conversation/ProjectConversationAnalysis";
 import { NotFoundRoute } from "./routes/404";
-import { ProjectLibrary } from "./routes/project/ProjectLibrary";
-import { ProjectLibraryInsight } from "./routes/project/ProjectLibraryInsight";
+import { ProjectLibraryRoute } from "./routes/project/library/ProjectLibrary";
+import { ProjectLibraryInsight } from "./routes/project/library/ProjectLibraryInsight";
 import { ParticipantPostConversation } from "./routes/participant/PostConversation";
 import { ProjectLibraryLayout } from "./components/layout/ProjectLibraryLayout";
-import { ProjectLibraryView } from "./routes/project/ProjectLibraryView";
-import { ProjectLibraryAspect } from "./routes/project/ProjectLibraryAspect";
+import { ProjectLibraryView } from "./routes/project/library/ProjectLibraryView";
+import { ProjectLibraryAspect } from "./routes/project/library/ProjectLibraryAspect";
 import { LoginRoute } from "./routes/auth/Login";
 import { RegisterRoute } from "./routes/auth/Register";
 import { Protected } from "./components/common/Protected";
@@ -34,6 +34,7 @@ import { VerifyEmailRoute } from "./routes/auth/VerifyEmail";
 import { PasswordResetRoute } from "./routes/auth/PasswordReset";
 import { RequestPasswordResetRoute } from "./routes/auth/RequestPasswordReset";
 import { Text } from "@mantine/core";
+import { ProjectChatRoute } from "./routes/project/chat/ProjectChat";
 
 export const mainRouter = createBrowserRouter([
   {
@@ -145,7 +146,7 @@ export const mainRouter = createBrowserRouter([
                   },
                   {
                     index: true,
-                    element: <ProjectLibrary />,
+                    element: <ProjectLibraryRoute />,
                   },
                 ],
               },
@@ -159,9 +160,7 @@ export const mainRouter = createBrowserRouter([
                   },
                   {
                     path: "chat",
-                    element: (
-                      <Text className="py-20">Dembrane Chat coming soon!</Text>
-                    ),
+                    element: <ProjectChatRoute />,
                   },
                   {
                     path: "resources/:resourceId",

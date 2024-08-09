@@ -1,12 +1,15 @@
 FROM node:18-alpine AS builder
 
-RUN npm install -g --force yarn
+RUN npm install -g --force pnpm
 
 WORKDIR /code
 
 COPY package.json yarn.lock ./
 
-RUN yarn install --frozen-lockfile --network-timeout 60000
+RUN echo "fetch-timeout=60000" >> .npmrc
+# https://github.com/pnpm/pnpm/issues/5803#issuecomment-1974820613
+RUN pnpm config set store-dir /home/node/.local/share/pnpm/store
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
@@ -24,7 +27,7 @@ ENV VITE_PARTICIPANT_BASE_URL=$VITE_PARTICIPANT_BASE_URL
 ENV VITE_DIRECTUS_PUBLIC_URL=$VITE_DIRECTUS_PUBLIC_URL
 ENV VITE_USE_PARTICIPANT_ROUTER=$VITE_USE_PARTICIPANT_ROUTER
 
-RUN yarn build
+RUN pnpm run build
 
 FROM node:18-alpine
 

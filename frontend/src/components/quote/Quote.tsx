@@ -11,7 +11,7 @@ export const Quote = ({ data }: { data: Quote }) => {
       </Text>
       {data.conversation_id && (
         <Link
-          to={`/projects/${projectId}/conversation/${(data.conversation_id as unknown as Conversation).id}/transcript`}
+          to={`/projects/${projectId}/conversation/${(data.conversation_id as unknown as Conversation).id}/analysis`}
         >
           <Pill>
             {((data as any).conversation_id as Conversation).participant_name ??

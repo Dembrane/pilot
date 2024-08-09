@@ -58,6 +58,7 @@ type Conversation = {
   chunks?: ConversationChunk[];
   title?: string | null;
   updated_at: string;
+  summary?: string;
 };
 
 type ConversationChunk = {
@@ -526,6 +527,7 @@ type Quote = {
   project_analysis_run_id?: string | ProjectAnalysisRun | null;
   representative_aspects: any[] | QuoteAspect1[];
   text: string;
+  order?: number | null;
   timestamp?: string | null;
   updated_at: string;
 };

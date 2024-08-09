@@ -17,13 +17,16 @@ import {
   TextInput,
   ActionIcon,
 } from "@mantine/core";
-import { PropsWithChildren, useState } from "react";
+import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { UploadResourceDropzone } from "../dropzone/UploadResourceDropzone";
 import { UploadConversationDropzone } from "../dropzone/UploadConversationDropzone";
 import clsx from "clsx";
 import { useDebouncedValue } from "@mantine/hooks";
-import { IconSearch, IconX } from "@tabler/icons-react";
+import { IconChevronRight, IconSearch, IconX } from "@tabler/icons-react";
+import { formatRelative } from "date-fns";
+import { InlineInputClasses } from "node_modules/@mantine/core/lib/components/InlineInput";
+import { NavigationButton } from "../common/NavigationButton";
 
 // const ResourceAccordionLabelIcon = ({ resource }: { resource: TResource }) => {
 //   if (resource.is_processed) {
@@ -125,35 +128,34 @@ import { IconSearch, IconX } from "@tabler/icons-react";
 const ConversationAccordionLabel = ({
   conversation,
   highlight = false,
-}: PropsWithChildren<{ conversation: Conversation; highlight?: boolean }>) => {
+}: {
+  conversation: Conversation;
+  highlight?: boolean;
+}) => {
   return (
-    <Paper
-      p="sm"
-      className={clsx(
-        highlight ? "!border-primary-400" : "hover:!border-primary-400",
-      )}
-      bg="transparent"
-    >
-      <Group
-        wrap="nowrap"
-        align="center"
-        justify="between"
-        className="w-full pb-1"
-      >
-        <Title order={4} className="font-normal text-sm">
+    <NavigationButton active={highlight} className="w-full">
+      <Stack gap="1">
+        <Text className="text-sm font-normal">
           {conversation.participant_email ?? conversation.participant_name}
-        </Title>
-      </Group>
-      <Group gap="sm" pr="sm">
-        {conversation.tags &&
-          conversation.tags.length > 0 &&
-          conversation.tags.map((tag) => (
-            <Pill key={tag.id} size="sm">
-              {(tag?.project_tag_id as unknown as ProjectTag).text}
-            </Pill>
-          ))}
-      </Group>
-    </Paper>
+        </Text>
+        <Text size="xs" c="gray.6">
+          {formatRelative(new Date(conversation.created_at), new Date())}
+        </Text>
+        <Group gap="sm" pr="sm" wrap="wrap">
+          {conversation.tags &&
+            conversation.tags.length > 0 &&
+            conversation.tags.map((tag) => (
+              <React.Fragment key={tag.id}>
+                {tag.project_tag_id && (
+                  <Pill size="sm">
+                    {(tag?.project_tag_id as unknown as ProjectTag)?.text}
+                  </Pill>
+                )}
+              </React.Fragment>
+            ))}
+        </Group>
+      </Stack>
+    </NavigationButton>
   );
 };
 
@@ -184,34 +186,12 @@ export const ProjectAccordion = ({ projectId }: { projectId: string }) => {
   const [parent2] = useAutoAnimate();
 
   return (
-    <Accordion
-      chevronPosition="left"
-      variant="filled"
-      multiple
-      defaultValue={["resources", "conversations"]}
-      styles={{
-        control: {
-          backgroundColor: "transparent",
-          padding: 0,
-        },
-        content: {
-          padding: 0,
-        },
-        item: {
-          backgroundColor: "transparent",
-          padding: 0,
-        },
-        panel: {
-          backgroundColor: "transparent",
-          paddingLeft: "48px",
-        },
-      }}
-    >
+    <Accordion multiple defaultValue={["resources", "conversations"]}>
       <Accordion.Item value="resources">
         <Accordion.Control>
           <Group justify="space-between">
             <Title order={3}>
-              <span className="font-normal text-gray-500 pr-2 min-w-[48px]">
+              <span className="min-w-[48px] pr-2 font-normal text-gray-500">
                 {resources.length}
               </span>
               Resources
@@ -231,7 +211,7 @@ export const ProjectAccordion = ({ projectId }: { projectId: string }) => {
             <div ref={parent} className="relative">
               {/* <LoadingOverlay visible={resourcesQuery.isLoading} /> */}
               {resources?.length === 0 && (
-                <Text size="sm" px="md">
+                <Text size="sm">
                   <Trans>
                     No resources found.
                     {/* Add resources using the button above. */}
@@ -269,7 +249,7 @@ export const ProjectAccordion = ({ projectId }: { projectId: string }) => {
         <Accordion.Control>
           <Group justify="space-between">
             <Title order={3}>
-              <span className="font-normal text-gray-500 pr-2 min-w-[48px]">
+              <span className="min-w-[48px] pr-2 font-normal text-gray-500">
                 {conversationsQuery.data?.length ?? 0}
               </span>
               <Trans>Conversations</Trans>
@@ -286,8 +266,7 @@ export const ProjectAccordion = ({ projectId }: { projectId: string }) => {
         </Accordion.Control>
 
         <Accordion.Panel>
-          <Stack ref={parent2} className="relative" py="sm">
-            <LoadingOverlay visible={conversationsQuery.isLoading} />
+          <Stack ref={parent2} className="relative">
             {!(
               conversationsQuery.data &&
               conversationsQuery.data.length === 0 &&
@@ -298,7 +277,7 @@ export const ProjectAccordion = ({ projectId }: { projectId: string }) => {
                 rightSection={
                   !!conversationSearch && (
                     <ActionIcon
-                      disabled={conversationsQuery.isRefetching}
+                      disabled={conversationsQuery.isLoading}
                       variant="transparent"
                       onClick={() => {
                         setConversationSearch("");
@@ -318,7 +297,7 @@ export const ProjectAccordion = ({ projectId }: { projectId: string }) => {
 
             <Checkbox
               size="sm"
-              disabled={conversationsQuery.isRefetching}
+              disabled={conversationsQuery.isLoading}
               label={`Hide Conversations Without Content`}
               checked={hideConversationsWithoutContent}
               onChange={() =>
@@ -338,7 +317,8 @@ export const ProjectAccordion = ({ projectId }: { projectId: string }) => {
               </Text>
             )}
 
-            <Stack gap="xs">
+            <Stack gap="xs" className="relative">
+              <LoadingOverlay visible={conversationsQuery.isLoading} />
               {conversationsQuery.data?.map((item) => (
                 <Link
                   key={item.id}

@@ -17,6 +17,8 @@ from langchain_experimental.text_splitter import SemanticChunker
 from dembrane.ner import anonymize_sentence
 from dembrane.utils import generate_uuid, get_utc_timestamp, download_image_and_get_public_url
 from dembrane.database import (
+    ConversationModel,
+    ProjectAnalysisRunModel,
     ViewModel,
     QuoteModel,
     AspectModel,
@@ -146,6 +148,7 @@ def generate_quotes(
 
     quote_strs = []
     buffer: List[str] = []
+    timestamp = 0
 
     # forward pass
     for sentence in split_conversation_transcript:
@@ -157,13 +160,18 @@ def generate_quotes(
         current_quote = " ".join(buffer).strip()
         if len(current_quote.split()) > MERGE_SENTENCE_UPPER_WORD_LIMIT:
             if len(current_quote.split()) > LONG_SENTENCE_LIMIT:
-                quote_strs.extend(llm_split_text(current_quote))
+                split_quotes = llm_split_text(current_quote)
+                for split_quote in split_quotes:
+                    quote_strs.append((split_quote, timestamp))
+                    timestamp += 1
             else:
-                quote_strs.append(current_quote)
+                quote_strs.append((current_quote, timestamp))
+                timestamp += 1
             buffer = []
 
     if buffer:
-        quote_strs.append(" ".join(buffer).strip())
+        quote_strs.append((" ".join(buffer).strip(), timestamp))
+        timestamp += 1
 
     # backward pass
     final_quotes = []
@@ -172,12 +180,12 @@ def generate_quotes(
     while i >= 0:
         if (
             i > 0
-            and len(quote_strs[i].split()) + len(quote_strs[i - 1].split())
+            and len(quote_strs[i][0].split()) + len(quote_strs[i - 1][0].split())
             <= BACKWARD_MERGE_UPPER_WORD_LIMIT
         ):
-            merged_quote = quote_strs[i - 1] + " " + quote_strs[i]
+            merged_quote = quote_strs[i - 1][0] + " " + quote_strs[i][0]
             if len(merged_quote.split()) <= LONG_SENTENCE_LIMIT:
-                final_quotes.append(merged_quote)
+                final_quotes.append((merged_quote, quote_strs[i - 1][1]))
                 i -= 2
             else:
                 final_quotes.append(quote_strs[i])
@@ -190,14 +198,10 @@ def generate_quotes(
 
     quotes = []
 
-    for quote_str in final_quotes:
+    for quote_str, quote_timestamp in final_quotes:
         try:
             closest_chunk_id = None
 
-            # substring check
-            # sometimes quote will be a substring of the chunk
-            # sometimes a quote may be span over multiple chunks
-            # FIXME
             for chunk_id, chunk_text in chunk_id_text.items():
                 if quote_str in chunk_text:
                     closest_chunk_id = chunk_id
@@ -215,19 +219,19 @@ def generate_quotes(
                 conversation_id=conversation_id,
                 text=quote_str,
                 embedding=embed_text(quote_str),
+                timestamp=closest_chunk.timestamp if closest_chunk else None,
+                order=quote_timestamp,
             )
 
-            db.add(quote)
-            db.commit()
-
-            # if closest_chunk:
-            #     quote.conversation_chunks.append(closest_chunk)
+            quotes.append(quote)
 
         except Exception as e:
-            logger.error(f"Error embedding text {quote_str}: {str(e)}")
+            logger.error(f"Error creating quote for text {quote_str}: {str(e)}")
             continue
 
-        quotes.append(quote)
+    # Bulk insert all quotes at once
+    db.bulk_save_objects(quotes)
+    db.commit()
 
     return quotes
 
@@ -986,6 +990,47 @@ def generate_insight_extras(db: Session, insight_id: str) -> None:
     return
 
 
+def generate_conversation_summary(db: Session, conversation_id: str) -> None:
+    conversation = db.query(ConversationModel).filter_by(id=conversation_id).first()
+
+    if not conversation:
+        logger.error(f"Conversation with ID {conversation_id} not found")
+        return
+
+    quotes = (
+        db.query(QuoteModel)
+        .filter_by(conversation_id=conversation_id)
+        .order_by(QuoteModel.timestamp)
+        .all()
+    )
+
+    if not quotes:
+        logger.error(f"No quotes found for conversation {conversation_id}")
+        return
+
+    quote_text_joined = "\n".join([f'"{quote.text}"' for quote in quotes])
+
+    messages = [
+        {
+            "role": "user",
+            "content": f'Generate a text using the given quotes. The text should be a summary of the conversation. Do not enclose your response in quotes or other special characters. Only output text. Keep the output within 3-4 short and easy to read sentences. Do not use filler words like "Overall", "In conclusion". The text should be easy to skim through. \n\nQuotes:\n"""\n{quote_text_joined}\n"""\n\nText:',
+        }
+    ]
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,  # type: ignore
+    )
+
+    summary = response.choices[0].message.content
+
+    conversation.summary = summary
+
+    db.commit()
+
+    return
+
+
 def initialize_insights(db: Session, project_analysis_run_id: str) -> List[str]:
     """Generate insights"""
 
@@ -1049,18 +1094,22 @@ if __name__ == "__main__":
 
     db = next(get_db())
 
-    project_id = "a817a3d5-4ec7-4dfb-8ed2-159268ceab92"
+    project_id = "f98d4ef2-1bc9-40f1-b360-3d784e2b22a0"
 
-    analysis_id = "460ef51a-c698-4c0a-bd24-824785b2f982"
+    # analysis_id = "460ef51a-c698-4c0a-bd24-824785b2f982"
 
-    # project_analysis_run = ProjectAnalysisRunModel(id=generate_uuid(), project_id=project_id, processing_status="DONE")
+    project_analysis_run = ProjectAnalysisRunModel(
+        id=generate_uuid(), project_id=project_id, processing_status="DONE"
+    )
 
-    # db.add(project_analysis_run)
-    # db.commit()
+    db.add(project_analysis_run)
+    db.commit()
 
-    # logger.debug(f"project_analysis_run_id: {project_analysis_run.id}")
+    logger.debug(f"project_analysis_run_id: {project_analysis_run.id}")
 
-    # analysis_id = project_analysis_run.id
+    analysis_id = project_analysis_run.id
+
+    generate_quotes(db, project_analysis_run.id, "a615ced7-fce1-4434-a88e-5041f30c2a15")
 
     # conversations = db.query(ConversationModel).filter(ConversationModel.project_id == project_id).all()
 
@@ -1069,9 +1118,9 @@ if __name__ == "__main__":
     #     quotes = generate_quotes(db, project_analysis_run.id, conversation.id)
     #     logger.debug(f"quotes generated: {len(quotes)}")
 
-    generate_aspect_image(db, "d9d4eb70-2965-4f68-911f-de7606ed0cf7")
+    # generate_aspect_image(db, "d9d4eb70-2965-4f68-911f-de7606ed0cf7")
 
-    logger.debug("quotes are generated")
+    # logger.debug("quotes are generated")
 
     # view = generate_view(db, analysis_id, "Make a plan to restructure the TUE Governance", "Make it a detailed plan")
     # assign_aspect_centroids_and_cluster_quotes(db, analysis_id, view.id)

@@ -78,20 +78,22 @@ class ProcessingStatusEnum(Enum):
 
 # class SessionModel(Base):
 #     __tablename__ = "session"
-    # id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    # uuid: Mapped[str] = mapped_column(UUID(as_uuid=False), unique=False, nullable=False)
-    # created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    # updated_at: Mapped[datetime] = mapped_column(
-    #     DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    # )
-    # projects: Mapped[List["ProjectModel"]] = relationship(
-    #     "ProjectModel", back_populates="session"
-    # )
-    # user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("directus_user.id"))
+# id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+# uuid: Mapped[str] = mapped_column(UUID(as_uuid=False), unique=False, nullable=False)
+# created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+# updated_at: Mapped[datetime] = mapped_column(
+#     DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+# )
+# projects: Mapped[List["ProjectModel"]] = relationship(
+#     "ProjectModel", back_populates="session"
+# )
+# user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("directus_user.id"))
+
 
 class UserModel(Base):
     __tablename__ = "directus_user"
-    id: Mapped[str]= mapped_column(UUID(as_uuid=False), primary_key=True)
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True)
+
 
 class ProjectModel(Base):
     __tablename__ = "project"
@@ -107,7 +109,9 @@ class ProjectModel(Base):
     # session_id: Mapped[int] = mapped_column(Integer, ForeignKey("session.id"))
     # session: Mapped["SessionModel"] = relationship("SessionModel", back_populates="projects")
 
-    directus_user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("directus_user.id"))
+    directus_user_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("directus_user.id")
+    )
     directus_user: Mapped["UserModel"] = relationship("UserModel")
 
     pin: Mapped[str] = mapped_column(String, unique=True)
@@ -267,6 +271,8 @@ class ConversationModel(Base):
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     context: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
     processing_status: Mapped[ProcessingStatusEnum] = mapped_column(String, default="PENDING")
     processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     processing_started_at: Mapped[Optional[datetime]] = mapped_column(
@@ -353,6 +359,9 @@ class QuoteModel(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+    order: Mapped[int] = mapped_column(Integer, nullable=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
     text: Mapped[str] = mapped_column(Text)
     embedding: Mapped[List[float]] = mapped_column(Vector(EMBEDDING_DIM))
@@ -449,6 +458,7 @@ class AspectModel(Base):
     )
 
     centroid_embedding: Mapped[List[float]] = mapped_column(Vector(EMBEDDING_DIM), nullable=True)
+
 
 ## Depracated
 class InsightModel(Base):

@@ -9,13 +9,14 @@ import {
   Title,
   Tooltip,
 } from "@mantine/core";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { ProjectAccordion } from "./ProjectAccordion";
-import { SidebarButton } from "../common/SidebarButton";
+import { NavigationButton } from "../common/NavigationButton";
 import { Breadcrumbs } from "../common/Breadcrumbs";
 
 export const ProjectSidebar = () => {
   const { projectId } = useParams();
+  const location = useLocation();
 
   const projectQuery = useProjectById({ projectId: projectId ?? "" });
 
@@ -24,7 +25,7 @@ export const ProjectSidebar = () => {
   }
 
   return (
-    <Stack className="h-full py-6 px-2">
+    <Stack className="border-r-none lg:border-b-none h-full border-b px-4 py-6 lg:border-r">
       <LoadingOverlay visible={projectQuery.isLoading} />
       <Group justify="space-between">
         <Breadcrumbs
@@ -57,18 +58,19 @@ export const ProjectSidebar = () => {
       </Group>
 
       <Link to={`/projects/${projectId}/chat`}>
-        <SidebarButton
+        <NavigationButton
           component="a"
-          icon={<Icons.Stars className="fill-black" />}
+          rightSection={<Icons.Stars className="fill-black" />}
+          active={location.pathname.includes("chat")}
         >
           Ask
-        </SidebarButton>
+        </NavigationButton>
       </Link>
 
       <Link to={`/projects/${projectId}/library`}>
-        <SidebarButton component="a" icon={<Icons.LightBulb />}>
+        <NavigationButton component="a" rightSection={<Icons.LightBulb />}>
           Library
-        </SidebarButton>
+        </NavigationButton>
       </Link>
 
       <ProjectAccordion projectId={projectId} />

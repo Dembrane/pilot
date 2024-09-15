@@ -70,7 +70,7 @@ services:
       CORS_CREDENTIALS: true
       SESSION_COOKIE_DOMAIN: ${DIRECTUS_SESSION_COOKIE_DOMAIN}
       SESSION_COOKIE_SAME_SITE: lax
-      SESSION_COOKIE_SECURE: true
+      SESSION_COOKIE_SECURE: lax
       EMAIL_TRANSPORT: smtp
       EMAIL_FROM: ${SMTP_FROM:-DoNotReply@c1f65324-81a8-41de-abe3-2c1cbf52ba1a.azurecomm.net}
       EMAIL_SMTP_HOST: ${SMTP_HOST:-smtp.azurecomm.net}

@@ -5,7 +5,7 @@ export const Quote = ({ data }: { data: Quote }) => {
   const { projectId } = useParams();
 
   return (
-    <Paper p="sm">
+    <Paper p="sm" withBorder>
       <Text size="sm" pb="xs">
         "{data.text}"
       </Text>

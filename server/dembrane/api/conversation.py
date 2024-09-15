@@ -9,7 +9,7 @@ from sqlalchemy.orm import noload, selectinload
 from fastapi.responses import StreamingResponse
 
 from dembrane.tasks import task_process_conversation_chunk
-from dembrane.utils import generate_uuid
+from dembrane.utils import CacheWithExpiration, generate_uuid
 from dembrane.config import AUDIO_CHUNKS_DIR
 from dembrane.schemas import (
     ConversationSchema,
@@ -21,11 +21,11 @@ from dembrane.database import (
     DependencyInjectDatabase,
 )
 from dembrane.audio_utils import get_mime_type_from_file_path
+from dembrane.quote_utils import count_tokens
 from dembrane.api.exceptions import (
     NoContentFoundException,
     ConversationNotFoundException,
 )
-from dembrane.quote_utils import count_tokens
 
 logger = getLogger("api.conversation")
 ConversationRouter = APIRouter(tags=["conversation"])
@@ -48,7 +48,6 @@ async def get_conversation(
             .first()
         )
     else:
-        logger.info(f"Loading conversation without chunks: {conversation_id}")
         conversation = (
             db.query(ConversationModel)
             .options(
@@ -200,59 +199,6 @@ async def get_conversation_chunk_content(
     return StreamingResponse(stream_audio(file_paths), media_type=mime_type)
 
 
-# class PutConversationRequestBodySchema(BaseModel):
-#     title: Optional[str]
-#     description: Optional[str]
-#     context: Optional[str]
-
-
-# @ConversationRouter.put("/{conversation_id}", response_model=ConversationSchema)
-# async def update_conversation(
-#     conversation_id: str,
-#     body: PutConversationRequestBodySchema,
-#     _session: DependencyRequireSession,
-#     db: DependencyInjectDatabase,
-# ) -> ConversationModel:
-#     conversation = await get_conversation(conversation_id, db, load_chunks=False)
-
-#     conversation.title = body.title
-#     conversation.description = body.description
-#     conversation.context = body.context
-
-#     db.commit()
-#     return conversation
-
-
-# @ConversationRouter.delete("/{conversation_id}", response_model=ConversationSchema)
-# async def delete_conversation(
-#     conversation_id: str,
-#     _session: DependencyRequireSession,
-#     db: DependencyInjectDatabase,
-# ) -> ConversationModel:
-#     conversation = await get_conversation(conversation_id, db, load_chunks=False)
-#     db.delete(conversation)
-#     db.commit()
-#     return conversation
-
-
-# @FnRouter.post("/count-tokens")
-# async def post_count_tokens(body: CountTokensBodySchema, db: DependencyInjectDatabase) -> int:
-#     if body.model == "openai":
-#         if body.text is not None:
-#             return count_tokens(body.text)
-
-#         if body.conversation_id is not None:
-#             conversation = db.get(ConversationModel, body.conversation_id)
-
-#             if not conversation:
-#                 raise HTTPException(status_code=404, detail="Conversation not found")
-
-#             return count_tokens(conversation.transcript)
-
-#     else:
-#         raise HTTPException(status_code=400, detail="Model not supported")
-
-
 @ConversationRouter.get("/{conversation_id}/transcript")
 async def get_conversation_transcript(conversation_id: str, db: DependencyInjectDatabase) -> str:
     conversation_chunks = await get_conversation_chunks(conversation_id, db)
@@ -265,13 +211,28 @@ async def get_conversation_transcript(conversation_id: str, db: DependencyInject
     return "\n".join(transcript)
 
 
+# Initialize the cache
+token_count_cache = CacheWithExpiration(ttl=500)
+
+
 @ConversationRouter.get("/{conversation_id}/token-count")
 async def get_conversation_token_count(
     conversation_id: str,
     db: DependencyInjectDatabase,
 ) -> int:
+    # Try to get the token count from the cache
+    cached_count = await token_count_cache.get(conversation_id)
+    if cached_count is not None:
+        return cached_count
+
+    # If not in cache, calculate the token count
     transcript = await get_conversation_transcript(conversation_id, db)
-    return count_tokens(transcript)
+    token_count = count_tokens(transcript)
+
+    # Store the result in the cache
+    await token_count_cache.set(conversation_id, token_count)
+
+    return token_count
 
 
 class UploadConversationBodySchema(BaseModel):
@@ -339,41 +300,3 @@ async def upload_conversation_chunk(
     task_process_conversation_chunk.delay(chunk.id)
 
     return [chunk]
-
-
-# @ConversationRouter.get("/{conversation_id}/quotes", response_model=List[QuoteSchema])
-# async def get_conversation_quotes(
-#     conversation_id: str,
-#     db: DependencyInjectDatabase,
-#     _session: DependencyRequireSession,
-# ) -> List[QuoteModel]:
-#     conversation = await get_conversation(conversation_id, db, load_chunks=False)
-
-#     project_id = conversation.project_id
-
-#     latest_project_analysis = (
-#         db.query(ProjectAnalysisRunModel)
-#         .filter(ProjectAnalysisRunModel.project_id == project_id)
-#         .order_by(ProjectAnalysisRunModel.created_at.desc())
-#         .first()
-#     )
-
-#     if not latest_project_analysis:
-#         return []
-
-#     quotes = (
-#         db.query(QuoteModel)
-#         .options(selectinload(QuoteModel.conversation_chunks))
-#         .filter(
-#             QuoteModel.conversation_id == conversation_id,
-#             QuoteModel.project_analysis_run_id == latest_project_analysis.id,
-#         )
-#         .order_by(QuoteModel.created_at.asc())
-#         .all()
-#     )
-
-#     quotes.sort(
-#         key=lambda quote: quote.conversation_chunks[0].timestamp if quote.conversation_chunks else quote.created_at
-#     )
-
-#     return quotes

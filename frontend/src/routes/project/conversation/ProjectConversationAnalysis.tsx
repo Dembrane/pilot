@@ -12,6 +12,7 @@ import {
   Group,
   Button,
   Divider,
+  SimpleGrid,
 } from "@mantine/core";
 import { Link, useParams } from "react-router-dom";
 import { Quote } from "../../../components/quote/Quote";
@@ -73,12 +74,12 @@ export const ProjectConversationAnalysis = () => {
           </Text>
         )}
 
-        <Stack gap="sm">
+        <SimpleGrid cols={3} spacing="sm">
           {insightsQuery.data &&
             insightsQuery.data.map((insight) => (
               <Insight key={insight.id} data={insight as Insight} />
             ))}
-        </Stack>
+        </SimpleGrid>
       </Spoiler>
 
       <Divider />
@@ -90,14 +91,14 @@ export const ProjectConversationAnalysis = () => {
           </Text>
         )}
         <Title order={2}>Quotes</Title>
-        {quotesQuery.data && quotesQuery.data.length > 0 && (
+        {/* {quotesQuery.data && quotesQuery.data.length > 0 && (
           <Button
             variant="transparent"
             onClick={() => setShowQuotes(!showQuotes)}
           >
             <Text>{showQuotes ? "Hide all" : "Show all"} quotes</Text>
           </Button>
-        )}
+        )} */}
       </Group>
       {quotesQuery.error && (
         <Text className="text-red-500">Error loading quotes</Text>
@@ -109,32 +110,30 @@ export const ProjectConversationAnalysis = () => {
           <Skeleton height={150} />
         </>
       )}
-      <Spoiler
+      {/* <Spoiler
         maxHeight={250}
         hideLabel="Hide all quotes"
         showLabel={null}
         pb="md"
         expanded={showQuotes}
         onExpandedChange={(expanded) => setShowQuotes(expanded)}
-      >
-        {quotesQuery.data && quotesQuery.data.length === 0 && (
-          <Text>
-            No quotes available. Generate quotes for this conversation by
-            visiting
-            <Link to={`/projects/${projectId}/library`}>
-              <Anchor> the project library.</Anchor>
-            </Link>
-          </Text>
-        )}
-        <Stack gap="sm">
-          {quotesQuery.data &&
-            quotesQuery.data.map((quote) => (
-              <Quote key={quote.id} data={quote as Quote} />
-            ))}
-        </Stack>
-      </Spoiler>
-
-      <Divider />
+      > */}
+      {quotesQuery.data && quotesQuery.data.length === 0 && (
+        <Text>
+          No quotes available. Generate quotes for this conversation by visiting
+          <Link to={`/projects/${projectId}/library`}>
+            <Anchor> the project library.</Anchor>
+          </Link>
+        </Text>
+      )}
+      <Stack gap="sm">
+        {quotesQuery.data &&
+          quotesQuery.data.map((quote) => (
+            <Quote key={quote.id} data={quote as Quote} />
+          ))}
+      </Stack>
+      {/* </Spoiler> */}
+      {/* <Divider /> */}
     </Stack>
   );
 };

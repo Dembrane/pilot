@@ -1,8 +1,7 @@
 import { useUploadResourceByProjectIdMutation } from "@/lib/query";
-import { Group, rem } from "@mantine/core";
-import { Dropzone, PDF_MIME_TYPE } from "@mantine/dropzone";
-import { IconUpload, IconX } from "@tabler/icons-react";
+import { PDF_MIME_TYPE } from "@mantine/dropzone";
 import { PropsWithChildren } from "react";
+import { CommonDropzone } from "./Dropzone";
 
 export const UploadResourceDropzone = (
   props: PropsWithChildren<{
@@ -15,8 +14,7 @@ export const UploadResourceDropzone = (
   const uploadDocumentsMutation = useUploadResourceByProjectIdMutation();
 
   return (
-    <Dropzone
-      p="sm"
+    <CommonDropzone
       onDrop={(files) => {
         uploadDocumentsMutation.mutate({
           projectId: props.projectId,
@@ -29,37 +27,7 @@ export const UploadResourceDropzone = (
       loading={uploadDocumentsMutation.isPending}
       accept={PDF_MIME_TYPE}
     >
-      <Group justify="center" gap="xl" style={{ pointerEvents: "none" }}>
-        <Dropzone.Accept>
-          {props.accept ? (
-            props.accept
-          ) : (
-            <IconUpload
-              style={{
-                width: rem(52),
-                height: rem(52),
-                color: "var(--mantine-color-blue-6)",
-              }}
-              stroke={1.5}
-            />
-          )}
-        </Dropzone.Accept>
-        <Dropzone.Reject>
-          {props.reject ? (
-            props.reject
-          ) : (
-            <IconX
-              style={{
-                width: rem(52),
-                height: rem(52),
-                color: "var(--mantine-color-red-6)",
-              }}
-              stroke={1.5}
-            />
-          )}
-        </Dropzone.Reject>
-        <Dropzone.Idle>{props.children}</Dropzone.Idle>
-      </Group>
-    </Dropzone>
+      {props.children}
+    </CommonDropzone>
   );
 };

@@ -201,6 +201,30 @@ conversation_project_tag_association_table = Table(
     Column("project_tag_id", ForeignKey("project_tag.id")),
 )
 
+project_chat_message_conversation_association_table = Table(
+    "project_chat_message_conversation",
+    Base.metadata,
+    Column("id", Integer, autoincrement=True, primary_key=True, unique=True),
+    Column("project_chat_message_id", ForeignKey("project_chat_message.id")),
+    Column("conversation_id", ForeignKey("conversation.id")),
+)
+
+project_chat_message_conversation_association_1_table = Table(
+    "project_chat_message_conversation_1",
+    Base.metadata,
+    Column("id", Integer, autoincrement=True, primary_key=True, unique=True),
+    Column("project_chat_message_id", ForeignKey("project_chat_message.id")),
+    Column("conversation_id", ForeignKey("conversation.id")),
+)
+
+project_chat_conversation_association_table = Table(
+    "project_chat_conversation",
+    Base.metadata,
+    Column("id", Integer, autoincrement=True, primary_key=True, unique=True),
+    Column("project_chat_id", ForeignKey("project_chat.id")),
+    Column("conversation_id", ForeignKey("conversation.id")),
+)
+
 
 class ProjectTagModel(Base):
     __tablename__ = "project_tag"
@@ -221,6 +245,57 @@ class ProjectTagModel(Base):
     )
 
     text: Mapped[str] = mapped_column(String)
+
+
+class ProjectChatMessageModel(Base):
+    __tablename__ = "project_chat_message"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True)
+    date_created: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    date_updated: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+    project_chat_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("project_chat.id"))
+    project_chat: Mapped["ProjectChatModel"] = relationship(
+        "ProjectChatModel", back_populates="project_chat_messages"
+    )
+    text: Mapped[str] = mapped_column(String)
+    message_from: Mapped[str] = mapped_column(String)
+    used_conversations: Mapped[List["ConversationModel"]] = relationship(
+        "ConversationModel",
+        secondary=project_chat_message_conversation_association_table,
+        back_populates="project_chat_messages",
+    )
+    added_conversations: Mapped[List["ConversationModel"]] = relationship(
+        "ConversationModel",
+        secondary=project_chat_message_conversation_association_1_table,
+    )
+    tokens_count: Mapped[int] = mapped_column(Integer)
+
+
+class ProjectChatModel(Base):
+    __tablename__ = "project_chat"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True)
+    date_created: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    date_updated: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+    project_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("project.id"))
+
+    project_chat_messages: Mapped[List["ProjectChatMessageModel"]] = relationship(
+        "ProjectChatMessageModel", back_populates="project_chat"
+    )
+
+    used_conversations: Mapped[List["ConversationModel"]] = relationship(
+        "ConversationModel",
+        secondary=project_chat_conversation_association_table,
+        back_populates="project_chats",
+    )
 
 
 class ResourceTypeEnum(Enum):
@@ -296,6 +371,18 @@ class ConversationModel(Base):
 
     quotes: Mapped[List["QuoteModel"]] = relationship(
         "QuoteModel", back_populates="conversation", cascade="all, delete-orphan"
+    )
+
+    project_chats: Mapped[List["ProjectChatModel"]] = relationship(
+        "ProjectChatModel",
+        back_populates="used_conversations",
+        secondary=project_chat_conversation_association_table,
+    )
+
+    project_chat_messages: Mapped[List["ProjectChatMessageModel"]] = relationship(
+        "ProjectChatMessageModel",
+        back_populates="used_conversations",
+        secondary=project_chat_message_conversation_association_table,
     )
 
 

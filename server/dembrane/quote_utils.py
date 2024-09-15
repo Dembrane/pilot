@@ -17,14 +17,14 @@ from langchain_experimental.text_splitter import SemanticChunker
 from dembrane.ner import anonymize_sentence
 from dembrane.utils import generate_uuid, get_utc_timestamp, download_image_and_get_public_url
 from dembrane.database import (
-    ConversationModel,
-    ProjectAnalysisRunModel,
     ViewModel,
     QuoteModel,
     AspectModel,
     InsightModel,
+    ConversationModel,
     ProcessingStatusEnum,
     ConversationChunkModel,
+    ProjectAnalysisRunModel,
 )
 from dembrane.embedding import EMBEDDING_DIM, embed_text
 from dembrane.image_utils import brilliant_image_generator_3000
@@ -36,6 +36,8 @@ logger.setLevel(logging.DEBUG)
 np.random.seed(0)
 
 client = OpenAI()
+
+
 lc_embedder = OpenAIEmbeddings(model="text-embedding-3-small")
 semantic_chunker = SemanticChunker(lc_embedder)
 

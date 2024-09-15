@@ -46,6 +46,7 @@ dependencies = [
     "flower>=2.0.1",
     "python-jose[cryptography]>=3.3.0",
     "types-python-jose>=3.3.4.20240106",
+    "anthropic>=0.34.2",
 ]
 
 [tool.setuptools]

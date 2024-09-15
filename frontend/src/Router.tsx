@@ -159,7 +159,7 @@ export const mainRouter = createBrowserRouter([
                     element: <ProjectOverviewRoute />,
                   },
                   {
-                    path: "chat",
+                    path: "chats/:chatId",
                     element: <ProjectChatRoute />,
                   },
                   {

@@ -20,7 +20,6 @@ from dembrane.database import (
 from dembrane.transcribe import transcribe_conversation_chunk
 from dembrane.audio_utils import split_audio_chunk
 from dembrane.quote_utils import (
-    generate_conversation_summary,
     generate_quotes,
     initialize_view,
     initialize_insights,
@@ -28,6 +27,7 @@ from dembrane.quote_utils import (
     assign_aspect_centroid,
     generate_aspect_extras,
     generate_insight_extras,
+    generate_conversation_summary,
     cluster_quotes_using_aspect_centroids,
 )
 

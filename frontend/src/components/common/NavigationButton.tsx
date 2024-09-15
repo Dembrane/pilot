@@ -5,33 +5,86 @@ import {
   Text,
   Group,
   PolymorphicComponentProps,
+  Paper,
 } from "@mantine/core";
 import { PropsWithChildren } from "react";
+import { Link } from "react-router-dom";
 
 type Props = {
+  to?: string;
+  rightIcon?: React.ReactNode;
   rightSection?: React.ReactNode;
   active?: boolean;
+  disabled?: boolean;
 } & PolymorphicComponentProps<"a" | "button", UnstyledButtonProps>;
 
 export const NavigationButton = ({
   children,
-  rightSection,
+  to,
+  rightSection, // not clickable
+  rightIcon, // clickable
   active,
+  disabled,
   ...props
 }: PropsWithChildren<Props>) => {
   return (
-    <UnstyledButton {...props} aria-selected={active}>
-      <Group
-        className={cn(
-          "w-full justify-between rounded-md border border-gray-200 bg-white px-4 py-2 shadow-sm transition-colors hover:border-primary-500",
-          active ? "border-primary-500" : "",
+    <Paper
+      className={cn(
+        "w-full border border-gray-200 bg-white transition-colors hover:border-primary-500",
+        active ? "border-primary-500" : "",
+        props.className,
+      )}
+    >
+      <Group align="center" wrap="nowrap">
+        {to ? (
+          <Link to={to} className="flex-grow px-4 py-2">
+            <UnstyledButton
+              {...props}
+              // @ts-ignore
+              disabled={disabled}
+              className={cn(
+                "w-full text-left",
+                disabled ? "cursor-not-allowed" : "cursor-pointer",
+              )}
+            >
+              <Group className="w-full justify-between">
+                <Text size="lg" className="font-semibold">
+                  {children}
+                </Text>
+                {!!rightIcon && rightIcon}
+              </Group>
+            </UnstyledButton>
+          </Link>
+        ) : (
+          <UnstyledButton
+            {...props}
+            // @ts-ignore
+            disabled={disabled}
+            className={cn(
+              "h-full w-full px-4 py-2 text-left",
+              disabled ? "cursor-not-allowed" : "cursor-pointer",
+            )}
+          >
+            <Group className="h-full w-full justify-between">
+              <Text size="lg" className="font-semibold">
+                {children}
+              </Text>
+              {!!rightIcon && rightIcon}
+            </Group>
+          </UnstyledButton>
         )}
-      >
-        <Text size="lg" className="font-semibold">
-          {children}
-        </Text>
-        {!!rightSection && rightSection}
+
+        {!!rightSection && (
+          <div
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent the main link from being activated
+            }}
+            className="mx-2 h-full"
+          >
+            {rightSection}
+          </div>
+        )}
       </Group>
-    </UnstyledButton>
+    </Paper>
   );
 };

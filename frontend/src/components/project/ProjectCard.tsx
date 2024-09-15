@@ -1,6 +1,7 @@
 import { Icons } from "@/icons";
-import { ActionIcon, Button, Group, Paper, Stack } from "@mantine/core";
+import { ActionIcon, Button, Group, Paper, Stack, Text } from "@mantine/core";
 import { IconExternalLink } from "@tabler/icons-react";
+import { formatRelative } from "date-fns";
 import { PropsWithChildren } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -12,26 +13,33 @@ export const ProjectCard = ({
   const link = `/projects/${project.id}/overview`;
 
   return (
-    <Paper p="md" className="h-full">
-      <Stack className="h-full">
-        <Group justify="space-between" wrap="nowrap" className="grow">
-          <Group align="center">
-            <Icons.Calendar />
-            {project.name}
+    <Paper p="md" className="h-full" withBorder>
+      <Stack className="h-full" justify="space-between">
+        <Stack gap="xs">
+          <Group justify="space-between" wrap="nowrap">
+            <Group align="center">
+              <Icons.Calendar />
+              <Text className="font-semibold" size="lg">
+                {project.name}
+              </Text>
+            </Group>
+            <Link to={link}>
+              <ActionIcon component="a" variant="subtle">
+                <Icons.Dots />
+              </ActionIcon>
+            </Link>
           </Group>
-
-          <Link to={link}>
-            <ActionIcon component="a" variant="transparent">
-              <Icons.Dots />
-            </ActionIcon>
-          </Link>
-        </Group>
-
-        <Link to={link}>
+          <Text size="sm" c="dimmed">
+            {project.conversations_count} Conversation
+            {project.conversations_count === 1 ? "" : "s"} &middot; Edited{" "}
+            {formatRelative(new Date(project.updated_at), new Date())}
+          </Text>
+        </Stack>
+        <Link to={link} style={{ width: "100%" }}>
           <Button
             rightSection={<IconExternalLink size={20} />}
-            className="w-full"
-            component="a"
+            fullWidth
+            variant="light"
           >
             Open
           </Button>

@@ -1,9 +1,8 @@
 import { useProjectById, useUploadConversation } from "@/lib/query";
-import { Group, LoadingOverlay, rem } from "@mantine/core";
-import { Dropzone } from "@mantine/dropzone";
-import { IconUpload, IconX } from "@tabler/icons-react";
+import { LoadingOverlay } from "@mantine/core";
 import { PropsWithChildren } from "react";
 import { toast } from "../common/Toaster";
+import { CommonDropzone } from "./Dropzone";
 
 export const UploadConversationDropzone = (
   props: PropsWithChildren<{
@@ -14,7 +13,6 @@ export const UploadConversationDropzone = (
   }>,
 ) => {
   const uploadConversationMutation = useUploadConversation();
-
   const projectQuery = useProjectById({
     projectId: props.projectId,
   });
@@ -24,8 +22,7 @@ export const UploadConversationDropzone = (
   }
 
   return (
-    <Dropzone
-      p="sm"
+    <CommonDropzone
       onDrop={(files) => {
         uploadConversationMutation.mutate({
           projectId: props.projectId,
@@ -52,37 +49,7 @@ export const UploadConversationDropzone = (
         "audio/mpeg",
       ]}
     >
-      <Group justify="center" gap="xl" style={{ pointerEvents: "none" }}>
-        <Dropzone.Accept>
-          {props.accept ? (
-            props.accept
-          ) : (
-            <IconUpload
-              style={{
-                width: rem(52),
-                height: rem(52),
-                color: "var(--mantine-color-blue-6)",
-              }}
-              stroke={1.5}
-            />
-          )}
-        </Dropzone.Accept>
-        <Dropzone.Reject>
-          {props.reject ? (
-            props.reject
-          ) : (
-            <IconX
-              style={{
-                width: rem(52),
-                height: rem(52),
-                color: "var(--mantine-color-red-6)",
-              }}
-              stroke={1.5}
-            />
-          )}
-        </Dropzone.Reject>
-        <Dropzone.Idle>{props.children}</Dropzone.Idle>
-      </Group>
-    </Dropzone>
+      {props.children}
+    </CommonDropzone>
   );
 };

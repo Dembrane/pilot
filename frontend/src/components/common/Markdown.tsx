@@ -1,7 +1,14 @@
+import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import showdown from "showdown";
 
-export const Markdown = ({ content }: { content: string }) => {
+export const Markdown = ({
+  content,
+  className,
+}: {
+  content: string;
+  className?: string;
+}) => {
   const generatedHTML = new showdown.Converter().makeHtml(content);
 
   useEffect(() => {
@@ -18,7 +25,7 @@ export const Markdown = ({ content }: { content: string }) => {
 
   return (
     <div
-      className="prose"
+      className={cn("prose", className)}
       dangerouslySetInnerHTML={{ __html: generatedHTML }}
     />
   );

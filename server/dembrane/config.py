@@ -80,6 +80,10 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is not set"
 logger.debug("OPENAI_API: set")
 
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
+assert ANTHROPIC_API_KEY, "ANTHROPIC_API_KEY environment variable is not set"
+logger.debug("ANTHROPIC_API_KEY: set")
+
 SERVE_API_DOCS = os.environ.get("SERVE_API_DOCS", "false").lower() in ["true", "1"]
 logger.debug(f"SERVE_API_DOCS: {SERVE_API_DOCS}")
 

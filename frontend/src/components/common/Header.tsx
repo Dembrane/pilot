@@ -1,20 +1,13 @@
 import {
   Paper,
   Group,
-  ActionIcon,
   Menu,
   UnstyledButton,
   Avatar,
   Text,
-  VisuallyHidden,
 } from "@mantine/core";
 import { Logo } from "./Logo";
-import {
-  IconLogout,
-  IconChevronRight,
-  IconSettings,
-  IconChevronDown,
-} from "@tabler/icons-react";
+import { IconLogout, IconSettings, IconChevronDown } from "@tabler/icons-react";
 import { useLogoutMutation, useCurrentUser } from "@/lib/query";
 import { useAuthenticated } from "@/lib/useAuthenticated";
 import { forwardRef } from "react";
@@ -71,11 +64,11 @@ export const Header = () => {
 
   return (
     <Paper
-      bg="white"
       component="header"
       p="xs"
       shadow="xs"
-      className="h-full w-full rounded-none"
+      className="z-30 h-full w-full"
+      bg={{ dark: "dark.8", light: "white" }}
     >
       <Group justify="space-between" align="center" className="h-full w-full">
         <Group gap="md">

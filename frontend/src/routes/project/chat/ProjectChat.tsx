@@ -44,7 +44,7 @@ import { formatDate } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
-const ConversationBadges = ({
+const ConversationLinks = ({
   conversations,
 }: {
   conversations: Conversation[];
@@ -58,7 +58,7 @@ const ConversationBadges = ({
           key={conversation.id}
           to={`/projects/${projectId}/conversation/${conversation.id}/overview`}
         >
-          <Badge size="xs">{conversation.participant_name}</Badge>
+          {conversation.participant_name}
         </Link>
       ))}
     </Group>
@@ -118,8 +118,8 @@ const ChatHistoryMessage = ({
     return (
       <ChatMessage key={message.id} role="dembrane" section={section}>
         <Group gap="xs" align="baseline">
-          <Text size="xs">You added:</Text>
-          <ConversationBadges
+          <Text size="xs">Je added:</Text>
+          <ConversationLinks
             conversations={message._original.added_conversations.map(
               (ac) => ac.conversation_id,
             )}
@@ -450,7 +450,7 @@ export const ProjectChatRoute = () => {
             <ChatMessage role="dembrane">
               <Group gap="xs" align="baseline">
                 <Text size="xs">You are adding: </Text>
-                <ConversationBadges
+                <ConversationLinks
                   // @ts-ignore
                   conversations={contextToBeAdded.conversations.map((c) => ({
                     id: c.conversation_id,

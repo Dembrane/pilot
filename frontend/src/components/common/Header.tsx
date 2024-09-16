@@ -67,6 +67,7 @@ export const Header = () => {
       component="header"
       p="xs"
       shadow="xs"
+      radius="0"
       className="z-30 h-full w-full"
       bg={{ dark: "dark.8", light: "white" }}
     >

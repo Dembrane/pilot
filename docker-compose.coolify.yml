@@ -115,6 +115,7 @@ services:
       - PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
       - REDIS_URL=redis://redis:6379
       - DISABLE_REDACTION=1
@@ -144,6 +145,7 @@ services:
       - PARTICIPANT_BASE_URL=${PARTICIPANT_BASE_URL}
       - BUILD_VERSION=${BUILD_VERSION}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
       - REDIS_URL=redis://redis:6379
       - DISABLE_REDACTION=1

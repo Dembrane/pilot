@@ -20,64 +20,40 @@ export const ChatContextProgress = ({ chatId }: { chatId: string }) => {
     .filter((c) => c.locked)
     .sort((a, b) => b.token_usage - a.token_usage);
 
-  const conversationsAlreadyAddedTokenUsage = conversationsAlreadyAdded?.reduce(
-    (acc, c) => acc + c.token_usage * 100,
-    0,
-  );
-
   const conversationsToBeAdded = chatContextQuery.data?.conversations
     .filter((c) => !c.locked)
     .sort((a, b) => b.token_usage - a.token_usage);
 
-  const conversationsToBeAddedTokenUsage = conversationsToBeAdded?.reduce(
-    (acc, c) => acc + c.token_usage * 100,
-    0,
-  );
-
   return (
     <Box>
       <Progress.Root size={8}>
-        <Tooltip
-          label={
-            <>
-              Conversations already added (
-              {conversationsAlreadyAddedTokenUsage?.toFixed(0)}%)
-              {conversationsAlreadyAdded?.map((c) => (
-                <div key={c.conversation_id}>
-                  {c.conversation_participant_name} -{" "}
-                  {(c.token_usage * 100).toFixed(0)}%
-                </div>
-              ))}
-            </>
-          }
-          withArrow
-        >
-          <Progress.Section
-            value={conversationsAlreadyAddedTokenUsage || 0}
-            color="blue.6"
-            mr="1px"
-          />
-        </Tooltip>
-        <Tooltip
-          label={
-            <>
-              Conversations to be added (
-              {conversationsToBeAddedTokenUsage?.toFixed(0)}%)
-              {conversationsToBeAdded?.map((c) => (
-                <div key={c.conversation_id}>
-                  {c.conversation_participant_name} -{" "}
-                  {(c.token_usage * 100).toFixed(0)}%
-                </div>
-              ))}
-            </>
-          }
-          withArrow
-        >
-          <Progress.Section
-            value={conversationsToBeAddedTokenUsage || 0}
-            color="blue.3"
-          />
-        </Tooltip>
+        {conversationsAlreadyAdded?.map((m) => (
+          <Tooltip
+            label={`${m.conversation_participant_name} - ${Math.ceil(
+              m.token_usage * 100,
+            )}%`}
+          >
+            <Progress.Section
+              value={m.token_usage * 100}
+              color="blue.6"
+              mr="1px"
+            />
+          </Tooltip>
+        ))}
+
+        {conversationsToBeAdded?.map((m) => (
+          <Tooltip
+            label={`${m.conversation_participant_name} - ${Math.ceil(
+              m.token_usage * 100,
+            )}%`}
+          >
+            <Progress.Section
+              value={m.token_usage * 100}
+              color="blue.3"
+              mr="1px"
+            />
+          </Tooltip>
+        ))}
 
         {chatContextQuery.data?.messages.map((m) => (
           <Tooltip

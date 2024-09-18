@@ -3,6 +3,7 @@ import { ChatMessage } from "@/components/chat/ChatMessage";
 import {
   useAddChatMessageMutation,
   useChatHistory,
+  useLockConversationsMutation,
   useProjectChatContext,
 } from "@/lib/query";
 import {
@@ -15,13 +16,11 @@ import {
   Text,
   Button,
   LoadingOverlay,
-  Badge,
   Alert,
   Menu,
   SimpleGrid,
   CopyButton,
   ActionIcon,
-  rem,
   Tooltip,
   Anchor,
 } from "@mantine/core";
@@ -72,8 +71,6 @@ const ChatHistoryMessage = ({
   message: ChatHistory[number];
   section?: React.ReactNode;
 }) => {
-  const { projectId } = useParams();
-
   if (message.role === "system") {
     return null;
   }
@@ -182,7 +179,7 @@ const TemplatesMenu = ({
       onClose={setOpen.close}
     >
       <Menu.Target>
-        <Button variant="outline" className="flex-grow" color="gray">
+        <Button variant="subtle" color="gray">
           Templates
         </Button>
       </Menu.Target>
@@ -218,6 +215,7 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
   const chatContextQuery = useProjectChatContext(chatId);
 
   const addChatMessageMutation = useAddChatMessageMutation();
+  const lockConversationsMutation = useLockConversationsMutation();
 
   const lastInput = useRef("");
   const lastMessageRef = useRef<HTMLDivElement>(null);
@@ -261,7 +259,7 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
     },
     onFinish: async (message) => {
       console.log("onFinish", message.content);
-      // do this for now because - i dont want to do the text processing again in the backend
+      // do this for now because - i dont want to do the streamed text processing again in the backend
       addChatMessageMutation.mutate({
         project_chat_id: chatId,
         text: message.content,
@@ -277,7 +275,7 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
     stop();
 
     const incompleteMessage = messages[messages.length - 1];
-    // publish the incomplete result to the backend
+
     const body = {
       project_chat_id: chatId,
       text: incompleteMessage.content,
@@ -286,13 +284,29 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
         incompleteMessage.createdAt ?? new Date(),
       ).toISOString(),
     };
+
+    // publish the incomplete result to the backend
     addChatMessageMutation.mutate(body as any);
   };
 
-  const customHandleSubmit = () => {
+  const customHandleSubmit = async () => {
     lastInput.current = input;
-    console.log("customHandleSubmit", input);
-    handleSubmit();
+
+    try {
+      // Lock conversations first
+      await lockConversationsMutation.mutateAsync({ chatId });
+
+      // Wait for queries to settle
+      await Promise.all([
+        chatHistoryQuery.refetch(),
+        chatContextQuery.refetch()
+      ]);
+
+      // Submit the chat
+      handleSubmit();
+    } catch (error) {
+      console.error("Error in customHandleSubmit:", error);
+    }
   };
 
   // reconcile for "dembrane" messages
@@ -319,6 +333,7 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
     error,
     lastInputRef: lastInput,
     lastMessageRef,
+    reload,
     setInput,
     handleInputChange,
     handleSubmit: customHandleSubmit,
@@ -343,6 +358,7 @@ export const ProjectChatRoute = () => {
     handleInputChange,
     handleSubmit,
     stop,
+    reload,
   } = useDembraneChat({ chatId: chatId ?? "" });
 
   if (isInitializing) {
@@ -438,7 +454,7 @@ export const ProjectChatRoute = () => {
               <Text>An error occurred.</Text>
               <Button
                 color="red"
-                // onClick={() => reload()}
+                onClick={() => reload()}
                 leftSection={<IconRefresh size="1rem" />}
                 mt="md"
               >
@@ -475,44 +491,50 @@ export const ProjectChatRoute = () => {
             }}
           >
             <Group>
-              <Textarea
-                placeholder="Type a message..."
-                minRows={3}
-                autosize
-                value={input}
-                onChange={handleInputChange}
-                disabled={isLoading}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleSubmit();
-                  }
-                }}
-                className="grow"
-                color="gray"
-              />
-              <Button
-                type="submit"
-                variant="primary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleSubmit();
-                }}
-                rightSection={<IconSend size={14} />}
-                disabled={input.trim() === "" || isLoading}
-              >
-                Send
-              </Button>
+              <Box className="grow">
+                <Textarea
+                  placeholder="Type a message..."
+                  minRows={4}
+                  autosize
+                  value={input}
+                  onChange={handleInputChange}
+                  disabled={isLoading}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleSubmit();
+                    }
+                  }}
+                  color="gray"
+                />
+              </Box>
+              <Stack className="h-full" gap="xs">
+                <Box>
+                  <Button
+                    size="lg"
+                    type="submit"
+                    variant="primary"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleSubmit();
+                    }}
+                    rightSection={<IconSend size={24} />}
+                    disabled={input.trim() === "" || isLoading}
+                  >
+                    Send
+                  </Button>
+                </Box>
+
+                <TemplatesMenu input={input} setInput={setInput} />
+              </Stack>
             </Group>
+
+            <Text size="xs" className="mt-1 italic">
+              Use Shift + Enter to add a new line
+            </Text>
           </form>
-          <Group align="center" className="w-full" justify="center">
-            <TemplatesMenu input={input} setInput={setInput} />
-            <Button variant="outline" className="flex-grow" color="gray">
-              Context
-            </Button>
-          </Group>
         </Stack>
       </Box>
     </Stack>

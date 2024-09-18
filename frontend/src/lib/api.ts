@@ -445,6 +445,13 @@ export const deleteChatContext = async (
   );
 };
 
+// this will lock all unused conversations in the chat as a dembrane message
+export const lockConversations = async (chatId: string) => {
+  return api.post<unknown, TProjectChatContext>(
+    `/chats/${chatId}/lock-conversations`
+  );
+};
+
 export const getChatHistory = async (chatId: string): Promise<ChatHistory> => {
   const data = await directus.request<ProjectChatMessage[]>(
     readItems("project_chat_message", {

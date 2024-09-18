@@ -1,32 +1,3 @@
-"""
-chat.py
-
-Context related routes:
-GET /{chat_id}/context
-- get all conversations used in the chat
-- locked means that the conversation cannot be removed from the chat (because it's being used in a chat_message)
-- token_usage is between 0 and 1
-Example response:
-{
-    "conversations": [
-        {
-            "conversation_id": "123",
-            "locked": false,
-            "token_usage": 0.1
-        }
-    ]
-}
-
-POST /{chat_id}/add-context
-- add a conversation to the chat
-- if the conversation is already in the chat, do nothing
-- if the conversation is too long, do nothing
-- if the chat context is too long, do nothing
-
-POST /{chat_id}/delete-context
-- delete a conversation from the chat, if not locked
-"""
-
 import logging
 from typing import Dict, List, Literal, Optional, Generator
 
@@ -71,6 +42,7 @@ class ChatContextSchema(BaseModel):
     conversations: List[ChatContextConversationSchema]
     messages: List[ChatContextMessageSchema]
     conversation_id_list: List[str]
+    locked_conversation_id_list: List[str]
 
 
 @ChatRouter.get("/{chat_id}/context", response_model=ChatContextSchema)
@@ -86,6 +58,7 @@ async def get_chat_context(chat_id: str, db: DependencyInjectDatabase) -> ChatCo
         .all()
     )
 
+    # conversation is locked when any chat message is using a conversation
     locked_conversations = set()
     for message in messages:
         for conversation in message.used_conversations:
@@ -107,9 +80,12 @@ async def get_chat_context(chat_id: str, db: DependencyInjectDatabase) -> ChatCo
                 assistant_message_token_count += message.tokens_count
 
     used_conversations = chat.used_conversations
+
+    # initialize response
     context = ChatContextSchema(
         conversations=[],
         conversation_id_list=[],
+        locked_conversation_id_list=[],
         messages=[
             ChatContextMessageSchema(
                 role="user",
@@ -123,10 +99,11 @@ async def get_chat_context(chat_id: str, db: DependencyInjectDatabase) -> ChatCo
     )
 
     for conversation in used_conversations:
+        is_conversation_locked = conversation.id in locked_conversations
         chat_context_resource = ChatContextConversationSchema(
             conversation_id=conversation.id,
             conversation_participant_name=conversation.participant_name,
-            locked=conversation.id in locked_conversations,
+            locked=is_conversation_locked,
             # TODO: if quotes for this convo are present then just use RAG
             token_usage=(
                 await get_conversation_token_count(conversation.id, db) / MAX_CHAT_CONTEXT_LENGTH
@@ -134,6 +111,8 @@ async def get_chat_context(chat_id: str, db: DependencyInjectDatabase) -> ChatCo
         )
         context.conversations.append(chat_context_resource)
         context.conversation_id_list.append(conversation.id)
+        if is_conversation_locked:
+            context.locked_conversation_id_list.append(conversation.id)
 
     return context
 
@@ -224,7 +203,8 @@ async def delete_chat_context(
     raise HTTPException(status_code=404, detail="Conversation not found in the chat")
 
 
-async def add_new_conversations(
+@ChatRouter.post("/{chat_id}/lock-conversations", response_model=None)
+async def lock_conversations(
     chat_id: str, db: DependencyInjectDatabase
 ) -> List[ConversationModel]:
     db_messages = (
@@ -246,13 +226,6 @@ async def add_new_conversations(
     set_all_conversations = set(current_context.conversation_id_list)
     set_conversations_to_add = set_all_conversations - set_conversations_already_in_chat
 
-    # Fetch ConversationModel objects for used_conversations
-    used_conversations = (
-        db.query(ConversationModel)
-        .filter(ConversationModel.id.in_(current_context.conversation_id_list))
-        .all()
-    )
-
     if len(set_conversations_to_add) > 0:
         # Fetch ConversationModel objects for added_conversations
         added_conversations = (
@@ -267,20 +240,30 @@ async def add_new_conversations(
             message_from="dembrane",
             text=f"You added {len(set_conversations_to_add)} conversations as context to the chat.",
             project_chat_id=chat_id,
+            used_conversations=added_conversations,
             added_conversations=added_conversations,
         )
         db.add(dembrane_message)
         db.commit()
 
+    # Fetch ConversationModel objects for used_conversations
+    used_conversations = (
+        db.query(ConversationModel)
+        .filter(ConversationModel.id.in_(current_context.conversation_id_list))
+        .all()
+    )
+
     return used_conversations
 
 
 async def create_prompt_message(
-    used_conversations: List[ConversationModel], db: DependencyInjectDatabase
+    locked_conversation_id_list: List[str], db: DependencyInjectDatabase
 ) -> Dict[str, str]:
     conversation_transcripts = []
 
-    for conversation in used_conversations:
+    conversations = db.query(ConversationModel).filter(ConversationModel.id.in_(locked_conversation_id_list)).all()
+
+    for conversation in conversations:
         conversation_transcripts.append(f"""
 <conversation>
 <name>{conversation.participant_name}</name>
@@ -342,15 +325,12 @@ async def post_chat(
     This can significantly improve performance across all models.
     """
 
-    used_conversations = await add_new_conversations(chat.id, db)
-
     user_message = ProjectChatMessageModel(
         id=generate_uuid(),
         date_created=get_utc_timestamp(),
         message_from="user",
         text=body.messages[-1].content,
         project_chat_id=chat.id,
-        used_conversations=used_conversations,
     )
     db.add(user_message)
     db.commit()
@@ -359,8 +339,11 @@ async def post_chat(
 
     if len(messages) == 0:
         logger.debug("initializing chat")
+    
+    chat_context = await get_chat_context(chat_id, db)
+    locked_conversation_id_list = chat_context.locked_conversation_id_list
 
-    prompt_message = await create_prompt_message(used_conversations, db)
+    prompt_message = await create_prompt_message(locked_conversation_id_list, db)
 
     def stream_response() -> Generator[str, None, None]:
         with DatabaseSession() as db:

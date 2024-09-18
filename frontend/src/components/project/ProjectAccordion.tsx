@@ -42,7 +42,7 @@ import {
 } from "@tabler/icons-react";
 import { formatRelative } from "date-fns";
 import { NavigationButton } from "../common/NavigationButton";
-import { cn } from "@/lib/utils";
+import { capitalize, cn } from "@/lib/utils";
 
 const ConversationAccordionLabelChatSelection = ({
   conversation,
@@ -69,17 +69,9 @@ const ConversationAccordionLabelChatSelection = ({
   const isSelected = !!projectChatContextQuery.data?.conversations?.find(
     (c) => c.conversation_id === conversation.id,
   );
-  const isLocked = projectChatContextQuery.data?.conversations?.find(
+  const isLocked = !!projectChatContextQuery.data?.conversations?.find(
     (c) => c.conversation_id === conversation.id && c.locked,
   );
-
-  if (isLocked) {
-    return (
-      <Tooltip label="Already added to this chat">
-        <IconChecks />
-      </Tooltip>
-    );
-  }
 
   const handleSelectChat = () => {
     if (!isSelected) {
@@ -97,11 +89,18 @@ const ConversationAccordionLabelChatSelection = ({
 
   const tooltipLabel = isSelected
     ? "Remove from this chat"
-    : "Add to this chat";
+    : isLocked
+      ? "Already added to this chat"
+      : "Add to this chat";
 
   return (
     <Tooltip label={tooltipLabel}>
-      <Checkbox size="md" checked={isSelected} onChange={handleSelectChat} />
+      <Checkbox
+        size="md"
+        checked={isSelected}
+        disabled={isLocked}
+        onChange={handleSelectChat}
+      />
     </Tooltip>
   );
 };
@@ -241,7 +240,14 @@ const ChatAccordion = ({ projectId }: { projectId: string }) => {
               active={item.id === activeChatId}
               rightSection={<ChatAccordionItemMenu chat={item} />}
             >
-              <Text size="xs">{item.id}</Text>
+              <Text size="xs">
+                {capitalize(
+                  formatRelative(
+                    new Date(item.date_created ?? new Date()),
+                    new Date(),
+                  ),
+                )}
+              </Text>
             </NavigationButton>
           ))}
         </Stack>

@@ -26,6 +26,7 @@ import {
   addChatContext,
   deleteChatContext,
   getChatHistory,
+  lockConversations,
 } from "./api";
 import { toast } from "@/components/common/Toaster";
 import { directus } from "./directus";
@@ -1094,8 +1095,8 @@ export const useProjectChats = (projectId: string) => {
     queryFn: () =>
       directus.request(
         readItems("project_chat", {
-          fields: ["id", "project_id"],
-          sort: "-date_updated",
+          fields: ["id", "project_id", "date_created", "date_updated"],
+          sort: "-date_created",
           filter: {
             project_id: {
               _eq: projectId,
@@ -1108,7 +1109,7 @@ export const useProjectChats = (projectId: string) => {
 
 export const useProjectChatContext = (chatId: string) => {
   return useQuery({
-    queryKey: ["chats", chatId, "context"],
+    queryKey: ["chats", "context", chatId],
     queryFn: () => getProjectChatContext(chatId),
   });
 };
@@ -1129,7 +1130,7 @@ export const useAddChatContextMutation = () => {
     },
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({
-        queryKey: ["chats", vars.chatId, "context"],
+        queryKey: ["chats", "context", vars.chatId],
       });
       toast.success("Conversation added to chat");
     },
@@ -1143,7 +1144,7 @@ export const useDeleteChatContextMutation = () => {
       deleteChatContext(payload.chatId, payload.conversationId),
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({
-        queryKey: ["chats", vars.chatId, "context"],
+        queryKey: ["chats", "context", vars.chatId],
       });
       toast.success("Conversation removed from chat");
     },
@@ -1157,6 +1158,22 @@ export const useChatHistory = (chatId: string) => {
   });
 };
 
+export const useLockConversationsMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { chatId: string }) =>
+      lockConversations(payload.chatId),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({
+        queryKey: ["chats", "context", vars.chatId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["chats", "history", vars.chatId],
+      });
+    },
+  });
+};
+
 export const useAddChatMessageMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -1164,7 +1181,7 @@ export const useAddChatMessageMutation = () => {
       directus.request(createItem("project_chat_message", payload as any)),
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({
-        queryKey: ["chats", vars.project_chat_id, "context"],
+        queryKey: ["chats", "context", vars.project_chat_id],
       });
       queryClient.invalidateQueries({
         queryKey: ["chats", "history", vars.project_chat_id],

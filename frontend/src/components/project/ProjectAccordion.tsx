@@ -87,10 +87,10 @@ const ConversationAccordionLabelChatSelection = ({
     }
   };
 
-  const tooltipLabel = isSelected
-    ? "Remove from this chat"
-    : isLocked
-      ? "Already added to this chat"
+  const tooltipLabel = isLocked
+    ? "Already added to this chat"
+    : isSelected
+      ? "Remove from this chat"
       : "Add to this chat";
 
   return (

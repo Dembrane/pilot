@@ -7,11 +7,19 @@ import { NavigationButton } from "../common/NavigationButton";
 import { Breadcrumbs } from "../common/Breadcrumbs";
 
 export const ProjectSidebar = () => {
-  const { projectId } = useParams();
+  const { projectId, conversationId } = useParams();
 
   const projectQuery = useProjectById({ projectId: projectId ?? "" });
 
   const createChatMutation = useCreateChatMutation();
+
+  const handleAsk = () => {
+    createChatMutation.mutate({
+      project_id: { id: projectId ?? "" },
+      conversationId: conversationId ?? "",
+      navigateToNewChat: true,
+    });
+  };
 
   if (!projectId) {
     return null;
@@ -53,12 +61,7 @@ export const ProjectSidebar = () => {
       </Group>
 
       <NavigationButton
-        onClick={() =>
-          createChatMutation.mutate({
-            project_id: { id: projectId ?? "" },
-            navigateToNewChat: true,
-          })
-        }
+        onClick={handleAsk}
         component="button"
         rightIcon={<Icons.Stars />}
       >

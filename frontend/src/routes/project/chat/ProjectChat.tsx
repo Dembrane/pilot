@@ -115,7 +115,7 @@ const ChatHistoryMessage = ({
     return (
       <ChatMessage key={message.id} role="dembrane" section={section}>
         <Group gap="xs" align="baseline">
-          <Text size="xs">You added:</Text>
+          <Text size="xs">Context added:</Text>
           <ConversationLinks
             conversations={message._original.added_conversations.map(
               (ac) => ac.conversation_id,
@@ -261,7 +261,9 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
       console.log("onFinish", message.content);
       // do this for now because - i dont want to do the streamed text processing again in the backend
       addChatMessageMutation.mutate({
-        project_chat_id: chatId,
+        project_chat_id: {
+          id: chatId,
+        } as ProjectChat,
         text: message.content,
         message_from: "assistant",
         date_created: new Date().toISOString(),
@@ -277,7 +279,9 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
     const incompleteMessage = messages[messages.length - 1];
 
     const body = {
-      project_chat_id: chatId,
+      project_chat_id: {
+        id: chatId,
+      } as ProjectChat,
       text: incompleteMessage.content,
       message_from: "assistant",
       date_created: new Date(
@@ -299,7 +303,7 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
       // Wait for queries to settle
       await Promise.all([
         chatHistoryQuery.refetch(),
-        chatContextQuery.refetch()
+        chatContextQuery.refetch(),
       ]);
 
       // Submit the chat
@@ -470,7 +474,7 @@ export const ProjectChatRoute = () => {
           {contextToBeAdded && contextToBeAdded.conversations.length > 0 && (
             <ChatMessage role="dembrane">
               <Group gap="xs" align="baseline">
-                <Text size="xs">You are adding: </Text>
+                <Text size="xs">Adding Context:</Text>
                 <ConversationLinks
                   // @ts-ignore
                   conversations={contextToBeAdded.conversations.map((c) => ({

@@ -4,7 +4,7 @@ RUN npm install -g --force pnpm
 
 WORKDIR /code
 
-COPY package.json yarn.lock ./
+COPY package.json pnpm-lock.yaml ./
 
 RUN echo "fetch-timeout=60000" >> .npmrc
 # https://github.com/pnpm/pnpm/issues/5803#issuecomment-1974820613

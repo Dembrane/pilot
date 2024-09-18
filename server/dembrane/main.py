@@ -58,7 +58,10 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("shutting down server")
 
 
-docs_url = "/docs" if SERVE_API_DOCS else None
+docs_url = None
+if SERVE_API_DOCS:
+    logger.info("serving api docs at /docs")
+    docs_url = "/docs"
 
 # need to be added at the end
 origins = [

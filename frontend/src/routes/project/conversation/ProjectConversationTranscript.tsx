@@ -1,6 +1,10 @@
 import { BaseMessage } from "@/components/BaseMessage";
 import { getConversationChunkContentLink } from "@/lib/api";
-import { useConversationById, useConversationChunks } from "@/lib/query";
+import {
+  useConversationById,
+  useConversationChunks,
+  useConversationTranscriptString,
+} from "@/lib/query";
 import {
   ActionIcon,
   Group,
@@ -15,14 +19,18 @@ import {
   Button,
   Checkbox,
   TextInput,
+  CopyButton,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconDownload } from "@tabler/icons-react";
+import { IconCheck, IconCopy, IconDownload } from "@tabler/icons-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 const Chunk = ({ chunk }: { chunk: ConversationChunk }) => {
-  const src = getConversationChunkContentLink(chunk.conversation_id, chunk.id);
+  const src = getConversationChunkContentLink(
+    chunk.conversation_id as string,
+    chunk.id,
+  );
   return (
     <BaseMessage
       title={"Speaker"}
@@ -36,7 +44,7 @@ const Chunk = ({ chunk }: { chunk: ConversationChunk }) => {
           <Divider />
           <audio
             src={src}
-            className="w-full h-6 p-0"
+            className="h-6 w-full p-0"
             crossOrigin="anonymous"
             preload="metadata"
             controls
@@ -62,6 +70,7 @@ export const ProjectConversationTranscript = () => {
     loadConversationChunks: true,
   });
   const conversationChunksQuery = useConversationChunks(conversationId ?? "");
+  const transcriptQuery = useConversationTranscriptString(conversationId ?? "");
 
   const [opened, { open, close }] = useDisclosure(false);
   const [downloadWithTimestamps, setDownloadWithTimestamps] = useState(false);
@@ -127,6 +136,21 @@ export const ProjectConversationTranscript = () => {
               <IconDownload size={48} />
             </ActionIcon>
           </Tooltip>
+          <CopyButton value={transcriptQuery.data ?? ""}>
+            {({ copied, copy }) => (
+              <Tooltip label="Copy transcript">
+                <ActionIcon
+                  size="md"
+                  variant="subtle"
+                  color="gray"
+                  loading={transcriptQuery.isLoading}
+                  onClick={copy}
+                >
+                  {!copied ? <IconCopy size={48} /> : <IconCheck size={48} />}
+                </ActionIcon>
+              </Tooltip>
+            )}
+          </CopyButton>
           <Modal
             opened={opened}
             onClose={close}

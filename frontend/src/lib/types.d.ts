@@ -153,3 +153,25 @@ type TTask =
       state: "PROGRESS";
       meta: TTaskProgressMeta;
     };
+
+type TProjectChatContext = {
+  conversations: Array<{
+    conversation_id: string;
+    conversation_participant_name?: string;
+    locked: boolean;
+    token_usage: number; // between 0 and 1
+  }>;
+  messages: Array<{
+    role: "user" | "assistant";
+    token_usage: number; // between 0 and 1
+  }>;
+};
+
+type ChatHistoryMessage = {
+  id: string;
+  role: "user" | "assistant" | "system" | "dembrane";
+  content: string;
+  _original: ProjectChatMessage;
+};
+
+type ChatHistory = Array<ChatHistoryMessage>;

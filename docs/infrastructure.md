@@ -1,6 +1,0 @@
-# Infrastructure
-
-Persistance:
-
-- Database
-- Storage

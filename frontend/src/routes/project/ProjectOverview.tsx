@@ -36,9 +36,9 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import useSessionStorageState from "use-session-storage-state";
-import { ProjectDangerZone } from "./ProjectDangerZone";
+import { ProjectDangerZone } from "../../components/project/ProjectDangerZone";
 import { SummaryCard } from "@/components/common/SummaryCard";
-import { ProjectEdit } from "./ProjectEdit";
+import { ProjectEdit } from "../../components/project/ProjectEdit";
 import { QRCode } from "@/components/common/QRCode";
 import { useDocumentTitle } from "@mantine/hooks";
 

@@ -3,6 +3,7 @@ import {
   useDeleteTagByIdMutation,
   useProjectById,
 } from "@/lib/query";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import {
   Box,
   Button,
@@ -20,10 +21,15 @@ import { useState } from "react";
 export const ProjectTagPill = ({ tag }: { tag: ProjectTag }) => {
   const deleteTagMutation = useDeleteTagByIdMutation();
 
+  if (!tag || !tag.text) {
+    return null;
+  }
+
   return (
     <Pill
       size="md"
       withRemoveButton
+      disabled={deleteTagMutation.isPending}
       onRemove={() => {
         deleteTagMutation.mutate(tag.id);
       }}
@@ -39,11 +45,13 @@ export const ProjectTagsInput = (props: { project: Project }) => {
 
   const [tagInput, setTagInput] = useState("");
 
+  const [parent] = useAutoAnimate();
+
   const handleSubmit = () => {
     createTagMutation.mutate({
       project_id: {
         id: props.project.id,
-        directus_user_id: props.project.directus_user_id,
+        directus_user_id: (props.project.directus_user_id as string) ?? "",
       },
       text: tagInput,
     });
@@ -63,7 +71,7 @@ export const ProjectTagsInput = (props: { project: Project }) => {
       <LoadingOverlay visible={projectQuery.isLoading} />
       <Box>
         <Title order={4}>Tags</Title>
-        <Group gap="sm">
+        <Group gap="sm" ref={parent}>
           {(projectQuery.data?.tags?.length ?? 0) === 0 && (
             <Text size="sm">
               No tags have been added to this project yet. Add a tag using the
@@ -94,9 +102,10 @@ export const ProjectTagsInput = (props: { project: Project }) => {
             onChange={(e) => setTagInput(e.currentTarget.value)}
           />
           <Button
+            loading={createTagMutation.isPending}
             onClick={handleSubmit}
             variant="outline"
-            disabled={createTagMutation.isPending || !tagInput.trim()}
+            disabled={!tagInput.trim()}
           >
             Add Tag
           </Button>

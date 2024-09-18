@@ -30,12 +30,12 @@ export const AspectCard = ({
           bg="white"
           shadow="sm"
           className={cn(
-            "rounded-md overflow-hidden hover:-translate-y-1 my-1 transition group h-full w-[320px] text-left flex flex-col",
+            "group my-1 flex h-full w-[320px] flex-col overflow-hidden rounded-md text-left transition hover:-translate-y-1",
             className,
           )}
         >
-          <Box className="w-full relative rounded-t-md overflow-hidden bg-slate-500">
-            <Box className="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Box className="relative w-full overflow-hidden rounded-t-md bg-slate-500">
+            <Box className="absolute right-0 top-0 p-2 opacity-0 transition-opacity group-hover:opacity-100">
               <Button
                 variant="default"
                 leftSection={<IconArrowsDiagonal size="14" />}
@@ -45,13 +45,13 @@ export const AspectCard = ({
             </Box>
             <img
               src={data.image_url ?? "/placeholder.png"}
-              alt={data.name}
-              className="w-full h-[200px] object-cover"
+              alt={data.name ?? ""}
+              className="h-[200px] w-full object-cover"
             />
           </Box>
 
           <Box p="md" className="flex-grow justify-between">
-            <Box className="flex flex-col h-full">
+            <Box className="flex h-full flex-col">
               <Stack className="flex-grow">
                 <Text size="lg" className="font-semibold">
                   {data.name}
@@ -66,7 +66,7 @@ export const AspectCard = ({
                   <Pill>
                     <Group>
                       <Text className="font-semibold">
-                        {data.quotes_count} Quotes
+                        {data.quotes_count ?? 0} Quotes
                       </Text>
                     </Group>
                   </Pill>

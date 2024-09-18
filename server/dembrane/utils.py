@@ -1,9 +1,11 @@
 import time
 import uuid
 import random
+import asyncio
+import logging
 import threading
 from os import path
-from typing import Generator
+from typing import Any, Dict, Tuple, Optional, Generator
 from datetime import datetime, timezone
 
 import requests
@@ -70,6 +72,51 @@ def get_utc_timestamp() -> datetime:
 
 def get_safe_filename(filename: str) -> str:
     return filename.replace("/", "_").replace("\\", "_").replace(" ", "_")
+
+
+logger = logging.getLogger(__name__)
+
+
+class CacheWithExpiration:
+    def __init__(self, ttl: int):
+        self.cache: Dict[str, Tuple[Any, float]] = {}
+        self.ttl = ttl
+        self.lock = asyncio.Lock()
+        logger.debug(f"Initialized CacheWithExpiration with TTL: {ttl}")
+
+    async def get(self, key: str) -> Optional[Any]:
+        async with self.lock:
+            if key in self.cache:
+                value, expiration_time = self.cache[key]
+                if time.time() < expiration_time:
+                    logger.debug(f"Cache hit for key: {key}")
+                    return value
+                else:
+                    logger.debug(f"Cache expired for key: {key}")
+                    del self.cache[key]
+            else:
+                logger.debug(f"Cache miss for key: {key}")
+        return None
+
+    async def set(self, key: str, value: Any) -> None:
+        expiration_time = time.time() + self.ttl
+        async with self.lock:
+            self.cache[key] = (value, expiration_time)
+        logger.debug(f"Set cache for key: {key}, expires at: {expiration_time}")
+        asyncio.create_task(self.expire_cache(key, expiration_time))
+
+    async def expire_cache(self, key: str, expiration_time: float) -> None:
+        await asyncio.sleep(self.ttl)
+        async with self.lock:
+            stored_value = self.cache.get(key)
+            if stored_value and stored_value[1] <= expiration_time:
+                del self.cache[key]
+                logger.debug(f"Expired and removed cache for key: {key}")
+
+    async def clear(self) -> None:
+        async with self.lock:
+            self.cache.clear()
+            logger.debug("Cleared entire cache")
 
 
 if __name__ == "__main__":

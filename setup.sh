@@ -9,10 +9,11 @@ frontend_setup () {
     eval "`fnm env`"
   fi  
   fnm install 18
-  npm i -g yarn
+  npm i -g pnpm
+  pnpm config set store-dir /home/node/.local/share/pnpm/store
 
   cd frontend
-  yarn install
+  pnpm install
 }
 
 server_setup() {

@@ -10,7 +10,7 @@ import {
   Skeleton,
 } from "@mantine/core";
 import { useParams } from "react-router-dom";
-import { Quote } from "../../components/quote/Quote";
+import { Quote } from "../../../components/quote/Quote";
 import { Markdown } from "@/components/common/Markdown";
 import { useAspectById } from "@/lib/query";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
@@ -35,7 +35,7 @@ export const ProjectLibraryAspect = () => {
   );
 
   return (
-    <Stack className="py-6 px-4 relative">
+    <Stack className="relative px-4 py-6">
       <Breadcrumbs
         items={[
           {
@@ -61,8 +61,8 @@ export const ProjectLibraryAspect = () => {
         <LoadingOverlay visible={isLoading} />
         <img
           src={aspect?.image_url ?? "/placeholder.png"}
-          alt={aspect?.name}
-          className="w-full h-[400px] object-cover"
+          alt={aspect?.name ?? ""}
+          className="h-[400px] w-full object-cover"
         />
         <Container>
           <Stack>

@@ -19,7 +19,7 @@
       "splitTerminals": [
         {
           "name": "server",
-          "commands": ["cd server", "./run.sh"]
+          "commands": ["cd server", "source .venv/bin/activate", "./run.sh"]
         }
       ]
     },
@@ -27,7 +27,7 @@
       "splitTerminals": [
         {
           "name": "workers",
-          "commands": ["cd server", "./run-worker.sh"]
+          "commands": ["cd server", "source .venv/bin/activate", "./run-worker.sh"]
         }
       ]
     },
@@ -35,13 +35,14 @@
       "splitTerminals": [
         {
           "name": "admin-dashboard",
-          "commands": ["cd frontend", "yarn dev"]
+          "commands": ["cd frontend", "pnpm run dev"]
         },
         {
           "name": "participant-portal",
-          "commands": ["cd frontend", "yarn participant:dev"]
+          "commands": ["cd frontend", "pnpm run participant:dev"]
         }
       ]
     }
-  ]
+  ],
+  "files.eol": "\n"
 }

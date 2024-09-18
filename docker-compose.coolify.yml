@@ -7,7 +7,7 @@ x-logging: &default-logging
 
 services:
   redis:
-    image: "bitnami/redis:latest"
+    image: "bitnami/redis:6.2.14"
     restart: unless-stopped
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
@@ -70,7 +70,7 @@ services:
       CORS_CREDENTIALS: true
       SESSION_COOKIE_DOMAIN: ${DIRECTUS_SESSION_COOKIE_DOMAIN}
       SESSION_COOKIE_SAME_SITE: lax
-      SESSION_COOKIE_SECURE: true
+      SESSION_COOKIE_SECURE: lax
       EMAIL_TRANSPORT: smtp
       EMAIL_FROM: ${SMTP_FROM:-DoNotReply@c1f65324-81a8-41de-abe3-2c1cbf52ba1a.azurecomm.net}
       EMAIL_SMTP_HOST: ${SMTP_HOST:-smtp.azurecomm.net}
@@ -80,6 +80,20 @@ services:
       USER_REGISTER_URL_ALLOW_LIST: ${ADMIN_BASE_URL}/verify-email
       PASSWORD_RESET_URL_ALLOW_LIST: ${ADMIN_BASE_URL}/password-reset
       USER_INVITE_URL_ALLOW_LIST: ${ADMIN_BASE_URL}/invite
+      AUTH_PROVIDERS: google
+      AUTH_GOOGLE_DRIVER: openid
+      AUTH_GOOGLE_CLIENT_ID: ${AUTH_GOOGLE_CLIENT_ID}
+      AUTH_GOOGLE_CLIENT_SECRET: ${AUTH_GOOGLE_CLIENT_SECRET}
+      AUTH_GOOGLE_ISSUER_URL: https://accounts.google.com
+      AUTH_GOOGLE_IDENTIFIER_KEY: email
+      AUTH_GOOGLE_FIRST_NAME_KEY: given_name
+      AUTH_GOOGLE_LAST_NAME_KEY: family_name
+      AUTH_GOOGLE_ICON: google
+      AUTH_GOOGLE_LABEL: Google
+      AUTH_GOOGLE_ALLOW_PUBLIC_REGISTRATION: true
+      AUTH_GOOGLE_DEFAULT_ROLE_ID: 2446660a-ab6c-4801-ad69-5711030cba83
+      AUTH_GOOGLE_REDIRECT_ALLOW_LIST: ${ADMIN_BASE_URL}/projects
+
     volumes:
       - ./directus/uploads:/directus/uploads
 
@@ -180,54 +194,54 @@ services:
       - dashboard-frontend
     logging: *default-logging
 
-  promtail:
-    image: grafana/promtail:2.8.0
-    volumes:
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./promtail-config.yaml:/etc/promtail/config.yaml
-    command: -config.file=/etc/promtail/config.yaml
-    networks:
-      - default
+  # promtail:
+  #   image: grafana/promtail:2.8.0
+  #   volumes:
+  #     - /var/lib/docker/containers:/var/lib/docker/containers:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - ./promtail-config.yaml:/etc/promtail/config.yaml
+  #   command: -config.file=/etc/promtail/config.yaml
+  #   networks:
+  #     - default
 
-  loki:
-    image: grafana/loki:latest
-    restart: unless-stopped
-    networks:
-      - default
-    volumes:
-      - loki_data:/loki
-    command: -config.file=/etc/loki/local-config.yaml
+  # loki:
+  #   image: grafana/loki:latest
+  #   restart: unless-stopped
+  #   networks:
+  #     - default
+  #   volumes:
+  #     - loki_data:/loki
+  #   command: -config.file=/etc/loki/local-config.yaml
 
-  grafana:
-    image: grafana/grafana:latest
-    restart: unless-stopped
-    entrypoint:
-      - sh
-      - -euc
-      - |
-        mkdir -p /etc/grafana/provisioning/datasources
-        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
-        apiVersion: 1
-        datasources:
-          - name: Loki
-            type: loki
-            access: proxy
-            url: http://loki:3100
-        EOF
-        /run.sh
-    networks:
-      - default
-    volumes:
-      - grafana_data:/var/lib/grafana
-    depends_on:
-      - loki
-    labels:
-      - caddy_0.basicauth.0_dembrane=${CADDY_HASHED_PASSWORD}
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   restart: unless-stopped
+  #   entrypoint:
+  #     - sh
+  #     - -euc
+  #     - |
+  #       mkdir -p /etc/grafana/provisioning/datasources
+  #       cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+  #       apiVersion: 1
+  #       datasources:
+  #         - name: Loki
+  #           type: loki
+  #           access: proxy
+  #           url: http://loki:3100
+  #       EOF
+  #       /run.sh
+  #   networks:
+  #     - default
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  #   depends_on:
+  #     - loki
+  #   labels:
+  #     - caddy_0.basicauth.0_dembrane=${CADDY_HASHED_PASSWORD}
 
 volumes:
-  loki_data:
-  grafana_data:
+  # loki_data:
+  # grafana_data:
   postgres_data:
   rabbitmq_data:
   redis_data:

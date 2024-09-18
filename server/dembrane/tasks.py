@@ -27,6 +27,7 @@ from dembrane.quote_utils import (
     assign_aspect_centroid,
     generate_aspect_extras,
     generate_insight_extras,
+    generate_conversation_summary,
     cluster_quotes_using_aspect_centroids,
 )
 
@@ -200,6 +201,23 @@ def task_generate_quotes(
         try:
             generate_quotes(db, project_analysis_run_id, conversation_id)
         # FIXME - Add specific exceptions
+        except Exception as exc:
+            logger.error(f"Error: {exc}")
+            db.rollback()
+            raise self.retry(exc=exc) from exc
+
+
+@celery_app.task(
+    bind=True,
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 2},
+    ignore_result=False,
+    base=BaseTask,
+)
+def task_generate_conversation_summary(self, conversation_id: str):
+    with DatabaseSession() as db:
+        try:
+            generate_conversation_summary(db, conversation_id)
         except Exception as exc:
             logger.error(f"Error: {exc}")
             db.rollback()
@@ -482,7 +500,10 @@ def task_create_project_library(_self, project_id: str):
 
             for conversation in conversations:
                 quote_s_list.append(
-                    task_generate_quotes.si(project_analysis_run.id, conversation.id)
+                    chord(
+                        task_generate_quotes.si(project_analysis_run.id, conversation.id),
+                        task_generate_conversation_summary.si(conversation.id),
+                    )
                 )
 
             g = group(*quote_s_list)

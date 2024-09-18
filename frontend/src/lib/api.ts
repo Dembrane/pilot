@@ -7,6 +7,7 @@ import axios, {
 } from "axios";
 import { directus } from "./directus";
 import { QueryAlias, readItem, readItems } from "@directus/sdk";
+import { Message } from "ai/react";
 
 export const apiCommonConfig: CreateAxiosDefaults = {
   baseURL: API_BASE_URL,
@@ -212,6 +213,46 @@ export const getProjectInsights = async (projectId: string) => {
   );
 };
 
+export const getQuotesByConversationId = async (conversationId: string) => {
+  const conversation = await directus.request<Conversation>(
+    readItem("conversation", conversationId, {
+      fields: ["project_id"],
+    }),
+  );
+
+  if (!conversation) {
+    return [];
+  }
+
+  const project_analysis_run = await getLatestProjectAnalysisRunByProjectId(
+    conversation.project_id as string,
+  );
+
+  if (!project_analysis_run) {
+    return [];
+  }
+
+  const data = await directus.request<Quote[]>(
+    readItems("quote", {
+      fields: [
+        "*",
+        {
+          conversation_id: ["id", "participant_name"],
+        },
+      ],
+      sort: "order",
+      filter: {
+        conversation_id: {
+          _eq: conversationId,
+        },
+        project_analysis_run_id: project_analysis_run?.id,
+      },
+    }),
+  );
+
+  return data;
+};
+
 export const getProjectTranscriptsLink = (projectId: string) =>
   `${apiCommonConfig.baseURL}/projects/${projectId}/transcripts`;
 
@@ -230,34 +271,6 @@ export const initiateConversation = async (payload: {
       pin: payload.pin,
       tag_id_list: payload.tagIdList,
       user_agent: navigator.userAgent ?? undefined,
-    },
-  );
-};
-
-export const getConversationById = async (
-  conversationId: string,
-  loadChunks?: boolean,
-) => {
-  return apiNoAuth.get<unknown, TConversation>(
-    `/conversations/${conversationId}`,
-    {
-      params: {
-        load_chunks: loadChunks,
-      },
-    },
-  );
-};
-
-export const getConversationsByProjectId = async (
-  projectId: string,
-  load_chunks?: boolean,
-) => {
-  return api.get<unknown, TConversation[]>(
-    `/projects/${projectId}/conversations`,
-    {
-      params: {
-        load_chunks,
-      },
     },
   );
 };
@@ -382,9 +395,7 @@ export const getConversationChunkContentLink = (
 export const generateProjectLibrary = async (payload: {
   projectId: string;
 }) => {
-  return api.post<unknown, TTask>(
-    `/projects/${payload.projectId}/create-library`,
-  );
+  return api.post<unknown>(`/projects/${payload.projectId}/create-library`);
 };
 
 export const generateProjectView = async (payload: {
@@ -392,11 +403,80 @@ export const generateProjectView = async (payload: {
   query: string;
   additionalContext?: string;
 }) => {
-  return api.post<unknown, TTask>(
-    `/projects/${payload.projectId}/create-view`,
+  return api.post<unknown>(`/projects/${payload.projectId}/create-view`, {
+    query: payload.query,
+    additional_context: payload.additionalContext,
+  });
+};
+
+export const getConversationTranscriptString = async (
+  conversationId: string,
+) => {
+  return api.get<unknown, string>(
+    `/conversations/${conversationId}/transcript`,
+  );
+};
+
+export const getProjectChatContext = async (chatId: string) => {
+  return api.get<unknown, TProjectChatContext>(`/chats/${chatId}/context`);
+};
+
+export const addChatContext = async (
+  chatId: string,
+  conversationId?: string,
+) => {
+  return api.post<unknown, TProjectChatContext>(
+    `/chats/${chatId}/add-context`,
     {
-      query: payload.query,
-      additional_context: payload.additionalContext,
+      conversation_id: conversationId,
     },
   );
+};
+
+export const deleteChatContext = async (
+  chatId: string,
+  conversationId?: string,
+) => {
+  return api.post<unknown, TProjectChatContext>(
+    `/chats/${chatId}/delete-context`,
+    {
+      conversation_id: conversationId,
+    },
+  );
+};
+
+// this will lock all unused conversations in the chat as a dembrane message
+export const lockConversations = async (chatId: string) => {
+  return api.post<unknown, TProjectChatContext>(
+    `/chats/${chatId}/lock-conversations`
+  );
+};
+
+export const getChatHistory = async (chatId: string): Promise<ChatHistory> => {
+  const data = await directus.request<ProjectChatMessage[]>(
+    readItems("project_chat_message", {
+      filter: {
+        project_chat_id: chatId,
+      },
+      sort: "date_created",
+      fields: [
+        "*",
+        {
+          added_conversations: [
+            {
+              conversation_id: ["id", "participant_name"],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+
+  return data.map((message) => ({
+    createdAt: message.date_created,
+    id: message.id,
+    role: message.message_from as "user" | "assistant",
+    content: message.text ?? "",
+    _original: message,
+  }));
 };

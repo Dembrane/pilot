@@ -9,7 +9,6 @@ COPY ./snapshots/snapshot.yaml ./snapshot.yaml
 # https://github.com/directus/directus/blob/main/Dockerfile
 CMD : \
     && node cli.js bootstrap \
-    # load snapshot (just run it manually)
-    # && npx directus schema apply --yes ./snapshot.yaml \
+    && npx directus schema apply --yes ./snapshot.yaml \
     && pm2-runtime start ecosystem.config.cjs \
     ;

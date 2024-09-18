@@ -17,8 +17,8 @@ export const ProjectListItem = ({
       <Paper
         component="a"
         p="sm"
-        bg="transparent"
         className="relative hover:!border-primary-400"
+        withBorder
       >
         <Group justify="space-between">
           <Stack gap="0">
@@ -28,7 +28,7 @@ export const ProjectListItem = ({
                 {project.name}
               </Text>
             </Group>
-            <Text size="sm" c="gray.8">
+            <Text size="sm" c="dimmed">
               {project.conversations_count} Conversation
               {project.conversations_count === 1 ? "" : "s"} &middot; Edited{" "}
               {formatRelative(new Date(project.updated_at), new Date())}

@@ -1005,11 +1005,11 @@ export const useInsightsByConversationId = (conversationId: string) => {
 
 export const useCreateChatMutation = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: {
       navigateToNewChat?: boolean;
+      conversationId?: string;
       project_id: {
         id: string;
       };
@@ -1017,6 +1017,15 @@ export const useCreateChatMutation = () => {
       const chat = await directus.request(
         createItem("project_chat", payload as any),
       );
+
+      try {
+        if (payload.conversationId) {
+          await addChatContext(chat.id, payload.conversationId);
+        }
+      } catch (error) {
+        console.error("Failed to add conversation to chat:", error);
+        toast.error("Failed to add conversation to chat");
+      }
 
       if (payload.navigateToNewChat && chat && chat.id) {
         navigate(`/projects/${payload.project_id.id}/chats/${chat.id}`);

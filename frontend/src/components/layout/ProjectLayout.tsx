@@ -6,7 +6,7 @@ import { ProjectSidebar } from "../project/ProjectSidebar";
 export const ProjectLayout = () => {
   return (
     <Box className="relative grid grid-cols-12 gap-2">
-      <aside className="col-span-full h-fit lg:col-span-4 lg:h-[calc(100vh-60px)] lg:overflow-y-auto">
+      <aside className="col-span-full h-fit border-b border-r-0 lg:col-span-4 lg:h-[calc(100vh-60px)] lg:overflow-y-auto lg:border-b-0 lg:border-r">
         <ProjectSidebar />
       </aside>
 

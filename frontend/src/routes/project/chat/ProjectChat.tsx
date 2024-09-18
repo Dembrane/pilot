@@ -535,7 +535,7 @@ export const ProjectChatRoute = () => {
               </Stack>
             </Group>
 
-            <Text size="xs" className="mt-1 italic">
+            <Text size="xs" className="mt-1 italic" c="dimmed">
               Use Shift + Enter to add a new line
             </Text>
           </form>

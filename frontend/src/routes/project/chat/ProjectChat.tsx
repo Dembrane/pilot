@@ -23,6 +23,7 @@ import {
   ActionIcon,
   rem,
   Tooltip,
+  Anchor,
 } from "@mantine/core";
 import { useDisclosure, useDocumentTitle } from "@mantine/hooks";
 import {
@@ -42,7 +43,6 @@ import { Markdown } from "@/components/common/Markdown";
 import React, { useEffect, useMemo, useRef } from "react";
 import { formatDate } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const ConversationLinks = ({
   conversations,
@@ -53,14 +53,14 @@ const ConversationLinks = ({
 
   return (
     <Group gap="xs" align="center">
-      {conversations.map((conversation) => (
+      {conversations?.map((conversation) => (
         <Link
           key={conversation.id}
           to={`/projects/${projectId}/conversation/${conversation.id}/overview`}
         >
-          {conversation.participant_name}
+          <Anchor size="xs">{conversation.participant_name}</Anchor>
         </Link>
-      ))}
+      )) ?? null}
     </Group>
   );
 };
@@ -114,11 +114,11 @@ const ChatHistoryMessage = ({
     );
   }
 
-  if (message._original.added_conversations.length > 0) {
+  if (message._original.added_conversations?.length > 0) {
     return (
       <ChatMessage key={message.id} role="dembrane" section={section}>
         <Group gap="xs" align="baseline">
-          <Text size="xs">Je added:</Text>
+          <Text size="xs">You added:</Text>
           <ConversationLinks
             conversations={message._original.added_conversations.map(
               (ac) => ac.conversation_id,
@@ -263,9 +263,10 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
       console.log("onFinish", message.content);
       // do this for now because - i dont want to do the text processing again in the backend
       addChatMessageMutation.mutate({
-        project_chat_id: chatId ?? "",
+        project_chat_id: chatId,
         text: message.content,
         message_from: "assistant",
+        date_created: new Date().toISOString(),
       });
       // scroll to the last message
       lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -276,20 +277,21 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
     stop();
 
     const incompleteMessage = messages[messages.length - 1];
-
     // publish the incomplete result to the backend
-    addChatMessageMutation.mutate({
-      project_chat_id: chatId ?? "",
+    const body = {
+      project_chat_id: chatId,
       text: incompleteMessage.content,
       message_from: "assistant",
       date_created: new Date(
         incompleteMessage.createdAt ?? new Date(),
       ).toISOString(),
-    });
+    };
+    addChatMessageMutation.mutate(body as any);
   };
 
   const customHandleSubmit = () => {
     lastInput.current = input;
+    console.log("customHandleSubmit", input);
     handleSubmit();
   };
 
@@ -299,7 +301,10 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
       return;
     }
 
-    if (chatHistoryQuery.data.length > messages.length) {
+    if (
+      chatHistoryQuery.data &&
+      chatHistoryQuery.data.length > (messages?.length ?? 0)
+    ) {
       // @ts-ignore
       setMessages(chatHistoryQuery.data ?? messages);
     }
@@ -349,7 +354,7 @@ export const ProjectChatRoute = () => {
   }
 
   const lastMessage =
-    messages.length > 0 ? messages[messages.length - 1] : null;
+    messages && messages.length > 0 ? messages[messages.length - 1] : null;
 
   return (
     <Stack className="relative flex min-h-full flex-col px-2 pr-4">

@@ -35,12 +35,12 @@ dependencies = [
     # Types
     "types-aiofiles==23.2.*",
     "types-tqdm > 4",
-    # Tools
+    # Uncategorized
     "mypy",
     "ruff",
     "isort",
     "pandas-stubs>=2.2.2.240514",
-    "trankit @ git+https://github.com/nlp-uoregon/trankit",
+    # "trankit @ git+https://github.com/nlp-uoregon/trankit",
     "ffmpeg-python>=0.2.0",
     "types-requests>=2.32.0.20240602",
     "flower>=2.0.1",

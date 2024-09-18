@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Generator
 
 from pydantic import BaseModel
 from anthropic import Anthropic
@@ -31,49 +31,13 @@ class ClientMessage(BaseModel):
     toolInvocations: Optional[List[ToolInvocation]] = None
 
 
-def convert_to_openai_messages(messages: List[ClientMessage]):
+def convert_to_openai_messages(messages: List[ClientMessage]) -> List[Dict[str, Any]]:
     openai_messages = []
 
     for message in messages:
         parts = []
 
         parts.append({"type": "text", "text": message.content})
-
-        if message.experimental_attachments:
-            for attachment in message.experimental_attachments:
-                if attachment.contentType.startswith("image"):
-                    parts.append({"type": "image_url", "image_url": {"url": attachment.url}})
-
-                elif attachment.contentType.startswith("text"):
-                    parts.append({"type": "text", "text": attachment.url})
-
-        if message.toolInvocations:
-            tool_calls = [
-                {
-                    "id": tool_invocation.toolCallId,
-                    "type": "function",
-                    "function": {
-                        "name": tool_invocation.toolName,
-                        "arguments": json.dumps(tool_invocation.args),
-                    },
-                }
-                for tool_invocation in message.toolInvocations
-            ]
-
-            openai_messages.append({"role": "assistant", "tool_calls": tool_calls})
-
-            tool_results = [
-                {
-                    "role": "tool",
-                    "content": json.dumps(tool_invocation.result),
-                    "tool_call_id": tool_invocation.toolCallId,
-                }
-                for tool_invocation in message.toolInvocations
-            ]
-
-            openai_messages.extend(tool_results)
-
-            continue
 
         openai_messages.append({"role": message.role, "content": parts})
 
@@ -105,70 +69,75 @@ anthropic_client = Anthropic(
 )
 
 
-def stream_anthropic_chat_response(messages: List[Dict[str, str]], protocol: str = "data"):
+def stream_anthropic_chat_response(
+    messages: List[Dict[str, str]], protocol: str = "data"
+) -> Generator[str, None, None]:
     stream = anthropic_client.messages.create(
-        model="claude-3-sonnet-20240229", messages=messages, max_tokens=1000, stream=True
+        model="claude-3-sonnet-20240229",
+        messages=messages,  # type: ignore
+        max_tokens=1000,
+        stream=True,
     )
 
     finish_reason = "unknown"
     usage = {"promptTokens": 0, "completionTokens": 0}
     tool_call_content_blocks = {}
-    # provider_metadata = None
 
     for chunk in stream:
-        if chunk.type == "ping":
+        if chunk.type == "ping":  # type: ignore
             continue
 
-        elif chunk.type == "content_block_start":
-            if chunk.content_block.type == "text":
+        elif chunk.type == "content_block_start":  # type: ignore
+            if chunk.content_block.type == "text":  # type: ignore
                 continue
-            elif chunk.content_block.type == "tool_use":
-                tool_call_content_blocks[chunk.index] = {
-                    "tool_call_id": chunk.content_block.id,
-                    "tool_name": chunk.content_block.name,
+            elif chunk.content_block.type == "tool_use":  # type: ignore
+                tool_call_content_blocks[chunk.index] = {  # type: ignore
+                    "tool_call_id": chunk.content_block.id,  # type: ignore
+                    "tool_name": chunk.content_block.name,  # type: ignore
                     "json_text": "",
                 }
                 if protocol == "data":
-                    yield f"b:{json.dumps({'toolCallId': chunk.content_block.id, 'toolName': chunk.content_block.name})}\n"
+                    yield f"b:{json.dumps({'toolCallId': chunk.content_block.id, 'toolName': chunk.content_block.name})}\n"  # type: ignore
 
-        elif chunk.type == "content_block_stop":
-            if chunk.index in tool_call_content_blocks:
-                content_block = tool_call_content_blocks[chunk.index]
+        elif chunk.type == "content_block_stop":  # type: ignore
+            if chunk.index in tool_call_content_blocks:  # type: ignore
+                content_block = tool_call_content_blocks[chunk.index]  # type: ignore
                 if protocol == "data":
                     yield f"9:{json.dumps({'toolCallId': content_block['tool_call_id'], 'toolName': content_block['tool_name'], 'args': json.loads(content_block['json_text'])})}\n"
-                del tool_call_content_blocks[chunk.index]
+                del tool_call_content_blocks[chunk.index]  # type: ignore
 
-        elif chunk.type == "content_block_delta":
-            if chunk.delta.type == "text_delta":
+        elif chunk.type == "content_block_delta":  # type: ignore
+            if chunk.delta.type == "text_delta":  # type: ignore
                 if protocol == "text":
-                    yield chunk.delta.text
+                    yield chunk.delta.text  # type: ignore
                 elif protocol == "data":
-                    yield f"0:{json.dumps(chunk.delta.text)}\n"
-            elif chunk.delta.type == "input_json_delta":
-                content_block = tool_call_content_blocks[chunk.index]
+                    yield f"0:{json.dumps(chunk.delta.text)}\n"  # type: ignore
+            elif chunk.delta.type == "input_json_delta":  # type: ignore
+                content_block = tool_call_content_blocks[chunk.index]  # type: ignore
                 if protocol == "data":
-                    yield f"c:{json.dumps({'toolCallId': content_block['tool_call_id'], 'argsTextDelta': chunk.delta.partial_json})}\n"
-                content_block["json_text"] += chunk.delta.partial_json
+                    yield f"c:{json.dumps({'toolCallId': content_block['tool_call_id'], 'argsTextDelta': chunk.delta.partial_json})}\n"  # type: ignore
+                content_block["json_text"] += chunk.delta.partial_json  # type: ignore
 
-        elif chunk.type == "message_start":
-            usage["promptTokens"] = chunk.message.usage.input_tokens
-            usage["completionTokens"] = chunk.message.usage.output_tokens
+        elif chunk.type == "message_start":  # type: ignore
+            usage["promptTokens"] = chunk.message.usage.input_tokens  # type: ignore
+            usage["completionTokens"] = chunk.message.usage.output_tokens  # type: ignore
             if protocol == "data":
-                yield f"2:{json.dumps([{'id': chunk.message.id, 'modelId': chunk.message.model}])}\n"
+                yield f"2:{json.dumps([{'id': chunk.message.id, 'modelId': chunk.message.model}])}\n"  # type: ignore
 
-        elif chunk.type == "message_delta":
-            usage["completionTokens"] = chunk.usage.output_tokens
-            finish_reason = map_anthropic_stop_reason(chunk.delta.stop_reason)
+        elif chunk.type == "message_delta":  # type: ignore
+            usage["completionTokens"] = chunk.usage.output_tokens  # type: ignore
+            if chunk.delta.stop_reason:  # type: ignore
+                finish_reason = map_anthropic_stop_reason(chunk.delta.stop_reason)  # type: ignore
 
-        elif chunk.type == "message_stop":
+        elif chunk.type == "message_stop":  # type: ignore
             if protocol == "data":
                 yield f"d:{json.dumps({'finishReason': finish_reason, 'usage': usage})}\n"
 
-        elif chunk.type == "error":
+        elif chunk.type == "error":  # type: ignore
             if protocol == "data":
-                yield f"3:{json.dumps(chunk.error)}\n"
+                yield f"3:{json.dumps(chunk.error)}\n"  # type: ignore
             else:
-                yield f"Error: {chunk.error}"
+                yield f"Error: {chunk.error}"  # type: ignore
 
 
 def map_anthropic_stop_reason(finish_reason: Optional[str]) -> str:

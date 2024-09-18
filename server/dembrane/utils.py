@@ -5,7 +5,7 @@ import asyncio
 import logging
 import threading
 from os import path
-from typing import Any, Optional, Generator
+from typing import Any, Dict, Tuple, Optional, Generator
 from datetime import datetime, timezone
 
 import requests
@@ -79,7 +79,7 @@ logger = logging.getLogger(__name__)
 
 class CacheWithExpiration:
     def __init__(self, ttl: int):
-        self.cache = {}
+        self.cache: Dict[str, Tuple[Any, float]] = {}
         self.ttl = ttl
         self.lock = asyncio.Lock()
         logger.debug(f"Initialized CacheWithExpiration with TTL: {ttl}")
@@ -98,14 +98,14 @@ class CacheWithExpiration:
                 logger.debug(f"Cache miss for key: {key}")
         return None
 
-    async def set(self, key: str, value: Any):
+    async def set(self, key: str, value: Any) -> None:
         expiration_time = time.time() + self.ttl
         async with self.lock:
             self.cache[key] = (value, expiration_time)
         logger.debug(f"Set cache for key: {key}, expires at: {expiration_time}")
         asyncio.create_task(self.expire_cache(key, expiration_time))
 
-    async def expire_cache(self, key: str, expiration_time: float):
+    async def expire_cache(self, key: str, expiration_time: float) -> None:
         await asyncio.sleep(self.ttl)
         async with self.lock:
             stored_value = self.cache.get(key)
@@ -113,7 +113,7 @@ class CacheWithExpiration:
                 del self.cache[key]
                 logger.debug(f"Expired and removed cache for key: {key}")
 
-    async def clear(self):
+    async def clear(self) -> None:
         async with self.lock:
             self.cache.clear()
             logger.debug("Cleared entire cache")

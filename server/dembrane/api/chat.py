@@ -28,7 +28,7 @@ POST /{chat_id}/delete-context
 """
 
 import logging
-from typing import List, Literal, Optional
+from typing import Dict, List, Literal, Optional, Generator
 
 from fastapi import Query, APIRouter, HTTPException
 from pydantic import BaseModel
@@ -74,7 +74,7 @@ class ChatContextSchema(BaseModel):
 
 
 @ChatRouter.get("/{chat_id}/context", response_model=ChatContextSchema)
-async def get_chat_context(chat_id: str, db: DependencyInjectDatabase):
+async def get_chat_context(chat_id: str, db: DependencyInjectDatabase) -> ChatContextSchema:
     chat = db.get(ProjectChatModel, chat_id)
 
     if chat is None:
@@ -143,7 +143,9 @@ class ChatAddContextSchema(BaseModel):
 
 
 @ChatRouter.post("/{chat_id}/add-context")
-async def add_chat_context(chat_id: str, body: ChatAddContextSchema, db: DependencyInjectDatabase):
+async def add_chat_context(
+    chat_id: str, body: ChatAddContextSchema, db: DependencyInjectDatabase
+) -> None:
     if body.conversation_id is None:
         raise HTTPException(status_code=400, detail="conversation_id is required")
 
@@ -196,7 +198,7 @@ class ChatDeleteContextSchema(BaseModel):
 @ChatRouter.post("/{chat_id}/delete-context")
 async def delete_chat_context(
     chat_id: str, body: ChatDeleteContextSchema, db: DependencyInjectDatabase
-):
+) -> None:
     chat = db.get(ProjectChatModel, chat_id)
 
     if chat is None:
@@ -222,7 +224,9 @@ async def delete_chat_context(
     raise HTTPException(status_code=404, detail="Conversation not found in the chat")
 
 
-async def add_new_conversations(chat_id, db):
+async def add_new_conversations(
+    chat_id: str, db: DependencyInjectDatabase
+) -> List[ConversationModel]:
     db_messages = (
         db.query(ProjectChatMessageModel)
         .filter(ProjectChatMessageModel.project_chat_id == chat_id)
@@ -271,7 +275,9 @@ async def add_new_conversations(chat_id, db):
     return used_conversations
 
 
-async def create_prompt_message(used_conversations, db):
+async def create_prompt_message(
+    used_conversations: List[ConversationModel], db: DependencyInjectDatabase
+) -> Dict[str, str]:
     conversation_transcripts = []
 
     for conversation in used_conversations:
@@ -356,9 +362,9 @@ async def post_chat(
 
     prompt_message = await create_prompt_message(used_conversations, db)
 
-    def stream_response():
+    def stream_response() -> Generator[str, None, None]:
         with DatabaseSession() as db:
-            filtered_messages = []
+            filtered_messages: List[Dict[str, str]] = []
 
             filtered_messages.insert(0, prompt_message)
             filtered_messages.insert(

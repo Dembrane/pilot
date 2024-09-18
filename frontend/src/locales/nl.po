@@ -29,7 +29,7 @@ msgstr "*Een moment a.u.b.*"
 msgid "*We make sure nothing can be traced back to you, and even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]"
 msgstr "*We zorgen dat niks terug te leiden is naar jou als persoon, ook al zeg je per ongeluk je naam, verwijderen wij deze voordat we alles analyseren. Door deze tool te gebruiken, ga je akkoord met onze privacy voorwaarden. Wil je meer weten? Lees dan onze [privacy verklaring]"
 
-#: src/routes/project/ProjectOverview.tsx:254
+#: src/routes/project/ProjectOverview.tsx:262
 msgid "Access Code"
 msgstr ""
 
@@ -57,7 +57,7 @@ msgstr "Vink aan wat van toepassing is"
 #~ msgid "All documents are uploaded and ready now. What research question are you interested in asking? Optionally, you can now open an individual analysis chat for each document."
 #~ msgstr "Alle documenten zijn geüpload en zijn nu klaar. Welke onderzoeksvraag wil je stellen? Optioneel kunt u nu voor elk document een individuele analysechat openen."
 
-#: src/components/project/ProjectResourceLayout.tsx:57
+#: src/components/project/ProjectResourceLayout.tsx:55
 msgid "Analysis"
 msgstr "Analyse"
 
@@ -107,9 +107,9 @@ msgstr "Weet je zeker dat je het wilt afmaken?"
 #~ msgid "Attach as many documents as you like to analyse"
 #~ msgstr "Voeg zoveel documenten toe als je wilt analyseren"
 
-#: src/routes/project/ProjectConversationOverview.tsx:172
-#: src/routes/project/ProjectEdit.tsx:186
-#: src/routes/project/ProjectResourceOverview.tsx:150
+#: src/components/project/ProjectEdit.tsx:202
+#: src/routes/project/conversation/ProjectConversationOverview.tsx:172
+#: src/routes/project/resource/ProjectResourceOverview.tsx:150
 msgid "Cancel"
 msgstr "Annuleren"
 
@@ -118,7 +118,7 @@ msgstr "Annuleren"
 msgid "Check microphone access"
 msgstr "Controleer microfoontoegang"
 
-#: src/components/project/ProjectAccordion.tsx:269
+#: src/components/project/ProjectAccordion.tsx:332
 msgid "Conversations"
 msgstr ""
 
@@ -127,8 +127,8 @@ msgstr ""
 #~ msgstr "Maak een nieuwe sessie aan"
 
 #: src/components/session/SessionSelection.tsx:33
-msgid "Create a new workspace"
-msgstr ""
+#~ msgid "Create a new workspace"
+#~ msgstr ""
 
 #: src/components/layout/ProjectSidebar.tsx:110
 #: src/components/layout/ProjectSidebar.tsx:181
@@ -163,15 +163,15 @@ msgstr ""
 #~ msgid "Drag documents here or select files"
 #~ msgstr "Sleep documenten hierheen of selecteer bestanden"
 
-#: src/routes/project/ProjectConversationOverview.tsx:105
+#: src/routes/project/conversation/ProjectConversationOverview.tsx:105
 msgid "Edit Conversation"
 msgstr ""
 
-#: src/routes/project/ProjectEdit.tsx:73
+#: src/components/project/ProjectEdit.tsx:89
 msgid "Edit Project"
 msgstr ""
 
-#: src/routes/project/ProjectResourceOverview.tsx:112
+#: src/routes/project/resource/ProjectResourceOverview.tsx:112
 msgid "Edit Resource"
 msgstr ""
 
@@ -201,8 +201,8 @@ msgstr "Eerst vragen we een aantal korte vragen, en dan kan je beginnen met opne
 #~ msgstr "Hallo, ik ben vandaag je onderzoeksassistent. Om te beginnen upload je de documenten die je wilt analyseren."
 
 #: src/components/session/SessionSelection.tsx:50
-msgid "Here you can create new workspaces to organize your projects. Click \"Create\" to get started!"
-msgstr ""
+#~ msgid "Here you can create new workspaces to organize your projects. Click \"Create\" to get started!"
+#~ msgstr ""
 
 #: src/routes/participant/ParticipantLogin.tsx:134
 msgid "Hi, Thanks for sharing!"
@@ -221,7 +221,7 @@ msgstr "Hi, Fijn dat je meedoet!"
 #~ msgid "Input global context"
 #~ msgstr "Voer algemene context in"
 
-#: src/routes/project/ProjectOverview.tsx:263
+#: src/routes/project/ProjectOverview.tsx:271
 msgid "Invite Link"
 msgstr ""
 
@@ -246,7 +246,11 @@ msgstr "Naam"
 msgid "Next"
 msgstr "Volgende"
 
-#: src/components/project/ProjectAccordion.tsx:325
+#: src/components/project/ProjectAccordion.tsx:231
+msgid "No chats found. Start a chat using the \"Ask\" button."
+msgstr ""
+
+#: src/components/project/ProjectAccordion.tsx:406
 msgid "No conversations found. Start a conversation using the participation invite link from the <0><1>project overview.</1></0>"
 msgstr ""
 
@@ -254,7 +258,7 @@ msgstr ""
 #~ msgid "No documents uploaded yet"
 #~ msgstr "Nog geen documenten geüpload"
 
-#: src/components/project/ProjectAccordion.tsx:232
+#: src/components/project/ProjectAccordion.tsx:289
 msgid "No resources found."
 msgstr ""
 
@@ -285,8 +289,8 @@ msgstr "Open de probleemoplossingsgids"
 #~ msgid "Original filename"
 #~ msgstr "Originele bestandsnaam"
 
-#: src/components/project/ProjectResourceLayout.tsx:54
-#: src/routes/project/ProjectOverview.tsx:170
+#: src/components/project/ProjectResourceLayout.tsx:52
+#: src/routes/project/ProjectOverview.tsx:130
 msgid "Overview"
 msgstr ""
 
@@ -317,8 +321,8 @@ msgid "Privacy Statements"
 msgstr "Privacy verklaring"
 
 #: src/components/project/ProjectSidebar.tsx:56
-msgid "Project Overview"
-msgstr ""
+#~ msgid "Project Overview"
+#~ msgstr ""
 
 #: src/routes/participant/ParticipantLogin.tsx:148
 msgid "Ready!"
@@ -333,9 +337,9 @@ msgstr "Neem nog een gesprek op"
 msgid "Resume"
 msgstr "Hervatten"
 
-#: src/routes/project/ProjectConversationOverview.tsx:164
-#: src/routes/project/ProjectEdit.tsx:178
-#: src/routes/project/ProjectResourceOverview.tsx:142
+#: src/components/project/ProjectEdit.tsx:194
+#: src/routes/project/conversation/ProjectConversationOverview.tsx:164
+#: src/routes/project/resource/ProjectResourceOverview.tsx:142
 msgid "Save"
 msgstr "Opslaan"
 
@@ -415,9 +419,9 @@ msgstr "Met deze tool kan je gesprekken of verhalen opnemen om je stem te laten 
 msgid "Type your response here"
 msgstr "Typ hier je reactie"
 
-#: src/routes/project/ProjectConversationOverview.tsx:107
-#: src/routes/project/ProjectEdit.tsx:75
-#: src/routes/project/ProjectResourceOverview.tsx:114
+#: src/components/project/ProjectEdit.tsx:91
+#: src/routes/project/conversation/ProjectConversationOverview.tsx:107
+#: src/routes/project/resource/ProjectResourceOverview.tsx:114
 msgid "Unsaved changes"
 msgstr ""
 
@@ -429,7 +433,7 @@ msgstr ""
 msgid "Upload in progress"
 msgstr "Upload bezig"
 
-#: src/components/project/ProjectAccordion.tsx:216
+#: src/components/project/ProjectAccordion.tsx:274
 msgid "Upload resources"
 msgstr ""
 
@@ -443,8 +447,8 @@ msgstr "Welkom"
 #~ msgstr "Wat voor soort vraag wil je stellen voor dit document?"
 
 #: src/components/session/SessionSelection.tsx:31
-msgid "Workspaces"
-msgstr ""
+#~ msgid "Workspaces"
+#~ msgstr ""
 
 #: src/components/BaseMessage.tsx:32
 msgid "You"
@@ -458,7 +462,7 @@ msgstr "Je kan dit in je eentje gebruiken om je eigen verhaal te delen, of je ka
 msgid "You may also choose to record another conversation."
 msgstr "Je kunt er ook voor kiezen om een ander gesprek op te nemen."
 
-#: src/routes/project/ProjectOverview.tsx:257
+#: src/routes/project/ProjectOverview.tsx:265
 msgid "Your code is"
 msgstr ""
 

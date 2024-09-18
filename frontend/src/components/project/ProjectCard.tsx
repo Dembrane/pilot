@@ -30,7 +30,7 @@ export const ProjectCard = ({
             </Link>
           </Group>
           <Text size="sm" c="dimmed">
-            {project.conversations_count} Conversation
+            {project.conversations_count ?? 0} Conversation
             {project.conversations_count === 1 ? "" : "s"} &middot; Edited{" "}
             {formatRelative(new Date(project.updated_at), new Date())}
           </Text>

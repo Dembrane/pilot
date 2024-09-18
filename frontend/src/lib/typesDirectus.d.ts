@@ -11,6 +11,7 @@ type Aspect = {
   short_summary?: string | null;
   updated_at: string;
   view_id?: string | View | null;
+  quotes_count?: number | null;
 };
 
 type Conversation = {
@@ -466,6 +467,7 @@ type Project = {
   project_chats: any[] | ProjectChat[];
   tags: any[] | ProjectTag[];
   updated_at: string;
+  conversations_count?: number | null;
 };
 
 type ProjectAnalysisRun = {

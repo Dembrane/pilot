@@ -51,7 +51,7 @@ export const ProjectTagsInput = (props: { project: Project }) => {
     createTagMutation.mutate({
       project_id: {
         id: props.project.id,
-        directus_user_id: props.project.directus_user_id,
+        directus_user_id: (props.project.directus_user_id as string) ?? "",
       },
       text: tagInput,
     });

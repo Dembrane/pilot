@@ -2,13 +2,13 @@
 
 frontend() {
   cd frontend
-  yarn build
+  pnpm run build
 }
 
 server() {
   cd server
   mypy .
-  ruff .
+  ruff check .
 }
 
 frontend &

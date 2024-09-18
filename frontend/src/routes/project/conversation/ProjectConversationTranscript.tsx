@@ -27,7 +27,10 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 const Chunk = ({ chunk }: { chunk: ConversationChunk }) => {
-  const src = getConversationChunkContentLink(chunk.conversation_id, chunk.id);
+  const src = getConversationChunkContentLink(
+    chunk.conversation_id as string,
+    chunk.id,
+  );
   return (
     <BaseMessage
       title={"Speaker"}

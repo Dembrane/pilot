@@ -80,6 +80,20 @@ services:
       USER_REGISTER_URL_ALLOW_LIST: ${ADMIN_BASE_URL}/verify-email
       PASSWORD_RESET_URL_ALLOW_LIST: ${ADMIN_BASE_URL}/password-reset
       USER_INVITE_URL_ALLOW_LIST: ${ADMIN_BASE_URL}/invite
+      AUTH_PROVIDERS: google
+      AUTH_GOOGLE_DRIVER: openid
+      AUTH_GOOGLE_CLIENT_ID: ${AUTH_GOOGLE_CLIENT_ID}
+      AUTH_GOOGLE_CLIENT_SECRET: ${AUTH_GOOGLE_CLIENT_SECRET}
+      AUTH_GOOGLE_ISSUER_URL: https://accounts.google.com
+      AUTH_GOOGLE_IDENTIFIER_KEY: email
+      AUTH_GOOGLE_FIRST_NAME_KEY: given_name
+      AUTH_GOOGLE_LAST_NAME_KEY: family_name
+      AUTH_GOOGLE_ICON: google
+      AUTH_GOOGLE_LABEL: Google
+      AUTH_GOOGLE_ALLOW_PUBLIC_REGISTRATION: true
+      AUTH_GOOGLE_DEFAULT_ROLE_ID: 2446660a-ab6c-4801-ad69-5711030cba83
+      AUTH_GOOGLE_REDIRECT_ALLOW_LIST: ${ADMIN_BASE_URL}/projects
+
     volumes:
       - ./directus/uploads:/directus/uploads
 

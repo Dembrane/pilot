@@ -3,3 +3,7 @@
 }
 @tailwind components;
 @tailwind utilities;
+
+.space-grotesk {
+  font-family: "Space Grotesk", sans-serif !important;
+}

@@ -1,48 +1,43 @@
-import { PARTICIPANT_BASE_URL } from "@/config";
-import { Icons } from "@/icons";
-import { getProjectTranscriptsLink } from "@/lib/api";
 import {
+  useConversationById,
   useConversationsByProjectId,
   useProjectById,
-  useGenerateProjectLibraryMutation,
   useUpdateProjectByIdMutation,
 } from "@/lib/query";
-import { Trans } from "@lingui/macro";
 import {
   Box,
   Button,
+  Text,
   Checkbox,
   CopyButton,
   Divider,
   Group,
   LoadingOverlay,
-  NativeSelect,
   Paper,
+  rem,
   SimpleGrid,
   Stack,
-  Tabs,
-  Text,
-  TextInput,
   Title,
   Tooltip,
-  rem,
 } from "@mantine/core";
+import { useParams } from "react-router-dom";
+import { TabsWithRouter } from "./TabsWithRouter";
+import { PARTICIPANT_BASE_URL } from "@/config";
+import { Icons } from "@/icons";
+import { useDocumentTitle } from "@mantine/hooks";
 import {
+  IconUsersGroup,
+  IconShare,
   IconCheck,
   IconCopy,
-  IconDownload,
-  IconShare,
 } from "@tabler/icons-react";
-import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import useSessionStorageState from "use-session-storage-state";
-import { ProjectDangerZone } from "../../components/project/ProjectDangerZone";
-import { SummaryCard } from "@/components/common/SummaryCard";
-import { ProjectEdit } from "../../components/project/ProjectEdit";
-import { QRCode } from "@/components/common/QRCode";
-import { useDocumentTitle } from "@mantine/hooks";
+import { useState, useEffect } from "react";
+import { SummaryCard } from "../common/SummaryCard";
 
-export const ProjectOverviewRoute = () => {
+import useSessionStorageState from "use-session-storage-state";
+import { QRCode } from "../common/QRCode";
+
+export const ProjectOverviewLayout = () => {
   const projectId = useParams().projectId;
   const projectQuery = useProjectById({
     projectId: projectId ?? "",
@@ -105,7 +100,27 @@ export const ProjectOverviewRoute = () => {
   const summaryItems = [
     {
       loading: conversationsQuery.isLoading,
-      icon: <Icons.Phone fill="green" />,
+      icon: <Icons.Phone width="24px" />,
+      label: "Open for Participation?",
+      value: (
+        <Tooltip
+          position="bottom"
+          label="Allow participants using the link to start new conversations"
+        >
+          <Checkbox
+            size="md"
+            checked={projectQuery.data?.is_conversation_allowed}
+            disabled={
+              updateProjectMutation.isPending || projectQuery.isFetching
+            }
+            onChange={handleOpenForParticipationCheckboxChange}
+          />
+        </Tooltip>
+      ),
+    },
+    {
+      loading: conversationsQuery.isLoading,
+      icon: <IconUsersGroup size={24} />,
       label: "Ongoing Conversations",
       value: `${
         conversationsQuery.data?.filter(
@@ -122,28 +137,43 @@ export const ProjectOverviewRoute = () => {
       }`,
     },
   ];
-
   return (
-    <Stack className="py-6 px-2 relative">
+    <Stack className="relative px-2 py-4">
       <LoadingOverlay visible={projectQuery.isLoading} />
-      <Title order={1}>
-        <Trans>Overview</Trans>
-      </Title>
-      <Divider />
       <SimpleGrid
         cols={{
           sm: 1,
-          md: 2,
+          md: 3,
         }}
       >
         <Paper p="md">
           {projectQuery.data && projectQuery.data.is_conversation_allowed ? (
             <Group>
-              <Box className="h-auto max-w-32 w-full p-2 bg-white rounded-lg">
+              <Box className="h-auto w-full max-w-[300px] rounded-lg bg-white md:max-w-36">
                 <QRCode value={sharingLink} />
               </Box>
               <Stack gap="sm">
-                <Text>Share</Text>
+                {/* <Text>Share</Text> */}
+                {
+                  // if sharing is enabled, show the share button
+                  navigator.canShare({
+                    title: `Join ${projectQuery.data?.default_conversation_title} on Dembrane`,
+                    url: sharingLink,
+                  }) && (
+                    <Button
+                      rightSection={<IconShare style={{ width: rem(16) }} />}
+                      variant="outline"
+                      onClick={async () => {
+                        await navigator.share({
+                          title: `Join ${projectQuery.data?.default_conversation_title} on Dembrane`,
+                          url: sharingLink,
+                        });
+                      }}
+                    >
+                      Share
+                    </Button>
+                  )
+                }
                 <CopyButton value={sharingLink} timeout={2000}>
                   {({ copied, copy }) => (
                     <Tooltip
@@ -153,9 +183,6 @@ export const ProjectOverviewRoute = () => {
                     >
                       <Button
                         variant="outline"
-                        size="sm"
-                        c="gray"
-                        color="gray"
                         onClick={copy}
                         rightSection={
                           copied ? (
@@ -183,7 +210,7 @@ export const ProjectOverviewRoute = () => {
       <Divider />
 
       {/* Share Section */}
-      <Tabs variant="default" defaultValue="participation">
+      {/* <Tabs variant="default" defaultValue="participation">
         <Tabs.List grow justify="space-between">
           <Tabs.Tab value="participation">
             <Trans>Participation</Trans>
@@ -195,12 +222,10 @@ export const ProjectOverviewRoute = () => {
 
         <Tabs.Panel value="participation">
           <Stack py="md">
-            <Title order={2}>
-              <Trans>Participation</Trans>
-            </Title>
+            <Title order={2}>Participation</Title>
             <Box>
               <Checkbox
-                label="Open for Participation"
+                label="Open for Participation?"
                 description="Allow participants using the link to start new conversations"
                 checked={projectQuery.data?.is_conversation_allowed}
                 disabled={
@@ -330,7 +355,7 @@ export const ProjectOverviewRoute = () => {
                 </Box>{" "}
                 <Box>
                   <Text size="md">QR Code</Text>
-                  <Box className="h-auto max-w-32 w-full">
+                  <Box className="h-auto w-full max-w-32">
                     <QRCode value={sharingLink} />
                   </Box>
                 </Box>
@@ -366,7 +391,16 @@ export const ProjectOverviewRoute = () => {
             </Stack>
           )}
         </Tabs.Panel>
-      </Tabs>
+      </Tabs> */}
+      <TabsWithRouter
+        basePath="/projects/:projectId"
+        tabs={[
+          { value: "overview", label: "Overview" },
+          { value: "portal-editor", label: "Portal Editor" },
+          { value: "transcript-settings", label: "Transcript Settings" },
+        ]}
+        loading={projectQuery.isLoading}
+      />
     </Stack>
   );
 };

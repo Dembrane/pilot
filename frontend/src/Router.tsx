@@ -2,7 +2,11 @@ import { Navigate, createBrowserRouter } from "react-router-dom";
 import { BaseLayout } from "./components/layout/BaseLayout";
 import { ProjectsHomeRoute } from "./routes/project/ProjectsHome";
 import { ProjectsCreateRoute } from "./routes/project/ProjectCreate";
-import { ProjectOverviewRoute } from "./routes/project/ProjectOverview";
+import {
+  ProjectPortalEditor,
+  ProjectSettings,
+  ProjectTranscriptSettings,
+} from "./routes/project/ProjectRoutes";
 import { ProjectLayout } from "./components/layout/ProjectLayout";
 import { ProjectResourceLayout } from "./components/layout/ProjectResourceLayout";
 import { ProjectResourceOverviewRoute } from "./routes/project/resource/ProjectResourceOverview";
@@ -35,6 +39,7 @@ import { PasswordResetRoute } from "./routes/auth/PasswordReset";
 import { RequestPasswordResetRoute } from "./routes/auth/RequestPasswordReset";
 import { Text } from "@mantine/core";
 import { ProjectChatRoute } from "./routes/project/chat/ProjectChat";
+import { ProjectOverviewLayout } from "./components/layout/ProjectOverviewLayout";
 
 export const mainRouter = createBrowserRouter([
   {
@@ -129,34 +134,26 @@ export const mainRouter = createBrowserRouter([
             path: ":projectId",
             children: [
               {
-                path: "library",
-                element: <ProjectLibraryLayout />,
-                children: [
-                  {
-                    path: "views/:viewId/aspects/:aspectId",
-                    element: <ProjectLibraryAspect />,
-                  },
-                  {
-                    path: "views/:viewId",
-                    element: <ProjectLibraryView />,
-                  },
-                  {
-                    path: "insights/:insightId",
-                    element: <ProjectLibraryInsight />,
-                  },
-                  {
-                    index: true,
-                    element: <ProjectLibraryRoute />,
-                  },
-                ],
-              },
-              {
                 element: <ProjectLayout />,
                 children: [
                   {
-                    index: true,
-                    path: "overview",
-                    element: <ProjectOverviewRoute />,
+                    path: "",
+                    element: <ProjectOverviewLayout />,
+                    children: [
+                      {
+                        index: true,
+                        path: "overview",
+                        element: <ProjectSettings />,
+                      },
+                      {
+                        path: "portal-editor",
+                        element: <ProjectPortalEditor />,
+                      },
+                      {
+                        path: "transcript-settings",
+                        element: <ProjectTranscriptSettings />,
+                      },
+                    ],
                   },
                   {
                     path: "chats/:chatId",
@@ -195,9 +192,28 @@ export const mainRouter = createBrowserRouter([
                       },
                     ],
                   },
+
                   {
-                    path: "chat/:chatId",
-                    element: <></>,
+                    path: "library",
+                    element: <ProjectLibraryLayout />,
+                    children: [
+                      {
+                        path: "views/:viewId/aspects/:aspectId",
+                        element: <ProjectLibraryAspect />,
+                      },
+                      {
+                        path: "views/:viewId",
+                        element: <ProjectLibraryView />,
+                      },
+                      {
+                        path: "insights/:insightId",
+                        element: <ProjectLibraryInsight />,
+                      },
+                      {
+                        index: true,
+                        element: <ProjectLibraryRoute />,
+                      },
+                    ],
                   },
                 ],
               },

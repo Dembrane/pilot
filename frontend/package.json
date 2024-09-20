@@ -25,6 +25,7 @@
     "@mantine/core": "^7.5.2",
     "@mantine/dropzone": "^7.5.2",
     "@mantine/hooks": "^7.5.2",
+    "@mdxeditor/editor": "^3.11.5",
     "@ricky0123/vad-react": "^0.0.22",
     "@ricky0123/vad-web": "^0.0.16",
     "@sentry/react": "^7.110.1",

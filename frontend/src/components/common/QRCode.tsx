@@ -1,4 +1,3 @@
-import { LegacyRef, Ref, useRef } from "react";
 import { QRCode as Q } from "react-qrcode-logo";
 
 /**
@@ -12,7 +11,7 @@ export const QRCode = (props: { value: string; ref?: any }) => {
       ref={props.ref}
       logoImage="/dembrane-logo-hq.png"
       eyeColor={"#000000"}
-      logoPadding={4}
+      logoPadding={2}
       removeQrCodeBehindLogo
       logoPaddingStyle="circle"
       size={1024}

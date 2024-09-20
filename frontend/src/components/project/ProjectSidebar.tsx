@@ -38,7 +38,11 @@ export const ProjectSidebar = () => {
             {
               label: (
                 <Link to={`/projects/${projectId}/overview`}>
-                  <Title order={2} size="sm">
+                  <Title
+                    order={2}
+                    size="sm"
+                    className="whitespace-break-spaces"
+                  >
                     {projectQuery.data?.name}
                   </Title>
                 </Link>

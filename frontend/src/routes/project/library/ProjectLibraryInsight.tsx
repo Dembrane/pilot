@@ -9,9 +9,16 @@ import {
   ActionIcon,
   Container,
 } from "@mantine/core";
-import { IconArrowBack, IconChevronLeft } from "@tabler/icons-react";
+import {
+  IconArrowBack,
+  IconChevronLeft,
+  IconHome,
+  IconStackBack,
+} from "@tabler/icons-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Quote } from "../../../components/quote/Quote";
+import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { Icons } from "@/icons";
 
 export const ProjectLibraryInsight = () => {
   const { projectId, insightId } = useParams();
@@ -46,14 +53,26 @@ export const ProjectLibraryInsight = () => {
   return (
     <Container>
       <Stack className="px-2 py-6">
-        <Group align="baseline">
+        {/* <Group align="baseline">
           <ActionIcon variant="light" onClick={() => navigate(-1)}>
             <IconChevronLeft />
           </ActionIcon>
-          <Title order={1}>Insight Library</Title>
-        </Group>
+          <Title order={1}>Insight Library</Title> */}
+
+        {/* </Group> */}
+        <Breadcrumbs
+          items={[
+            {
+              label: <Title order={2}>Insights</Title>,
+              link: `/projects/${projectId}/library#insights`,
+            },
+            {
+              label: <Title order={2}>{insight.title}</Title>,
+            },
+          ]}
+        />
         <Divider />
-        <Title order={2}>{insight.title}</Title>
+
         <Text>{insight.summary}</Text>
 
         <Divider />

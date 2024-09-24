@@ -1,4 +1,5 @@
 import ProjectBasicEdit from "@/components/project/ProjectBasicEdit";
+import { ProjectDangerZone } from "@/components/project/ProjectDangerZone";
 import { ProjectEdit } from "@/components/project/ProjectEdit";
 import { getProjectTranscriptsLink } from "@/lib/api";
 import { useProjectById } from "@/lib/query";
@@ -43,6 +44,13 @@ export const ProjectSettings = () => {
               Download All Transcripts
             </Button>
           </Box>
+        </>
+      )}
+
+      {projectQuery.data && (
+        <>
+          <Divider />
+          <ProjectDangerZone project={projectQuery.data} />
         </>
       )}
     </Stack>

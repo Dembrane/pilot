@@ -12,3 +12,4 @@ directus/uploads
 directus/.env
 *.sql
 node_modules
+.next

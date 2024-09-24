@@ -39,10 +39,6 @@ export const ProjectLibraryAspect = () => {
       <Breadcrumbs
         items={[
           {
-            label: <Icons.Sidebar />,
-            link: `/projects/${projectId}/overview`,
-          },
-          {
             label: "Library",
             link: `/projects/${projectId}/library`,
           },
@@ -64,29 +60,29 @@ export const ProjectLibraryAspect = () => {
           alt={aspect?.name ?? ""}
           className="h-[400px] w-full object-cover"
         />
-        <Container>
+        <Container size="sm">
           <Stack>
             <Title order={1}>{aspect?.name}</Title>
-            <Markdown content={aspect?.long_summary ?? ""} />
+            <Markdown
+              content={aspect?.long_summary ?? ""}
+              className="!max-w-full"
+            />
+            <Title order={2}>Quotes</Title>
+            {!isLoading ? (
+              <>
+                {" "}
+                {dedupeQuotes([
+                  ...(aspect?.representative_quotes ?? []),
+                  ...(aspect?.quotes ?? []),
+                ]).map((quote: QuoteAspect) => (
+                  <Quote key={quote.id} data={quote.quote_id as Quote} />
+                ))}{" "}
+              </>
+            ) : (
+              <Skeleton height={100} />
+            )}
           </Stack>
         </Container>
-      </Stack>
-
-      <Stack>
-        <Title order={2}>Quotes</Title>
-        {!isLoading ? (
-          <>
-            {" "}
-            {dedupeQuotes([
-              ...(aspect?.representative_quotes ?? []),
-              ...(aspect?.quotes ?? []),
-            ]).map((quote: QuoteAspect) => (
-              <Quote key={quote.id} data={quote.quote_id as Quote} />
-            ))}{" "}
-          </>
-        ) : (
-          <Skeleton height={100} />
-        )}
       </Stack>
     </Stack>
   );

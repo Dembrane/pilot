@@ -5,12 +5,14 @@ import {
   UnstyledButton,
   Avatar,
   Text,
+  Stack,
 } from "@mantine/core";
 import { Logo } from "./Logo";
 import { IconLogout, IconSettings, IconChevronDown } from "@tabler/icons-react";
 import { useLogoutMutation, useCurrentUser } from "@/lib/query";
 import { useAuthenticated } from "@/lib/useAuthenticated";
 import { forwardRef } from "react";
+import { Link } from "react-router-dom";
 
 const UserButton = forwardRef<
   HTMLButtonElement,
@@ -65,15 +67,20 @@ export const Header = () => {
   return (
     <Paper
       component="header"
-      p="xs"
       shadow="xs"
       radius="0"
-      className="z-30 h-full w-full"
+      className="z-30 h-full w-full px-4"
       bg={{ dark: "dark.8", light: "white" }}
     >
-      <Group justify="space-between" align="center" className="h-full w-full">
+      <Group
+        justify="space-between"
+        align="center"
+        className="h-full min-h-[58px] w-full"
+      >
         <Group gap="md">
-          <Logo />
+          <Link to="/projects">
+            <Logo />
+          </Link>
         </Group>
         {!loading && isAuthenticated && user && (
           <Menu withArrow arrowPosition="center">
@@ -85,18 +92,20 @@ export const Header = () => {
               />
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item
-                leftSection={<IconSettings color="gray" />}
-                onClick={handleSettingsClick}
-              >
-                Settings
-              </Menu.Item>
-              <Menu.Item
-                leftSection={<IconLogout color="gray" />}
-                onClick={handleLogout}
-              >
-                Logout
-              </Menu.Item>
+              <Stack gap="xs">
+                <Menu.Item
+                  leftSection={<IconSettings color="gray" />}
+                  onClick={handleSettingsClick}
+                >
+                  Settings
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<IconLogout color="gray" />}
+                  onClick={handleLogout}
+                >
+                  Logout
+                </Menu.Item>
+              </Stack>
             </Menu.Dropdown>
           </Menu>
         )}

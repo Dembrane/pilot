@@ -4,6 +4,7 @@ import {
   useAddChatMessageMutation,
   useChatHistory,
   useLockConversationsMutation,
+  useChat as useProjectChat,
   useProjectChatContext,
 } from "@/lib/query";
 import {
@@ -349,6 +350,7 @@ export const ProjectChatRoute = () => {
   useDocumentTitle("Chat | Dembrane");
 
   const { chatId } = useParams();
+  const chatQuery = useProjectChat(chatId ?? "");
 
   const {
     isInitializing,
@@ -365,7 +367,7 @@ export const ProjectChatRoute = () => {
     reload,
   } = useDembraneChat({ chatId: chatId ?? "" });
 
-  if (isInitializing) {
+  if (isInitializing || chatQuery.isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <LoadingOverlay visible={true} />
@@ -373,14 +375,11 @@ export const ProjectChatRoute = () => {
     );
   }
 
-  const lastMessage =
-    messages && messages.length > 0 ? messages[messages.length - 1] : null;
-
   return (
     <Stack className="relative flex min-h-full flex-col px-2 pr-4">
       {/* Header */}
       <Stack className="top-0 w-full bg-white pt-6">
-        <Title order={1}>Chat</Title>
+        <Title order={1}>{chatQuery.data?.name ?? "Chat"}</Title>
         <Divider />
       </Stack>
       {/* Body */}

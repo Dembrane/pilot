@@ -1,4 +1,4 @@
-import { Text, Paper, LoadingOverlay, Stack } from "@mantine/core";
+import { Text, Paper, LoadingOverlay, Stack, Group } from "@mantine/core";
 import React from "react";
 
 type SummaryCardProps = {
@@ -10,12 +10,14 @@ type SummaryCardProps = {
 
 export const SummaryCard = (props: SummaryCardProps) => {
   return (
-    <Paper p="md" shadow="0">
+    <Paper p="md" shadow="0" className="h-full">
       <LoadingOverlay visible={props.loading} />
       <Stack align="start" justify="center" h="100%">
-        <div>{props.icon}</div>
-        <span>{props.label}</span>
-        <Text size="xl">{props.value}</Text>
+        <Group gap="xs">
+          <div>{props.icon}</div>
+          <span>{props.label}</span>
+        </Group>
+        {props.value}
       </Stack>
     </Paper>
   );

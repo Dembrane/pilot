@@ -9,8 +9,14 @@ export const ProjectDangerZone = ({ project }: { project: Project }) => {
 
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this project?")) {
-      deleteProjectByIdMutation.mutate(project.id);
-      navigate(`/projects`);
+      if (
+        window.confirm(
+          "By deleting this project, you will delete all the data associated with it. This action cannot be undone. Are you ABSOLUTELY sure you want to delete this project?",
+        )
+      ) {
+        deleteProjectByIdMutation.mutate(project.id);
+        navigate(`/projects`);
+      }
     }
   };
 

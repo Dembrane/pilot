@@ -1,0 +1,128 @@
+import {
+  useDeleteChatMutation,
+  useUpdateChatMutation,
+  useProjectChats,
+} from "@/lib/query";
+import { Trans } from "@lingui/macro";
+import {
+  Accordion,
+  Group,
+  LoadingOverlay,
+  Stack,
+  Title,
+  Text,
+  ActionIcon,
+  Menu,
+} from "@mantine/core";
+import { useNavigate, useParams } from "react-router-dom";
+import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react";
+import { formatRelative } from "date-fns";
+import { NavigationButton } from "../common/NavigationButton";
+
+const ChatAccordionItemMenu = ({ chat }: { chat: Partial<ProjectChat> }) => {
+  const deleteChatMutation = useDeleteChatMutation();
+  const updateChatMutation = useUpdateChatMutation();
+  const navigate = useNavigate();
+
+  return (
+    <Menu shadow="md" position="right">
+      <Menu.Target>
+        <ActionIcon
+          variant="transparent"
+          c="gray"
+          className="flex items-center justify-center"
+        >
+          <IconDotsVertical />
+        </ActionIcon>
+      </Menu.Target>
+
+      <Menu.Dropdown>
+        <Stack gap="xs">
+          <Menu.Item
+            leftSection={<IconPencil />}
+            disabled={deleteChatMutation.isPending}
+            onClick={() => {
+              const newName = prompt(
+                "Enter new name for the chat:",
+                chat.name ?? "",
+              );
+              if (newName) {
+                updateChatMutation.mutate({
+                  chatId: chat.id ?? "",
+                  projectId: (chat.project_id as string) ?? "",
+                  payload: { name: newName },
+                });
+              }
+            }}
+          >
+            Rename
+          </Menu.Item>
+          <Menu.Item
+            leftSection={<IconTrash />}
+            disabled={deleteChatMutation.isPending}
+            onClick={() => {
+              deleteChatMutation.mutate({
+                chatId: chat.id ?? "",
+                projectId: (chat.project_id as string) ?? "",
+              });
+              navigate(`/projects/${chat.project_id}/overview`);
+            }}
+          >
+            Delete
+          </Menu.Item>
+        </Stack>
+      </Menu.Dropdown>
+    </Menu>
+  );
+};
+
+// Chat Accordion
+export const ChatAccordion = ({ projectId }: { projectId: string }) => {
+  const chatsQuery = useProjectChats(projectId);
+  const { chatId: activeChatId } = useParams();
+
+  return (
+    <Accordion.Item value="chat">
+      <Accordion.Control>
+        <Group justify="space-between">
+          <Title order={3}>
+            <span className="min-w-[48px] pr-2 font-normal text-gray-500">
+              {chatsQuery.data?.length ?? 0}
+            </span>
+            Chats
+          </Title>
+        </Group>
+      </Accordion.Control>
+
+      <Accordion.Panel>
+        <Stack gap="xs">
+          <LoadingOverlay visible={chatsQuery.isLoading} />
+          {chatsQuery.data?.length === 0 && (
+            <Text size="sm">
+              <Trans>
+                No chats found. Start a chat using the "Ask" button.
+              </Trans>
+            </Text>
+          )}
+          {chatsQuery.data?.map((item) => (
+            <NavigationButton
+              key={item.id}
+              to={`/projects/${projectId}/chats/${item.id}`}
+              active={item.id === activeChatId}
+              rightSection={<ChatAccordionItemMenu chat={item} />}
+            >
+              <Text size="xs">
+                {item.name
+                  ? item.name
+                  : formatRelative(
+                      new Date(item.date_created ?? new Date()),
+                      new Date(),
+                    )}
+              </Text>
+            </NavigationButton>
+          ))}
+        </Stack>
+      </Accordion.Panel>
+    </Accordion.Item>
+  );
+};

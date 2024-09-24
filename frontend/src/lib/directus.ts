@@ -31,9 +31,8 @@ wsDirectus.connect().then(() => {
   console.log("Connected to realtime");
 });
 
+// TODO: localization
 export const getDirectusErrorString = (error: any) => {
-  // {"errors":[{"message":"You don't have permission to access this.","extensions":{"code":"FORBIDDEN"}}],"response":{}}
-
   if (error.errors && error.errors.length > 0) {
     return error.errors[0].message;
   }

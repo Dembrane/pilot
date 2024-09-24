@@ -1,16 +1,51 @@
-import { Box } from "@mantine/core";
+import { ActionIcon, Box, Button } from "@mantine/core";
 import { Outlet } from "react-router-dom";
 import { ProjectSidebar } from "../project/ProjectSidebar";
+import { useState } from "react";
+import { Resizable } from "re-resizable";
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { useSidebarCollapsed } from "@/lib/useSidebarCollapsed";
+import { Icons } from "@/icons";
 
 // can be rendered inside BaseLayout
 export const ProjectLayout = () => {
-  return (
-    <Box className="relative grid grid-cols-12 gap-2">
-      <aside className="col-span-full h-fit border-b border-r-0 lg:col-span-4 lg:h-[calc(100vh-60px)] lg:overflow-y-auto lg:border-b-0 lg:border-r">
-        <ProjectSidebar />
-      </aside>
+  const {
+    isCollapsed,
+    setIsCollapsed,
+    sidebarWidth,
+    setSidebarWidth,
+    toggleSidebar,
+  } = useSidebarCollapsed();
 
-      <section className="col-span-full h-fit lg:col-span-8 lg:h-[calc(100vh-60px)] lg:overflow-y-auto">
+  return (
+    <Box className="relative flex h-[calc(100vh-60px)]">
+      <Resizable
+        size={{ width: sidebarWidth }}
+        minWidth={300}
+        maxWidth="45%"
+        onResizeStop={(e, _direction, _ref, d) => {
+          setSidebarWidth(sidebarWidth + d.width);
+        }}
+        enable={{ right: !isCollapsed }}
+      >
+        <aside
+          className={`h-full overflow-y-auto border-r transition-all duration-300 ${isCollapsed ? "w-0" : ""}`}
+        >
+          <ProjectSidebar />
+        </aside>
+      </Resizable>
+
+      {isCollapsed && (
+        <ActionIcon
+          className="absolute left-2 top-2 z-10"
+          variant="subtle"
+          onClick={toggleSidebar}
+        >
+          <Icons.Sidebar />
+        </ActionIcon>
+      )}
+
+      <section className="flex-grow overflow-y-auto px-2">
         <Outlet />
       </section>
     </Box>

@@ -3,7 +3,7 @@ import { ProjectListItem } from "@/components/project/ProjectListItem";
 import { Icons } from "@/icons";
 import { getDirectusErrorString } from "@/lib/directus";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { useProjects } from "@/lib/query";
+import { useCreateProjectMutation, useProjects } from "@/lib/query";
 import {
   Text,
   Box,
@@ -30,7 +30,7 @@ import {
   IconSearch,
   IconX,
 } from "@tabler/icons-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 
@@ -57,6 +57,16 @@ export const ProjectsHomeRoute = () => {
     defaultValue: "list",
   });
 
+  const navigate = useNavigate();
+  const createProjectMutation = useCreateProjectMutation();
+
+  const handleCreateProject = async () => {
+    const project = await createProjectMutation.mutateAsync({
+      name: "New Project",
+    });
+    navigate(`/projects/${project.id}/overview`);
+  };
+
   return (
     <Container>
       <Stack>
@@ -75,15 +85,14 @@ export const ProjectsHomeRoute = () => {
               ]}
             />
           </Group>
-          <Link to={`/projects/create`}>
-            <Button
-              component="a"
-              size="md"
-              rightSection={<Icons.Plus stroke="white" fill="white" />}
-            >
-              Create
-            </Button>
-          </Link>
+          <Button
+            size="md"
+            rightSection={<Icons.Plus stroke="white" fill="white" />}
+            loading={createProjectMutation.isPending}
+            onClick={handleCreateProject}
+          >
+            Create
+          </Button>
         </Group>
         <Divider />
         <Group justify="space-between" className="relative">
@@ -177,7 +186,7 @@ export const ProjectsHomeRoute = () => {
           {view === "grid" && (
             <Box
               ref={gridParent}
-              className="grid grid-cols-12 gap-4 place-content-stretch"
+              className="grid grid-cols-12 place-content-stretch gap-4"
             >
               {projectsQuery.isLoading &&
                 Array.from({ length: 3 }).map((_, i) => (

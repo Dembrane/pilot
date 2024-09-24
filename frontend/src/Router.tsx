@@ -127,10 +127,6 @@ export const mainRouter = createBrowserRouter([
             element: <ProjectsHomeRoute />,
           },
           {
-            path: "create",
-            element: <ProjectsCreateRoute />,
-          },
-          {
             path: ":projectId",
             children: [
               {

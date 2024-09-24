@@ -26,6 +26,7 @@ import {
   useUpdateConversationByIdMutation,
 } from "@/lib/query";
 import { apiCommonConfig } from "@/lib/api";
+import { InformationTooltip } from "@/components/common/InformationTooltip";
 
 const ConversationDangerZone = ({
   conversation,
@@ -193,7 +194,18 @@ export const ProjectConversationOverviewRoute = () => {
           <Stack>
             {conversationQuery.data?.summary && (
               <>
-                <Title order={2}>Summary</Title>
+
+<Group>
+                  <Title order={2}>Summary</Title>
+                  <InformationTooltip
+                    label={
+                      <Text>
+                        This summary is AI-generated and brief, for thorough
+                        analysis, use the Chat or Library.
+                      </Text>
+                    }
+                  />
+                </Group>
 
                 <Text>{conversationQuery.data?.summary}</Text>
                 <Divider />

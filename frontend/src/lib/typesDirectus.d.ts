@@ -489,6 +489,7 @@ type ProjectChat = {
   date_created?: string | null;
   date_updated?: string | null;
   id: string;
+  name?: string | null;
   project_chat_messages: any[] | ProjectChatMessage[];
   project_id?: string | Project | null;
   used_conversations: any[] | ProjectChatConversation[];
@@ -583,6 +584,32 @@ type View = {
   updated_at: string;
 };
 
+type PortalTutorial = {
+  date_created?: string | null;
+  date_updated?: string | null;
+  id: number;
+  label?: string | null;
+  slug?: string | null;
+  sort?: number | null;
+  status: string;
+  user_created?: string | DirectusUsers | null;
+  user_updated?: string | DirectusUsers | null;
+};
+
+type PortalTutorialCard = {
+  date_created?: string | null;
+  date_updated?: string | null;
+  description?: string | null;
+  heading?: string | null;
+  icon_url?: string | null;
+  id: number;
+  sort?: number | null;
+  subheading?: string | null;
+  user_confirmation_required?: boolean | null;
+  user_created?: string | DirectusUsers | null;
+  user_updated?: string | DirectusUsers | null;
+};
+
 type CustomDirectusTypes = {
   aspect: Aspect[];
   conversation: Conversation[];
@@ -627,4 +654,6 @@ type CustomDirectusTypes = {
   quote_aspect_1: QuoteAspect1[];
   quote_conversation_chunk: QuoteConversationChunk[];
   view: View[];
+  portal_tutorial: PortalTutorial[];
+  portal_tutorial_card: PortalTutorialCard[];
 };

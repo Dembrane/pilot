@@ -1,15 +1,28 @@
 import { Icons } from "@/icons";
 import { useCreateChatMutation, useProjectById } from "@/lib/query";
-import { Group, LoadingOverlay, Stack, Title } from "@mantine/core";
+import {
+  ActionIcon,
+  Box,
+  Group,
+  LoadingOverlay,
+  Stack,
+  Title,
+  Tooltip,
+} from "@mantine/core";
 import { Link, useParams } from "react-router-dom";
 import { ProjectAccordion } from "./ProjectAccordion";
 import { NavigationButton } from "../common/NavigationButton";
 import { Breadcrumbs } from "../common/Breadcrumbs";
+import { ProjectQRCode } from "./ProjectQRCode";
+import { useSidebarCollapsed } from "@/lib/useSidebarCollapsed";
+import { IconChevronLeft } from "@tabler/icons-react";
 
 export const ProjectSidebar = () => {
   const { projectId, conversationId } = useParams();
 
   const projectQuery = useProjectById({ projectId: projectId ?? "" });
+
+  const { isCollapsed, toggleSidebar } = useSidebarCollapsed();
 
   const createChatMutation = useCreateChatMutation();
 
@@ -32,7 +45,13 @@ export const ProjectSidebar = () => {
         <Breadcrumbs
           items={[
             {
-              label: <Icons.Home color="black" />,
+              label: (
+                <Tooltip label="Projects Home">
+                  <ActionIcon variant="transparent">
+                    <Icons.Home color="black" />
+                  </ActionIcon>
+                </Tooltip>
+              ),
               link: `/projects`,
             },
             {
@@ -51,7 +70,7 @@ export const ProjectSidebar = () => {
           ]}
         />
 
-        {/* <Tooltip label={t`Project Overview`}>
+        <Tooltip label={`Project Overview`}>
           <Link to={`/projects/${projectId}/overview`}>
             <ActionIcon
               component="a"
@@ -61,7 +80,13 @@ export const ProjectSidebar = () => {
               <Icons.Gear color="black" />
             </ActionIcon>
           </Link>
-        </Tooltip> */}
+        </Tooltip>
+
+        {!isCollapsed && (
+          <ActionIcon variant="transparent" onClick={toggleSidebar}>
+            <Icons.Sidebar />
+          </ActionIcon>
+        )}
       </Group>
 
       <NavigationButton
@@ -79,6 +104,10 @@ export const ProjectSidebar = () => {
       >
         Library
       </NavigationButton>
+
+      <Box hiddenFrom="lg">
+        <ProjectQRCode project={projectQuery.data} />
+      </Box>
 
       <ProjectAccordion projectId={projectId} />
     </Stack>

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   Stack,
   Group,
@@ -11,12 +11,12 @@ import {
 import { Trans } from "@lingui/macro";
 import { useForm } from "react-hook-form";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
-import { IconDeviceFloppy } from "@tabler/icons-react";
+import { IconX } from "@tabler/icons-react";
 
 type ProjectEditFormValues = {
   name: string;
   context: string;
-  language: "en" | "nl" | "multi";
+  language: "en" | "nl";
 };
 
 type ProjectBasicEditProps = {
@@ -35,7 +35,7 @@ export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
   const {
     register,
     handleSubmit,
-    formState: { isSubmitSuccessful, isDirty },
+    formState: { isSubmitSuccessful, isDirty, dirtyFields },
     reset,
     getValues,
   } = useForm<ProjectEditFormValues>({
@@ -45,10 +45,20 @@ export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
   const updateProjectMutation = useUpdateProjectByIdMutation();
 
   const onSubmit = (data: ProjectEditFormValues) => {
-    updateProjectMutation.mutateAsync({
-      id: project.id,
-      payload: data,
-    });
+    if (isDirty) {
+      updateProjectMutation.mutateAsync({
+        id: project.id,
+        payload: data,
+      });
+    }
+  };
+
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+
+  const handleFormBlur = (event: React.FocusEvent<HTMLFormElement>) => {
+    if (isDirty && event.relatedTarget !== cancelButtonRef.current) {
+      handleSubmit(onSubmit)(event);
+    }
   };
 
   useEffect(() => {
@@ -65,7 +75,7 @@ export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
         </Title>
         {isDirty && <Trans>Unsaved changes</Trans>}
       </Group>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} onBlur={handleFormBlur}>
         <Stack className="relative">
           <TextInput label="Title" {...register("name")} />
           <Textarea
@@ -79,38 +89,27 @@ export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
           />
           <NativeSelect
             label="Language"
-            description="Changing this will affect the language of transcripts for new conversations"
             {...register("language")}
             data={[
               { label: "English", value: "en" },
               { label: "Dutch", value: "nl" },
-              { label: "Multilingual (Experimental)", value: "multi" },
             ]}
           />
-          <Group>
-            <Button
-              type="submit"
-              loading={updateProjectMutation.isPending}
-              disabled={!isDirty}
-            >
-              <Trans>Save</Trans>
-            </Button>
-            {isDirty && (
-              <Button
-                type="reset"
-                variant="outline"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  reset(defaultValues);
-                }}
-              >
-                <Trans>Cancel</Trans>
-              </Button>
-            )}
-          </Group>
         </Stack>
       </form>
+      <Group>
+        {isDirty && (
+          <Button
+            ref={cancelButtonRef}
+            type="button"
+            variant="outline"
+            onClick={() => reset(defaultValues)}
+            rightSection={<IconX />}
+          >
+            <Trans>Cancel</Trans>
+          </Button>
+        )}
+      </Group>
     </Stack>
   );
 };

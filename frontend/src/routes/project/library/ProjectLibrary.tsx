@@ -244,14 +244,10 @@ export const ProjectLibraryRoute = () => {
   };
 
   return (
-    <Stack className="py-6 px-4 relative">
+    <Stack className="relative px-4 py-6">
       <Group justify="space-between">
         <Breadcrumbs
           items={[
-            {
-              label: <Icons.Sidebar />,
-              link: `/projects/${projectId}/overview`,
-            },
             {
               label: (
                 <Title order={1} size="md">
@@ -331,7 +327,9 @@ export const ProjectLibraryRoute = () => {
           viewsQuery.data.map((v) => <ViewExpandedCard key={v.id} data={v} />)}
       </Stack>
 
-      <Title order={2}>All Insights</Title>
+      <Title order={2} id="insights">
+        All Insights
+      </Title>
 
       {!insightsExist && (
         <Alert variant="light" icon={<IconInfoCircle />}>
@@ -363,7 +361,7 @@ export const ProjectLibraryRoute = () => {
             </Button>
           </Group>
 
-          <div ref={parent} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div ref={parent} className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {insightsQuery.isLoading && (
               <>
                 <Skeleton height={100} />

@@ -1,9 +1,20 @@
 import { demos } from '#/lib/demos';
+import { client } from '#/lib/directus';
+import { FeelFreeToDelete } from '#/types';
+import { readItem } from '@directus/sdk';
 import Link from 'next/link';
 
-export default function Page() {
+export default async function Page() {
+  const query = await client.request<FeelFreeToDelete>(
+    readItem('feel_free_to_delete', 1),
+  );
+
   return (
     <div className="space-y-8">
+      <h1 className="animate-bounce text-6xl text-vercel-pink">
+        FROM DIRECTUS: {query.text ?? 'ERROR'}
+      </h1>
+
       <h1 className="text-xl font-medium text-gray-300">Examples</h1>
 
       <div className="space-y-10 text-white">

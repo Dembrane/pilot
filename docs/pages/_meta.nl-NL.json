@@ -1,0 +1,15 @@
+{
+  "index": "Introductie",
+  "another": "Nog een pagina",
+  "advanced": "Geavanceerd (Een map)",
+  "about": {
+    "title": "Over ons",
+    "type": "page"
+  },
+  "contact": {
+    "title": "Contact ↗",
+    "type": "page",
+    "href": "https://tally.so/r/npL14Z",
+    "newWindow": true
+  }
+}

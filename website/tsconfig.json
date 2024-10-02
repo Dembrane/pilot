@@ -16,7 +16,10 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "#/*": ["./*"]
+      "@/*": ["./*"],
+      "@/i18nConfig": ["i18nConfig.js"],
+      "@/src/*": ["src/*"],
+      "@/components/*": ["components/*"]
     },
     "plugins": [
       {
@@ -24,6 +27,6 @@
       }
     ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "middleware.js"],
   "exclude": ["node_modules"]
 }

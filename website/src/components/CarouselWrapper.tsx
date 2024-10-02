@@ -1,0 +1,140 @@
+'use client';
+
+import React from 'react';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/src/components/ui/carousel';
+import WysiwygContent from '@/src/components/WysiwygContent';
+import type { CarouselApi } from '@/src/components/ui/carousel';
+import type { AutoplayPlugin } from 'embla-carousel-autoplay';
+import { Button } from '@/src/components/ui/button';
+import { PlayIcon, PauseIcon } from '@radix-ui/react-icons';
+
+type CarouselWrapperProps = {
+  title?: string;
+  headline?: string;
+  children: React.ReactNode;
+};
+
+const CarouselWrapper: React.FC<CarouselWrapperProps> = ({ title, headline, children }) => {
+  const [api, setApi] = React.useState<CarouselApi>();
+  const [autoplay, setAutoplay] = React.useState<AutoplayPlugin | null>(null);
+  const [plugins, setPlugins] = React.useState<AutoplayPlugin[]>([]);
+  const [isAutoplayActive, setIsAutoplayActive] = React.useState(false);
+  const autoplayTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      import('embla-carousel-autoplay').then((AutoplayModule) => {
+        const autoplayPlugin = AutoplayModule.default({ 
+          delay: 2000, 
+          stopOnInteraction: true,
+          playOnInit: false 
+        });
+        setAutoplay(autoplayPlugin);
+        setPlugins([autoplayPlugin]);
+      });
+    }
+  }, []);
+
+  const toggleAutoplay = React.useCallback(() => {
+    if (autoplay) {
+      if (isAutoplayActive) {
+        autoplay.stop();
+      } else {
+        autoplay.play();
+      }
+      setIsAutoplayActive(!isAutoplayActive);
+    }
+  }, [autoplay, isAutoplayActive]);
+
+  const resetAutoplayTimeout = React.useCallback(() => {
+    if (autoplayTimeoutRef.current) {
+      clearTimeout(autoplayTimeoutRef.current);
+    }
+    autoplayTimeoutRef.current = setTimeout(() => {
+      if (autoplay) {
+        autoplay.play();
+        setIsAutoplayActive(true);
+      }
+    }, 1000);
+  }, [autoplay]);
+
+  React.useEffect(() => {
+    if (!api || !autoplay) return;
+
+    const onSelect = () => {
+      autoplay.stop();
+      setIsAutoplayActive(false);
+      resetAutoplayTimeout();
+    };
+
+    api.on('select', onSelect);
+    return () => {
+      api.off('select', onSelect);
+    };
+  }, [api, autoplay, resetAutoplayTimeout]);
+
+  return (
+    <div className="w-full overflow-visible">
+      <Carousel
+        opts={{
+          align: 'start',
+          loop: true,
+          skipSnaps: false,
+          inViewThreshold: 0.7,
+          dragFree: true,
+          containScroll: 'trimSnaps',
+        }}
+        plugins={plugins}
+        setApi={setApi}
+        className="w-full"
+      >
+        <div className="mb-8 flex items-center justify-between">
+          {title && (
+            <h2 className="px-4 text-left text-3xl font-bold md:text-4xl">
+              {title}
+            </h2>
+          )}
+          <div className="flex items-center space-x-2 px-4">
+            <CarouselPrevious className="relative inset-auto transform-none" />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleAutoplay}
+              className="relative inset-auto transform-none rounded-full"
+            >
+              {isAutoplayActive ? (
+                <PauseIcon className="h-4 w-4" />
+              ) : (
+                <PlayIcon className="h-4 w-4" />
+              )}
+            </Button>
+            <CarouselNext className="relative inset-auto transform-none" />
+          </div>
+        </div>
+        {headline && (
+          <div className="mb-8 px-4 text-left text-lg text-gray-600 md:text-xl">
+            <WysiwygContent content={headline} />
+          </div>
+        )}
+        <CarouselContent className="ml-0">
+          {React.Children.map(children, (child, index) => (
+            <CarouselItem
+              key={index}
+              className="basis-4/5 pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 2xl:basis-1/5 pb-4"
+            >
+              {child}
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+    </div>
+  );
+};
+
+export default CarouselWrapper;

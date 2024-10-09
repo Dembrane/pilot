@@ -2,16 +2,14 @@ import React from 'react'
 import { DocsThemeConfig } from 'nextra-theme-docs'
 
 const config: DocsThemeConfig = {
-  logo: <span>My Project</span>,
-  project: {
-    link: "https://github.com/shuding/nextra-docs-template",
+  logo: <span>Dembrane Docs: Echo</span>,
+  docsRepositoryBase: "https://github.com/Dembrane/pilot/tree/main/docs",
+  banner: {
+    key: 'in-progress',
+    text: "🚧 Dembrane Docs is under construction - Things will change"
   },
-  chat: {
-    link: "https://discord.com",
-  },
-  docsRepositoryBase: "https://github.com/shuding/nextra-docs-template",
   footer: {
-    text: "Nextra Docs Template",
+    text: "Dembrane Docs",
   },
   i18n: [
     { locale: "en-US", text: "English" },

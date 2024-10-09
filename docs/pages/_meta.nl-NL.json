@@ -1,6 +1,17 @@
 {
-  "index": "Introductie",
-  "advanced": "Geavanceerd (Een map) hahah",
+  "index": "In gesprek in 30 seconden",
+  "getting-started": "Aan de slag!",
+  "troubleshoot": "Toch een probleem? Los het makkelijk op",
+  "faq": "Veelgestelde vragen",
+  "---": {
+    "type": "separator"
+  },
+  "advanced-use": "Gevorderd gebruik",
+  "resources": "Slides voor jouw publiek",
+  "known-bugs": "Bekende bugs 🪲",
+  "product-info": "Product ontwikkeling",
+  "conclusion": "Afsluiter",
+  "cheatsheet": "[temporary] cheatsheet",
   "about": {
     "title": "Over ons",
     "type": "page"

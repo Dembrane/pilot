@@ -6,7 +6,7 @@ import {
   useProjectChatContext,
 } from "@/lib/query";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Trans } from "@lingui/macro";
+import { t, Trans } from "@lingui/macro";
 import {
   Accordion,
   Group,
@@ -50,7 +50,7 @@ const ConversationAccordionLabelChatSelection = ({
     deleteChatContextMutation.isPending
   ) {
     return (
-      <Tooltip label="Loading...">
+      <Tooltip label={t`Loading...`}>
         <Loader size="xs" />
       </Tooltip>
     );
@@ -78,10 +78,10 @@ const ConversationAccordionLabelChatSelection = ({
   };
 
   const tooltipLabel = isLocked
-    ? "Already added to this chat"
+    ? t`Already added to this chat`
     : isSelected
-      ? "Remove from this chat"
-      : "Add to this chat";
+      ? t`Remove from this chat`
+      : t`Add to this chat`;
 
   return (
     <Tooltip label={tooltipLabel}>
@@ -229,7 +229,7 @@ export const ConversationAccordion = ({ projectId }: { projectId: string }) => {
                     </ActionIcon>
                   )
                 }
-                placeholder="Search conversations"
+                placeholder={t`Search conversations`}
                 value={conversationSearch}
                 size="sm"
                 onChange={(e) => setConversationSearch(e.currentTarget.value)}
@@ -248,12 +248,12 @@ export const ConversationAccordion = ({ projectId }: { projectId: string }) => {
                 <Menu.Dropdown>
                   <Stack py="md" px="lg" gap="sm">
                     <Text size="lg" className="font-semibold">
-                      Filter
+                      <Trans>Filter</Trans>
                     </Text>
                     <Checkbox
                       size="sm"
                       disabled={conversationsQuery.isLoading}
-                      label={`Hide Conversations Without Content`}
+                      label={t`Hide Conversations Without Content`}
                       checked={hideConversationsWithoutContent}
                       onChange={() =>
                         setHideConversationsWithoutContent((prev) => !prev)

@@ -3,7 +3,7 @@ import {
   useUpdateChatMutation,
   useProjectChats,
 } from "@/lib/query";
-import { Trans } from "@lingui/macro";
+import { t, Trans } from "@lingui/macro";
 import {
   Accordion,
   Group,
@@ -44,7 +44,7 @@ const ChatAccordionItemMenu = ({ chat }: { chat: Partial<ProjectChat> }) => {
             disabled={deleteChatMutation.isPending}
             onClick={() => {
               const newName = prompt(
-                "Enter new name for the chat:",
+                t`Enter new name for the chat:`,
                 chat.name ?? "",
               );
               if (newName) {
@@ -56,7 +56,7 @@ const ChatAccordionItemMenu = ({ chat }: { chat: Partial<ProjectChat> }) => {
               }
             }}
           >
-            Rename
+            <Trans>Rename</Trans>
           </Menu.Item>
           <Menu.Item
             leftSection={<IconTrash />}
@@ -69,7 +69,7 @@ const ChatAccordionItemMenu = ({ chat }: { chat: Partial<ProjectChat> }) => {
               navigate(`/projects/${chat.project_id}/overview`);
             }}
           >
-            Delete
+            <Trans>Delete</Trans>
           </Menu.Item>
         </Stack>
       </Menu.Dropdown>
@@ -90,7 +90,7 @@ export const ChatAccordion = ({ projectId }: { projectId: string }) => {
             <span className="min-w-[48px] pr-2 font-normal text-gray-500">
               {chatsQuery.data?.length ?? 0}
             </span>
-            Chats
+            <Trans>Chats</Trans>
           </Title>
         </Group>
       </Accordion.Control>
@@ -122,7 +122,7 @@ export const ChatAccordion = ({ projectId }: { projectId: string }) => {
               </Text>
             </NavigationButton>
           ))}
-        </Stack>
+      </Stack>
       </Accordion.Panel>
     </Accordion.Item>
   );

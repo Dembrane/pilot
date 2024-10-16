@@ -14,6 +14,7 @@ import { Quote } from "../../../components/quote/Quote";
 import { Markdown } from "@/components/common/Markdown";
 import { useAspectById } from "@/lib/query";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { Trans } from "@lingui/macro";
 
 const dedupeQuotes = (quotes: QuoteAspect[]): QuoteAspect[] => {
   const seen = new Set();
@@ -39,15 +40,15 @@ export const ProjectLibraryAspect = () => {
       <Breadcrumbs
         items={[
           {
-            label: "Library",
+            label: <Trans>Library</Trans>,
             link: `/projects/${projectId}/library`,
           },
           {
-            label: "View",
+            label: <Trans>View</Trans>,
             link: `/projects/${projectId}/library/views/${viewId}`,
           },
           {
-            label: "Aspect",
+            label: <Trans>Aspect</Trans>,
           },
         ]}
       />
@@ -67,7 +68,9 @@ export const ProjectLibraryAspect = () => {
               content={aspect?.long_summary ?? ""}
               className="!max-w-full"
             />
-            <Title order={2}>Quotes</Title>
+            <Title order={2}>
+              <Trans>Quotes</Trans>
+            </Title>
             {!isLoading ? (
               <>
                 {" "}

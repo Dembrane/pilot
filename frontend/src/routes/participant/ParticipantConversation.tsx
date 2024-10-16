@@ -1235,7 +1235,7 @@ export const ParticipantConversationAudioRoute = () => {
                           rightSection={<IconCheck />}
                           disabled={uploadInProgress}
                         >
-                          Finish
+                          <Trans>Finish</Trans>
                         </Button>
                       )}
                   </Group>
@@ -1280,7 +1280,7 @@ export const ParticipantConversationAudioRoute = () => {
                       }}
                       rightSection={<IconUpload />}
                     >
-                      Submit
+                      <Trans>Submit</Trans>
                     </Button>
                   </Stack>
                 )}
@@ -1407,7 +1407,7 @@ export const ParticipantConversationTextRoute = () => {
               variant="light"
               rightSection={<IconCheck />}
             >
-              Finish
+              <Trans>Finish</Trans>
             </Button>
           )}
         </Group>

@@ -21,12 +21,12 @@ import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { Icons } from "@/icons";
 import { I18nLink } from "@/components/common/i18nLink";
 import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { Trans } from "@lingui/macro";
 
 export const ProjectLibraryInsight = () => {
   const { projectId, insightId } = useParams();
 
   const insightQuery = useInsight(insightId ?? "");
-  const navigate = usei18nNavigate();
 
   if (!insightQuery.isLoading && !insightQuery.data) {
     return (
@@ -37,10 +37,14 @@ export const ProjectLibraryInsight = () => {
               <IconArrowBack />
             </ActionIcon>
           </I18nLink>
-          <Title order={1}>Insight Library</Title>
+          <Title order={1}>
+            <Trans>Insight Library</Trans>
+          </Title>
         </Group>
         <Divider />
-        <p>Insight not found</p>
+        <Text>
+          <Trans>Insight not found</Trans>
+        </Text>
       </Stack>
     );
   }
@@ -65,7 +69,11 @@ export const ProjectLibraryInsight = () => {
         <Breadcrumbs
           items={[
             {
-              label: <Title order={2}>Insights</Title>,
+              label: (
+                <Title order={2}>
+                  <Trans>Insights</Trans>
+                </Title>
+              ),
               link: `/projects/${projectId}/library#insights`,
             },
             {
@@ -78,7 +86,9 @@ export const ProjectLibraryInsight = () => {
         <Text>{insight.summary}</Text>
 
         <Divider />
-        <Title order={2}>Quotes</Title>
+        <Title order={2}>
+          <Trans>Quotes</Trans>
+        </Title>
         <Stack>
           {quotes.map((quote) => (
             <Quote key={(quote as Quote).id} data={quote as Quote} />

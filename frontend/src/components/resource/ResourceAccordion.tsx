@@ -17,7 +17,7 @@ const ResourceAccordion = ({ projectId }: { projectId: string }) => {
             <span className="min-w-[48px] pr-2 font-normal text-gray-500">
               {resources.length}
             </span>
-            Resources
+            <Trans>Resources</Trans>
           </Title>
           <Tooltip label={t`Upload resources`}>
             <div>

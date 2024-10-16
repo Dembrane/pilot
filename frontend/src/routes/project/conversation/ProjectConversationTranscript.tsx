@@ -5,6 +5,7 @@ import {
   useConversationChunks,
   useConversationTranscriptString,
 } from "@/lib/query";
+import { t, Trans } from "@lingui/macro";
 import {
   ActionIcon,
   Group,
@@ -33,7 +34,7 @@ const Chunk = ({ chunk }: { chunk: ConversationChunk }) => {
   );
   return (
     <BaseMessage
-      title={"Speaker"}
+      title={t`Speaker`}
       rightSection={
         <span className="text-sm">
           {new Date(chunk.timestamp).toLocaleTimeString()}
@@ -130,15 +131,17 @@ export const ProjectConversationTranscript = () => {
     <Stack>
       <Stack>
         <Group>
-          <Title order={2}>Transcript</Title>
-          <Tooltip label="Download transcript">
+          <Title order={2}>
+            <Trans>Transcript</Trans>
+          </Title>
+          <Tooltip label={t`Download transcript`}>
             <ActionIcon onClick={open} size="md" variant="subtle" color="gray">
               <IconDownload size={48} />
             </ActionIcon>
           </Tooltip>
           <CopyButton value={transcriptQuery.data ?? ""}>
             {({ copied, copy }) => (
-              <Tooltip label="Copy transcript">
+              <Tooltip label={t`Copy transcript`}>
                 <ActionIcon
                   size="md"
                   variant="subtle"
@@ -154,17 +157,17 @@ export const ProjectConversationTranscript = () => {
           <Modal
             opened={opened}
             onClose={close}
-            title="Download Transcript Options"
+            title={t`Download Transcript Options`}
           >
             <Stack>
               <TextInput
-                label="Custom Filename"
+                label={t`Custom Filename`}
                 placeholder="ConversationTitle-Email.md"
                 value={filename}
                 onChange={(event) => setFilename(event.currentTarget.value)}
               />
               <Checkbox
-                label="Include timestamps"
+                label={t`Include timestamps`}
                 checked={downloadWithTimestamps}
                 onChange={(event) =>
                   setDownloadWithTimestamps(event.currentTarget.checked)
@@ -177,7 +180,7 @@ export const ProjectConversationTranscript = () => {
                 }}
                 rightSection={<IconDownload />}
               >
-                Download
+                <Trans>Download</Trans>
               </Button>
             </Stack>
           </Modal>
@@ -185,7 +188,7 @@ export const ProjectConversationTranscript = () => {
         <Stack>
           {sorted?.length === 0 && (
             <Text size="md">
-              No transcript available for this conversation.
+              <Trans>No transcript available for this conversation.</Trans>
             </Text>
           )}
           {sorted?.map((chunk) => {

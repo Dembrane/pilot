@@ -1,4 +1,5 @@
 import { useResetPasswordMutation } from "@/lib/query";
+import { t, Trans } from "@lingui/macro";
 import {
   Alert,
   Button,
@@ -13,7 +14,7 @@ import { useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
 export const PasswordResetRoute = () => {
-  useDocumentTitle("Reset Password | Dembrane");
+  useDocumentTitle(t`Reset Password | Dembrane`);
   const [search, _] = useSearchParams();
   const { register, handleSubmit } = useForm<{
     password: string;
@@ -25,12 +26,12 @@ export const PasswordResetRoute = () => {
 
   const onSubmit = handleSubmit(async (data) => {
     if (data.password !== data.confirmPassword) {
-      setError("Passwords do not match");
+      setError(t`Passwords do not match`);
       return;
     }
 
     if (!search.get("token") || search.get("token") === "") {
-      setError("Invalid code. Please request a new one.");
+      setError(t`Invalid code. Please request a new one.`);
       return;
     }
 
@@ -44,23 +45,25 @@ export const PasswordResetRoute = () => {
     <Container size="sm" className="!h-full">
       <Stack className="h-full">
         <Stack className="flex-grow">
-          <Title order={1}>Reset Password</Title>
+          <Title order={1}>
+            <Trans>Reset Password</Trans>
+          </Title>
 
           <form onSubmit={onSubmit}>
             <Stack>
               {error && <Alert color="red">{error}</Alert>}
               <PasswordInput
-                label="New Password"
+                label={<Trans>New Password</Trans>}
                 size="lg"
                 {...register("password")}
-                placeholder="New Password"
+                placeholder={t`New Password`}
                 required
               />
               <PasswordInput
-                label="Confirm New Password"
+                label={<Trans>Confirm New Password</Trans>}
                 size="lg"
                 {...register("confirmPassword")}
-                placeholder="Confirm New Password"
+                placeholder={t`Confirm New Password`}
                 required
               />
               <Button
@@ -68,7 +71,7 @@ export const PasswordResetRoute = () => {
                 type="submit"
                 loading={resetPasswordMutation.isPending}
               >
-                Reset Password
+                <Trans>Reset Password</Trans>
               </Button>
             </Stack>
           </form>

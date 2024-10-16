@@ -46,7 +46,7 @@ export const ParticipantInitiateForm = ({ project }: { project: Project }) => {
   const onSubmit = (data: FormValues) => {
     initiateConversationMutation.mutate({
       projectId: project.id,
-      name: data.name ?? "Anonymous Participant",
+      name: data.name ?? t`Anonymous Participant`,
       pin: project.pin ?? "",
       tagIdList: data.tagIdList,
     });

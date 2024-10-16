@@ -13,6 +13,7 @@ import { AspectCard } from "../aspect/AspectCard";
 import { Link, useParams } from "react-router-dom";
 import { Markdown } from "../common/Markdown";
 import { I18nLink } from "../common/i18nLink";
+import { Trans } from "@lingui/macro";
 
 export const ViewCard = ({ data }: { data: TView }) => {
   return (
@@ -23,7 +24,7 @@ export const ViewCard = ({ data }: { data: TView }) => {
           <Pill>
             <Group>
               <Text className="font-semibold">
-                {data.aspects?.length ?? 0} Aspects
+                {data.aspects?.length ?? 0} <Trans>Aspects</Trans>
               </Text>
             </Group>
           </Pill>
@@ -42,7 +43,9 @@ export const ViewExpandedCard = ({ data }: { data: View }) => {
         <Group justify="space-between">
           <Group c="gray">
             <Icons.View />
-            <Text className="font-semibold">View</Text>
+            <Text className="font-semibold">
+              <Trans>View</Trans>
+            </Text>
           </Group>
 
           <I18nLink to={`/projects/${projectId}/library/views/${data.id}`}>
@@ -63,7 +66,7 @@ export const ViewExpandedCard = ({ data }: { data: View }) => {
           <Pill>
             <Group>
               <Text className="font-semibold">
-                {data.aspects?.length ?? 0} Aspects
+                {data.aspects?.length ?? 0} <Trans>Aspects</Trans>
               </Text>
             </Group>
           </Pill>

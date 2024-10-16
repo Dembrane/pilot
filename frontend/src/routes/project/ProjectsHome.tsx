@@ -127,7 +127,7 @@ export const ProjectsHomeRoute = () => {
               }
               variant="transparent"
               onClick={() => setView("grid")}
-              title="Grid view"
+              title={t`Grid view`}
               color={view === "grid" ? "blue" : "gray"}
             >
               <IconLayoutGrid />

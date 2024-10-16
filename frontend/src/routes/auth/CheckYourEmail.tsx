@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/macro";
 import { Text, Container, Stack, Title } from "@mantine/core";
 import { useDocumentTitle } from "@mantine/hooks";
 
@@ -6,10 +7,14 @@ export const CheckYourEmailRoute = () => {
   return (
     <Container size="sm">
       <Stack>
-        <Title order={1}>Check your email</Title>
+        <Title order={1}>
+          <Trans>Check your email</Trans>
+        </Title>
         <Text>
-          We have sent you an email with next steps. If you don't see it, check
-          your spam folder.
+          <Trans>
+            We have sent you an email with next steps. If you don't see it,
+            check your spam folder.
+          </Trans>
         </Text>
       </Stack>
     </Container>

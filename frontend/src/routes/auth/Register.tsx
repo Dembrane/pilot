@@ -1,6 +1,7 @@
 import { I18nLink } from "@/components/common/i18nLink";
 import { ADMIN_BASE_URL } from "@/config";
 import { useRegisterMutation } from "@/lib/query";
+import { t, Trans } from "@lingui/macro";
 import {
   Alert,
   Button,
@@ -18,7 +19,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 
 export const RegisterRoute = () => {
-  useDocumentTitle("Register | Dembrane");
+  useDocumentTitle(t`Register | Dembrane`);
   const { register, handleSubmit } = useForm<{
     email: string;
     password: string;
@@ -33,7 +34,7 @@ export const RegisterRoute = () => {
 
   const onSubmit = handleSubmit(async (data) => {
     if (data.password !== data.confirmPassword) {
-      setError("Passwords do not match");
+      setError(t`Passwords do not match`);
       return;
     }
 
@@ -52,7 +53,9 @@ export const RegisterRoute = () => {
     <Container size="sm" className="!h-full">
       <Stack className="h-full">
         <Stack className="flex-grow">
-          <Title order={1}>Create an Account</Title>
+          <Title order={1}>
+            <Trans>Create an Account</Trans>
+          </Title>
 
           <form onSubmit={onSubmit}>
             <Stack>
@@ -69,16 +72,16 @@ export const RegisterRoute = () => {
               >
                 <TextInput
                   size="lg"
-                  label="First Name"
+                  label={<Trans>First Name</Trans>}
                   {...register("first_name")}
-                  placeholder="First Name"
+                  placeholder={t`First Name`}
                   required
                 />
                 <TextInput
                   size="lg"
-                  label="Last Name"
+                  label={<Trans>Last Name</Trans>}
                   {...register("last_name")}
-                  placeholder="Last Name"
+                  placeholder={t`Last Name`}
                   required
                 />
               </SimpleGrid>
@@ -91,17 +94,17 @@ export const RegisterRoute = () => {
                 type="email"
               />
               <PasswordInput
-                label="Password"
+                label={<Trans>Password</Trans>}
                 size="lg"
                 {...register("password")}
-                placeholder="Password"
+                placeholder={t`Password`}
                 required
               />
               <PasswordInput
-                label="Confirm Password"
+                label={<Trans>Confirm Password</Trans>}
                 size="lg"
                 {...register("confirmPassword")}
-                placeholder="Confirm Password"
+                placeholder={t`Confirm Password`}
                 required
               />
               <Button
@@ -118,7 +121,7 @@ export const RegisterRoute = () => {
 
           <I18nLink to="/login">
             <Button size="lg" variant="outline" fullWidth>
-              Login as an existing user
+              <Trans>Login as an existing user</Trans>
             </Button>
           </I18nLink>
         </Stack>

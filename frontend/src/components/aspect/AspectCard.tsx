@@ -12,6 +12,7 @@ import {
 import { IconArrowsDiagonal } from "@tabler/icons-react";
 import { Link, useParams } from "react-router-dom";
 import { I18nLink } from "@/components/common/i18nLink";
+import { Trans } from "@lingui/macro";
 
 export const AspectCard = ({
   data,
@@ -41,7 +42,7 @@ export const AspectCard = ({
                 variant="default"
                 leftSection={<IconArrowsDiagonal size="14" />}
               >
-                Open
+                <Trans>Open</Trans>
               </Button>
             </Box>
             <img
@@ -67,7 +68,7 @@ export const AspectCard = ({
                   <Pill>
                     <Group>
                       <Text className="font-semibold">
-                        {data.quotes_count ?? 0} Quotes
+                        {data.quotes_count ?? 0} <Trans>Quotes</Trans>
                       </Text>
                     </Group>
                   </Pill>

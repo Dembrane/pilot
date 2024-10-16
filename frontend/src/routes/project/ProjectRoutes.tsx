@@ -5,6 +5,7 @@ import { ProjectPortalEditor } from "@/components/project/ProjectPortalEditor";
 import { ProjectTranscriptSettings } from "@/components/project/ProjectTranscriptSettings";
 import { getProjectTranscriptsLink } from "@/lib/api";
 import { useProjectById } from "@/lib/query";
+import { Trans } from "@lingui/macro";
 import {
   Alert,
   Box,
@@ -26,7 +27,7 @@ export const ProjectSettingsRoute = () => {
       {projectQuery.isLoading && <LoadingOverlay visible />}
       {projectQuery.isError && (
         <Alert variant="outline" color="red">
-          Error loading project
+          <Trans>Error loading project</Trans>
         </Alert>
       )}
       {projectQuery.data && <ProjectBasicEdit project={projectQuery.data} />}
@@ -34,7 +35,9 @@ export const ProjectSettingsRoute = () => {
       {projectQuery.data && (
         <>
           <Divider />
-          <Title order={2}>Export</Title>
+          <Title order={2}>
+            <Trans>Export</Trans>
+          </Title>
           <Box>
             <Button
               component="a"
@@ -43,7 +46,7 @@ export const ProjectSettingsRoute = () => {
               rightSection={<IconDownload />}
               variant="outline"
             >
-              Download All Transcripts
+              <Trans>Download All Transcripts</Trans>
             </Button>
           </Box>
         </>
@@ -68,7 +71,7 @@ export const ProjectPortalSettingsRoute = () => {
       {projectQuery.isLoading && <LoadingOverlay visible />}
       {projectQuery.isError && (
         <Alert variant="outline" color="red">
-          Error loading project
+          <Trans>Error loading project</Trans>
         </Alert>
       )}
       {projectQuery.data && <ProjectPortalEditor project={projectQuery.data} />}
@@ -85,7 +88,7 @@ export const ProjectTranscriptSettingsRoute = () => {
       {projectQuery.isLoading && <LoadingOverlay visible />}
       {projectQuery.isError && (
         <Alert variant="outline" color="red">
-          Error loading project
+          <Trans>Error loading project</Trans>
         </Alert>
       )}
       {projectQuery.data && (

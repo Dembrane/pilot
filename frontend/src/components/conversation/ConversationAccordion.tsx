@@ -32,6 +32,7 @@ import { IconFilter, IconSearch, IconX } from "@tabler/icons-react";
 import { formatRelative } from "date-fns";
 import { NavigationButton } from "../common/NavigationButton";
 import { cn } from "@/lib/utils";
+import { I18nLink } from "@/components/common/i18nLink";
 
 const ConversationAccordionLabelChatSelection = ({
   conversation,
@@ -269,9 +270,9 @@ export const ConversationAccordion = ({ projectId }: { projectId: string }) => {
               <Trans>
                 No conversations found. Start a conversation using the
                 participation invite link from the{" "}
-                <Link to={`/projects/${projectId}/overview`}>
+                <I18nLink to={`/projects/${projectId}/overview`}>
                   <Anchor>project overview.</Anchor>
-                </Link>
+                </I18nLink>
               </Trans>
             </Text>
           )}

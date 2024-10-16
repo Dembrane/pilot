@@ -19,22 +19,24 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Quote } from "../../../components/quote/Quote";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { Icons } from "@/icons";
+import { I18nLink } from "@/components/common/i18nLink";
+import { usei18nNavigate } from "@/lib/usei18nNavigate";
 
 export const ProjectLibraryInsight = () => {
   const { projectId, insightId } = useParams();
 
   const insightQuery = useInsight(insightId ?? "");
-  const navigate = useNavigate();
+  const navigate = usei18nNavigate();
 
   if (!insightQuery.isLoading && !insightQuery.data) {
     return (
       <Stack className="px-2 py-6">
         <Group>
-          <Link to="..">
+          <I18nLink to="..">
             <ActionIcon>
               <IconArrowBack />
             </ActionIcon>
-          </Link>
+          </I18nLink>
           <Title order={1}>Insight Library</Title>
         </Group>
         <Divider />

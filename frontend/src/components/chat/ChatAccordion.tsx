@@ -18,11 +18,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react";
 import { formatRelative } from "date-fns";
 import { NavigationButton } from "../common/NavigationButton";
+import { usei18nNavigate } from "@/lib/usei18nNavigate";
 
 const ChatAccordionItemMenu = ({ chat }: { chat: Partial<ProjectChat> }) => {
   const deleteChatMutation = useDeleteChatMutation();
   const updateChatMutation = useUpdateChatMutation();
-  const navigate = useNavigate();
+  const navigate = usei18nNavigate();
 
   return (
     <Menu shadow="md" position="right">

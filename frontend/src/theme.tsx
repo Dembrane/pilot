@@ -1,6 +1,7 @@
 import { createTheme } from "@mantine/core";
 import { IconChevronRight, IconInfoCircle } from "@tabler/icons-react";
 import accordionClasses from "./styles/accordion.module.css";
+import DembraneLoadingSpinner from "./components/common/DembraneLoadingSpinner";
 
 export const theme = createTheme({
   fontFamily: "'Space Grotesk Variable', sans-serif",
@@ -145,6 +146,7 @@ export const theme = createTheme({
         icon: <IconInfoCircle />,
       },
     },
+    LoadingOverlay: {},
     Breadcrumbs: {
       defaultProps: {
         separator: <IconChevronRight />,

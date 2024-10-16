@@ -27,6 +27,7 @@ import {
 } from "@/lib/query";
 import { apiCommonConfig } from "@/lib/api";
 import { InformationTooltip } from "@/components/common/InformationTooltip";
+import { usei18nNavigate } from "@/lib/usei18nNavigate";
 
 const ConversationDangerZone = ({
   conversation,
@@ -34,7 +35,7 @@ const ConversationDangerZone = ({
   conversation: Conversation;
 }) => {
   const deleteConversationByIdMutation = useDeleteConversationByIdMutation();
-  const navigate = useNavigate();
+  const navigate = usei18nNavigate();
   const { projectId } = useParams();
 
   const handleDelete = () => {

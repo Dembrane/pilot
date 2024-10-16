@@ -1,7 +1,4 @@
-import { directus, wsDirectus } from "@/lib/directus";
 import { useLatestProjectAnalysisRunByProjectId } from "@/lib/query";
-import { LoadingOverlay, Stack } from "@mantine/core";
-import { useEffect, useState } from "react";
 
 export const ProjectAnalysisRunStatus = ({
   projectId,
@@ -59,7 +56,7 @@ export const ProjectAnalysisRunStatus = ({
 
   if (data.processing_status === "DONE") {
     return (
-      <div className="text-gray-700 italic">
+      <div className="italic text-gray-700">
         This project library was generated on{" "}
         {new Date(data.created_at).toLocaleString()}.
       </div>

@@ -1,3 +1,4 @@
+import { I18nLink } from "@/components/common/i18nLink";
 import { Logo } from "@/components/common/Logo";
 import { Markdown } from "@/components/common/Markdown";
 import { PARTICIPANT_BASE_URL } from "@/config";
@@ -45,14 +46,14 @@ export const ParticipantPostConversation = () => {
     ) ?? null;
 
   return (
-    <div className="container max-w-2xl mx-auto">
-      <header className="fixed left-0 w-full top-0 h-[64px] border-b border-slate-300 py-4 bg-white z-10">
-        <Group justify="center" align="center" className="px-4 relative">
-          <Logo hideTitle className="left-0 pl-4 absolute sm:relative" />
+    <div className="container mx-auto max-w-2xl">
+      <header className="fixed left-0 top-0 z-10 h-[64px] w-full border-b border-slate-300 bg-white py-4">
+        <Group justify="center" align="center" className="relative px-4">
+          <Logo hideTitle className="absolute left-0 pl-4 sm:relative" />
           <h1 className="text-xl">Dembrane</h1>
         </Group>
       </header>
-      <Stack className="mt-[64px] py-8 px-4">
+      <Stack className="mt-[64px] px-4 py-8">
         {!!text && text != "" ? (
           <>
             <Markdown content={text} />
@@ -71,11 +72,11 @@ export const ParticipantPostConversation = () => {
         </Text>
         <Box className="relative">
           <LoadingOverlay visible={project.isLoading} />
-          <Link to={initiateLink}>
+          <I18nLink to={initiateLink}>
             <Button component="a" size="md" variant="outline">
               <Trans>Record another conversation</Trans>
             </Button>
-          </Link>
+          </I18nLink>
         </Box>
       </Stack>
     </div>

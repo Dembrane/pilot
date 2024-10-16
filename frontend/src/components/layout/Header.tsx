@@ -7,12 +7,14 @@ import {
   Text,
   Stack,
 } from "@mantine/core";
-import { Logo } from "./Logo";
+import { Logo } from "../common/Logo";
 import { IconLogout, IconSettings, IconChevronDown } from "@tabler/icons-react";
 import { useLogoutMutation, useCurrentUser } from "@/lib/query";
 import { useAuthenticated } from "@/lib/useAuthenticated";
 import { forwardRef } from "react";
-import { Link } from "react-router-dom";
+import { I18nLink } from "@/components/common/i18nLink";
+import { LanguagePicker } from "../language/LanguagePicker";
+import { t, Trans } from "@lingui/macro";
 
 const UserButton = forwardRef<
   HTMLButtonElement,
@@ -78,36 +80,43 @@ export const Header = () => {
         className="h-full min-h-[58px] w-full"
       >
         <Group gap="md">
-          <Link to="/projects">
+          <I18nLink to="/projects">
             <Logo />
-          </Link>
+          </I18nLink>
         </Group>
-        {!loading && isAuthenticated && user && (
+
+        {!loading && isAuthenticated && user ? (
           <Menu withArrow arrowPosition="center">
             <Menu.Target>
               <UserButton
                 image={typeof user.avatar === "string" ? user.avatar : ""}
-                name={`Hi, ${user.first_name}`}
+                name={t`Hi, ${user.first_name}`}
                 email={user.email || ""}
               />
             </Menu.Target>
             <Menu.Dropdown>
               <Stack gap="xs">
+                <LanguagePicker />
+                <Menu.Divider />
                 <Menu.Item
                   leftSection={<IconSettings color="gray" />}
                   onClick={handleSettingsClick}
                 >
-                  Settings
+                  <Trans>Settings</Trans>
                 </Menu.Item>
                 <Menu.Item
                   leftSection={<IconLogout color="gray" />}
                   onClick={handleLogout}
                 >
-                  Logout
+                  <Trans>Logout</Trans>
                 </Menu.Item>
               </Stack>
             </Menu.Dropdown>
           </Menu>
+        ) : (
+          <Group>
+            <LanguagePicker />
+          </Group>
         )}
       </Group>
     </Paper>

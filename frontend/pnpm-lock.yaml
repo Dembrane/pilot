@@ -20,6 +20,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^3.3.4
         version: 3.9.0(react-hook-form@7.52.2(react@18.3.1))
+      '@lingui/conf':
+        specifier: ^4.12.0
+        version: 4.12.0(typescript@5.5.4)
       '@lingui/core':
         specifier: ^4.11.2
         version: 4.11.2
@@ -989,6 +992,10 @@ packages:
 
   '@lingui/conf@4.11.2':
     resolution: {integrity: sha512-Kw45dRa3biV8CLg50R0e4vCfU750H5fFJ8zBUAIEtWkksKsRDOvf3l1qxfUF76xuLSCPhdLjYfnmW0FqMe/kdg==}
+    engines: {node: '>=16.0.0'}
+
+  '@lingui/conf@4.12.0':
+    resolution: {integrity: sha512-RExMUKnIUNEt91yFlBxklXCMC8ZgFX0eEF066hPIEX8NXCqowm7pbiNy+UlRfxgB7mdIlPDqXCkN94CH9jnpHw==}
     engines: {node: '>=16.0.0'}
 
   '@lingui/core@4.11.2':
@@ -5140,6 +5147,17 @@ snapshots:
       - typescript
 
   '@lingui/conf@4.11.2(typescript@5.5.4)':
+    dependencies:
+      '@babel/runtime': 7.25.0
+      chalk: 4.1.2
+      cosmiconfig: 8.3.6(typescript@5.5.4)
+      jest-validate: 29.7.0
+      jiti: 1.21.6
+      lodash.get: 4.4.2
+    transitivePeerDependencies:
+      - typescript
+
+  '@lingui/conf@4.12.0(typescript@5.5.4)':
     dependencies:
       '@babel/runtime': 7.25.0
       chalk: 4.1.2

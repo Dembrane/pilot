@@ -12,8 +12,11 @@ import {
   ListsToggle,
   linkDialogPlugin,
   markdownShortcutPlugin,
+  directivesPlugin,
+  ChangeAdmonitionType,
+  BlockTypeSelect,
 } from "@mdxeditor/editor";
-import "@mdxeditor/editor/style.css";
+import "./styles.css";
 
 export function MarkdownWYSIWYG(props: MDXEditorProps) {
   return (
@@ -28,16 +31,17 @@ export function MarkdownWYSIWYG(props: MDXEditorProps) {
         toolbarPlugin({
           toolbarContents: () => (
             <>
-              <UndoRedo />
               <BoldItalicUnderlineToggles />
               <CreateLink />
               <ListsToggle options={["number", "bullet"]} />
+              <BlockTypeSelect />
+              <UndoRedo />
             </>
           ),
         }),
       ]}
-      contentEditableClassName="prose space-grotesk"
-      className="space-grotesk rounded border border-gray-200"
+      contentEditableClassName="prose min-h-[200px]"
+      className="rounded border border-gray-200"
       {...props}
     />
   );

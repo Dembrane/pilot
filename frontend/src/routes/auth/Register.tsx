@@ -1,3 +1,4 @@
+import { I18nLink } from "@/components/common/i18nLink";
 import { ADMIN_BASE_URL } from "@/config";
 import { useRegisterMutation } from "@/lib/query";
 import {
@@ -115,11 +116,11 @@ export const RegisterRoute = () => {
 
           <Divider variant="dashed" label="or" labelPosition="center" />
 
-          <Link to="/login">
+          <I18nLink to="/login">
             <Button size="lg" variant="outline" fullWidth>
               Login as an existing user
             </Button>
-          </Link>
+          </I18nLink>
         </Stack>
       </Stack>
     </Container>

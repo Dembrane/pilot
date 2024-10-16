@@ -18,6 +18,7 @@ import { Link, useParams } from "react-router-dom";
 import { Quote } from "../../../components/quote/Quote";
 import { Insight } from "@/components/insight/Insight";
 import { useState } from "react";
+import { I18nLink } from "@/components/common/i18nLink";
 
 export const ProjectConversationAnalysis = () => {
   const { conversationId, projectId } = useParams();
@@ -68,9 +69,9 @@ export const ProjectConversationAnalysis = () => {
           <Text>
             No insights available. Generate insights for this conversation by
             visiting
-            <Link to={`/projects/${projectId}/library`}>
+            <I18nLink to={`/projects/${projectId}/library`}>
               <Anchor> the project library.</Anchor>
-            </Link>
+            </I18nLink>
           </Text>
         )}
 
@@ -121,9 +122,9 @@ export const ProjectConversationAnalysis = () => {
       {quotesQuery.data && quotesQuery.data.length === 0 && (
         <Text>
           No quotes available. Generate quotes for this conversation by visiting
-          <Link to={`/projects/${projectId}/library`}>
+          <I18nLink to={`/projects/${projectId}/library`}>
             <Anchor> the project library.</Anchor>
-          </Link>
+          </I18nLink>
         </Text>
       )}
       <Stack gap="sm">

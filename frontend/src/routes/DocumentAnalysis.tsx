@@ -15,11 +15,11 @@
 //     <Stack p="sm" h="100%">
 //       <Group justify="space-between">
 //         <Group align="center" gap="xs" wrap="nowrap">
-//           <Link to="/">
+//           <I18nLink to="/">
 //             <Title component={Anchor} order={1}>
 //               Analysis
 //             </Title>
-//           </Link>
+//           </I18nLink>
 //           <IconChevronRight />
 //           <Title order={1}>{initialData.title}</Title>
 //         </Group>

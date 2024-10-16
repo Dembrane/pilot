@@ -1,6 +1,8 @@
 import WelcomeImage from "@/assets/participant-welcome-pattern.png";
 import { Logo } from "@/components/common/Logo";
 import { Markdown } from "@/components/common/Markdown";
+import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { I18nLink } from "@/components/common/i18nLink";
 import {
   useUploadConversationChunk,
   useUploadConversationTextChunk,
@@ -557,9 +559,9 @@ const useConversationChunksQuery = (
 
 const ParticipantHeader = () => {
   return (
-    <header className="w-full h-[64px] sticky top-0 border-b border-slate-300 py-4 bg-white z-10 shadow-sm">
-      <Group justify="center" align="center" className="px-4 relative">
-        <Logo hideTitle className="left-0 pl-4 absolute sm:relative" />
+    <header className="sticky top-0 z-10 h-[64px] w-full border-b border-slate-300 bg-white py-4 shadow-sm">
+      <Group justify="center" align="center" className="relative px-4">
+        <Logo hideTitle className="absolute left-0 pl-4 sm:relative" />
         <h1 className="text-xl">Dembrane</h1>
       </Group>
     </header>
@@ -620,7 +622,7 @@ const UserChunkMessage = ({ chunk }: { chunk?: TConversationChunk }) => {
   };
 
   return (
-    <div className="flex justify-end align-center">
+    <div className="align-center flex justify-end">
       <div>
         <Menu shadow="md" width={200}>
           <Menu.Target>
@@ -640,8 +642,8 @@ const UserChunkMessage = ({ chunk }: { chunk?: TConversationChunk }) => {
           </Menu.Dropdown>
         </Menu>
       </div>
-      <Paper className="rounded-t-xl rounded-bl-xl shadow-sm p-4">
-        <Text className="text-sm prose">
+      <Paper className="rounded-t-xl rounded-bl-xl p-4 shadow-sm">
+        <Text className="prose text-sm">
           {chunk.transcript == null && (
             <Markdown content={t`*Transcription in progress.*`} />
           )}
@@ -655,8 +657,8 @@ const UserChunkMessage = ({ chunk }: { chunk?: TConversationChunk }) => {
 const UserMessage = ({ markdown }: { markdown?: string }) => {
   return (
     <div className="flex justify-end">
-      <Paper className="rounded-t-xl rounded-bl-xl shadow-sm p-4">
-        <Text className="text-sm prose">
+      <Paper className="rounded-t-xl rounded-bl-xl p-4 shadow-sm">
+        <Text className="prose text-sm">
           <Markdown content={markdown ?? ""} />
         </Text>
       </Paper>
@@ -669,9 +671,9 @@ const SystemMessage = ({ markdown }: { markdown?: string }) => {
     <div className="flex justify-start">
       <Paper
         bg="transparent"
-        className="rounded-t-xl rounded-br-xl shadow-sm p-4 border border-slate-200"
+        className="rounded-t-xl rounded-br-xl border border-slate-200 p-4 shadow-sm"
       >
-        <Text className="text-sm prose">
+        <Text className="prose text-sm">
           <Markdown content={markdown ?? ""} />
         </Text>
       </Paper>
@@ -702,16 +704,16 @@ const ParticipantBody = ({
   return (
     <Stack ref={ref} className="max-h-full">
       {conversation && conversation.participant_name != "" ? (
-        <h2 className="text-3xl text-center">
+        <h2 className="text-center text-3xl">
           <Trans>Welcome</Trans>, {conversation.participant_name}
         </h2>
       ) : (
-        <h2 className="text-3xl text-center">
+        <h2 className="text-center text-3xl">
           <Trans>Welcome</Trans>
         </h2>
       )}
       <img
-        className="w-full object-contain animate-pulse duration-1000"
+        className="w-full animate-pulse object-contain duration-1000"
         src={WelcomeImage}
       />
       {conversation && (
@@ -793,7 +795,7 @@ export const ParticipantConversationChunkedAudioRoute = () =>
     const [troubleShootingGuideOpened, setTroubleShootingGuideOpened] =
       useState(false);
 
-    const navigate = useNavigate();
+    const navigate = usei18nNavigate();
     const { language } = useLanguage();
 
     const handleCheckMicrophoneAccess = async () => {
@@ -821,7 +823,7 @@ export const ParticipantConversationChunkedAudioRoute = () =>
     };
 
     return (
-      <div className="min-h-dvh flex flex-col container max-w-2xl mx-auto">
+      <div className="container mx-auto flex min-h-dvh max-w-2xl flex-col">
         {/* modal for permissions error */}
         <Modal
           opened={!!permissionError}
@@ -832,10 +834,10 @@ export const ParticipantConversationChunkedAudioRoute = () =>
           transitionProps={{ transition: "fade", duration: 200 }}
           withCloseButton={false}
         >
-          <div className="bg-white py-4 h-full rounded-md">
+          <div className="h-full rounded-md bg-white py-4">
             <ParticipantHeader />
-            <Stack className="mt-4 px-2 mx-auto container max-w-2xl" gap="lg">
-              <div className="text-lg max-w-prose">
+            <Stack className="container mx-auto mt-4 max-w-2xl px-2" gap="lg">
+              <div className="max-w-prose text-lg">
                 <Trans>
                   Oops! It looks like microphone access was denied. No worries,
                   though! We've got a handy troubleshooting guide for you. Feel
@@ -871,20 +873,20 @@ export const ParticipantConversationChunkedAudioRoute = () =>
 
         <ParticipantHeader />
 
-        <Box className={clsx("flex-grow px-4 py-4 relative transition-all")}>
+        <Box className={clsx("relative flex-grow px-4 py-4 transition-all")}>
           <ParticipantBody conversation={conversationQuery.data} />
         </Box>
 
         {!errored && (
-          <Stack className="sticky bottom-0 z-10 p-4 w-full border-t border-slate-300 bg-white shadow-sm">
+          <Stack className="sticky bottom-0 z-10 w-full border-t border-slate-300 bg-white p-4 shadow-sm">
             {/* Recording time indicator */}
             {isRecording && (
-              <div className="w-full bg-white border-slate-300 pt-2 pb-4">
+              <div className="w-full border-slate-300 bg-white pb-4 pt-2">
                 <Group justify="center" align="center">
                   {isPaused ? (
                     <IconPlayerPause />
                   ) : (
-                    <div className="animate-pulse bg-red-500 h-4 w-4 rounded-full"></div>
+                    <div className="h-4 w-4 animate-pulse rounded-full bg-red-500"></div>
                   )}
                   <Text className="text-4xl">
                     {Math.floor(recordingTime / 60)
@@ -909,11 +911,11 @@ export const ParticipantConversationChunkedAudioRoute = () =>
                       <Trans>Start Recording</Trans>
                     </Button>
 
-                    <Link to={textModeUrl}>
+                    <I18nLink to={textModeUrl}>
                       <ActionIcon component="a" size="60" variant="outline">
                         <IconTextCaption />
                       </ActionIcon>
-                    </Link>
+                    </I18nLink>
 
                     {!isRecording && chunks?.data && chunks.data.length > 0 && (
                       <Button
@@ -1043,7 +1045,7 @@ export const ParticipantConversationAudioRoute = ({
     const [troubleShootingGuideOpened, setTroubleShootingGuideOpened] =
       useState(false);
 
-    const navigate = useNavigate();
+    const navigate = usei18nNavigate();
     const { language } = useLanguage();
 
     const handleCheckMicrophoneAccess = async () => {
@@ -1071,7 +1073,7 @@ export const ParticipantConversationAudioRoute = ({
     };
 
     return (
-      <div className="min-h-dvh flex flex-col container max-w-2xl mx-auto">
+      <div className="container mx-auto flex min-h-dvh max-w-2xl flex-col">
         {/* modal for permissions error */}
         <Modal
           opened={!!permissionError}
@@ -1082,10 +1084,10 @@ export const ParticipantConversationAudioRoute = ({
           transitionProps={{ transition: "fade", duration: 200 }}
           withCloseButton={false}
         >
-          <div className="bg-white py-4 h-full rounded-md">
+          <div className="h-full rounded-md bg-white py-4">
             <ParticipantHeader />
-            <Stack className="mt-4 px-2 mx-auto container max-w-2xl" gap="lg">
-              <div className="text-lg max-w-prose">
+            <Stack className="container mx-auto mt-4 max-w-2xl px-2" gap="lg">
+              <div className="max-w-prose text-lg">
                 <Trans>
                   Oops! It looks like microphone access was denied. No worries,
                   though! We've got a handy troubleshooting guide for you. Feel
@@ -1121,20 +1123,20 @@ export const ParticipantConversationAudioRoute = ({
 
         <ParticipantHeader />
 
-        <Box className={clsx("flex-grow px-4 py-4 relative transition-all")}>
+        <Box className={clsx("relative flex-grow px-4 py-4 transition-all")}>
           <ParticipantBody conversation={conversationQuery.data} />
         </Box>
 
         {!errored && (
-          <Stack className="sticky bottom-0 z-10 p-4 w-full border-t border-slate-300 bg-white shadow-sm">
+          <Stack className="sticky bottom-0 z-10 w-full border-t border-slate-300 bg-white p-4 shadow-sm">
             {/* Recording time indicator */}
             {isRecording && (
-              <div className="w-full bg-white border-slate-300 pt-2 pb-4">
+              <div className="w-full border-slate-300 bg-white pb-4 pt-2">
                 <Group justify="center" align="center">
                   {isPaused ? (
                     <IconPlayerPause />
                   ) : (
-                    <div className="animate-pulse bg-red-500 h-4 w-4 rounded-full"></div>
+                    <div className="h-4 w-4 animate-pulse rounded-full bg-red-500"></div>
                   )}
                   <Text className="text-4xl">
                     {Math.floor(recordingTime / 60)
@@ -1166,11 +1168,11 @@ export const ParticipantConversationAudioRoute = ({
                         <Trans>Start Recording</Trans>
                       </Button>
 
-                      <Link to={textModeUrl}>
+                      <I18nLink to={textModeUrl}>
                         <ActionIcon component="a" size="60" variant="outline">
                           <IconTextCaption />
                         </ActionIcon>
-                      </Link>
+                      </I18nLink>
 
                       {!isRecording &&
                         !preview &&
@@ -1299,7 +1301,7 @@ export const ParticipantConversationTextRoute = () => {
     setText("");
   };
 
-  const navigate = useNavigate();
+  const navigate = usei18nNavigate();
   const { language } = useLanguage();
 
   const audioModeUrl = `/${language}/${projectId}/conversation/${conversationId}`;
@@ -1316,18 +1318,18 @@ export const ParticipantConversationTextRoute = () => {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col container max-w-2xl mx-auto">
+    <div className="container mx-auto flex min-h-dvh max-w-2xl flex-col">
       <ParticipantHeader />
 
-      <Box className={clsx("flex-grow px-4 py-4 relative transition-all")}>
+      <Box className={clsx("relative flex-grow px-4 py-4 transition-all")}>
         <ParticipantBody
           conversation={conversationQuery.data}
         ></ParticipantBody>
       </Box>
 
-      <Stack className="sticky bottom-0 z-10 p-4 w-full border-t border-slate-300 bg-white shadow-sm">
+      <Stack className="sticky bottom-0 z-10 w-full border-t border-slate-300 bg-white p-4 shadow-sm">
         <textarea
-          className="w-full h-32 p-4 border border-slate-300 rounded-md"
+          className="h-32 w-full rounded-md border border-slate-300 p-4"
           placeholder={t`Type your response here`}
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -1342,11 +1344,11 @@ export const ParticipantConversationTextRoute = () => {
           >
             <Trans>Submit</Trans>
           </Button>
-          <Link to={audioModeUrl}>
+          <I18nLink to={audioModeUrl}>
             <ActionIcon component="a" variant="outline" size="60">
               <IconMicrophone />
             </ActionIcon>
-          </Link>
+          </I18nLink>
           {text.trim() == "" && chunks.data && chunks.data.length > 0 && (
             <Button
               size="xl"

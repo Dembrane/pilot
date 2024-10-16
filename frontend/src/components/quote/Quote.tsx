@@ -1,5 +1,6 @@
 import { Paper, Pill, Text } from "@mantine/core";
 import { useParams, Link } from "react-router-dom";
+import { I18nLink } from "../common/i18nLink";
 
 export const Quote = ({ data }: { data: Quote }) => {
   const { projectId } = useParams();
@@ -10,14 +11,14 @@ export const Quote = ({ data }: { data: Quote }) => {
         "{data.text}"
       </Text>
       {data.conversation_id && (
-        <Link
+        <I18nLink
           to={`/projects/${projectId}/conversation/${(data.conversation_id as unknown as Conversation).id}/analysis`}
         >
           <Pill>
             {((data as any).conversation_id as Conversation).participant_name ??
               ""}
           </Pill>
-        </Link>
+        </I18nLink>
       )}
     </Paper>
   );

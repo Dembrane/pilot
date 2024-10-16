@@ -43,6 +43,7 @@ import { Markdown } from "@/components/common/Markdown";
 import React, { useEffect, useMemo, useRef } from "react";
 import { formatDate } from "date-fns";
 import { cn } from "@/lib/utils";
+import { I18nLink } from "@/components/common/i18nLink";
 
 const ConversationLinks = ({
   conversations,
@@ -54,12 +55,12 @@ const ConversationLinks = ({
   return (
     <Group gap="xs" align="center">
       {conversations?.map((conversation) => (
-        <Link
+        <I18nLink
           key={conversation.id}
           to={`/projects/${projectId}/conversation/${conversation.id}/overview`}
         >
           <Anchor size="xs">{conversation.participant_name}</Anchor>
-        </Link>
+        </I18nLink>
       )) ?? null}
     </Group>
   );

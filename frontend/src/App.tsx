@@ -9,7 +9,6 @@ import { I18nProvider } from "./components/layout/I18nProvider";
 import { mainRouter, participantRouter } from "./Router";
 import { USE_PARTICIPANT_ROUTER } from "./config";
 import { theme } from "./theme";
-import BreakpointIndicator from "./components/common/BreakpointIndicator";
 
 const queryClient = new QueryClient();
 
@@ -19,7 +18,6 @@ export const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <MantineProvider theme={theme}>
-        {/* <BreakpointIndicator /> */}
         <I18nProvider>
           <RouterProvider router={router} />
         </I18nProvider>

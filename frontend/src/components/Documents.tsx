@@ -115,7 +115,7 @@
 //   document,
 // }: PropsWithChildren<{ document: TDocument }>) => {
 //   return (
-//     <Link to={`/document/${document.id}`}>
+//     <I18nLink to={`/document/${document.id}`}>
 //       <Button
 //         disabled={document.is_processed === false}
 //         loading={document.is_processed === false}
@@ -125,7 +125,7 @@
 //       >
 //         <Trans>Open Document Chat ✨</Trans>
 //       </Button>
-//     </Link>
+//     </I18nLink>
 //   );
 // };
 

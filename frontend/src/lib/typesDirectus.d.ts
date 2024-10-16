@@ -452,10 +452,12 @@ type Project = {
   context?: string | null;
   conversations: any[] | Conversation[];
   created_at: string;
-  default_conversation_context?: string | null;
+  default_conversation_ask_for_participant_name: boolean;
+  default_conversation_title?: string | null;
   default_conversation_description?: string | null;
   default_conversation_finish_text?: string | null;
-  default_conversation_title?: string | null;
+  default_conversation_tutorial_slug?: string | null;
+  default_conversation_transcript_prompt?: string | null;
   directus_user_id?: string | DirectusUsers | null;
   id: string;
   image_generation_model?: string | null;
@@ -584,32 +586,6 @@ type View = {
   updated_at: string;
 };
 
-type PortalTutorial = {
-  date_created?: string | null;
-  date_updated?: string | null;
-  id: number;
-  label?: string | null;
-  slug?: string | null;
-  sort?: number | null;
-  status: string;
-  user_created?: string | DirectusUsers | null;
-  user_updated?: string | DirectusUsers | null;
-};
-
-type PortalTutorialCard = {
-  date_created?: string | null;
-  date_updated?: string | null;
-  description?: string | null;
-  heading?: string | null;
-  icon_url?: string | null;
-  id: number;
-  sort?: number | null;
-  subheading?: string | null;
-  user_confirmation_required?: boolean | null;
-  user_created?: string | DirectusUsers | null;
-  user_updated?: string | DirectusUsers | null;
-};
-
 type CustomDirectusTypes = {
   aspect: Aspect[];
   conversation: Conversation[];
@@ -654,6 +630,4 @@ type CustomDirectusTypes = {
   quote_aspect_1: QuoteAspect1[];
   quote_conversation_chunk: QuoteConversationChunk[];
   view: View[];
-  portal_tutorial: PortalTutorial[];
-  portal_tutorial_card: PortalTutorialCard[];
 };

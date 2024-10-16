@@ -5,9 +5,10 @@ import axios, {
   AxiosRequestConfig,
   CreateAxiosDefaults,
 } from "axios";
-import { directus } from "./directus";
+import { directus, directusContent, directusParticipant } from "./directus";
 import { QueryAlias, readItem, readItems } from "@directus/sdk";
 import { Message } from "ai/react";
+import { EchoPortalTutorial } from "./typesDirectusContent";
 
 export const apiCommonConfig: CreateAxiosDefaults = {
   baseURL: API_BASE_URL,
@@ -31,7 +32,51 @@ interface CustomAxiosRequestConfig extends AxiosRequestConfig {
 }
 
 export const getParticipantProjectById = async (projectId: string) => {
-  return apiNoAuth.get<unknown, TProject>(`/participant/projects/${projectId}`);
+  // return apiNoAuth.get<unknown, TProject>(`/participant/projects/${projectId}`);
+  return directusParticipant.request<Project>(
+    readItem("project", projectId, {
+      fields: ["*", { tags: ["id", "project_id", "text"] }],
+    }),
+  );
+};
+
+export const getParticipantTutorialCardsBySlug = async (slug: string) => {
+  return directusContent.request<EchoPortalTutorial[]>(
+    readItems("echo__portal_tutorial", {
+      filter: {
+        slug: {
+          _eq: slug,
+        },
+      },
+      deep: {
+        cards: {
+          _sort: "sort",
+        } as any,
+      },
+      fields: [
+        "id",
+        "slug",
+        "count(cards)",
+        {
+          cards: [
+            "id",
+            "sort",
+            {
+              echo__portal_tutorial_card_id: [
+                "id",
+                "user_confirmation_required",
+                "icon",
+                "link",
+                {
+                  translations: ["*"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
 };
 
 export const getParticipantConversation = async (

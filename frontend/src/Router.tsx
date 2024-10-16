@@ -1,18 +1,16 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
 import { BaseLayout } from "./components/layout/BaseLayout";
 import { ProjectsHomeRoute } from "./routes/project/ProjectsHome";
-import { ProjectsCreateRoute } from "./routes/project/ProjectCreate";
 import {
-  ProjectPortalEditor,
-  ProjectSettings,
-  ProjectTranscriptSettings,
+  ProjectPortalSettingsRoute,
+  ProjectSettingsRoute,
+  ProjectTranscriptSettingsRoute,
 } from "./routes/project/ProjectRoutes";
 import { ProjectLayout } from "./components/layout/ProjectLayout";
 import { ProjectResourceLayout } from "./components/layout/ProjectResourceLayout";
 import { ProjectResourceOverviewRoute } from "./routes/project/resource/ProjectResourceOverview";
 import { ProjectResourceAnalysisRoute } from "./routes/project/resource/ProjectResourceAnalysis";
 import { LanguageLayout } from "./components/layout/LanguageLayout";
-import { ParticipantLoginRoute } from "./routes/participant/ParticipantLogin";
 import {
   ParticipantConversationAudioRoute,
   ParticipantConversationTextRoute,
@@ -37,9 +35,10 @@ import { CheckYourEmailRoute } from "./routes/auth/CheckYourEmail";
 import { VerifyEmailRoute } from "./routes/auth/VerifyEmail";
 import { PasswordResetRoute } from "./routes/auth/PasswordReset";
 import { RequestPasswordResetRoute } from "./routes/auth/RequestPasswordReset";
-import { Text } from "@mantine/core";
 import { ProjectChatRoute } from "./routes/project/chat/ProjectChat";
 import { ProjectOverviewLayout } from "./components/layout/ProjectOverviewLayout";
+import { ParticipantLayout } from "./components/layout/ParticipantLayout";
+import { ParticipantStartRoute } from "./routes/participant/ParticipantStart";
 
 export const mainRouter = createBrowserRouter([
   {
@@ -98,23 +97,8 @@ export const mainRouter = createBrowserRouter([
           </AuthLayout>
         ),
       },
-
-      // {
-      //   path: "workspaces",
-      //   element: (
-      //     <Protected>
-      //       <BaseLayout>
-      //         <WorkspacesHomeRoute />
-      //       </BaseLayout>
-      //     </Protected>
-      //   ),
-      // },
-
       {
-        // path: "workspaces/:sessionId/projects",
         path: "projects",
-
-        // path: "projects",
         element: (
           <Protected>
             <BaseLayout />
@@ -139,15 +123,15 @@ export const mainRouter = createBrowserRouter([
                       {
                         index: true,
                         path: "overview",
-                        element: <ProjectSettings />,
+                        element: <ProjectSettingsRoute />,
                       },
                       {
                         path: "portal-editor",
-                        element: <ProjectPortalEditor />,
+                        element: <ProjectPortalSettingsRoute />,
                       },
                       {
                         path: "transcript-settings",
-                        element: <ProjectTranscriptSettings />,
+                        element: <ProjectTranscriptSettingsRoute />,
                       },
                     ],
                   },
@@ -224,22 +208,16 @@ export const mainRouter = createBrowserRouter([
 export const participantRouter = createBrowserRouter([
   {
     path: "/:language?/:projectId",
-    element: <LanguageLayout />,
+    element: <ParticipantLayout />,
     errorElement: <NotFoundRoute />,
     children: [
       {
-        path: "login",
-        element: <ParticipantLoginRoute />,
+        path: "start",
+        element: <ParticipantStartRoute />,
       },
       {
         path: "conversation/:conversationId",
         element: <ParticipantConversationAudioRoute isTranscriptionLive />,
-      },
-      {
-        path: "conversation/:conversationId/async",
-        element: (
-          <ParticipantConversationAudioRoute isTranscriptionLive={false} />
-        ),
       },
       {
         path: "conversation/:conversationId/text",

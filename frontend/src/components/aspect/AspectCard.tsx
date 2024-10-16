@@ -11,6 +11,7 @@ import {
 } from "@mantine/core";
 import { IconArrowsDiagonal } from "@tabler/icons-react";
 import { Link, useParams } from "react-router-dom";
+import { I18nLink } from "@/components/common/i18nLink";
 
 export const AspectCard = ({
   data,
@@ -23,7 +24,7 @@ export const AspectCard = ({
 
   return (
     <Box className="place-self-stretch">
-      <Link
+      <I18nLink
         to={`/projects/${projectId}/library/views/${data.view_id}/aspects/${data.id}`}
       >
         <Paper
@@ -75,7 +76,7 @@ export const AspectCard = ({
             </Box>
           </Box>
         </Paper>
-      </Link>
+      </I18nLink>
     </Box>
   );
 };

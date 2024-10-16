@@ -14,6 +14,7 @@ import {
 import { IconCheck, IconCopy, IconShare } from "@tabler/icons-react";
 import { QRCode } from "../common/QRCode";
 import { PARTICIPANT_BASE_URL } from "@/config";
+import { Trans, t } from "@lingui/macro";
 
 interface ProjectQRCodeProps {
   project?: Project;
@@ -54,12 +55,12 @@ export const ProjectQRCode = ({ project }: ProjectQRCodeProps) => {
                 variant="outline"
                 onClick={async () => {
                   await navigator.share({
-                    title: `Join ${project?.default_conversation_title} on Dembrane`,
+                    title: t`Join ${project?.default_conversation_title} on Dembrane`,
                     url: link,
                   });
                 }}
               >
-                Share
+                <Trans>Share</Trans>
               </Button>
             )}{" "}
             <CopyButton value={link} timeout={2000}>
@@ -75,14 +76,16 @@ export const ProjectQRCode = ({ project }: ProjectQRCodeProps) => {
                     )
                   }
                 >
-                  {copied ? "Copied" : "Copy link"}
+                  {copied ? t`Copied` : t`Copy link`}
                 </Button>
               )}
             </CopyButton>
           </Stack>
         </Group>
       ) : (
-        <Text size="sm">Please enable participation to enable sharing</Text>
+        <Text size="sm">
+          <Trans>Please enable participation to enable sharing</Trans>
+        </Text>
       )}
     </Paper>
   );

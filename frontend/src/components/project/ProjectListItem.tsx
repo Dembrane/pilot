@@ -4,6 +4,8 @@ import { IconExternalLink } from "@tabler/icons-react";
 import { formatRelative } from "date-fns";
 import { PropsWithChildren } from "react";
 import { Link, useParams } from "react-router-dom";
+import { I18nLink } from "../common/i18nLink";
+import { Trans, t } from "@lingui/macro";
 
 export const ProjectListItem = ({
   project,
@@ -13,7 +15,7 @@ export const ProjectListItem = ({
   const link = `/projects/${project.id}/overview`;
 
   return (
-    <Link to={link}>
+    <I18nLink to={link}>
       <Paper
         component="a"
         p="sm"
@@ -29,13 +31,14 @@ export const ProjectListItem = ({
               </Text>
             </Group>
             <Text size="sm" c="dimmed">
-              {project.conversations_count} Conversation
-              {project.conversations_count === 1 ? "" : "s"} &middot; Edited{" "}
-              {formatRelative(new Date(project.updated_at), new Date())}
+              <Trans>
+                {project.conversations_count} Conversations • Edited{" "}
+                {formatRelative(new Date(project.updated_at), new Date())}
+              </Trans>
             </Text>
           </Stack>
         </Group>
       </Paper>
-    </Link>
+    </I18nLink>
   );
 };

@@ -30,12 +30,13 @@ import {
   IconSearch,
   IconX,
 } from "@tabler/icons-react";
-import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { Trans, t } from "@lingui/macro";
 
 export const ProjectsHomeRoute = () => {
-  useDocumentTitle("Projects | Dembrane");
+  useDocumentTitle(t`Projects | Dembrane`);
 
   const [gridParent] = useAutoAnimate();
   const [listParent] = useAutoAnimate();
@@ -57,12 +58,12 @@ export const ProjectsHomeRoute = () => {
     defaultValue: "list",
   });
 
-  const navigate = useNavigate();
+  const navigate = usei18nNavigate();
   const createProjectMutation = useCreateProjectMutation();
 
   const handleCreateProject = async () => {
     const project = await createProjectMutation.mutateAsync({
-      name: "New Project",
+      name: t`New Project`,
     });
     navigate(`/projects/${project.id}/overview`);
   };
@@ -78,7 +79,9 @@ export const ProjectsHomeRoute = () => {
                   label: (
                     <Group>
                       <Icons.Home />
-                      <Title order={1}>Home</Title>
+                      <Title order={1}>
+                        <Trans>Home</Trans>
+                      </Title>
                     </Group>
                   ),
                 },
@@ -91,12 +94,14 @@ export const ProjectsHomeRoute = () => {
             loading={createProjectMutation.isPending}
             onClick={handleCreateProject}
           >
-            Create
+            <Trans>Create</Trans>
           </Button>
         </Group>
         <Divider />
         <Group justify="space-between" className="relative">
-          <Title order={2}>Projects</Title>
+          <Title order={2}>
+            <Trans>Projects</Trans>
+          </Title>
 
           <Group gap="xs">
             <ActionIcon
@@ -134,9 +139,11 @@ export const ProjectsHomeRoute = () => {
           projectsQuery.data.length === 0 &&
           debouncedSearchValue === "" && (
             <Alert icon={<IconInfoCircle />}>
-              Welcome to Your Home! Here you can see all your projects and get
-              access to tutorial resources. Currently, you have no projects.
-              Click "Create" to configure to get started!
+              <Trans>
+                Welcome to Your Home! Here you can see all your projects and get
+                access to tutorial resources. Currently, you have no projects.
+                Click "Create" to configure to get started!
+              </Trans>
             </Alert>
           )}
 
@@ -160,7 +167,7 @@ export const ProjectsHomeRoute = () => {
                 </ActionIcon>
               )
             }
-            placeholder="Search projects"
+            placeholder={t`Search projects`}
             value={search}
             size="md"
             onChange={(e) => setSearch(e.currentTarget.value)}
@@ -172,7 +179,8 @@ export const ProjectsHomeRoute = () => {
           projectsQuery.data.length === 0 &&
           debouncedSearchValue !== "" && (
             <Text>
-              No projects found for search term <i>{debouncedSearchValue}</i>
+              <Trans>No projects found for search term</Trans>{" "}
+              <i>{debouncedSearchValue}</i>
             </Text>
           )}
 

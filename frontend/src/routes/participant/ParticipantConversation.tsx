@@ -56,6 +56,8 @@ import {
   getParticipantConversation,
   getParticipantConversationChunks,
 } from "@/lib/api";
+import { useParticipantProjectById } from "@/lib/participantQuery";
+import { useDisclosure } from "@mantine/hooks";
 
 const preferredMimeTypes = ["audio/webm", "audio/wav", "video/mp4"];
 
@@ -682,24 +684,21 @@ const SystemMessage = ({ markdown }: { markdown?: string }) => {
 };
 
 const ParticipantBody = ({
+  project,
   conversation,
+  viewResponses = false,
   children,
 }: PropsWithChildren<{
+  project: Project;
   conversation?: TConversation;
+  viewResponses?: boolean;
 }>) => {
-  const { projectId } = useParams();
   const [ref] = useAutoAnimate();
   const [chatRef] = useAutoAnimate();
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const chunksQuery = useConversationChunksQuery(projectId, conversation?.id);
-
-  useEffect(() => {
-    if (bottomRef.current) {
-      // disable autoscroll for now
-      // bottomRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [chunksQuery.data]);
+  const chunksQuery = useConversationChunksQuery(project.id, conversation?.id);
+  const [opened, { open, close }] = useDisclosure(false);
 
   return (
     <Stack ref={ref} className="max-h-full">
@@ -718,10 +717,12 @@ const ParticipantBody = ({
       />
       {conversation && (
         <Stack ref={chatRef} py="md">
-          <Title order={3}>{conversation.title}</Title>
+          <Title order={3}>{project.default_conversation_title}</Title>
 
-          {conversation.description && (
-            <SystemMessage markdown={conversation.description} />
+          {project.default_conversation_description && (
+            <SystemMessage
+              markdown={project.default_conversation_description ?? ""}
+            />
           )}
 
           <SystemMessage
@@ -730,15 +731,54 @@ const ParticipantBody = ({
 
           {children}
 
-          {chunksQuery.data
-            ?.sort(
-              (a, b) =>
-                new Date(a.timestamp).getTime() -
-                new Date(b.timestamp).getTime(),
-            )
-            .map((chunk) => {
-              return <UserChunkMessage key={chunk.id} chunk={chunk} />;
-            })}
+          {viewResponses ? (
+            <div className="flex justify-end">
+              <Stack gap="sm">
+                {chunksQuery.data
+                  ?.sort(
+                    (a, b) =>
+                      new Date(a.timestamp).getTime() -
+                      new Date(b.timestamp).getTime(),
+                  )
+                  .map((chunk) => {
+                    return <UserChunkMessage key={chunk.id} chunk={chunk} />;
+                  })}
+              </Stack>
+            </div>
+          ) : (
+            <>
+              {chunksQuery.data && chunksQuery.data.length > 0 && (
+                <div className="flex justify-end">
+                  <Button variant="transparent" onClick={open}>
+                    <Trans>View your responses</Trans>
+                  </Button>
+                </div>
+              )}
+
+              <Modal
+                opened={opened}
+                onClose={close}
+                size="lg"
+                title={t`Your responses`}
+              >
+                <div style={{ maxHeight: "70vh", overflowY: "auto" }}>
+                  <Stack gap="sm">
+                    {chunksQuery.data
+                      ?.sort(
+                        (a, b) =>
+                          new Date(a.timestamp).getTime() -
+                          new Date(b.timestamp).getTime(),
+                      )
+                      .map((chunk) => {
+                        return (
+                          <UserChunkMessage key={chunk.id} chunk={chunk} />
+                        );
+                      })}
+                  </Stack>
+                </div>
+              </Modal>
+            </>
+          )}
 
           <div
             role="presentation"
@@ -759,6 +799,7 @@ export const ParticipantConversationChunkedAudioRoute = () =>
   // }
   {
     const { projectId, conversationId } = useParams();
+    const projectQuery = useParticipantProjectById(projectId ?? "");
     const conversationQuery = useConversationQuery(projectId, conversationId);
     const chunks = useConversationChunksQuery(projectId, conversationId);
     const uploadChunkMutation = useUploadConversationChunk();
@@ -809,7 +850,7 @@ export const ParticipantConversationChunkedAudioRoute = () =>
       }
     };
 
-    if (conversationQuery.isLoading || loading) {
+    if (conversationQuery.isLoading || loading || projectQuery.isLoading) {
       return <LoadingOverlay visible />;
     }
 
@@ -874,7 +915,12 @@ export const ParticipantConversationChunkedAudioRoute = () =>
         <ParticipantHeader />
 
         <Box className={clsx("relative flex-grow px-4 py-4 transition-all")}>
-          <ParticipantBody conversation={conversationQuery.data} />
+          {projectQuery.data && conversationQuery.data && (
+            <ParticipantBody
+              conversation={conversationQuery.data}
+              project={projectQuery.data}
+            />
+          )}
         </Box>
 
         {!errored && (
@@ -972,315 +1018,318 @@ export const ParticipantConversationChunkedAudioRoute = () =>
     );
   };
 
-export const ParticipantConversationAudioRoute = ({
-  isTranscriptionLive,
-}: {
-  isTranscriptionLive: boolean;
-}) =>
-  //   {
-  //   fallback = false,
-  // }: {
-  //   fallback?: boolean;
-  // }
-  {
-    const { projectId, conversationId } = useParams();
-    const conversationQuery = useConversationQuery(projectId, conversationId);
-    const chunks = useConversationChunksQuery(projectId, conversationId);
-    const uploadChunkMutation = useUploadConversationChunk();
+export const ParticipantConversationAudioRoute = () => {
+  const { projectId, conversationId } = useParams();
 
-    const [uploadInProgress, updatedUploadInProgress] = useState(false);
-    // Add a delay when setting back "uploadInProgress" to false
-    // to avoid "flashing" effect
-    useEffect(() => {
-      if (uploadChunkMutation.isPending === true) {
-        updatedUploadInProgress(true);
-      }
-      if (uploadChunkMutation.isPending === false) {
-        const timer = setTimeout(() => {
-          console.log("here!");
-          updatedUploadInProgress(false);
-        }, 2000);
-        return () => clearTimeout(timer);
-      }
-    }, [uploadChunkMutation.isPending]);
+  const projectQuery = useParticipantProjectById(projectId ?? "");
+  const conversationQuery = useConversationQuery(projectId, conversationId);
+  const chunks = useConversationChunksQuery(projectId, conversationId);
+  const uploadChunkMutation = useUploadConversationChunk();
 
-    const [preview, setPreview] = useState<string | null>(null);
-    const blob = useRef<Blob | null>(null);
+  const [uploadInProgress, updatedUploadInProgress] = useState(false);
 
-    const showPreview = false;
-
-    const onChunk = (chunk: Blob) => {
-      if (showPreview) {
-        blob.current = chunk;
-        const url = URL.createObjectURL(chunk);
-        setPreview(url);
-      } else {
-        uploadChunkMutation.mutate({
-          conversationId: conversationId ?? "",
-          chunk,
-          timestamp: new Date(),
-        });
-      }
-    };
-
-    // const audioRecorder = useVADAudioRecorder({ onChunk });
-    const liveAudioRecorder = useChunkedAudioRecorder({ onChunk });
-    const asyncAudioRecorder = useAudioRecorder({ onChunk });
-
-    useWakeLock({ obtainWakeLockOnMount: true });
-
-    const {
-      startRecording,
-      stopRecording,
-      isRecording,
-      isPaused,
-      pauseRecording,
-      resumeRecording,
-      recordingTime,
-      errored,
-      loading,
-      permissionError,
-    } = isTranscriptionLive === false ? asyncAudioRecorder : liveAudioRecorder;
-
-    const [troubleShootingGuideOpened, setTroubleShootingGuideOpened] =
-      useState(false);
-
-    const navigate = usei18nNavigate();
-    const { language } = useLanguage();
-
-    const handleCheckMicrophoneAccess = async () => {
-      const permissionError = await checkPermissionError();
-      if (["granted", "prompt"].includes(permissionError ?? "")) {
-        window.location.reload();
-      } else {
-        alert(
-          t`Microphone access is still denied. Please check your settings and try again.`,
-        );
-      }
-    };
-
-    if (conversationQuery.isLoading || loading) {
-      return <LoadingOverlay visible />;
+  useEffect(() => {
+    if (uploadChunkMutation.isPending === true) {
+      updatedUploadInProgress(true);
     }
+    if (uploadChunkMutation.isPending === false) {
+      const timer = setTimeout(() => {
+        updatedUploadInProgress(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [uploadChunkMutation.isPending]);
 
-    const textModeUrl = `/${language}/${projectId}/conversation/${conversationId}/text`;
-    const finishUrl = `/${language}/${projectId}/conversation/${conversationId}/finish`;
+  const [preview, setPreview] = useState<string | null>(null);
+  const blob = useRef<Blob | null>(null);
 
-    const handleFinish = () => {
-      if (window.confirm(t`Are you sure you want to finish?`)) {
-        navigate(finishUrl);
-      }
-    };
+  const showPreview = false;
 
-    return (
-      <div className="container mx-auto flex min-h-dvh max-w-2xl flex-col">
-        {/* modal for permissions error */}
-        <Modal
-          opened={!!permissionError}
-          onClose={() => true}
-          centered
-          fullScreen
-          radius={0}
-          transitionProps={{ transition: "fade", duration: 200 }}
-          withCloseButton={false}
-        >
-          <div className="h-full rounded-md bg-white py-4">
-            <ParticipantHeader />
-            <Stack className="container mx-auto mt-4 max-w-2xl px-2" gap="lg">
-              <div className="max-w-prose text-lg">
-                <Trans>
-                  Oops! It looks like microphone access was denied. No worries,
-                  though! We've got a handy troubleshooting guide for you. Feel
-                  free to check it out. Once you've resolved the issue, come
-                  back and visit this page again to check if your microphone is
-                  ready.
-                </Trans>
-              </div>
+  const onChunk = (chunk: Blob) => {
+    if (showPreview) {
+      blob.current = chunk;
+      const url = URL.createObjectURL(chunk);
+      setPreview(url);
+    } else {
+      uploadChunkMutation.mutate({
+        conversationId: conversationId ?? "",
+        chunk,
+        timestamp: new Date(),
+      });
+    }
+  };
 
-              <Button
-                component="a"
-                href="https://dembrane.notion.site/Troubleshooting-Microphone-Permissions-All-Languages-bd340257647742cd9cd960f94c4223bb?pvs=74"
-                target="_blank"
-                size={troubleShootingGuideOpened ? "lg" : "xl"}
-                leftSection={<IconQuestionMark />}
-                variant={!troubleShootingGuideOpened ? "filled" : "light"}
-                onClick={() => setTroubleShootingGuideOpened(true)}
-              >
-                <Trans>Open troubleshooting guide</Trans>
-              </Button>
-              <Divider />
-              <Button
-                size={!troubleShootingGuideOpened ? "lg" : "xl"}
-                leftSection={<IconReload />}
-                variant={troubleShootingGuideOpened ? "filled" : "light"}
-                onClick={handleCheckMicrophoneAccess}
-              >
-                <Trans>Check microphone access</Trans>
-              </Button>
-            </Stack>
-          </div>
-        </Modal>
+  const liveAudioRecorder = useChunkedAudioRecorder({ onChunk });
 
-        <ParticipantHeader />
+  useWakeLock({ obtainWakeLockOnMount: true });
 
-        <Box className={clsx("relative flex-grow px-4 py-4 transition-all")}>
-          <ParticipantBody conversation={conversationQuery.data} />
-        </Box>
+  const {
+    startRecording,
+    stopRecording,
+    isRecording,
+    isPaused,
+    pauseRecording,
+    resumeRecording,
+    recordingTime,
+    errored,
+    loading,
+    permissionError,
+  } = liveAudioRecorder;
 
-        {!errored && (
-          <Stack className="sticky bottom-0 z-10 w-full border-t border-slate-300 bg-white p-4 shadow-sm">
-            {/* Recording time indicator */}
-            {isRecording && (
-              <div className="w-full border-slate-300 bg-white pb-4 pt-2">
-                <Group justify="center" align="center">
-                  {isPaused ? (
-                    <IconPlayerPause />
-                  ) : (
-                    <div className="h-4 w-4 animate-pulse rounded-full bg-red-500"></div>
-                  )}
-                  <Text className="text-4xl">
-                    {Math.floor(recordingTime / 60)
-                      .toString()
-                      .padStart(2, "0")}
-                    :{(recordingTime % 60).toString().padStart(2, "0")}
-                  </Text>
-                </Group>
-              </div>
-            )}
+  const [troubleShootingGuideOpened, setTroubleShootingGuideOpened] =
+    useState(false);
 
-            {uploadInProgress && (
-              <Notification title={t`Upload in progress`}>
-                <Trans>Please do not close your browser</Trans>
-              </Notification>
-            )}
+  const navigate = usei18nNavigate();
 
-            <Group justify="center">
-              {!isRecording && (
-                <>
-                  {!preview || !blob ? (
-                    <Group className="w-full">
-                      <Button
-                        size="xl"
-                        rightSection={<IconMicrophone />}
-                        onClick={startRecording}
-                        className="flex-grow"
-                      >
-                        <Trans>Start Recording</Trans>
-                      </Button>
+  const handleCheckMicrophoneAccess = async () => {
+    const permissionError = await checkPermissionError();
+    if (["granted", "prompt"].includes(permissionError ?? "")) {
+      window.location.reload();
+    } else {
+      alert(
+        t`Microphone access is still denied. Please check your settings and try again.`,
+      );
+    }
+  };
 
-                      <I18nLink to={textModeUrl}>
-                        <ActionIcon component="a" size="60" variant="outline">
-                          <IconTextCaption />
-                        </ActionIcon>
-                      </I18nLink>
+  if (conversationQuery.isLoading || loading || projectQuery.isLoading) {
+    return <LoadingOverlay visible />;
+  }
 
-                      {!isRecording &&
-                        !preview &&
-                        !blob.current &&
-                        chunks?.data &&
-                        chunks.data.length > 0 && (
-                          <Button
-                            size="xl"
-                            onClick={handleFinish}
-                            component="a"
-                            variant="light"
-                            rightSection={<IconCheck />}
-                            disabled={uploadInProgress}
-                          >
-                            Finish
-                          </Button>
-                        )}
-                    </Group>
-                  ) : (
-                    <Stack className="w-full">
-                      <Group className="w-full">
-                        <audio controls src={preview} className="flex-grow" />
+  const textModeUrl = `/${projectId}/conversation/${conversationId}/text`;
+  const finishUrl = `/${projectId}/conversation/${conversationId}/finish`;
 
-                        <ActionIcon
-                          variant="outline"
+  const handleFinish = () => {
+    if (window.confirm(t`Are you sure you want to finish?`)) {
+      navigate(finishUrl);
+    }
+  };
+
+  return (
+    <div className="container mx-auto flex h-full max-w-2xl flex-col">
+      {/* modal for permissions error */}
+      <Modal
+        opened={!!permissionError}
+        onClose={() => true}
+        centered
+        fullScreen
+        radius={0}
+        transitionProps={{ transition: "fade", duration: 200 }}
+        withCloseButton={false}
+      >
+        <div className="h-full rounded-md bg-white py-4">
+          <ParticipantHeader />
+          <Stack className="container mx-auto mt-4 max-w-2xl px-2" gap="lg">
+            <div className="max-w-prose text-lg">
+              <Trans>
+                Oops! It looks like microphone access was denied. No worries,
+                though! We've got a handy troubleshooting guide for you. Feel
+                free to check it out. Once you've resolved the issue, come back
+                and visit this page again to check if your microphone is ready.
+              </Trans>
+            </div>
+
+            <Button
+              component="a"
+              href="https://dembrane.notion.site/Troubleshooting-Microphone-Permissions-All-Languages-bd340257647742cd9cd960f94c4223bb?pvs=74"
+              target="_blank"
+              size={troubleShootingGuideOpened ? "lg" : "xl"}
+              leftSection={<IconQuestionMark />}
+              variant={!troubleShootingGuideOpened ? "filled" : "light"}
+              onClick={() => setTroubleShootingGuideOpened(true)}
+            >
+              <Trans>Open troubleshooting guide</Trans>
+            </Button>
+            <Divider />
+            <Button
+              size={!troubleShootingGuideOpened ? "lg" : "xl"}
+              leftSection={<IconReload />}
+              variant={troubleShootingGuideOpened ? "filled" : "light"}
+              onClick={handleCheckMicrophoneAccess}
+            >
+              <Trans>Check microphone access</Trans>
+            </Button>
+          </Stack>
+        </div>
+      </Modal>
+
+      <Box className={clsx("relative flex-grow px-4 py-4 transition-all")}>
+        {projectQuery.data && conversationQuery.data && (
+          <ParticipantBody
+            conversation={conversationQuery.data}
+            project={projectQuery.data}
+          />
+        )}
+      </Box>
+
+      {!errored && (
+        <Stack className="sticky bottom-0 z-10 w-full border-t border-slate-300 bg-white p-4 shadow-sm">
+          {/* Recording time indicator */}
+          {isRecording && (
+            <div className="w-full border-slate-300 bg-white pb-4 pt-2">
+              <Group justify="center" align="center">
+                {isPaused ? (
+                  <IconPlayerPause />
+                ) : (
+                  <div className="h-4 w-4 animate-pulse rounded-full bg-red-500"></div>
+                )}
+                <Text className="text-4xl">
+                  {recordingTime >= 3600
+                    ? `${Math.floor(recordingTime / 3600)
+                        .toString()
+                        .padStart(2, "0")}:${Math.floor(
+                        (recordingTime % 3600) / 60,
+                      )
+                        .toString()
+                        .padStart(
+                          2,
+                          "0",
+                        )}:${(recordingTime % 60).toString().padStart(2, "0")}`
+                    : `${Math.floor(recordingTime / 60)
+                        .toString()
+                        .padStart(
+                          2,
+                          "0",
+                        )}:${(recordingTime % 60).toString().padStart(2, "0")}`}
+                </Text>
+              </Group>
+            </div>
+          )}
+
+          {uploadInProgress && (
+            <Notification title={t`Upload in progress`}>
+              <Trans>Please do not close your browser</Trans>
+            </Notification>
+          )}
+
+          <Group justify="center">
+            {!isRecording && (
+              <>
+                {!preview || !blob ? (
+                  <Group className="w-full">
+                    <Button
+                      size="xl"
+                      rightSection={<IconMicrophone />}
+                      onClick={startRecording}
+                      className="flex-grow"
+                    >
+                      <Trans>Start Recording</Trans>
+                    </Button>
+
+                    <I18nLink to={textModeUrl}>
+                      <ActionIcon component="a" size="60" variant="outline">
+                        <IconTextCaption />
+                      </ActionIcon>
+                    </I18nLink>
+
+                    {!isRecording &&
+                      !preview &&
+                      !blob.current &&
+                      chunks?.data &&
+                      chunks.data.length > 0 && (
+                        <Button
                           size="xl"
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                t`Are you sure you want to delete this recording?`,
-                              )
-                            ) {
-                              setPreview(null);
-                              blob.current = null;
-                            }
-                          }}
+                          onClick={handleFinish}
+                          component="a"
+                          variant="light"
+                          rightSection={<IconCheck />}
+                          disabled={uploadInProgress}
                         >
-                          <IconTrash />
-                        </ActionIcon>
-                      </Group>
-                      <Button
+                          Finish
+                        </Button>
+                      )}
+                  </Group>
+                ) : (
+                  <Stack className="w-full">
+                    <Group className="w-full">
+                      <audio controls src={preview} className="flex-grow" />
+
+                      <ActionIcon
+                        variant="outline"
                         size="xl"
                         onClick={() => {
-                          if (!blob.current) {
-                            alert(t`Something went wrong. Please try again.`);
-                            throw new Error("No blob found");
+                          if (
+                            window.confirm(
+                              t`Are you sure you want to delete this recording?`,
+                            )
+                          ) {
+                            setPreview(null);
+                            blob.current = null;
                           }
-
-                          uploadChunkMutation.mutate({
-                            conversationId: conversationId ?? "",
-                            chunk: blob.current,
-                            timestamp: new Date(),
-                          });
-
-                          setPreview(null);
-                          blob.current = null;
                         }}
-                        rightSection={<IconUpload />}
                       >
-                        Submit
-                      </Button>
-                    </Stack>
-                  )}
-                </>
-              )}
+                        <IconTrash />
+                      </ActionIcon>
+                    </Group>
+                    <Button
+                      size="xl"
+                      onClick={() => {
+                        if (!blob.current) {
+                          alert(t`Something went wrong. Please try again.`);
+                          throw new Error("No blob found");
+                        }
 
-              {isRecording && (
-                <>
-                  {isPaused ? (
-                    <Button
-                      className="flex-1"
-                      size="xl"
-                      rightSection={<IconPlayerPlay size={16} />}
-                      onClick={resumeRecording}
+                        uploadChunkMutation.mutate({
+                          conversationId: conversationId ?? "",
+                          chunk: blob.current,
+                          timestamp: new Date(),
+                        });
+
+                        setPreview(null);
+                        blob.current = null;
+                      }}
+                      rightSection={<IconUpload />}
                     >
-                      <Trans>Resume</Trans>
+                      Submit
                     </Button>
-                  ) : (
-                    <Button
-                      className="flex-1"
-                      size="xl"
-                      rightSection={<IconPlayerPause size={16} />}
-                      onClick={pauseRecording}
-                    >
-                      <Trans>Pause</Trans>
-                    </Button>
-                  )}
+                  </Stack>
+                )}
+              </>
+            )}
+
+            {isRecording && (
+              <>
+                {isPaused ? (
                   <Button
-                    variant="outline"
+                    className="flex-1"
                     size="xl"
-                    rightSection={<IconPlayerStop size={16} />}
-                    onClick={() => {
-                      stopRecording();
-                    }}
+                    rightSection={<IconPlayerPlay size={16} />}
+                    onClick={resumeRecording}
                   >
-                    <Trans>Stop</Trans>
+                    <Trans>Resume</Trans>
                   </Button>
-                </>
-              )}
-            </Group>
-          </Stack>
-        )}
-      </div>
-    );
-  };
+                ) : (
+                  <Button
+                    className="flex-1"
+                    size="xl"
+                    rightSection={<IconPlayerPause size={16} />}
+                    onClick={pauseRecording}
+                  >
+                    <Trans>Pause</Trans>
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="xl"
+                  rightSection={<IconPlayerStop size={16} />}
+                  onClick={() => {
+                    stopRecording();
+                  }}
+                >
+                  <Trans>Stop</Trans>
+                </Button>
+              </>
+            )}
+          </Group>
+        </Stack>
+      )}
+    </div>
+  );
+};
 
 export const ParticipantConversationTextRoute = () => {
   const { projectId, conversationId } = useParams();
+  const projectQuery = useParticipantProjectById(projectId ?? "");
   const conversationQuery = useConversationQuery(projectId, conversationId);
   const chunks = useConversationChunksQuery(projectId, conversationId);
   const uploadChunkMutation = useUploadConversationTextChunk();
@@ -1302,10 +1351,9 @@ export const ParticipantConversationTextRoute = () => {
   };
 
   const navigate = usei18nNavigate();
-  const { language } = useLanguage();
 
-  const audioModeUrl = `/${language}/${projectId}/conversation/${conversationId}`;
-  const finishUrl = `/${language}/${projectId}/conversation/${conversationId}/finish`;
+  const audioModeUrl = `/${projectId}/conversation/${conversationId}`;
+  const finishUrl = `/${projectId}/conversation/${conversationId}/finish`;
 
   const handleFinish = () => {
     if (window.confirm(t`Are you sure you want to finish?`)) {
@@ -1313,18 +1361,20 @@ export const ParticipantConversationTextRoute = () => {
     }
   };
 
-  if (conversationQuery.isLoading) {
+  if (conversationQuery.isLoading || projectQuery.isLoading) {
     return <LoadingOverlay visible />;
   }
 
   return (
-    <div className="container mx-auto flex min-h-dvh max-w-2xl flex-col">
-      <ParticipantHeader />
-
+    <div className="container mx-auto flex h-full max-w-2xl flex-col">
       <Box className={clsx("relative flex-grow px-4 py-4 transition-all")}>
-        <ParticipantBody
-          conversation={conversationQuery.data}
-        ></ParticipantBody>
+        {projectQuery.data && conversationQuery.data && (
+          <ParticipantBody
+            viewResponses
+            conversation={conversationQuery.data}
+            project={projectQuery.data}
+          />
+        )}
       </Box>
 
       <Stack className="sticky bottom-0 z-10 w-full border-t border-slate-300 bg-white p-4 shadow-sm">

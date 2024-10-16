@@ -130,9 +130,6 @@ async def initiate_conversation(
         participant_name=body.name,
         participant_email=body.email if body.email else None,
         participant_user_agent=body.user_agent if body.user_agent else None,
-        title=project.default_conversation_title,
-        description=project.default_conversation_description,
-        context=project.default_conversation_context,
     )
 
     if body.tag_id_list is not None and len(body.tag_id_list) > 0:

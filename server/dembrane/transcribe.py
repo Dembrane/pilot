@@ -76,7 +76,15 @@ def transcribe_conversation_chunk(conversation_chunk_id: str) -> None:
             project = conversation.project
             language = project.language or "en"
             default_prompt = DEFAULT_WHISPER_PROMPTS.get(language, "")
-            whisper_prompt = default_prompt + " " + (conversation.context if conversation.context else "")
+            whisper_prompt = (
+                default_prompt
+                + " "
+                + (
+                    project.default_conversation_transcript_prompt
+                    if project.default_conversation_transcript_prompt
+                    else ""
+                )
+            )
 
             transcription = transcribe_audio(chunk.path, language=language, whisper_prompt=whisper_prompt)
 

@@ -9,6 +9,7 @@ import {
   Checkbox,
   InputDescription,
   Alert,
+  TextInput,
 } from "@mantine/core";
 import { ProjectTagsInput } from "./ProjectTagsInput";
 import { MarkdownWYSIWYG } from "../common/MarkdownWYSIWYG/MarkdownWYSIWYG";
@@ -22,6 +23,7 @@ import { UnsavedChanges } from "../form/UnsavedChanges";
 type ProjectPortalFormValues = {
   default_conversation_tutorial_slug: string;
   default_conversation_ask_for_participant_name: boolean;
+  default_conversation_title: string;
   default_conversation_description: string;
   default_conversation_finish_text: string;
 };
@@ -32,6 +34,7 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
       project.default_conversation_tutorial_slug ?? "none",
     default_conversation_ask_for_participant_name:
       project.default_conversation_ask_for_participant_name ?? false,
+    default_conversation_title: project.default_conversation_title ?? "",
     default_conversation_description:
       project.default_conversation_description ?? "",
     default_conversation_finish_text:
@@ -126,9 +129,23 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
           />
           <ProjectTagsInput project={project} />
           <Divider />
+          <TextInput
+            label={
+              <Title order={3}>
+                <Trans>Page Title</Trans>
+              </Title>
+            }
+            description={
+              <Trans>
+                This title is shown to participants when they start a
+                conversation
+              </Trans>
+            }
+            {...register("default_conversation_title")}
+          />
           <Stack gap="xs">
             <Title order={3}>
-              <Trans>Page</Trans>
+              <Trans>Page Content</Trans>
             </Title>
             <InputDescription>
               <Trans>
@@ -147,7 +164,7 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
           </Stack>
           <Stack gap="xs">
             <Title order={3}>
-              <Trans>Thank You Page</Trans>
+              <Trans>Thank You Page Content</Trans>
             </Title>
             <InputDescription>
               <Trans>

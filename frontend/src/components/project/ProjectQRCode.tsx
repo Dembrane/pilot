@@ -24,7 +24,13 @@ export const useProjectSharingLink = (project?: Project) => {
   if (!project) {
     return null;
   }
-  const link = `${PARTICIPANT_BASE_URL}/${project.language}/${project.id}/login?pin=${project.pin}&transcription=live`;
+
+  const languageCode = {
+    en: "en-US",
+    nl: "nl-NL",
+  }[project.language as "en" | "nl"];
+
+  const link = `${PARTICIPANT_BASE_URL}/${languageCode}/${project.id}/start`;
   return link;
 };
 

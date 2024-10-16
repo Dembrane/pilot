@@ -863,6 +863,8 @@ summary of ideas: "{aspect.description}\""""
             logger.error(f"Error downloading image: {e}")
     elif use_model == "EXTRAVAGANT":
         image_url = brilliant_image_generator_3000(f"{aspect.name}\n{aspect.short_summary}")
+    elif use_model == "PLACEHOLDER":
+        image_url = None
     else:
         logger.info(f"Image generation model not found: {use_model}")
         image_url = None

@@ -71,7 +71,6 @@ class CreateProjectRequestSchema(BaseModel):
     is_conversation_allowed: Optional[bool] = None
     default_conversation_title: Optional[str] = None
     default_conversation_description: Optional[str] = None
-    default_conversation_context: Optional[str] = None
     default_conversation_finish_text: Optional[str] = None
 
 

@@ -3,6 +3,7 @@ import { Logo } from "@/components/common/Logo";
 import { Markdown } from "@/components/common/Markdown";
 import { PARTICIPANT_BASE_URL } from "@/config";
 import { getParticipantProjectById } from "@/lib/api";
+import { useParticipantProjectById } from "@/lib/participantQuery";
 import { useProjectById } from "@/lib/query";
 import { useLanguage } from "@/lib/useLanguage";
 import { Trans } from "@lingui/macro";
@@ -21,17 +22,9 @@ import { Link, useParams } from "react-router-dom";
 
 export const ParticipantPostConversation = () => {
   const { projectId, conversationId } = useParams();
-  const project = useQuery({
-    queryKey: ["participant", "project", projectId],
-    queryFn: () => getParticipantProjectById(projectId as string),
-    enabled: !!projectId,
-  });
+  const project = useParticipantProjectById(projectId ?? "");
 
-  const { language } = useLanguage();
-
-  const initiateLink =
-    PARTICIPANT_BASE_URL +
-    `/${language}/${projectId}/login?pin=${project?.data?.pin}`;
+  const initiateLink = `/${projectId}/start`;
 
   const variables = {
     "{{CONVERSATION_ID}}": conversationId ?? "null",
@@ -46,13 +39,7 @@ export const ParticipantPostConversation = () => {
     ) ?? null;
 
   return (
-    <div className="container mx-auto max-w-2xl">
-      <header className="fixed left-0 top-0 z-10 h-[64px] w-full border-b border-slate-300 bg-white py-4">
-        <Group justify="center" align="center" className="relative px-4">
-          <Logo hideTitle className="absolute left-0 pl-4 sm:relative" />
-          <h1 className="text-xl">Dembrane</h1>
-        </Group>
-      </header>
+    <div className="container mx-auto h-full max-w-2xl">
       <Stack className="mt-[64px] px-4 py-8">
         {!!text && text != "" ? (
           <>

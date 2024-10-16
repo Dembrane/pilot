@@ -14,7 +14,7 @@ import { LanguageLayout } from "./components/layout/LanguageLayout";
 import {
   ParticipantConversationAudioRoute,
   ParticipantConversationTextRoute,
-} from "./routes/participant/Conversation";
+} from "./routes/participant/ParticipantConversation";
 import { ProjectConversationLayout } from "./components/layout/ProjectConversationLayout";
 import { ProjectConversationOverviewRoute } from "./routes/project/conversation/ProjectConversationOverview";
 import { ProjectConversationTranscript } from "./routes/project/conversation/ProjectConversationTranscript";
@@ -22,14 +22,13 @@ import { ProjectConversationAnalysis } from "./routes/project/conversation/Proje
 import { NotFoundRoute } from "./routes/404";
 import { ProjectLibraryRoute } from "./routes/project/library/ProjectLibrary";
 import { ProjectLibraryInsight } from "./routes/project/library/ProjectLibraryInsight";
-import { ParticipantPostConversation } from "./routes/participant/PostConversation";
+import { ParticipantPostConversation } from "./routes/participant/ParticipantPostConversation";
 import { ProjectLibraryLayout } from "./components/layout/ProjectLibraryLayout";
 import { ProjectLibraryView } from "./routes/project/library/ProjectLibraryView";
 import { ProjectLibraryAspect } from "./routes/project/library/ProjectLibraryAspect";
 import { LoginRoute } from "./routes/auth/Login";
 import { RegisterRoute } from "./routes/auth/Register";
 import { Protected } from "./components/common/Protected";
-// import { WorkspacesHomeRoute } from "./routes/workspaces/WorkspacesHome";
 import { AuthLayout } from "./components/layout/AuthLayout";
 import { CheckYourEmailRoute } from "./routes/auth/CheckYourEmail";
 import { VerifyEmailRoute } from "./routes/auth/VerifyEmail";
@@ -217,7 +216,7 @@ export const participantRouter = createBrowserRouter([
       },
       {
         path: "conversation/:conversationId",
-        element: <ParticipantConversationAudioRoute isTranscriptionLive />,
+        element: <ParticipantConversationAudioRoute />,
       },
       {
         path: "conversation/:conversationId/text",

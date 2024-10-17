@@ -19,9 +19,7 @@ import { useLanguage } from "@/lib/useLanguage";
 import { usei18nNavigate } from "@/lib/usei18nNavigate";
 
 const FormSchema = z.object({
-  // email: z.string().email("Must be a valid email address.").optional(),
   name: z.string().optional(),
-  // pin: z.string().min(4),
   tagIdList: z.array(z.string()).default([]),
 });
 
@@ -52,13 +50,11 @@ export const ParticipantInitiateForm = ({ project }: { project: Project }) => {
     });
   };
 
-  const { language } = useLanguage();
-
   useEffect(() => {
     if (isSuccess) {
       if (initiateConversationMutation.data?.id) {
         navigate(
-          `/${language}/${project.id}/conversation/${initiateConversationMutation.data?.id}`,
+          `/${project.id}/conversation/${initiateConversationMutation.data?.id}`,
         );
       } else {
         reset();
@@ -96,29 +92,18 @@ export const ParticipantInitiateForm = ({ project }: { project: Project }) => {
             error={errors.name?.message}
           />
         )}
-        {/* {!searchParams.get("pin") && (
-          <Box>
-            <InputLabel size="lg">
-              <Trans>Enter your access code</Trans>
-            </InputLabel>
-            <PinInput
-              {...register("pin")}
-              error={!!errors.pin?.message}
-              size="sm"
-              inputMode="numeric"
-              length={4}
-              onChange={(value: string) => {
-                setValue("pin", value);
-              }}
-            />
-          </Box>
-        )} */}
         {project.tags.length > 0 && (
           <Box className="relative">
             <MultiSelect
               label={t`Tags`}
               description={t`Add all that apply`}
               size="md"
+              comboboxProps={{
+                position: "top",
+                middlewares: { flip: false, shift: false },
+                offset: 0,
+                withinPortal: false,
+              }}
               data={project.tags.map((tag) => ({
                 value: tag.id,
                 label: tag.text,

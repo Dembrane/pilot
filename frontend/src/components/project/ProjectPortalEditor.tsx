@@ -85,7 +85,7 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
         </Title>
         {isDirty && <UnsavedChanges />}
       </Group>
-      <Alert>
+      <Alert withCloseButton>
         <Trans>
           The Portal is the website that loads when participants scan the QR
           code.

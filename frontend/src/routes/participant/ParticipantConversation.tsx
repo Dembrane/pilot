@@ -702,15 +702,9 @@ const ParticipantBody = ({
 
   return (
     <Stack ref={ref} className="max-h-full">
-      {conversation && conversation.participant_name != "" ? (
-        <h2 className="text-center text-3xl">
-          <Trans>Welcome</Trans>, {conversation.participant_name}
-        </h2>
-      ) : (
-        <h2 className="text-center text-3xl">
-          <Trans>Welcome</Trans>
-        </h2>
-      )}
+      <h2 className="text-center text-3xl">
+        <Trans>Welcome</Trans>
+      </h2>
       <img
         className="w-full animate-pulse object-contain duration-1000"
         src={WelcomeImage}

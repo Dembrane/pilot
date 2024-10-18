@@ -1,6 +1,7 @@
 import { SUPPORTED_LANGUAGES } from "@/config";
 import { usei18nNavigate } from "@/lib/usei18nNavigate";
 import { useLanguage } from "@/lib/useLanguage";
+import { t } from "@lingui/macro";
 import { NativeSelect } from "@mantine/core";
 import { ChangeEvent } from "react";
 import { useLocation } from "react-router-dom";

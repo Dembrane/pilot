@@ -12,7 +12,7 @@ import {
 import { useParams } from "react-router-dom";
 import { Quote } from "../../../components/quote/Quote";
 import { Markdown } from "@/components/common/Markdown";
-import { useAspectById } from "@/lib/query";
+import { useAspectById, useProjectById } from "@/lib/query";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { Trans } from "@lingui/macro";
 
@@ -35,6 +35,13 @@ export const ProjectLibraryAspect = () => {
     aspectId ?? "",
   );
 
+  const project = useProjectById({
+    projectId: projectId ?? "",
+    query: {
+      fields: ["image_generation_model"],
+    },
+  });
+
   return (
     <Stack className="relative px-4 py-6">
       <Breadcrumbs
@@ -56,11 +63,13 @@ export const ProjectLibraryAspect = () => {
 
       <Stack gap="md" className="relative">
         <LoadingOverlay visible={isLoading} />
-        <img
-          src={aspect?.image_url ?? "/placeholder.png"}
-          alt={aspect?.name ?? ""}
-          className="h-[400px] w-full object-cover"
-        />
+        {project.data?.image_generation_model !== "PLACEHOLDER" && (
+          <img
+            src={aspect?.image_url ?? "/placeholder.png"}
+            alt={aspect?.name ?? ""}
+            className="h-[400px] w-full object-cover"
+          />
+        )}
         <Container size="sm">
           <Stack>
             <Title order={1}>{aspect?.name}</Title>

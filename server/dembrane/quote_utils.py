@@ -110,6 +110,7 @@ BACKWARD_MERGE_UPPER_WORD_LIMIT = 35
 LONG_SENTENCE_LIMIT = 75
 
 
+# TODO: for a quote we should know which conversation_chunk it belongs to
 def generate_quotes(
     db: Session, project_analysis_run_id: Optional[str], conversation_id: str
 ) -> List[QuoteModel]:

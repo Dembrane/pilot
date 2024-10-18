@@ -6,9 +6,9 @@ import { useLanguage } from "@/lib/useLanguage";
 import { Button } from "@mantine/core";
 import { PARTICIPANT_BASE_URL } from "@/config";
 import { cn } from "@/lib/utils";
-import { ParticipantInitiateForm } from "./ParticipantInitiateForm";
 import { Trans } from "@lingui/macro";
 import { Play } from "lucide-react";
+import { ParticipantInitiateForm } from "./ParticipantInitiateForm";
 
 interface Slide {
   title: string;
@@ -139,7 +139,7 @@ const ParticipantOnboardingCards = ({
       <div
         key={currentSlideIndex}
         className={cn(
-          `flex flex-grow flex-col items-center justify-center gap-4 rounded-xl bg-white p-4 text-center shadow`,
+          `flex w-full max-w-[400px] flex-grow flex-col items-center justify-center gap-4 rounded-xl bg-white p-4 text-center shadow`,
           `${animationDirection}`,
         )}
       >

@@ -17,8 +17,8 @@ import { t, Trans } from "@lingui/macro";
 import { useForm } from "react-hook-form";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
 import { IconX } from "@tabler/icons-react";
-import DembraneLoadingSpinner from "../common/DembraneLoadingSpinner";
 import { UnsavedChanges } from "../form/UnsavedChanges";
+import { CloseableAlert } from "../common/ClosableAlert";
 
 type ProjectPortalFormValues = {
   default_conversation_tutorial_slug: string;
@@ -85,12 +85,12 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
         </Title>
         {isDirty && <UnsavedChanges />}
       </Group>
-      <Alert withCloseButton>
+      <CloseableAlert>
         <Trans>
           The Portal is the website that loads when participants scan the QR
           code.
         </Trans>
-      </Alert>
+      </CloseableAlert>
       <form onSubmit={handleSubmit(onSubmit)} onBlur={handleFormBlur}>
         <Stack gap="lg">
           <NativeSelect

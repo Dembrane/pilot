@@ -1,54 +1,51 @@
+import { directus } from "@/lib/directus";
 import { useLatestProjectAnalysisRunByProjectId } from "@/lib/query";
+import { readItems } from "@directus/sdk";
+import { Trans } from "@lingui/macro";
+import { Alert, Stack } from "@mantine/core";
+import { useQuery } from "@tanstack/react-query";
 
-export const ProjectAnalysisRunStatus = ({
-  projectId,
-}: {
-  projectId: string;
-}) => {
-  // const [data, setData] = useState<ProjectAnalysisRun | null>(null);
-
+export const ProjectAnalysisRunStatus = ({ projectId }: { projectId: string }) => {
   const latestRunQuery = useLatestProjectAnalysisRunByProjectId(
     projectId ?? "",
   );
 
+  // one off query
+  const conversationChunksQuery = useQuery({
+    queryKey: ["conversationChunksProcessingPending", projectId],
+    queryFn: async () => {
+      const projectAnalysisRun = latestRunQuery.data;
+      if (!projectAnalysisRun) {
+        return 0;
+      }
+
+      const data = await directus.request(
+        readItems("conversation_chunk", {
+          filter: {
+            timestamp: {
+              // @ts-ignore
+              _gt: projectAnalysisRun.created_at,
+            },
+          },
+          fields: ["id"],
+          limit: 1,
+        }),
+      );
+
+      if (data.length === 0) {
+        return 0;
+      }
+
+      try {
+        return data.length;
+      } catch {
+        return 0;
+      }
+    },
+    enabled: !!latestRunQuery.data,
+  });
+
   const data = latestRunQuery.data ?? null;
-
-  // useEffect(() => {
-  //   if (latestRunQuery.data && latestRunQuery.data.length > 0) {
-  //     setData(latestRunQuery.data[0]);
-  //   }
-  // }, [latestRunQuery.data]);
-
-  // useEffect(() => {
-  //   const fn = async () => {
-  //     console.log("Subscribing to project_analysis_run");
-  //     const { subscription } = await wsDirectus.subscribe(
-  //       "project_analysis_run",
-  //       {
-  //         event: "update",
-  //         query: {
-  //           filter: {
-  //             project_id: { _eq: projectId },
-  //           },
-  //           limit: 1,
-  //         },
-  //       },
-  //     );
-
-  //     for await (const event of subscription) {
-  //       console.log("Received event", event);
-  //       if (event.event === "update" && event.data && event.data.length > 0) {
-  //         setData(event.data[0] as ProjectAnalysisRun);
-  //       }
-  //     }
-
-  //     return () => {
-  //       latestRunQuery.refetch();
-  //     };
-  //   };
-
-  //   fn();
-  // }, [setData]);
 
   if (data == null) {
     return null;
@@ -56,10 +53,22 @@ export const ProjectAnalysisRunStatus = ({
 
   if (data.processing_status === "DONE") {
     return (
-      <div className="italic text-gray-700">
-        This project library was generated on{" "}
-        {new Date(data.created_at).toLocaleString()}.
-      </div>
+      <Stack className="italic text-gray-700">
+        {!!conversationChunksQuery.data && conversationChunksQuery.data > 0 ? (
+          <Alert>
+            <Trans>
+              New conversations have been added since the library was generated.
+              Regenerate the library to process them.
+            </Trans>
+          </Alert>
+        ) : (
+          <></>
+        )}
+        <div>
+          <Trans>This project library was generated on</Trans>{" "}
+          {new Date(data.created_at).toLocaleString()}.
+        </div>
+      </Stack>
     );
   }
 

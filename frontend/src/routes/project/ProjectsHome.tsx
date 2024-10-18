@@ -3,7 +3,11 @@ import { ProjectListItem } from "@/components/project/ProjectListItem";
 import { Icons } from "@/icons";
 import { getDirectusErrorString } from "@/lib/directus";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { useCreateProjectMutation, useProjects } from "@/lib/query";
+import {
+  useCreateProjectMutation,
+  useProjects,
+  useUpdateProjectByIdMutation,
+} from "@/lib/query";
 import {
   Text,
   Box,
@@ -34,6 +38,7 @@ import { useState } from "react";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { usei18nNavigate } from "@/lib/usei18nNavigate";
 import { Trans, t } from "@lingui/macro";
+import { useLanguage } from "@/lib/useLanguage";
 
 export const ProjectsHomeRoute = () => {
   useDocumentTitle(t`Projects | Dembrane`);
@@ -60,10 +65,23 @@ export const ProjectsHomeRoute = () => {
 
   const navigate = usei18nNavigate();
   const createProjectMutation = useCreateProjectMutation();
+  const updateProjectMutation = useUpdateProjectByIdMutation();
+
+  const { language } = useLanguage();
 
   const handleCreateProject = async () => {
     const project = await createProjectMutation.mutateAsync({
       name: t`New Project`,
+      language:
+        language === "en-US" ? "en" : language === "nl-NL" ? "nl" : "en",
+    });
+    await updateProjectMutation.mutateAsync({
+      id: project.id,
+      payload: {
+        default_conversation_ask_for_participant_name: true,
+        default_conversation_tutorial_slug: "none",
+        image_generation_model: "PLACEHOLDER",
+      },
     });
     navigate(`/projects/${project.id}/overview`);
   };

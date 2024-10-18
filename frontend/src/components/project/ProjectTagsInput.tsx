@@ -99,7 +99,7 @@ export const ProjectTagsInput = (props: { project: Project }) => {
               loading={createTagMutation.isPending}
               onClick={handleSubmit}
               variant="outline"
-              disabled={!tagInput.trim()}
+              disabled={!tagInput.trim() || createTagMutation.isPending}
             >
               {tagInput.includes(",") ? t`Add Tags` : t`Add Tag`}
             </Button>

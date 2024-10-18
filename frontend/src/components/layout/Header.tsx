@@ -6,6 +6,8 @@ import {
   Avatar,
   Text,
   Stack,
+  ActionIcon,
+  Tooltip,
 } from "@mantine/core";
 import { Logo } from "../common/Logo";
 import { IconLogout, IconSettings, IconChevronDown } from "@tabler/icons-react";
@@ -16,22 +18,20 @@ import { I18nLink } from "@/components/common/i18nLink";
 import { LanguagePicker } from "../language/LanguagePicker";
 import { t, Trans } from "@lingui/macro";
 
-const UserButton = forwardRef<
-  HTMLButtonElement,
-  {
-    image: string;
-    name: string;
-    email: string;
-    icon?: React.ReactNode;
-  }
->(({ image, name, email, icon, ...others }, ref) => (
-  <UnstyledButton
-    ref={ref}
+const User = ({
+  image,
+  name,
+  email,
+}: {
+  image: string;
+  name: string;
+  email: string;
+}) => (
+  <div
     style={{
       color: "var(--mantine-color-text)",
       borderRadius: "var(--mantine-radius-sm)",
     }}
-    {...others}
   >
     <Group gap="sm">
       <Avatar src={image} radius="xl" />
@@ -45,11 +45,9 @@ const UserButton = forwardRef<
           {email}
         </Text>
       </div>
-
-      {icon || <IconChevronDown size="1rem" className="hidden md:block" />}
     </Group>
-  </UnstyledButton>
-));
+  </div>
+);
 
 export const Header = () => {
   const logoutMutation = useLogoutMutation();
@@ -60,10 +58,6 @@ export const Header = () => {
     await logoutMutation.mutateAsync({
       doRedirect: true,
     });
-  };
-
-  const handleSettingsClick = () => {
-    alert("Coming Soon!");
   };
 
   return (
@@ -88,28 +82,27 @@ export const Header = () => {
         {!loading && isAuthenticated && user ? (
           <Menu withArrow arrowPosition="center">
             <Menu.Target>
-              <UserButton
-                image={typeof user.avatar === "string" ? user.avatar : ""}
-                name={t`Hi, ${user.first_name}`}
-                email={user.email || ""}
-              />
+              <ActionIcon color="gray" variant="transparent">
+                <IconSettings />
+              </ActionIcon>
             </Menu.Target>
-            <Menu.Dropdown>
-              <Stack gap="xs">
-                <LanguagePicker />
-                <Menu.Divider />
-                <Menu.Item
-                  leftSection={<IconSettings color="gray" />}
-                  onClick={handleSettingsClick}
-                >
-                  <Trans>Settings</Trans>
-                </Menu.Item>
+            <Menu.Dropdown className="py-4">
+              <Stack gap="xs" className="px-2">
+                <User
+                  image={typeof user.avatar === "string" ? user.avatar : ""}
+                  name={t`Hi, ${user.first_name}`}
+                  email={user.email || ""}
+                />
+
                 <Menu.Item
                   leftSection={<IconLogout color="gray" />}
                   onClick={handleLogout}
                 >
                   <Trans>Logout</Trans>
                 </Menu.Item>
+                <Menu.Divider />
+
+                <LanguagePicker />
               </Stack>
             </Menu.Dropdown>
           </Menu>

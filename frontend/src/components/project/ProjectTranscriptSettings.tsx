@@ -1,17 +1,19 @@
 import { Trans, t } from "@lingui/macro";
 import {
   Stack,
-  Textarea,
   Text,
   Title,
   Group,
   Button,
-  Tooltip,
+  TextInput,
+  Pill,
+  Box,
+  Alert,
 } from "@mantine/core";
 import { useForm } from "react-hook-form";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
-import { IconInfoCircle, IconX } from "@tabler/icons-react";
-import React, { useEffect, useRef } from "react";
+import { IconX } from "@tabler/icons-react";
+import React, { useState, useEffect, useRef } from "react";
 import { UnsavedChanges } from "../form/UnsavedChanges";
 
 type ProjectTranscriptSettingsFormValues = {
@@ -23,15 +25,23 @@ export const ProjectTranscriptSettings = ({
 }: {
   project: Project;
 }) => {
+  const [properNouns, setProperNouns] = useState<string[]>(
+    project.default_conversation_transcript_prompt
+      ? project.default_conversation_transcript_prompt
+          .split(", ")
+          .filter(Boolean)
+      : [],
+  );
+  const [nounInput, setNounInput] = useState("");
+
   const defaultValues: ProjectTranscriptSettingsFormValues = {
     default_conversation_transcript_prompt:
       project.default_conversation_transcript_prompt ?? "",
   };
 
   const {
-    register,
     handleSubmit,
-    formState: { isSubmitSuccessful, isDirty, dirtyFields },
+    formState: { isSubmitSuccessful, isDirty },
     reset,
     getValues,
   } = useForm<ProjectTranscriptSettingsFormValues>({
@@ -40,20 +50,35 @@ export const ProjectTranscriptSettings = ({
 
   const updateProjectMutation = useUpdateProjectByIdMutation();
 
-  const onSubmit = (data: ProjectTranscriptSettingsFormValues) => {
-    if (isDirty) {
-      updateProjectMutation.mutateAsync({
-        id: project.id,
-        payload: data,
-      });
-    }
+  const onSubmit = () => {
+    const updatedPrompt = properNouns.join(", ");
+    updateProjectMutation.mutateAsync({
+      id: project.id,
+      payload: {
+        default_conversation_transcript_prompt: updatedPrompt,
+      },
+    });
   };
 
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
+  const handleAddNoun = () => {
+    if (nounInput.trim()) {
+      setProperNouns([...properNouns, nounInput.trim()]);
+      setNounInput("");
+      onSubmit();
+    }
+  };
+
+  const handleRemoveNoun = (noun: string) => {
+    const updatedNouns = properNouns.filter((n) => n !== noun);
+    setProperNouns(updatedNouns);
+    onSubmit();
+  };
+
   const handleFormBlur = (event: React.FocusEvent<HTMLFormElement>) => {
-    if (isDirty && event.relatedTarget !== cancelButtonRef.current) {
-      handleSubmit(onSubmit)(event);
+    if (event.relatedTarget !== cancelButtonRef.current) {
+      onSubmit();
     }
   };
 
@@ -73,20 +98,56 @@ export const ProjectTranscriptSettings = ({
       </Group>
       <form onSubmit={handleSubmit(onSubmit)} onBlur={handleFormBlur}>
         <Stack className="relative">
-          <Textarea
-            label={t`Specific Context`}
-            description={
-              <Trans>
-                Provide specific context to improve transcript quality and
-                accuracy. This may include key terms, specific instructions, or
-                other relevant information.
-              </Trans>
-            }
-            {...register("default_conversation_transcript_prompt")}
-            autosize
-            minRows={4}
-            placeholder={t`Example: This conversation is about [topic]. Key terms include [term1], [term2]. Please pay special attention to [specific aspect].`}
-          />
+          <Box>
+            <Group align="end">
+              <TextInput
+                label={t`Specific Context`}
+                description={
+                  <Trans>
+                    Add key terms or proper nouns to improve transcript quality
+                    and accuracy.
+                  </Trans>
+                }
+                value={nounInput}
+                onChange={(e) => setNounInput(e.currentTarget.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddNoun();
+                  }
+                }}
+                placeholder={t`Enter a key term or proper noun`}
+              />
+              <Button
+                onClick={handleAddNoun}
+                variant="outline"
+                disabled={!nounInput.trim()}
+              >
+                <Trans>Add</Trans>
+              </Button>
+            </Group>
+            <Group mt="sm" gap="xs">
+              {properNouns.map((noun, index) => (
+                <Pill
+                  key={index}
+                  withRemoveButton
+                  onRemove={() => handleRemoveNoun(noun)}
+                >
+                  {noun}
+                </Pill>
+              ))}
+            </Group>
+            {properNouns.length === 0 && (
+              <Alert mt="sm">
+                <Text size="sm">
+                  <Trans>
+                    No key terms or proper nouns have been added yet. Add them
+                    using the input above to improve transcript accuracy.
+                  </Trans>
+                </Text>
+              </Alert>
+            )}
+          </Box>
         </Stack>
       </form>
       <Group>
@@ -95,7 +156,14 @@ export const ProjectTranscriptSettings = ({
             ref={cancelButtonRef}
             type="button"
             variant="outline"
-            onClick={() => reset(defaultValues)}
+            onClick={() => {
+              reset(defaultValues);
+              setProperNouns(
+                defaultValues.default_conversation_transcript_prompt
+                  .split(", ")
+                  .filter(Boolean),
+              );
+            }}
             rightSection={<IconX />}
           >
             <Trans>Cancel</Trans>

@@ -2,8 +2,6 @@ import {
   Alert,
   Box,
   Button,
-  InputLabel,
-  PinInput,
   Stack,
   TextInput,
   MultiSelect,
@@ -15,7 +13,6 @@ import { useEffect } from "react";
 import { useInitiateConversationMutation } from "@/lib/query";
 import { AxiosError } from "axios";
 import { Trans, t } from "@lingui/macro";
-import { useLanguage } from "@/lib/useLanguage";
 import { usei18nNavigate } from "@/lib/usei18nNavigate";
 
 const FormSchema = z.object({
@@ -44,7 +41,7 @@ export const ParticipantInitiateForm = ({ project }: { project: Project }) => {
   const onSubmit = (data: FormValues) => {
     initiateConversationMutation.mutate({
       projectId: project.id,
-      name: data.name ?? t`Anonymous Participant`,
+      name: data.name ?? t`Participant`,
       pin: project.pin ?? "",
       tagIdList: data.tagIdList,
     });
@@ -83,41 +80,42 @@ export const ParticipantInitiateForm = ({ project }: { project: Project }) => {
 
         {project.default_conversation_ask_for_participant_name && (
           <TextInput
-            autoFocus
+            // autoFocus
             required
             size="md"
             label={t`Name`}
             placeholder="John Doe, Group 1, etc."
             {...register("name")}
             error={errors.name?.message}
+            className="w-full"
           />
         )}
         {project.tags.length > 0 && (
-          <Box className="relative">
-            <MultiSelect
-              label={t`Tags`}
-              description={t`Add all that apply`}
-              size="md"
-              comboboxProps={{
-                position: "top",
-                middlewares: { flip: false, shift: false },
-                offset: 0,
-                withinPortal: false,
-              }}
-              data={project.tags.map((tag) => ({
-                value: tag.id,
-                label: tag.text,
-              }))}
-              onChange={(value) => {
-                setValue("tagIdList", value);
-              }}
-            />
-          </Box>
+          <MultiSelect
+            label={t`Tags`}
+            description={t`Add all that apply`}
+            size="md"
+            comboboxProps={{
+              position: "top",
+              middlewares: { flip: false, shift: false },
+              offset: 0,
+              withinPortal: false,
+            }}
+            data={project.tags.map((tag) => ({
+              value: tag.id,
+              label: tag.text,
+            }))}
+            onChange={(value) => {
+              setValue("tagIdList", value);
+            }}
+            className="w-full"
+          />
         )}
         <Button
           type="submit"
           size="lg"
           loading={initiateConversationMutation.isPending}
+          fullWidth
         >
           <Trans>Begin!</Trans>
         </Button>

@@ -280,7 +280,7 @@ export const useProjectById = ({
   query?: Partial<Query<CustomDirectusTypes, Project>>;
 }) => {
   return useQuery({
-    queryKey: ["projects", projectId],
+    queryKey: ["projects", projectId, query],
     queryFn: () =>
       directus.request<Project>(readItem("project", projectId, query)),
   });
@@ -552,11 +552,8 @@ export const useUpdateConversationByIdMutation = () => {
         },
       );
       queryClient.invalidateQueries({
-        queryKey: ["conversations", variables.id],
+        queryKey: ["conversations"],
       });
-      // queryClient.invalidateQueries({
-      //   queryKey: ["conversationd", "all"],
-      // });
       toast.success("Conversation updated successfully");
     },
   });
@@ -731,7 +728,7 @@ export const useUploadConversationChunk = () => {
     // Always refetch after error or success:
     onSettled: (_data, _error, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["conversations", variables.conversationId, "chunks"],
+        queryKey: ["conversations", variables.conversationId],
       });
 
       queryClient.invalidateQueries({

@@ -9,13 +9,11 @@ import {
   Title,
   Tooltip,
 } from "@mantine/core";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { ProjectAccordion } from "./ProjectAccordion";
 import { NavigationButton } from "../common/NavigationButton";
 import { Breadcrumbs } from "../common/Breadcrumbs";
 import { ProjectQRCode } from "./ProjectQRCode";
-import { useSidebarCollapsed } from "@/lib/useSidebarCollapsed";
-import { IconChevronLeft } from "@tabler/icons-react";
 import { I18nLink } from "../common/i18nLink";
 import { Trans, t } from "@lingui/macro";
 
@@ -61,8 +59,8 @@ export const ProjectSidebar = () => {
                 <I18nLink to={`/projects/${projectId}/overview`}>
                   <Title
                     order={2}
-                    size="sm"
-                    className="whitespace-break-spaces"
+                    size="lg"
+                    className="whitespace-break-spaces hover:underline"
                   >
                     {projectQuery.data?.name}
                   </Title>
@@ -71,7 +69,7 @@ export const ProjectSidebar = () => {
             },
           ]}
         />
-
+        {/* 
         <Tooltip label={t`Project Overview`}>
           <I18nLink to={`/projects/${projectId}/overview`}>
             <ActionIcon
@@ -82,7 +80,7 @@ export const ProjectSidebar = () => {
               <Icons.Gear color="black" />
             </ActionIcon>
           </I18nLink>
-        </Tooltip>
+        </Tooltip> */}
         {/* 
         {!isCollapsed && (
           <ActionIcon variant="transparent" onClick={toggleSidebar}>

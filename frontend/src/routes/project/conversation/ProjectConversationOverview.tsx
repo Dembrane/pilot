@@ -24,10 +24,12 @@ import {
   useConversationChunks,
   useDeleteConversationByIdMutation,
   useUpdateConversationByIdMutation,
+  useProjectById,
 } from "@/lib/query";
 import { apiCommonConfig } from "@/lib/api";
 import { InformationTooltip } from "@/components/common/InformationTooltip";
 import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { ConversationEdit } from "@/components/conversation/ConversationEdit";
 
 const ConversationDangerZone = ({
   conversation,
@@ -68,18 +70,13 @@ const ConversationDangerZone = ({
   );
 };
 
-type ConversationEditFormValues = {
-  title: string;
-  description: string;
-  context: string;
-};
-
 export const ProjectConversationOverviewRoute = () => {
-  const { conversationId } = useParams();
+  const { conversationId, projectId } = useParams();
   const conversationQuery = useConversationById({
     conversationId: conversationId ?? "",
   });
   const conversationChunksQuery = useConversationChunks(conversationId ?? "");
+  const projectQuery = useProjectById({ projectId: projectId ?? "" });
 
   return (
     <Stack className="relative">
@@ -110,7 +107,7 @@ export const ProjectConversationOverviewRoute = () => {
               </>
             )}
 
-            <Group align="center">
+            {/* <Group align="center">
               <Title order={2}>
                 <Trans>Audio Recording</Trans>
               </Title>
@@ -142,35 +139,28 @@ export const ProjectConversationOverviewRoute = () => {
               }
               controls
               crossOrigin="anonymous"
-            />
+            /> */}
           </Stack>
         )}
-      <Divider />
+      {/* <Divider /> */}
 
-      <Box>
+      {/* <Box>
         <Text size="md">
           <Trans>Name</Trans>
         </Text>
         <Text size="sm">{conversationQuery.data?.participant_name}</Text>
-      </Box>
-      {conversationQuery.data?.participant_email && (
+      </Box> */}
+
+      {/* {conversationQuery.data?.participant_email && (
         <Box>
           <Text size="md">
             <Trans>Email</Trans>
           </Text>
           <Text size="sm">{conversationQuery.data?.participant_email}</Text>
         </Box>
-      )}
+      )} */}
 
-      <Box>
-        <Text size="md">
-          <Trans>Created on</Trans>
-        </Text>
-        <Text size="sm">
-          {new Date(conversationQuery.data?.created_at ?? 0).toLocaleString()}
-        </Text>
-      </Box>
-      {conversationQuery.data?.tags &&
+      {/* {conversationQuery.data?.tags &&
         conversationQuery.data.tags.filter(
           (t) => !!(t.project_tag_id as ProjectTag)?.text,
         ).length > 0 && (
@@ -190,12 +180,17 @@ export const ProjectConversationOverviewRoute = () => {
                 )}
             </Group>
           </Box>
-        )}
-      <Divider />
-      {conversationQuery.data && (
+        )} */}
+
+      {/* <Divider /> */}
+
+      {conversationQuery.data && projectQuery.data && (
         <>
-          {/* <ConversationEdit conversation={conversationQuery.data} />
-          <Divider /> */}
+          <ConversationEdit
+            conversation={conversationQuery.data}
+            projectTags={projectQuery.data.tags}
+          />
+          <Divider />
           <ConversationDangerZone conversation={conversationQuery.data} />
         </>
       )}

@@ -1,4 +1,5 @@
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { CloseableAlert } from "@/components/common/ClosableAlert";
 import { Insight } from "@/components/insight/Insight";
 import { ProjectAnalysisRunStatus } from "@/components/project/ProjectAnalysisRunStatus";
 import { ViewExpandedCard } from "@/components/view/View";
@@ -62,7 +63,7 @@ const DummyViews = () => {
       <Paper p="md">
         <SimpleGrid cols={3}>
           <Paper bg="white" p="md">
-            <Text className="font-xl font-semibold pb-2">
+            <Text className="font-xl pb-2 font-semibold">
               <Trans>Topics</Trans>
             </Text>
             <Group>
@@ -72,7 +73,7 @@ const DummyViews = () => {
             </Group>
           </Paper>
           <Paper bg="white" p="md">
-            <Text className="font-xl font-semibold pb-2">
+            <Text className="font-xl pb-2 font-semibold">
               <Trans>Sentiment</Trans>
             </Text>
             <Group>
@@ -202,7 +203,7 @@ export const ProjectLibraryRoute = () => {
   if (conversationsQuery.isLoading) {
     return (
       <Container>
-        <Stack className="relative py-6 px-2 h-[400px]">
+        <Stack className="relative h-[400px] px-2 py-6">
           <LoadingOverlay visible />
         </Stack>
       </Container>
@@ -253,7 +254,7 @@ export const ProjectLibraryRoute = () => {
   const handleCreateLibrary = async () => {
     if (
       window.confirm(
-        t`Are you sure you want to generate the library? This will take a while.`,
+        t`Are you sure you want to generate the library? This will take a while and overwrite your current views and insights.`,
       )
     ) {
       requestProjectLibraryMutation.mutate({
@@ -269,7 +270,7 @@ export const ProjectLibraryRoute = () => {
           items={[
             {
               label: (
-                <Title order={1} size="md">
+                <Title order={1}>
                   <Trans>Library</Trans>
                 </Title>
               ),
@@ -336,14 +337,14 @@ export const ProjectLibraryRoute = () => {
       </Collapse>
 
       {!opened && latestRun && latestRun.processing_status === "DONE" && (
-        <Alert variant="light" icon={<Icons.View />}>
+        <CloseableAlert variant="light" icon={<Icons.View />}>
           <Text>
             <Trans>
               In order to better navigate through the quotes, create additional
               views. The quotes will then be clustered based on your view.
             </Trans>
           </Text>
-        </Alert>
+        </CloseableAlert>
       )}
 
       <Stack>
@@ -360,7 +361,8 @@ export const ProjectLibraryRoute = () => {
         <Alert variant="light" icon={<IconInfoCircle />}>
           <Text>
             <Trans>
-              Your library is empty. Create a library to see your first insights.
+              Your library is empty. Create a library to see your first
+              insights.
             </Trans>
           </Text>
         </Alert>

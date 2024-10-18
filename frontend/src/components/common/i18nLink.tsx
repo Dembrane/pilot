@@ -22,5 +22,5 @@ export const I18nLink: React.FC<LinkProps> = ({ to, ...props }) => {
   const languagePrefix = finalLanguage ? `/${finalLanguage}` : "";
   const modifiedTo = typeof to === "string" ? `${languagePrefix}${to}` : to;
 
-  return <Link to={modifiedTo} {...props} />;
+  return <Link className="" to={modifiedTo} {...props} />;
 };

@@ -9,8 +9,8 @@ import dembrane.tasks_config
 from dembrane.utils import generate_uuid, get_utc_timestamp
 from dembrane.config import REDIS_URL, RABBITMQ_URL
 from dembrane.database import (
-    QuoteModel,
     ViewModel,
+    QuoteModel,
     AspectModel,
     DatabaseSession,
     ConversationModel,

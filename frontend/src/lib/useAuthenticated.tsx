@@ -27,7 +27,7 @@ export const useAuthenticated = (doRedirect = false) => {
   useEffect(() => {
     setLoading(true);
     checkAuth()
-      .catch((e) => {})
+      .catch((_e) => {})
       .finally(() => {
         setLoading(false);
       });

@@ -2,6 +2,7 @@ import os
 import logging
 from typing import Optional
 
+# import requests
 from openai import OpenAI
 
 from dembrane.database import DatabaseSession, ConversationModel, ConversationChunkModel
@@ -15,7 +16,9 @@ class TranscriptionError(Exception):
     pass
 
 
-def transcribe_audio(audio_file_path: str, language: Optional[str], whisper_prompt: Optional[str]) -> str:
+def transcribe_audio_openai(
+    audio_file_path: str, language: Optional[str], whisper_prompt: Optional[str]
+) -> str:
     try:
         f = open(audio_file_path, "rb")
     except FileNotFoundError as exc:
@@ -44,6 +47,53 @@ def transcribe_audio(audio_file_path: str, language: Optional[str], whisper_prom
             logger.info("Transcription is empty!")
 
     return str(transcription)
+
+
+# def transcribe_audio_azure_whisper(
+#     audio_file_path: str, language: Optional[str], whisper_prompt: Optional[str]
+# ) -> str:
+#     base_url = "https://whisper-asr-service.westeurope.azurecontainer.io/v1"
+#     endpoint = f"{base_url}/asr"
+
+#     try:
+#         with open(audio_file_path, "rb") as audio_file:
+#             files = {"audio_file": audio_file}
+#             params = {
+#                 "output": "json",
+#                 "task": "transcribe",
+#                 "language": language if language not in [None, "multi", ""] else None,
+#                 "word_timestamps": "false",
+#                 "encode": "true",
+#             }
+
+#             response = requests.post(endpoint, files=files, data=params)
+#             response.raise_for_status()
+
+#             result = response.json()
+#             transcription = result.get("text", "")
+
+#             if not transcription:
+#                 logger.info("Transcription is empty!")
+
+#             return transcription
+
+#     except FileNotFoundError as exc:
+#         logger.error(f"File not found: {audio_file_path}")
+#         raise FileNotFoundError from exc
+#     except requests.RequestException as exc:
+#         logger.error(f"Failed to transcribe audio: {exc}")
+#         raise TranscriptionError(f"Failed to transcribe audio: {exc}") from exc
+#     except Exception as exc:
+#         logger.error(f"Unexpected error: {exc}")
+#         raise TranscriptionError(f"Unexpected error: {exc}") from exc
+
+
+def transcribe_audio(
+    audio_file_path: str, language: Optional[str], whisper_prompt: Optional[str]
+) -> str:
+    # You can choose which transcription service to use here
+    return transcribe_audio_openai(audio_file_path, language, whisper_prompt)
+    # return transcribe_audio_azure_whisper(audio_file_path, language, whisper_prompt)
 
 
 DEFAULT_WHISPER_PROMPTS = {
@@ -76,7 +126,15 @@ def transcribe_conversation_chunk(conversation_chunk_id: str) -> None:
             project = conversation.project
             language = project.language or "en"
             default_prompt = DEFAULT_WHISPER_PROMPTS.get(language, "")
-            whisper_prompt = default_prompt + " " + (conversation.context if conversation.context else "")
+            whisper_prompt = (
+                default_prompt
+                + " "
+                + (
+                    project.default_conversation_transcript_prompt
+                    if project.default_conversation_transcript_prompt
+                    else ""
+                )
+            )
 
             transcription = transcribe_audio(chunk.path, language=language, whisper_prompt=whisper_prompt)
 

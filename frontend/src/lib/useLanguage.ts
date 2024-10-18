@@ -1,16 +1,17 @@
 import { i18n } from "@lingui/core";
 
-import { messages as enMessages } from "../locales/en";
-import { messages as nlMessages } from "../locales/nl";
+import { messages as enMessages } from "../locales/en-US";
+import { messages as nlMessages } from "../locales/nl-NL";
+
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { SUPPORTED_LANGUAGES } from "@/config";
 
-export const defaultLanguage = "en";
+export const defaultLanguage = "en-US";
 
 i18n.load({
-  en: enMessages,
-  nl: nlMessages,
+  "en-US": enMessages,
+  "nl-NL": nlMessages,
 });
 
 i18n.activate(defaultLanguage);

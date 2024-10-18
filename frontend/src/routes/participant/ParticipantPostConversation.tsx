@@ -1,7 +1,9 @@
+import { I18nLink } from "@/components/common/i18nLink";
 import { Logo } from "@/components/common/Logo";
 import { Markdown } from "@/components/common/Markdown";
 import { PARTICIPANT_BASE_URL } from "@/config";
 import { getParticipantProjectById } from "@/lib/api";
+import { useParticipantProjectById } from "@/lib/participantQuery";
 import { useProjectById } from "@/lib/query";
 import { useLanguage } from "@/lib/useLanguage";
 import { Trans } from "@lingui/macro";
@@ -20,17 +22,9 @@ import { Link, useParams } from "react-router-dom";
 
 export const ParticipantPostConversation = () => {
   const { projectId, conversationId } = useParams();
-  const project = useQuery({
-    queryKey: ["participant", "project", projectId],
-    queryFn: () => getParticipantProjectById(projectId as string),
-    enabled: !!projectId,
-  });
+  const project = useParticipantProjectById(projectId ?? "");
 
-  const { language } = useLanguage();
-
-  const initiateLink =
-    PARTICIPANT_BASE_URL +
-    `/${language}/${projectId}/login?pin=${project?.data?.pin}`;
+  const initiateLink = `/${projectId}/start`;
 
   const variables = {
     "{{CONVERSATION_ID}}": conversationId ?? "null",
@@ -45,14 +39,8 @@ export const ParticipantPostConversation = () => {
     ) ?? null;
 
   return (
-    <div className="container max-w-2xl mx-auto">
-      <header className="fixed left-0 w-full top-0 h-[64px] border-b border-slate-300 py-4 bg-white z-10">
-        <Group justify="center" align="center" className="px-4 relative">
-          <Logo hideTitle className="left-0 pl-4 absolute sm:relative" />
-          <h1 className="text-xl">Dembrane</h1>
-        </Group>
-      </header>
-      <Stack className="mt-[64px] py-8 px-4">
+    <div className="container mx-auto h-full max-w-2xl">
+      <Stack className="mt-[64px] px-4 py-8">
         {!!text && text != "" ? (
           <>
             <Markdown content={text} />
@@ -71,11 +59,11 @@ export const ParticipantPostConversation = () => {
         </Text>
         <Box className="relative">
           <LoadingOverlay visible={project.isLoading} />
-          <Link to={initiateLink}>
+          <I18nLink to={initiateLink}>
             <Button component="a" size="md" variant="outline">
               <Trans>Record another conversation</Trans>
             </Button>
-          </Link>
+          </I18nLink>
         </Box>
       </Stack>
     </div>

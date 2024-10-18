@@ -23,10 +23,11 @@ import { IconExternalLink, IconTrash } from "@tabler/icons-react";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { apiCommonConfig } from "@/lib/api";
+import { usei18nNavigate } from "@/lib/usei18nNavigate";
 
 const ResourceDangerZone = ({ resource }: { resource: TResource }) => {
   const deleteResourceByIdMutation = useDeleteResourceByIdMutation();
-  const navigate = useNavigate();
+  const navigate = usei18nNavigate();
   const { projectId } = useParams();
 
   const handleDelete = () => {

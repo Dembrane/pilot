@@ -2,6 +2,8 @@ import { useUploadResourceByProjectIdMutation } from "@/lib/query";
 import { PDF_MIME_TYPE } from "@mantine/dropzone";
 import { PropsWithChildren } from "react";
 import { CommonDropzone } from "./Dropzone";
+import { t } from "@lingui/macro";
+import { toast } from "../common/Toaster";
 
 export const UploadResourceDropzone = (
   props: PropsWithChildren<{
@@ -22,7 +24,9 @@ export const UploadResourceDropzone = (
         });
       }}
       onReject={(files) => {
-        console.log("rejected files", files);
+        toast.error(
+          t`Something went wrong while uploading the file: ${files[0].errors[0].message}`,
+        );
       }}
       loading={uploadDocumentsMutation.isPending}
       accept={PDF_MIME_TYPE}

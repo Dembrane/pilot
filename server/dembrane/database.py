@@ -124,9 +124,14 @@ class ProjectModel(Base):
     is_conversation_allowed: Mapped[bool] = mapped_column(Boolean, default=True)
     image_generation_model: Mapped[str] = mapped_column(String, default="MODEST")
 
+    default_conversation_ask_for_participant_name: Mapped[bool] = mapped_column(Boolean)
+    default_conversation_tutorial_slug: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    default_conversation_transcript_prompt: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )
+
     default_conversation_title: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     default_conversation_description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    default_conversation_context: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     default_conversation_finish_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     resources: Mapped[List["ResourceModel"]] = relationship(

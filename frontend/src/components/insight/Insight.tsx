@@ -1,5 +1,6 @@
 import { Paper, Stack, Text } from "@mantine/core";
 import { Link, useParams } from "react-router-dom";
+import { I18nLink } from "@/components/common/i18nLink";
 
 export const Insight = ({
   data,
@@ -16,7 +17,7 @@ export const Insight = ({
   }
 
   return (
-    <Link to={`/projects/${projectId}/library/insights/${data.id}`}>
+    <I18nLink to={`/projects/${projectId}/library/insights/${data.id}`}>
       <Paper
         component="a"
         className="h-full place-content-start border-2 p-4 text-left transition-all hover:border-primary-300 hover:border-opacity-70"
@@ -29,6 +30,6 @@ export const Insight = ({
           <Text size="sm">{data.summary}</Text>
         </Stack>
       </Paper>
-    </Link>
+    </I18nLink>
   );
 };

@@ -12,8 +12,9 @@ import {
 import { useParams } from "react-router-dom";
 import { Quote } from "../../../components/quote/Quote";
 import { Markdown } from "@/components/common/Markdown";
-import { useAspectById } from "@/lib/query";
+import { useAspectById, useProjectById } from "@/lib/query";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { Trans } from "@lingui/macro";
 
 const dedupeQuotes = (quotes: QuoteAspect[]): QuoteAspect[] => {
   const seen = new Set();
@@ -34,24 +35,27 @@ export const ProjectLibraryAspect = () => {
     aspectId ?? "",
   );
 
+  const project = useProjectById({
+    projectId: projectId ?? "",
+    query: {
+      fields: ["image_generation_model"],
+    },
+  });
+
   return (
     <Stack className="relative px-4 py-6">
       <Breadcrumbs
         items={[
           {
-            label: <Icons.Sidebar />,
-            link: `/projects/${projectId}/overview`,
-          },
-          {
-            label: "Library",
+            label: <Trans>Library</Trans>,
             link: `/projects/${projectId}/library`,
           },
           {
-            label: "View",
+            label: <Trans>View</Trans>,
             link: `/projects/${projectId}/library/views/${viewId}`,
           },
           {
-            label: "Aspect",
+            label: <Trans>Aspect</Trans>,
           },
         ]}
       />
@@ -59,34 +63,38 @@ export const ProjectLibraryAspect = () => {
 
       <Stack gap="md" className="relative">
         <LoadingOverlay visible={isLoading} />
-        <img
-          src={aspect?.image_url ?? "/placeholder.png"}
-          alt={aspect?.name ?? ""}
-          className="h-[400px] w-full object-cover"
-        />
-        <Container>
+        {project.data?.image_generation_model !== "PLACEHOLDER" && (
+          <img
+            src={aspect?.image_url ?? "/placeholder.png"}
+            alt={aspect?.name ?? ""}
+            className="h-[400px] w-full object-cover"
+          />
+        )}
+        <Container size="sm">
           <Stack>
             <Title order={1}>{aspect?.name}</Title>
-            <Markdown content={aspect?.long_summary ?? ""} />
+            <Markdown
+              content={aspect?.long_summary ?? ""}
+              className="!max-w-full"
+            />
+            <Title order={2}>
+              <Trans>Quotes</Trans>
+            </Title>
+            {!isLoading ? (
+              <>
+                {" "}
+                {dedupeQuotes([
+                  ...(aspect?.representative_quotes ?? []),
+                  ...(aspect?.quotes ?? []),
+                ]).map((quote: QuoteAspect) => (
+                  <Quote key={quote.id} data={quote.quote_id as Quote} />
+                ))}{" "}
+              </>
+            ) : (
+              <Skeleton height={100} />
+            )}
           </Stack>
         </Container>
-      </Stack>
-
-      <Stack>
-        <Title order={2}>Quotes</Title>
-        {!isLoading ? (
-          <>
-            {" "}
-            {dedupeQuotes([
-              ...(aspect?.representative_quotes ?? []),
-              ...(aspect?.quotes ?? []),
-            ]).map((quote: QuoteAspect) => (
-              <Quote key={quote.id} data={quote.quote_id as Quote} />
-            ))}{" "}
-          </>
-        ) : (
-          <Skeleton height={100} />
-        )}
       </Stack>
     </Stack>
   );

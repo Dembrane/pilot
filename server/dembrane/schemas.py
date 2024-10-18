@@ -36,7 +36,6 @@ class ProjectSchema(BaseModel):
     is_conversation_allowed: bool
     default_conversation_title: Optional[str] = None
     default_conversation_description: Optional[str] = None
-    default_conversation_context: Optional[str] = None
     default_conversation_finish_text: Optional[str] = None
 
 

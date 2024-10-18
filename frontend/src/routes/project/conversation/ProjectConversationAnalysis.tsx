@@ -18,6 +18,8 @@ import { Link, useParams } from "react-router-dom";
 import { Quote } from "../../../components/quote/Quote";
 import { Insight } from "@/components/insight/Insight";
 import { useState } from "react";
+import { I18nLink } from "@/components/common/i18nLink";
+import { t, Trans } from "@lingui/macro";
 
 export const ProjectConversationAnalysis = () => {
   const { conversationId, projectId } = useParams();
@@ -36,18 +38,25 @@ export const ProjectConversationAnalysis = () => {
             {insightsQuery.data.length}
           </Text>
         )}
-        <Title order={2}>Insights</Title>
+        <Title order={2}>
+          <Trans>Insights</Trans>
+        </Title>
         {insightsQuery.data && insightsQuery.data.length > 0 && (
           <Button
             variant="transparent"
             onClick={() => setShowInsights(!showInsights)}
           >
-            <Text>{showInsights ? "Hide all" : "Show all"} insights</Text>
+            <Text>
+              {showInsights ? t`Hide all` : t`Show all`}
+              <Trans>insights</Trans>
+            </Text>
           </Button>
         )}
       </Group>
       {insightsQuery.error && (
-        <Text className="text-red-500">Error loading insights</Text>
+        <Text className="text-red-500">
+          <Trans>Error loading insights</Trans>
+        </Text>
       )}
       {insightsQuery.isLoading && (
         <>
@@ -58,7 +67,7 @@ export const ProjectConversationAnalysis = () => {
       )}
       <Spoiler
         maxHeight={250}
-        hideLabel="Hide all insights"
+        hideLabel={t`Hide all insights`}
         showLabel={null}
         pb="md"
         expanded={showInsights}
@@ -66,11 +75,13 @@ export const ProjectConversationAnalysis = () => {
       >
         {insightsQuery.data && insightsQuery.data.length === 0 && (
           <Text>
-            No insights available. Generate insights for this conversation by
-            visiting
-            <Link to={`/projects/${projectId}/library`}>
-              <Anchor> the project library.</Anchor>
-            </Link>
+            <Trans>
+              No insights available. Generate insights for this conversation by
+              visiting
+              <I18nLink to={`/projects/${projectId}/library`}>
+                <Anchor> the project library.</Anchor>
+              </I18nLink>
+            </Trans>
           </Text>
         )}
 
@@ -90,7 +101,9 @@ export const ProjectConversationAnalysis = () => {
             {quotesQuery.data.length}
           </Text>
         )}
-        <Title order={2}>Quotes</Title>
+        <Title order={2}>
+          <Trans>Quotes</Trans>
+        </Title>
         {/* {quotesQuery.data && quotesQuery.data.length > 0 && (
           <Button
             variant="transparent"
@@ -101,7 +114,9 @@ export const ProjectConversationAnalysis = () => {
         )} */}
       </Group>
       {quotesQuery.error && (
-        <Text className="text-red-500">Error loading quotes</Text>
+        <Text className="text-red-500">
+          <Trans>Error loading quotes</Trans>
+        </Text>
       )}
       {quotesQuery.isLoading && (
         <>
@@ -120,10 +135,13 @@ export const ProjectConversationAnalysis = () => {
       > */}
       {quotesQuery.data && quotesQuery.data.length === 0 && (
         <Text>
-          No quotes available. Generate quotes for this conversation by visiting
-          <Link to={`/projects/${projectId}/library`}>
-            <Anchor> the project library.</Anchor>
-          </Link>
+          <Trans>
+            No quotes available. Generate quotes for this conversation by
+            visiting
+            <I18nLink to={`/projects/${projectId}/library`}>
+              <Anchor> the project library.</Anchor>
+            </I18nLink>
+          </Trans>
         </Text>
       )}
       <Stack gap="sm">

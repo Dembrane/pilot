@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
-import { ActionIcon, Tooltip } from "@mantine/core";
+import { ActionIcon, InputBase, InputBaseProps, Tooltip } from "@mantine/core";
 import { IconDeviceFloppy, IconPencil } from "@tabler/icons-react";
 import { useDebouncedCallback } from "@mantine/hooks";
+import { cn } from "@/lib/utils";
 
 interface EditableTextBoxProps {
   value: string;
   onChange: (value: string) => Promise<void>;
   disabled?: boolean;
   placeholder?: string;
+  inputProps?: InputBaseProps;
 }
 
 const EditableTextBox = ({
@@ -15,6 +17,7 @@ const EditableTextBox = ({
   onChange,
   disabled = false,
   placeholder = "Enter text",
+  inputProps,
 }: EditableTextBoxProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [localValue, setLocalValue] = useState(value ?? "");
@@ -67,7 +70,7 @@ const EditableTextBox = ({
       role="group"
       aria-label="Editable text"
     >
-      <input
+      <InputBase
         ref={inputRef}
         value={localValue}
         onChange={handleChange}
@@ -75,8 +78,9 @@ const EditableTextBox = ({
         onKeyDown={handleKeyDown}
         disabled={disabled}
         placeholder={placeholder}
-        className="mr-2 min-w-[100px] px-2 focus:border-primary-400 focus:ring-primary-400"
         aria-label="Editable text input"
+        {...inputProps}
+        className={cn("mr-2 min-w-[100px] py-1", inputProps?.className)}
       />
       <Tooltip label={isEditing ? "Save changes" : "Edit text"}>
         <ActionIcon

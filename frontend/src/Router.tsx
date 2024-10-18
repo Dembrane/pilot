@@ -1,18 +1,20 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
 import { BaseLayout } from "./components/layout/BaseLayout";
 import { ProjectsHomeRoute } from "./routes/project/ProjectsHome";
-import { ProjectsCreateRoute } from "./routes/project/ProjectCreate";
-import { ProjectOverviewRoute } from "./routes/project/ProjectOverview";
+import {
+  ProjectPortalSettingsRoute,
+  ProjectSettingsRoute,
+  ProjectTranscriptSettingsRoute,
+} from "./routes/project/ProjectRoutes";
 import { ProjectLayout } from "./components/layout/ProjectLayout";
 import { ProjectResourceLayout } from "./components/layout/ProjectResourceLayout";
 import { ProjectResourceOverviewRoute } from "./routes/project/resource/ProjectResourceOverview";
 import { ProjectResourceAnalysisRoute } from "./routes/project/resource/ProjectResourceAnalysis";
 import { LanguageLayout } from "./components/layout/LanguageLayout";
-import { ParticipantLoginRoute } from "./routes/participant/ParticipantLogin";
 import {
   ParticipantConversationAudioRoute,
   ParticipantConversationTextRoute,
-} from "./routes/participant/Conversation";
+} from "./routes/participant/ParticipantConversation";
 import { ProjectConversationLayout } from "./components/layout/ProjectConversationLayout";
 import { ProjectConversationOverviewRoute } from "./routes/project/conversation/ProjectConversationOverview";
 import { ProjectConversationTranscript } from "./routes/project/conversation/ProjectConversationTranscript";
@@ -20,21 +22,22 @@ import { ProjectConversationAnalysis } from "./routes/project/conversation/Proje
 import { NotFoundRoute } from "./routes/404";
 import { ProjectLibraryRoute } from "./routes/project/library/ProjectLibrary";
 import { ProjectLibraryInsight } from "./routes/project/library/ProjectLibraryInsight";
-import { ParticipantPostConversation } from "./routes/participant/PostConversation";
+import { ParticipantPostConversation } from "./routes/participant/ParticipantPostConversation";
 import { ProjectLibraryLayout } from "./components/layout/ProjectLibraryLayout";
 import { ProjectLibraryView } from "./routes/project/library/ProjectLibraryView";
 import { ProjectLibraryAspect } from "./routes/project/library/ProjectLibraryAspect";
 import { LoginRoute } from "./routes/auth/Login";
 import { RegisterRoute } from "./routes/auth/Register";
 import { Protected } from "./components/common/Protected";
-// import { WorkspacesHomeRoute } from "./routes/workspaces/WorkspacesHome";
 import { AuthLayout } from "./components/layout/AuthLayout";
 import { CheckYourEmailRoute } from "./routes/auth/CheckYourEmail";
 import { VerifyEmailRoute } from "./routes/auth/VerifyEmail";
 import { PasswordResetRoute } from "./routes/auth/PasswordReset";
 import { RequestPasswordResetRoute } from "./routes/auth/RequestPasswordReset";
-import { Text } from "@mantine/core";
 import { ProjectChatRoute } from "./routes/project/chat/ProjectChat";
+import { ProjectOverviewLayout } from "./components/layout/ProjectOverviewLayout";
+import { ParticipantLayout } from "./components/layout/ParticipantLayout";
+import { ParticipantStartRoute } from "./routes/participant/ParticipantStart";
 
 export const mainRouter = createBrowserRouter([
   {
@@ -93,23 +96,8 @@ export const mainRouter = createBrowserRouter([
           </AuthLayout>
         ),
       },
-
-      // {
-      //   path: "workspaces",
-      //   element: (
-      //     <Protected>
-      //       <BaseLayout>
-      //         <WorkspacesHomeRoute />
-      //       </BaseLayout>
-      //     </Protected>
-      //   ),
-      // },
-
       {
-        // path: "workspaces/:sessionId/projects",
         path: "projects",
-
-        // path: "projects",
         element: (
           <Protected>
             <BaseLayout />
@@ -122,41 +110,29 @@ export const mainRouter = createBrowserRouter([
             element: <ProjectsHomeRoute />,
           },
           {
-            path: "create",
-            element: <ProjectsCreateRoute />,
-          },
-          {
             path: ":projectId",
             children: [
-              {
-                path: "library",
-                element: <ProjectLibraryLayout />,
-                children: [
-                  {
-                    path: "views/:viewId/aspects/:aspectId",
-                    element: <ProjectLibraryAspect />,
-                  },
-                  {
-                    path: "views/:viewId",
-                    element: <ProjectLibraryView />,
-                  },
-                  {
-                    path: "insights/:insightId",
-                    element: <ProjectLibraryInsight />,
-                  },
-                  {
-                    index: true,
-                    element: <ProjectLibraryRoute />,
-                  },
-                ],
-              },
               {
                 element: <ProjectLayout />,
                 children: [
                   {
-                    index: true,
-                    path: "overview",
-                    element: <ProjectOverviewRoute />,
+                    path: "",
+                    element: <ProjectOverviewLayout />,
+                    children: [
+                      {
+                        index: true,
+                        path: "overview",
+                        element: <ProjectSettingsRoute />,
+                      },
+                      {
+                        path: "portal-editor",
+                        element: <ProjectPortalSettingsRoute />,
+                      },
+                      {
+                        path: "transcript-settings",
+                        element: <ProjectTranscriptSettingsRoute />,
+                      },
+                    ],
                   },
                   {
                     path: "chats/:chatId",
@@ -195,9 +171,28 @@ export const mainRouter = createBrowserRouter([
                       },
                     ],
                   },
+
                   {
-                    path: "chat/:chatId",
-                    element: <></>,
+                    path: "library",
+                    element: <ProjectLibraryLayout />,
+                    children: [
+                      {
+                        path: "views/:viewId/aspects/:aspectId",
+                        element: <ProjectLibraryAspect />,
+                      },
+                      {
+                        path: "views/:viewId",
+                        element: <ProjectLibraryView />,
+                      },
+                      {
+                        path: "insights/:insightId",
+                        element: <ProjectLibraryInsight />,
+                      },
+                      {
+                        index: true,
+                        element: <ProjectLibraryRoute />,
+                      },
+                    ],
                   },
                 ],
               },
@@ -212,22 +207,16 @@ export const mainRouter = createBrowserRouter([
 export const participantRouter = createBrowserRouter([
   {
     path: "/:language?/:projectId",
-    element: <LanguageLayout />,
+    element: <ParticipantLayout />,
     errorElement: <NotFoundRoute />,
     children: [
       {
-        path: "login",
-        element: <ParticipantLoginRoute />,
+        path: "start",
+        element: <ParticipantStartRoute />,
       },
       {
         path: "conversation/:conversationId",
-        element: <ParticipantConversationAudioRoute isTranscriptionLive />,
-      },
-      {
-        path: "conversation/:conversationId/async",
-        element: (
-          <ParticipantConversationAudioRoute isTranscriptionLive={false} />
-        ),
+        element: <ParticipantConversationAudioRoute />,
       },
       {
         path: "conversation/:conversationId/text",

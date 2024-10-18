@@ -10,7 +10,7 @@
 //   active?: boolean;
 // }) => {
 //   return (
-//     <Link to={`/workspaces/${session.id}/projects`}>
+//     <I18nLink to={`/workspaces/${session.id}/projects`}>
 //       <Paper
 //         component="a"
 //         bg="transparent"
@@ -32,6 +32,6 @@
 //           </Text>
 //         </Stack>
 //       </Paper>
-//     </Link>
+//     </I18nLink>
 //   );
 // };

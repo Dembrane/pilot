@@ -35,7 +35,8 @@ export const ProjectEdit = ({ project }: { project: Project }) => {
     default_conversation_title: project.default_conversation_title ?? "",
     default_conversation_description:
       project.default_conversation_description ?? "",
-    default_conversation_context: project.default_conversation_context ?? "",
+    default_conversation_context:
+      project.default_conversation_transcript_prompt ?? "",
     default_conversation_finish_text:
       project.default_conversation_finish_text ?? "",
   };
@@ -58,7 +59,8 @@ export const ProjectEdit = ({ project }: { project: Project }) => {
       default_conversation_title: project.default_conversation_title ?? "",
       default_conversation_description:
         project.default_conversation_description ?? "",
-      default_conversation_context: project.default_conversation_context ?? "",
+      default_conversation_context:
+        project.default_conversation_transcript_prompt ?? "",
       default_conversation_finish_text:
         project.default_conversation_finish_text ?? "",
     };

@@ -3,7 +3,11 @@ import { ProjectListItem } from "@/components/project/ProjectListItem";
 import { Icons } from "@/icons";
 import { getDirectusErrorString } from "@/lib/directus";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { useProjects } from "@/lib/query";
+import {
+  useCreateProjectMutation,
+  useProjects,
+  useUpdateProjectByIdMutation,
+} from "@/lib/query";
 import {
   Text,
   Box,
@@ -30,12 +34,15 @@ import {
   IconSearch,
   IconX,
 } from "@tabler/icons-react";
-import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { Trans, t } from "@lingui/macro";
+import { useLanguage } from "@/lib/useLanguage";
+import { CloseableAlert } from "@/components/common/ClosableAlert";
 
 export const ProjectsHomeRoute = () => {
-  useDocumentTitle("Projects | Dembrane");
+  useDocumentTitle(t`Projects | Dembrane`);
 
   const [gridParent] = useAutoAnimate();
   const [listParent] = useAutoAnimate();
@@ -57,6 +64,30 @@ export const ProjectsHomeRoute = () => {
     defaultValue: "list",
   });
 
+  const navigate = usei18nNavigate();
+  const createProjectMutation = useCreateProjectMutation();
+  const updateProjectMutation = useUpdateProjectByIdMutation();
+
+  const { language } = useLanguage();
+
+  const handleCreateProject = async () => {
+    const project = await createProjectMutation.mutateAsync({
+      name: t`New Project`,
+      language:
+        language === "en-US" ? "en" : language === "nl-NL" ? "nl" : "en",
+    });
+    await updateProjectMutation.mutateAsync({
+      id: project.id,
+      payload: {
+        default_conversation_ask_for_participant_name: true,
+        default_conversation_tutorial_slug: "none",
+        image_generation_model: "PLACEHOLDER",
+        default_conversation_transcript_prompt: "Dembrane",
+      },
+    });
+    navigate(`/projects/${project.id}/overview`);
+  };
+
   return (
     <Container>
       <Stack>
@@ -68,26 +99,29 @@ export const ProjectsHomeRoute = () => {
                   label: (
                     <Group>
                       <Icons.Home />
-                      <Title order={1}>Home</Title>
+                      <Title order={1}>
+                        <Trans>Home</Trans>
+                      </Title>
                     </Group>
                   ),
                 },
               ]}
             />
           </Group>
-          <Link to={`/projects/create`}>
-            <Button
-              component="a"
-              size="md"
-              rightSection={<Icons.Plus stroke="white" fill="white" />}
-            >
-              Create
-            </Button>
-          </Link>
+          <Button
+            size="md"
+            rightSection={<Icons.Plus stroke="white" fill="white" />}
+            loading={createProjectMutation.isPending}
+            onClick={handleCreateProject}
+          >
+            <Trans>Create</Trans>
+          </Button>
         </Group>
         <Divider />
         <Group justify="space-between" className="relative">
-          <Title order={2}>Projects</Title>
+          <Title order={2}>
+            <Trans>Projects</Trans>
+          </Title>
 
           <Group gap="xs">
             <ActionIcon
@@ -113,7 +147,7 @@ export const ProjectsHomeRoute = () => {
               }
               variant="transparent"
               onClick={() => setView("grid")}
-              title="Grid view"
+              title={t`Grid view`}
               color={view === "grid" ? "blue" : "gray"}
             >
               <IconLayoutGrid />
@@ -124,11 +158,13 @@ export const ProjectsHomeRoute = () => {
         {projectsQuery.data &&
           projectsQuery.data.length === 0 &&
           debouncedSearchValue === "" && (
-            <Alert icon={<IconInfoCircle />}>
-              Welcome to Your Home! Here you can see all your projects and get
-              access to tutorial resources. Currently, you have no projects.
-              Click "Create" to configure to get started!
-            </Alert>
+            <CloseableAlert icon={<IconInfoCircle />}>
+              <Trans>
+                Welcome to Your Home! Here you can see all your projects and get
+                access to tutorial resources. Currently, you have no projects.
+                Click "Create" to configure to get started!
+              </Trans>
+            </CloseableAlert>
           )}
 
         {!(
@@ -151,7 +187,7 @@ export const ProjectsHomeRoute = () => {
                 </ActionIcon>
               )
             }
-            placeholder="Search projects"
+            placeholder={t`Search projects`}
             value={search}
             size="md"
             onChange={(e) => setSearch(e.currentTarget.value)}
@@ -163,7 +199,8 @@ export const ProjectsHomeRoute = () => {
           projectsQuery.data.length === 0 &&
           debouncedSearchValue !== "" && (
             <Text>
-              No projects found for search term <i>{debouncedSearchValue}</i>
+              <Trans>No projects found for search term</Trans>{" "}
+              <i>{debouncedSearchValue}</i>
             </Text>
           )}
 
@@ -177,7 +214,7 @@ export const ProjectsHomeRoute = () => {
           {view === "grid" && (
             <Box
               ref={gridParent}
-              className="grid grid-cols-12 gap-4 place-content-stretch"
+              className="grid grid-cols-12 place-content-stretch gap-4"
             >
               {projectsQuery.isLoading &&
                 Array.from({ length: 3 }).map((_, i) => (

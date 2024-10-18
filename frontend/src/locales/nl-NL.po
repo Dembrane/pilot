@@ -1,0 +1,1372 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2024-10-14 13:44+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: nl-NL\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#. js-lingui-explicit-id
+#: src/lib/directus.ts:53
+msgid "You are not authenticated"
+msgstr "Je bent niet geauthenticeerd"
+
+#. js-lingui-explicit-id
+#: src/lib/directus.ts:59
+msgid "You don't have permission to access this."
+msgstr "Je hebt geen toegang tot deze pagina."
+
+#. js-lingui-explicit-id
+#: src/lib/directus.ts:64
+msgid "Resource not found"
+msgstr "Resource niet gevonden"
+
+#. js-lingui-explicit-id
+#: src/lib/directus.ts:68
+msgid "Server error"
+msgstr "Serverfout"
+
+#. js-lingui-explicit-id
+#: src/lib/directus.ts:71
+msgid "Something went wrong"
+msgstr "Er is iets fout gegaan"
+
+#: src/components/project/ProjectCard.tsx:35
+#: src/components/project/ProjectListItem.tsx:34
+msgid "{0} Conversations • Edited {1}"
+msgstr "{0} Gesprekken • Bewerkt {1}"
+
+#: src/routes/participant/ParticipantLogin.tsx:152
+#~ msgid "*At Dembrane, privacy is super important!*"
+#~ msgstr "*Bij Dembrane staat privacy op een!*"
+
+#: src/routes/participant/ParticipantLogin.tsx:157
+#~ msgid "*Oh, we don't have a cookie statement because we don't use cookies! We eat them.*"
+#~ msgstr "*Oh, we hebben geen cookievermelding want we gebruiken geen cookies! We eten ze op.*"
+
+#: src/routes/participant/ParticipantConversation.tsx:650
+msgid "*Transcription in progress.*"
+msgstr "*Een moment a.u.b.*"
+
+#: src/routes/participant/ParticipantLogin.tsx:154
+#~ msgid "*We make sure nothing can be traced back to you, and even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]"
+#~ msgstr "*We zorgen dat niks terug te leiden is naar jou als persoon, ook al zeg je per ongeluk je naam, verwijderen wij deze voordat we alles analyseren. Door deze tool te gebruiken, ga je akkoord met onze privacy voorwaarden. Wil je meer weten? Lees dan onze [privacy verklaring]"
+
+#: src/routes/project/library/ProjectLibrary.tsx:71
+#: src/routes/project/library/ProjectLibrary.tsx:81
+msgid "0 Aspects"
+msgstr "0 Aspecten"
+
+#: src/routes/project/ProjectOverview.tsx:262
+#~ msgid "Access Code"
+#~ msgstr ""
+
+#: src/routes/project/ProjectOverview.tsx:297
+#~ msgid "Active"
+#~ msgstr ""
+
+#: src/components/project/ProjectTranscriptSettings.tsx:126
+msgid "Add"
+msgstr "Toevoegen"
+
+#: src/routes/project/library/ProjectLibrary.tsx:160
+msgid "Add additional context (Optional)"
+msgstr "Voeg extra context toe (Optioneel)"
+
+#: src/components/participant/ParticipantInitiateForm.tsx:96
+msgid "Add all that apply"
+msgstr "Vink aan wat van toepassing is"
+
+#: src/components/Documents.tsx:90
+#~ msgid "Add context to document"
+#~ msgstr "Voeg context toe aan document"
+
+#: src/components/project/ProjectTranscriptSettings.tsx:106
+msgid "Add key terms or proper nouns to improve transcript quality and accuracy."
+msgstr "Voeg sleuteltermen of eigennamen toe om de kwaliteit en nauwkeurigheid van het transcript te verbeteren."
+
+#: src/components/project/ProjectTagsInput.tsx:104
+msgid "Add Tag"
+msgstr "Trefwoord toevoegen"
+
+#: src/components/project/ProjectTagsInput.tsx:104
+msgid "Add Tags"
+msgstr "Trefwoorden toevoegen"
+
+#: src/components/conversation/ConversationAccordion.tsx:84
+msgid "Add to this chat"
+msgstr "Voeg toe aan dit gesprek"
+
+#: src/components/Documents.tsx:144
+#~ msgid "Added context"
+#~ msgstr "Context toegevoegd"
+
+#: src/routes/project/chat/ProjectChat.tsx:482
+msgid "Adding Context:"
+msgstr "Context toevoegen:"
+
+#: src/components/project/ProjectPortalEditor.tsx:115
+msgid "Advanced (Tips and tricks)"
+msgstr "Geavanceerd (Tips en trucs)"
+
+#: src/components/Message.tsx:58
+#~ msgid "AI Assistant"
+#~ msgstr "AI Assistent"
+
+#: src/components/Message.tsx:340
+#~ msgid "All documents are uploaded and ready now. What research question are you interested in asking? Optionally, you can now open an individual analysis chat for each document."
+#~ msgstr "Alle documenten zijn geüpload en zijn nu klaar. Welke onderzoeksvraag wil je stellen? Optioneel kunt u nu voor elk document een individuele analysechat openen."
+
+#: src/routes/project/library/ProjectLibrary.tsx:357
+msgid "All Insights"
+msgstr "Alle insights"
+
+#: src/components/conversation/OpenForParticipationSummaryCard.tsx:36
+msgid "Allow participants using the link to start new conversations"
+msgstr "Sta deelnemers toe om met behulp van de link nieuwe gesprekken te starten"
+
+#: src/components/common/DembraneLoadingSpinner/index.tsx:21
+msgid "Almost there"
+msgstr "Bijna klaar"
+
+#: src/components/conversation/ConversationAccordion.tsx:81
+msgid "Already added to this chat"
+msgstr "Al toegevoegd aan dit gesprek"
+
+#: src/routes/participant/ParticipantStart.tsx:135
+msgid "An error occurred while loading the Portal. Please contact the support team."
+msgstr "Er is een fout opgetreden bij het laden van de Portal. Neem contact op met de ondersteuningsteam."
+
+#: src/routes/project/chat/ProjectChat.tsx:461
+msgid "An error occurred."
+msgstr "Er is een fout opgetreden."
+
+#: src/components/layout/ProjectConversationLayout.tsx:27
+#: src/components/layout/ProjectResourceLayout.tsx:48
+msgid "Analysis"
+msgstr "Analyse"
+
+#: src/components/Message.tsx:313
+#~ msgid "Analyze!"
+#~ msgstr "Analyseer!"
+
+#: src/components/participant/ParticipantInitiateForm.tsx:49
+#~ msgid "Anonymous Participant"
+#~ msgstr "Anonieme deelnemer"
+
+#: src/routes/participant/ParticipantLogin.tsx:144
+#~ msgid "Are you ready? Then press \"Ready!\""
+#~ msgstr "Ben je er klaar voor? Druk dan op \"Klaar om te beginnen\"."
+
+#: src/routes/project/conversation/ProjectConversationOverview.tsx:46
+msgid "Are you sure you want to delete this conversation? This action cannot be undone."
+msgstr "Weet je zeker dat je dit gesprek wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
+
+#: src/components/Documents.tsx:197
+#~ msgid "Are you sure you want to delete this document?"
+#~ msgstr "Weet je zeker dat je dit document wilt verwijderen?"
+
+#: src/components/project/ProjectDangerZone.tsx:12
+msgid "Are you sure you want to delete this project?"
+msgstr "Weet je zeker dat je dit project wilt verwijderen?"
+
+#: src/routes/participant/ParticipantConversation.tsx:1247
+msgid "Are you sure you want to delete this recording?"
+msgstr "Weet je zeker dat je deze opname wilt verwijderen?"
+
+#: src/routes/participant/ParticipantConversation.tsx:855
+#: src/routes/participant/ParticipantConversation.tsx:1097
+#: src/routes/participant/ParticipantConversation.tsx:1353
+msgid "Are you sure you want to finish?"
+msgstr "Weet je zeker dat je het wilt afmaken?"
+
+#: src/routes/project/library/ProjectLibrary.tsx:257
+msgid "Are you sure you want to generate the library? This will take a while and overwrite your current views and insights."
+msgstr "Weet je zeker dat je de bibliotheek wilt genereren? Dit kan een tijdje duren en overschrijft je huidige views en insights."
+
+#: src/routes/project/library/ProjectLibrary.tsx:256
+#~ msgid "Are you sure you want to generate the library? This will take a while."
+#~ msgstr "Weet je zeker dat je de bibliotheek wilt genereren? Dit kan een tijdje duren."
+
+#: src/routes/participant/Conversation.tsx:1060
+#~ msgid "Are you sure you want to stop recording?"
+#~ msgstr "Weet je zeker dat je wilt stoppen met opnemen?"
+
+#: src/components/project/ProjectSidebar.tsx:97
+msgid "Ask"
+msgstr "Stel vraag"
+
+#: src/components/Message.tsx:303
+#~ msgid "Ask a global research question"
+#~ msgstr "Stel een algemene onderzoeksvraag"
+
+#: src/components/Message.tsx:493
+#~ msgid "Ask a question..."
+#~ msgstr "Stel een vraag..."
+
+#: src/components/layout/ProjectSidebar.tsx:390
+#~ msgid "Ask AI"
+#~ msgstr "Vraag AI"
+
+#: src/components/project/ProjectPortalEditor.tsx:121
+msgid "Ask for Name?"
+msgstr "Vraag om naam?"
+
+#: src/components/project/ProjectPortalEditor.tsx:123
+msgid "Ask participants to provide their name when they start a conversation"
+msgstr "Vraag deelnemers om hun naam te geven wanneer ze een gesprek starten"
+
+#: src/components/Message.tsx:498
+#~ msgid "Ask Question"
+#~ msgstr "Stel Vraag"
+
+#: src/routes/project/library/ProjectLibraryAspect.tsx:58
+msgid "Aspect"
+msgstr "Aspect"
+
+#: src/components/view/View.tsx:27
+#: src/components/view/View.tsx:69
+#: src/routes/project/library/ProjectLibraryView.tsx:46
+msgid "Aspects"
+msgstr "Aspecten"
+
+#: src/routes/project/chat/ProjectChat.tsx:430
+msgid "Assistant is typing..."
+msgstr "Assistent is typen..."
+
+#: src/components/Message.tsx:193
+#~ msgid "Attach as many documents as you like to analyse"
+#~ msgstr "Voeg zoveel documenten toe als je wilt analyseren"
+
+#: src/routes/project/conversation/ProjectConversationOverview.tsx:115
+#~ msgid "Audio Recording"
+#~ msgstr "Audio opname"
+
+#: src/components/participant/ParticipantOnboardingCards.tsx:219
+msgid "Back"
+msgstr "Terug"
+
+#: src/components/project/ProjectPortalEditor.tsx:111
+msgid "Basic (Essential tutorial slides)"
+msgstr "Basis (Essentieel tutorial slides)"
+
+#: src/components/participant/ParticipantInitiateForm.tsx:120
+msgid "Begin!"
+msgstr "Begin!"
+
+#: src/components/project/ProjectDangerZone.tsx:15
+msgid "By deleting this project, you will delete all the data associated with it. This action cannot be undone. Are you ABSOLUTELY sure you want to delete this project?"
+msgstr "Door dit project te verwijderen, verwijder je alle gegevens die eraan gerelateerd zijn. Dit kan niet ongedaan worden gemaakt. Weet je zeker dat je dit project wilt verwijderen?"
+
+#: src/components/conversation/ConversationEdit.tsx:166
+#: src/components/project/ProjectBasicEdit.tsx:111
+#: src/components/project/ProjectEdit.tsx:202
+#: src/components/project/ProjectPortalEditor.tsx:195
+#: src/components/project/ProjectTranscriptSettings.tsx:169
+#: src/routes/project/resource/ProjectResourceOverview.tsx:151
+msgid "Cancel"
+msgstr "Annuleren"
+
+#: src/components/form/UnsavedChanges.tsx:10
+msgid "Changes are saved automatically as you continue to use the app. <0/>Once you have some unsaved changes, you can click anywhere to save the changes. <1/>You will also see a button to Cancel the changes."
+msgstr "Wijzigingen worden automatisch opgeslagen terwijl je de app gebruikt. <0/>Zodra je wijzigingen hebt die nog niet zijn opgeslagen, kun je op elk gedeelte van de pagina klikken om de wijzigingen op te slaan. <1/>Je zult ook een knop zien om de wijzigingen te annuleren."
+
+#: src/routes/project/chat/ProjectChat.tsx:385
+msgid "Chat"
+msgstr "Chat"
+
+#: src/routes/project/chat/ProjectChat.tsx:353
+msgid "Chat | Dembrane"
+msgstr "Chat | Dembrane"
+
+#: src/components/chat/ChatAccordion.tsx:93
+msgid "Chats"
+msgstr "Chats"
+
+#: src/routes/participant/ParticipantConversation.tsx:903
+#: src/routes/participant/ParticipantConversation.tsx:1144
+msgid "Check microphone access"
+msgstr "Controleer microfoontoegang"
+
+#: src/routes/auth/CheckYourEmail.tsx:11
+msgid "Check your email"
+msgstr "Controleer je email"
+
+#: src/routes/project/chat/ProjectChat.tsx:152
+msgid "Compare & Contrast"
+msgstr "Vergelijk en contrast   "
+
+#: src/routes/project/chat/ProjectChat.tsx:154
+msgid "Compare and contrast the following items provided in the context."
+msgstr "Vergelijk en contrast de volgende items die in de context zijn verstrekt.   "
+
+#: src/routes/auth/PasswordReset.tsx:63
+#: src/routes/auth/PasswordReset.tsx:66
+msgid "Confirm New Password"
+msgstr "Bevestig nieuw wachtwoord"
+
+#: src/routes/auth/Register.tsx:104
+#: src/routes/auth/Register.tsx:107
+msgid "Confirm Password"
+msgstr "Bevestig wachtwoord"
+
+#: src/components/project/ProjectBasicEdit.tsx:83
+msgid "Context"
+msgstr "Context"
+
+#: src/routes/project/chat/ProjectChat.tsx:122
+msgid "Context added:"
+msgstr "Context toegevoegd:"
+
+#: src/components/conversation/ConversationAccordion.tsx:196
+msgid "Conversations"
+msgstr "Gesprekken"
+
+#: src/components/project/ProjectQRCode.tsx:85
+msgid "Copied"
+msgstr "Gekopieerd"
+
+#: src/components/project/ProjectQRCode.tsx:85
+msgid "Copy link"
+msgstr "Kopieer link"
+
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:170
+msgid "Copy transcript"
+msgstr "Kopieer transcript"
+
+#: src/routes/project/ProjectsHome.tsx:115
+msgid "Create"
+msgstr "Maak"
+
+#: src/components/session/SelectSession.tsx:89
+#~ msgid "Create a new session"
+#~ msgstr "Maak een nieuwe sessie aan"
+
+#: src/components/session/SessionSelection.tsx:33
+#~ msgid "Create a new workspace"
+#~ msgstr "Maak een nieuwe werkruimte aan"
+
+#: src/routes/auth/Register.tsx:57
+msgid "Create an Account"
+msgstr "Maak een account aan"
+
+#: src/routes/project/library/ProjectLibrary.tsx:299
+msgid "Create Library"
+msgstr "Maak bibliotheek aan"
+
+#: src/routes/project/library/ProjectLibrary.tsx:130
+msgid "Create new view"
+msgstr "Maak nieuwe view aan"
+
+#: src/routes/project/library/ProjectLibrary.tsx:169
+#: src/routes/project/library/ProjectLibrary.tsx:331
+msgid "Create View"
+msgstr "Maak view aan"
+
+#: src/components/conversation/ConversationEdit.tsx:111
+msgid "Created on"
+msgstr "Gemaakt op"
+
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:201
+msgid "Custom Filename"
+msgstr "Aangepaste bestandsnaam"
+
+#: src/components/project/ProjectDangerZone.tsx:27
+#: src/routes/project/conversation/ProjectConversationOverview.tsx:57
+msgid "Danger Zone"
+msgstr "Gevaarlijke zone"
+
+#: src/components/chat/ChatAccordion.tsx:72
+msgid "Delete"
+msgstr "Verwijder"
+
+#: src/routes/project/conversation/ProjectConversationOverview.tsx:66
+msgid "Delete Conversation"
+msgstr "Verwijder gesprek"
+
+#: src/components/Documents.tsx:208
+#~ msgid "Delete document"
+#~ msgstr "Verwijder document"
+
+#: src/components/project/ProjectDangerZone.tsx:36
+msgid "Delete Project"
+msgstr "Verwijder project"
+
+#: src/components/project/ProjectBasicEdit.tsx:82
+#~ msgid "Description"
+#~ msgstr "Beschrijving"
+
+#: src/components/Message.tsx:82
+#~ msgid "Document AI Assistant"
+#~ msgstr "Document AI Assistent"
+
+#: src/components/layout/ProjectSidebar.tsx:77
+#~ msgid "Document is being processed"
+#~ msgstr "Document wordt verwerkt"
+
+#: src/components/Documents.tsx:199
+#~ msgid "Document was deleted"
+#~ msgstr "Document is verwijderd"
+
+#: src/components/Documents.tsx:48
+#~ msgid "Documents"
+#~ msgstr "Documenten"
+
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:220
+msgid "Download"
+msgstr "Downloaden"
+
+#: src/routes/project/ProjectRoutes.tsx:49
+msgid "Download All Transcripts"
+msgstr "Download alle transcripten"
+
+#: src/routes/project/conversation/ProjectConversationOverview.tsx:117
+#~ msgid "Download audio"
+#~ msgstr "Download audio"
+
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:158
+msgid "Download transcript"
+msgstr "Download transcript"
+
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:197
+msgid "Download Transcript Options"
+msgstr "Download transcript opties"
+
+#: src/components/Message.tsx:190
+#~ msgid "Drag documents here or select files"
+#~ msgstr "Sleep documenten hierheen of selecteer bestanden"
+
+#: src/components/project/ProjectBasicEdit.tsx:97
+msgid "Dutch"
+msgstr "Nederlands"
+
+#: src/components/conversation/ConversationEdit.tsx:95
+msgid "Edit Conversation"
+msgstr "Gesprek bewerken"
+
+#: src/components/project/ProjectBasicEdit.tsx:75
+#: src/components/project/ProjectEdit.tsx:89
+msgid "Edit Project"
+msgstr "Project bewerken"
+
+#: src/routes/project/resource/ProjectResourceOverview.tsx:113
+msgid "Edit Resource"
+msgstr "Bron bewerken"
+
+#: src/routes/auth/Login.tsx:154
+#: src/routes/auth/Login.tsx:157
+msgid "Email"
+msgstr "Email"
+
+#: src/routes/auth/VerifyEmail.tsx:38
+msgid "Email Verification"
+msgstr "Email verificatie"
+
+#: src/routes/auth/VerifyEmail.tsx:9
+msgid "Email Verification | Dembrane"
+msgstr "Email verificatie | Dembrane"
+
+#: src/routes/auth/VerifyEmail.tsx:49
+msgid "Email verified successfully. You will be redirected to the login page in 5 seconds. If you are not redirected, please click <0>here</0>."
+msgstr "Email is succesvol geverifieerd. Je wordt doorgestuurd naar de inlogpagina in 5 seconden. Als je niet doorgestuurd wordt, klik dan <0>hier</0>."
+
+#: src/components/project/ProjectBasicEdit.tsx:96
+msgid "English"
+msgstr "Engels"
+
+#: src/components/project/ProjectTranscriptSettings.tsx:119
+msgid "Enter a key term or proper noun"
+msgstr "Voer een sleutelterm of eigennamen in"
+
+#: src/components/chat/ChatAccordion.tsx:47
+msgid "Enter new name for the chat:"
+msgstr "Voer een nieuwe naam in voor de chat:"
+
+#: src/routes/participant/ParticipantLogin.tsx:196
+#~ msgid "Enter your access code"
+#~ msgstr "Voer uw toegangscode in"
+
+#: src/routes/project/library/ProjectLibrary.tsx:153
+msgid "Enter your query"
+msgstr "Voer uw query in"
+
+#: src/routes/project/conversation/ProjectConversationAnalysis.tsx:58
+msgid "Error loading insights"
+msgstr "Fout bij laden van inzichten"
+
+#: src/routes/project/ProjectRoutes.tsx:30
+#: src/routes/project/ProjectRoutes.tsx:74
+#: src/routes/project/ProjectRoutes.tsx:91
+msgid "Error loading project"
+msgstr "Fout bij laden van project"
+
+#: src/routes/project/conversation/ProjectConversationAnalysis.tsx:118
+msgid "Error loading quotes"
+msgstr "Fout bij laden van quotes"
+
+#: src/components/project/ProjectTranscriptSettings.tsx:88
+#~ msgid "Example: This conversation is about [topic]. Key terms include [term1], [term2]. Please pay special attention to [specific aspect]."
+#~ msgstr "Voorbeeld: Dit gesprek gaat over [onderwerp]. Belangrijke termen zijn [term1], [term2]. Let speciaal op [specifieke aspect]."
+
+#: src/routes/project/ProjectRoutes.tsx:39
+msgid "Export"
+msgstr "Exporteer"
+
+#: src/components/conversation/ConversationAccordion.tsx:251
+msgid "Filter"
+msgstr "Filteren"
+
+#: src/routes/participant/ParticipantConversation.tsx:1232
+#: src/routes/participant/ParticipantConversation.tsx:1404
+msgid "Finish"
+msgstr "Voltooien"
+
+#: src/routes/auth/Register.tsx:75
+#: src/routes/auth/Register.tsx:77
+msgid "First Name"
+msgstr "Voornaam"
+
+#: src/routes/participant/ParticipantLogin.tsx:140
+#~ msgid "First we ask some short questions, and then you can start recording."
+#~ msgstr "Eerst vragen we een aantal korte vragen, en dan kan je beginnen met opnemen."
+
+#: src/routes/auth/Login.tsx:171
+msgid "Forgot your password?"
+msgstr "Wachtwoord vergeten?"
+
+#: src/routes/project/chat/ProjectChat.tsx:159
+msgid "Generate structured meeting notes based on the following discussion points provided in the context."
+msgstr "Genereer gestructureerde vergaderingenotes op basis van de volgende discussiepunten die in de context zijn verstrekt."
+
+#: src/routes/project/library/ProjectLibrary.tsx:161
+msgid "Give me a list of 5-10 topics that are being discussed."
+msgstr "Geef me een lijst van 5-10 onderwerpen die worden besproken."
+
+#: src/components/Message.tsx:401
+#: src/components/Message.tsx:419
+#~ msgid "Global Research Question"
+#~ msgstr "Algemene Onderzoeksvraag"
+
+#: src/routes/404.tsx:15
+msgid "Go home"
+msgstr "Ga naar home"
+
+#: src/routes/GlobalAnalysis.tsx:47
+#~ msgid "Great! Your documents are now being uploaded. While the documents are being processed, can you tell me what this analysis is about?"
+#~ msgstr "Geweldig! Uw documenten worden nu geüpload. Terwijl de documenten worden verwerkt, kunt u mij vertellen waar deze analyse over gaat?"
+
+#: src/routes/project/ProjectsHome.tsx:148
+msgid "Grid view"
+msgstr "Rasterweergave"
+
+#: src/routes/GlobalAnalysis.tsx:41
+#~ msgid "Hello, I will be your research assistant today. To get started please upload the documents you want to analyse."
+#~ msgstr "Hallo, ik ben vandaag je onderzoeksassistent. Om te beginnen upload je de documenten die je wilt analyseren."
+
+#: src/components/layout/Header.tsx:93
+msgid "Hi, {0}"
+msgstr "Hallo, {0}"
+
+#: src/routes/participant/ParticipantLogin.tsx:134
+#~ msgid "Hi, Thanks for sharing!"
+#~ msgstr "Hi, Fijn dat je meedoet!"
+
+#: src/routes/project/conversation/ProjectConversationAnalysis.tsx:50
+msgid "Hide all"
+msgstr "Verbergen alles"
+
+#: src/routes/project/conversation/ProjectConversationAnalysis.tsx:70
+msgid "Hide all insights"
+msgstr "Verbergen alles"
+
+#: src/components/conversation/ConversationAccordion.tsx:256
+msgid "Hide Conversations Without Content"
+msgstr "Verbergen gesprekken zonder inhoud"
+
+#: src/routes/project/ProjectsHome.tsx:101
+msgid "Home"
+msgstr "Home"
+
+#: src/components/project/ProjectBasicEdit.tsx:86
+msgid ""
+"How would you describe to a colleague what are you trying to accomplish with this project?\n"
+"* What is the north star goal or key metric\n"
+"* What does success look like"
+msgstr ""
+"Hoe zou je een collega uitleggen wat je probeert te bereiken met dit project?\n"
+"* Wat is de noordsterdoel of belangrijkste maatstaf\n"
+"* Wat ziet eruit als succes"
+
+#: src/routes/project/library/ProjectLibrary.tsx:342
+msgid "In order to better navigate through the quotes, create additional views. The quotes will then be clustered based on your view."
+msgstr "Om beter door de quotes te navigeren, maak aanvullende views aan. De quotes worden dan op basis van uw view geclusterd."
+
+#: src/routes/project/ProjectOverview.tsx:304
+#~ msgid "Inactive"
+#~ msgstr "Inactief"
+
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:207
+msgid "Include timestamps"
+msgstr "Inclusief tijdstempels"
+
+#: src/components/Message.tsx:212
+#~ msgid "Input global context"
+#~ msgstr "Voer algemene context in"
+
+#: src/routes/project/library/ProjectLibraryInsight.tsx:41
+msgid "Insight Library"
+msgstr "Inzichtenbibliotheek"
+
+#: src/routes/project/library/ProjectLibraryInsight.tsx:46
+msgid "Insight not found"
+msgstr "Inzicht niet gevonden"
+
+#: src/routes/project/conversation/ProjectConversationAnalysis.tsx:51
+msgid "insights"
+msgstr "inzichten"
+
+#: src/routes/project/conversation/ProjectConversationAnalysis.tsx:42
+#: src/routes/project/library/ProjectLibraryInsight.tsx:74
+msgid "Insights"
+msgstr "Inzichten"
+
+#: src/routes/auth/PasswordReset.tsx:34
+msgid "Invalid code. Please request a new one."
+msgstr "Ongeldige code. Vraag een nieuwe aan."
+
+#: src/routes/auth/Login.tsx:124
+msgid "Invalid credentials."
+msgstr "Ongeldige inloggegevens."
+
+#: src/routes/auth/VerifyEmail.tsx:17
+msgid "Invalid token. Please try again."
+msgstr "Ongeldig token. Probeer het opnieuw."
+
+#: src/routes/project/ProjectOverview.tsx:271
+#~ msgid "Invite Link"
+#~ msgstr "Deelnemingslink"
+
+#: src/routes/participant/Login.tsx:128
+#~ msgid "Join"
+#~ msgstr "Aansluiten"
+
+#: src/components/project/ProjectQRCode.tsx:64
+msgid "Join {0} on Dembrane"
+msgstr "Aansluiten {0} op Dembrane"
+
+#: src/components/common/DembraneLoadingSpinner/index.tsx:22
+msgid "Just a moment"
+msgstr "Gewoon een momentje"
+
+#: src/components/project/ProjectBasicEdit.tsx:92
+msgid "Language"
+msgstr "Taal"
+
+#: src/routes/auth/Register.tsx:82
+#: src/routes/auth/Register.tsx:84
+msgid "Last Name"
+msgstr "Achternaam"
+
+#: src/components/project/ProjectSidebar.tsx:105
+#: src/routes/project/library/ProjectLibrary.tsx:274
+#: src/routes/project/library/ProjectLibraryAspect.tsx:50
+#: src/routes/project/library/ProjectLibraryView.tsx:29
+msgid "Library"
+msgstr "Bibliotheek"
+
+#: src/components/common/DembraneLoadingSpinner/index.tsx:19
+msgid "Loading"
+msgstr "Bezig met laden"
+
+#: src/components/conversation/ConversationAccordion.tsx:53
+msgid "Loading..."
+msgstr "Bezig met laden..."
+
+#: src/routes/auth/Login.tsx:176
+msgid "Login"
+msgstr "Inloggen"
+
+#: src/routes/auth/Login.tsx:63
+msgid "Login | Dembrane"
+msgstr "Inloggen | Dembrane"
+
+#: src/routes/auth/Register.tsx:124
+msgid "Login as an existing user"
+msgstr "Inloggen als bestaande gebruiker"
+
+#: src/components/session/SelectSession.tsx:87
+#~ msgid "Login with Session"
+#~ msgstr ""
+
+#: src/components/layout/Header.tsx:101
+msgid "Logout"
+msgstr "Uitloggen"
+
+#: src/routes/project/chat/ProjectChat.tsx:157
+msgid "Meeting Notes"
+msgstr "Vergaderingenotes"
+
+#: src/components/chat/ChatContextProgress.tsx:61
+msgid "Messages from {0} - {1}%"
+msgstr "Berichten van {0} - {1}%"
+
+#: src/routes/participant/ParticipantConversation.tsx:842
+#: src/routes/participant/ParticipantConversation.tsx:1084
+msgid "Microphone access is still denied. Please check your settings and try again."
+msgstr "Toegang tot de microfoon wordt nog steeds geweigerd. Controleer uw instellingen en probeer het opnieuw."
+
+#: src/components/conversation/ConversationEdit.tsx:118
+#: src/components/participant/ParticipantInitiateForm.tsx:86
+#: src/components/project/ProjectBasicEdit.tsx:81
+msgid "Name"
+msgstr "Naam"
+
+#: src/components/project/ProjectAnalysisRunStatus.tsx:59
+msgid "New conversations have been added since the library was generated. Regenerate the library to process them."
+msgstr "Er zijn nieuwe gesprekken toegevoegd sinds de bibliotheek is gegenereerd. Genereer de bibliotheek opnieuw om ze te verwerken."
+
+#: src/routes/auth/PasswordReset.tsx:56
+#: src/routes/auth/PasswordReset.tsx:59
+msgid "New Password"
+msgstr "Nieuw wachtwoord"
+
+#: src/routes/auth/Login.tsx:97
+#: src/routes/project/ProjectsHome.tsx:74
+msgid "New Project"
+msgstr "Nieuw project"
+
+#: src/components/participant/ParticipantOnboardingCards.tsx:231
+msgid "Next"
+msgstr "Volgende"
+
+#: src/components/chat/ChatAccordion.tsx:103
+msgid "No chats found. Start a chat using the \"Ask\" button."
+msgstr "Geen chats gevonden. Start een chat met behulp van de \"Vraag\" knop."
+
+#: src/components/conversation/ConversationAccordion.tsx:270
+msgid "No conversations found. Start a conversation using the participation invite link from the <0><1>project overview.</1></0>"
+msgstr "Geen gesprekken gevonden. Start een gesprek met behulp van de deelname-uitnodigingslink uit het <0><1>projectoverzicht.</1></0>"
+
+#: src/components/Documents.tsx:260
+#~ msgid "No documents uploaded yet"
+#~ msgstr "Nog geen documenten geüpload"
+
+#: src/routes/project/conversation/ProjectConversationAnalysis.tsx:78
+msgid "No insights available. Generate insights for this conversation by visiting<0><1> the project library.</1></0>"
+msgstr "Geen inzichten beschikbaar. Genereer inzichten voor dit gesprek door naar <0><1>de projectbibliotheek.</1></0> te gaan."
+
+#: src/components/project/ProjectTranscriptSettings.tsx:143
+msgid "No key terms or proper nouns have been added yet. Add them using the input above to improve transcript accuracy."
+msgstr "Er zijn nog geen sleuteltermen of eigennamen toegevoegd. Voeg ze toe met behulp van de invoer boven aan om de nauwkeurigheid van het transcript te verbeteren."
+
+#: src/routes/project/ProjectsHome.tsx:200
+msgid "No projects found for search term"
+msgstr "Geen projecten gevonden voor de zoekterm"
+
+#: src/routes/project/conversation/ProjectConversationAnalysis.tsx:138
+msgid "No quotes available. Generate quotes for this conversation by visiting<0><1> the project library.</1></0>"
+msgstr "Geen quotes beschikbaar. Genereer quotes voor dit gesprek door naar <0><1>de projectbibliotheek.</1></0> te gaan."
+
+#: src/components/resource/ResourceAccordion.tsx:37
+msgid "No resources found."
+msgstr "Geen bronnen gevonden."
+
+#: src/components/layout/ProjectSidebar.tsx:285
+#~ msgid "No resources found. Add resources using the button above."
+#~ msgstr "Geen bronnen gevonden. Voeg bronnen toe met behulp van de knop boven aan."
+
+#: src/components/conversation/ConversationEdit.tsx:151
+msgid "No tags found"
+msgstr "Geen trefwoorden gevonden"
+
+#: src/components/project/ProjectTagsInput.tsx:111
+msgid "No tags have been added to this project yet. Add a tag using the text input above to get started."
+msgstr "Er zijn nog geen trefwoorden toegevoegd aan dit project. Voeg een trefwoord toe met behulp van de tekstinvoer boven aan om te beginnen."
+
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:227
+msgid "No transcript available for this conversation."
+msgstr "Er is geen transcript beschikbaar voor dit gesprek."
+
+#: src/components/project/ProjectPortalEditor.tsx:107
+msgid "No tutorial (only Privacy statements)"
+msgstr "Geen tutorial (alleen Privacyverklaring)"
+
+#: src/components/conversation/OngoingConversationsSummaryCard.tsx:47
+msgid "Ongoing Conversations"
+msgstr "Actieve Gesprekken"
+
+#: src/routes/participant/ParticipantConversation.tsx:876
+#: src/routes/participant/ParticipantConversation.tsx:1118
+msgid "Oops! It looks like microphone access was denied. No worries, though! We've got a handy troubleshooting guide for you. Feel free to check it out. Once you've resolved the issue, come back and visit this page again to check if your microphone is ready."
+msgstr "Oeps! Het lijkt erop dat toegang tot de microfoon geweigerd is. Geen zorgen, we hebben een handige probleemoplossingsgids voor je. Voel je vrij om deze te bekijken. Zodra je het probleem hebt opgelost, kom dan terug naar deze pagina om te controleren of je microfoon klaar is voor gebruik."
+
+#: src/components/aspect/AspectCard.tsx:55
+#: src/components/project/ProjectCard.tsx:47
+msgid "Open"
+msgstr "Openen"
+
+#: src/components/Documents.tsx:126
+#~ msgid "Open Document Chat ✨"
+#~ msgstr "Open Document Chat ✨"
+
+#: src/components/conversation/OpenForParticipationSummaryCard.tsx:32
+msgid "Open for Participation?"
+msgstr "Open voor deelneming?"
+
+#: src/routes/participant/ParticipantConversation.tsx:894
+#: src/routes/participant/ParticipantConversation.tsx:1135
+msgid "Open troubleshooting guide"
+msgstr "Open de probleemoplossingsgids"
+
+#: src/components/Documents.tsx:233
+#~ msgid "Original filename"
+#~ msgstr "Originele bestandsnaam"
+
+#: src/components/layout/ProjectConversationLayout.tsx:25
+#: src/components/layout/ProjectOverviewLayout.tsx:36
+#: src/components/layout/ProjectResourceLayout.tsx:45
+msgid "Overview"
+msgstr "Overzicht"
+
+#: src/components/project/ProjectPortalEditor.tsx:35
+#~ msgid "Page"
+#~ msgstr "Pagina"
+
+#: src/components/project/ProjectPortalEditor.tsx:148
+msgid "Page Content"
+msgstr "Pagina inhoud"
+
+#: src/routes/404.tsx:12
+msgid "Page not found"
+msgstr "Pagina niet gevonden"
+
+#: src/components/project/ProjectPortalEditor.tsx:135
+msgid "Page Title"
+msgstr "Pagina titel"
+
+#: src/components/participant/ParticipantInitiateForm.tsx:44
+msgid "Participant"
+msgstr "Deelnemer"
+
+#: src/components/project/ProjectTagsInput.tsx:89
+msgid "Participants will be able to select tags when creating conversations"
+msgstr "Deelnemers kunnen trefwoorden selecteren wanneer ze een gesprek starten"
+
+#: src/routes/project/ProjectOverview.tsx:189
+#: src/routes/project/ProjectOverview.tsx:199
+#~ msgid "Participation"
+#~ msgstr "Deelneming"
+
+#: src/routes/auth/Login.tsx:162
+#: src/routes/auth/Login.tsx:165
+#: src/routes/auth/Register.tsx:97
+#: src/routes/auth/Register.tsx:100
+msgid "Password"
+msgstr "Wachtwoord"
+
+#: src/routes/auth/PasswordReset.tsx:29
+#: src/routes/auth/Register.tsx:37
+msgid "Passwords do not match"
+msgstr "Wachtwoorden komen niet overeen"
+
+#: src/routes/participant/ParticipantConversation.tsx:993
+#: src/routes/participant/ParticipantConversation.tsx:1302
+msgid "Pause"
+msgstr "Pauze"
+
+#: src/routes/participant/ParticipantConversation.tsx:1195
+msgid "Please do not close your browser"
+msgstr "Sluit uw browser alstublieft niet"
+
+#: src/components/project/ProjectQRCode.tsx:93
+msgid "Please enable participation to enable sharing"
+msgstr "Schakel deelneming in om delen mogelijk te maken"
+
+#: src/components/Message.tsx:449
+#~ msgid "Please enter a message"
+#~ msgstr "Voer een bericht in"
+
+#: src/routes/auth/Login.tsx:145
+msgid "Please login to continue."
+msgstr "Log in om door te gaan."
+
+#: src/routes/project/chat/ProjectChat.tsx:149
+msgid "Please provide a concise summary of the following provided in the context."
+msgstr "Geef een korte samenvatting van het volgende dat in de context is verstrekt."
+
+#: src/routes/participant/ParticipantConversation.tsx:723
+msgid "Please record your response by clicking the \"Start Recording\" button below. You may also choose to respond in text by clicking the text icon."
+msgstr "Neem uw antwoord op door op de knop \"Opname starten\" hieronder te klikken. U kunt er ook voor kiezen om in tekst te reageren door op het teksticoon te klikken."
+
+#: src/routes/auth/VerifyEmail.tsx:44
+msgid "Please wait while we verify your email address."
+msgstr "Wacht aub terwijl we uw e-mailadres verifiëren."
+
+#: src/components/layout/ProjectOverviewLayout.tsx:37
+#: src/components/project/ProjectPortalEditor.tsx:84
+msgid "Portal Editor"
+msgstr "Portal Editor"
+
+#: src/components/common/DembraneLoadingSpinner/index.tsx:20
+msgid "Preparing your experience"
+msgstr "Uw ervaring voorbereiden"
+
+#: src/components/layout/Footer.tsx:10
+msgid "Privacy Statements"
+msgstr "Privacy verklaring"
+
+#: src/components/layout/ProjectLibraryLayout.tsx:6
+msgid "Project Library | Dembrane"
+msgstr "Inzichtenbibliotheek | Dembrane"
+
+#: src/components/project/ProjectSidebar.tsx:75
+#~ msgid "Project Overview"
+#~ msgstr "Project Overzicht"
+
+#: src/components/layout/ProjectOverviewLayout.tsx:15
+msgid "Project Overview | Dembrane"
+msgstr "Project Overzicht | Dembrane"
+
+#: src/components/project/ProjectSidebar.tsx:80
+#~ msgid "Project Overview and Edit"
+#~ msgstr "Project Overzicht en Bewerken"
+
+#: src/routes/project/ProjectsHome.tsx:121
+msgid "Projects"
+msgstr "Projecten"
+
+#: src/routes/project/ProjectsHome.tsx:44
+msgid "Projects | Dembrane"
+msgstr "Projecten | Dembrane"
+
+#: src/components/project/ProjectSidebar.tsx:49
+msgid "Projects Home"
+msgstr "Projecten Home"
+
+#: src/components/project/ProjectTranscriptSettings.tsx:79
+#~ msgid "Provide specific context to improve transcript quality and accuracy. This may include key terms, specific instructions, or other relevant information."
+#~ msgstr "Geef specifieke context om de kwaliteit en nauwkeurigheid van de transcriptie te verbeteren. Dit kan bestaan uit belangrijke termen, specifieke instructies of andere relevante informatie."
+
+#: src/routes/project/conversation/ProjectConversationAnalysis.tsx:105
+#: src/routes/project/library/ProjectLibraryAspect.tsx:81
+#: src/routes/project/library/ProjectLibraryInsight.tsx:90
+msgid "Quotes"
+msgstr "Citaten"
+
+#: src/routes/participant/ParticipantLogin.tsx:148
+#~ msgid "Ready!"
+#~ msgstr "Klaar om te beginnen"
+
+#: src/routes/participant/ParticipantPostConversation.tsx:64
+msgid "Record another conversation"
+msgstr "Neem nog een gesprek op"
+
+#: src/routes/project/library/ProjectLibrary.tsx:287
+msgid "Regenerate Library"
+msgstr "Bibliotheek opnieuw genereren"
+
+#: src/routes/auth/Register.tsx:22
+msgid "Register | Dembrane"
+msgstr "Registreer | Dembrane"
+
+#: src/routes/auth/Login.tsx:185
+msgid "Register as a new user"
+msgstr "Registreer als nieuwe gebruiker"
+
+#: src/routes/project/library/ProjectLibrary.tsx:380
+msgid "Relevance"
+msgstr "Relevantie"
+
+#: src/components/conversation/ConversationAccordion.tsx:83
+msgid "Remove from this chat"
+msgstr "Verwijder van dit gesprek"
+
+#: src/components/chat/ChatAccordion.tsx:59
+msgid "Rename"
+msgstr "Naam wijzigen"
+
+#: src/routes/auth/RequestPasswordReset.tsx:30
+msgid "Request Password Reset"
+msgstr "Wachtwoord reset aanvragen"
+
+#: src/routes/auth/RequestPasswordReset.tsx:16
+msgid "Request Password Reset | Dembrane"
+msgstr "Wachtwoord reset aanvragen | Dembrane"
+
+#: src/routes/auth/PasswordReset.tsx:49
+#: src/routes/auth/PasswordReset.tsx:74
+msgid "Reset Password"
+msgstr "Wachtwoord resetten"
+
+#: src/routes/auth/PasswordReset.tsx:17
+msgid "Reset Password | Dembrane"
+msgstr "Wachtwoord resetten | Dembrane"
+
+#: src/components/resource/ResourceAccordion.tsx:20
+msgid "Resources"
+msgstr "Bronnen"
+
+#: src/routes/participant/ParticipantConversation.tsx:984
+#: src/routes/participant/ParticipantConversation.tsx:1293
+msgid "Resume"
+msgstr "Hervatten"
+
+#: src/routes/project/chat/ProjectChat.tsx:469
+msgid "Retry"
+msgstr "Opnieuw proberen"
+
+#: src/components/project/ProjectEdit.tsx:194
+#: src/routes/project/resource/ProjectResourceOverview.tsx:143
+msgid "Save"
+msgstr "Opslaan"
+
+#: src/components/conversation/ConversationAccordion.tsx:232
+msgid "Search conversations"
+msgstr "Zoek gesprekken"
+
+#: src/routes/project/ProjectsHome.tsx:188
+msgid "Search projects"
+msgstr "Zoek projecten"
+
+#: src/components/Layout.tsx:26
+#: src/routes/SelectSession.tsx:95
+#~ msgid "Select Session"
+#~ msgstr "Selecteer Sessie"
+
+#: src/components/project/ProjectPortalEditor.tsx:99
+msgid "Select the instructions that will be shown to participants when they start a conversation"
+msgstr "Selecteer de instructies die worden getoond aan deelnemers wanneer ze een gesprek starten"
+
+#: src/components/project/ProjectPortalEditor.tsx:97
+msgid "Select tutorial"
+msgstr "Selecteer tutorial"
+
+#: src/routes/participant/Login.tsx:188
+#~ msgid "Select your group"
+#~ msgstr "Selecteer je groep"
+
+#: src/routes/project/chat/ProjectChat.tsx:536
+msgid "Send"
+msgstr "Verzenden"
+
+#: src/routes/project/library/ProjectLibrary.tsx:77
+msgid "Sentiment"
+msgstr "Gevoel"
+
+#: src/routes/auth/Login.tsx:94
+msgid "Setting up your first project"
+msgstr "Installeer je eerste project"
+
+#: src/components/layout/Header.tsx:105
+#~ msgid "Settings"
+#~ msgstr "Instellingen"
+
+#: src/components/project/ProjectQRCode.tsx:69
+msgid "Share"
+msgstr "Delen"
+
+#: src/routes/project/conversation/ProjectConversationAnalysis.tsx:50
+msgid "Show all"
+msgstr "Toon alles"
+
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:190
+msgid "Show audio player"
+msgstr "Toon audiospeler"
+
+#: src/routes/auth/Login.tsx:196
+msgid "Sign in with Google"
+msgstr "Inloggen met Google"
+
+#: src/components/conversation/ConversationEdit.tsx:104
+#: src/components/participant/ParticipantInitiateForm.tsx:76
+#: src/routes/auth/Login.tsx:117
+msgid "Something went wrong"
+msgstr "Er ging iets mis"
+
+#: src/components/dropzone/UploadConversationDropzone.tsx:41
+#: src/components/dropzone/UploadResourceDropzone.tsx:28
+msgid "Something went wrong while uploading the file: {0}"
+msgstr "Er ging iets mis tijdens het uploaden van het bestand: {0}"
+
+#: src/routes/participant/ParticipantConversation.tsx:1262
+msgid "Something went wrong. Please try again."
+msgstr "Er is iets misgegaan. Probeer het alstublieft opnieuw."
+
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:45
+msgid "Speaker"
+msgstr "Spreker"
+
+#: src/components/project/ProjectTranscriptSettings.tsx:104
+msgid "Specific Context"
+msgstr "Specifieke context"
+
+#: src/routes/participant/ParticipantConversation.tsx:951
+#: src/routes/participant/ParticipantConversation.tsx:1210
+msgid "Start Recording"
+msgstr "Opname starten"
+
+#: src/routes/participant/ParticipantConversation.tsx:1004
+#: src/routes/participant/ParticipantConversation.tsx:1313
+#: src/routes/project/chat/ProjectChat.tsx:439
+msgid "Stop"
+msgstr "Stop"
+
+#: src/routes/auth/RequestPasswordReset.tsx:48
+#: src/routes/participant/ParticipantConversation.tsx:1277
+#: src/routes/participant/ParticipantConversation.tsx:1389
+msgid "Submit"
+msgstr "Stuur in"
+
+#: src/routes/project/chat/ProjectChat.tsx:147
+msgid "Summarize"
+msgstr "Samenvatten"
+
+#: src/routes/project/conversation/ProjectConversationOverview.tsx:91
+msgid "Summary"
+msgstr "Samenvatting"
+
+#: src/components/conversation/ConversationEdit.tsx:126
+#: src/components/participant/ParticipantInitiateForm.tsx:95
+#: src/components/project/ProjectTagsInput.tsx:88
+msgid "Tags"
+msgstr "Trefwoorden"
+
+#: src/routes/project/chat/ProjectChat.tsx:185
+#: src/routes/project/chat/ProjectChat.tsx:190
+msgid "Templates"
+msgstr "Sjablonen"
+
+#: src/routes/participant/ParticipantPostConversation.tsx:51
+msgid "Thank you for participating!"
+msgstr "Dank je wel voor je deelname!"
+
+#: src/components/project/ProjectPortalEditor.tsx:47
+#~ msgid "Thank You Page"
+#~ msgstr "Bedankt Pagina"
+
+#: src/components/project/ProjectPortalEditor.tsx:167
+msgid "Thank You Page Content"
+msgstr "Bedankt pagina inhoud"
+
+#: src/components/Message.tsx:242
+#~ msgid "Thank you! In the meantime, click individual documents to add context to each file that I will take into account for further analysis."
+#~ msgstr "Bedankt! Klik ondertussen op individuele documenten om context toe te voegen aan elk bestand dat ik zal meenemen voor verdere analyse."
+
+#: src/components/project/ProjectPortalEditor.tsx:89
+msgid "The Portal is the website that loads when participants scan the QR code."
+msgstr "De Portal is de website die wordt geladen wanneer deelnemers het QR-code scannen."
+
+#: src/routes/auth/VerifyEmail.tsx:58
+msgid "There was an error verifying your email. Please try again."
+msgstr "Er is een fout opgetreden bij het verifiëren van uw e-mail. Probeer het alstublieft opnieuw."
+
+#: src/routes/project/chat/ProjectChat.tsx:191
+msgid "These are some helpful preset templates to get you started."
+msgstr "Dit zijn enkele nuttige voorbeeld sjablonen om u te helpen."
+
+#: src/routes/project/library/ProjectLibrary.tsx:58
+msgid "These are your default view templates. Once you create your library these will be your first two views."
+msgstr "Dit zijn uw standaard weergave sjablonen. Zodra u uw bibliotheek hebt gemaakt, zullen deze uw eerste twee weergaven zijn."
+
+#: src/routes/participant/ParticipantLogin.tsx:138
+#~ msgid "This is a very simple tool where you can record conversations or stories to make your voice heard."
+#~ msgstr "Met deze tool kan je gesprekken of verhalen opnemen om je stem te laten horen."
+
+#: src/routes/project/library/ProjectLibrary.tsx:312
+msgid "This is your project library. Currently, {0} conversations are waiting to be processed."
+msgstr "Dit is uw projectbibliotheek. Momenteel zijn {0} gesprekken in behandeling om te worden verwerkt."
+
+#: src/components/project/ProjectBasicEdit.tsx:93
+msgid "This language will be used for the Participant's Portal, transcription and analysis. To change the language of this application, please use the language picker in the header user menu instead."
+msgstr "Deze taal wordt gebruikt voor de Portal van de deelnemer, transcriptie en analyse. Om de taal van deze toepassing te wijzigen, gebruikt u de taalkiezer in het gebruikersmenu in de header."
+
+#: src/components/project/ProjectPortalEditor.tsx:170
+msgid "This page is shown after the participant has completed the conversation."
+msgstr "Deze pagina wordt getoond na het voltooien van het gesprek door de deelnemer."
+
+#: src/components/project/ProjectPortalEditor.tsx:151
+msgid "This page is shown to participants when they start a conversation after they successfully complete the tutorial."
+msgstr "Deze pagina wordt getoond aan deelnemers wanneer ze een gesprek starten na het voltooien van de tutorial."
+
+#: src/components/project/ProjectAnalysisRunStatus.tsx:68
+msgid "This project library was generated on"
+msgstr "Deze projectbibliotheek is op"
+
+#: src/components/project/ProjectAnalysisRunStatus.tsx:106
+#~ msgid "This project library was generated on {0}."
+#~ msgstr "Deze projectbibliotheek is op {0} gemaakt."
+
+#: src/routes/project/conversation/ProjectConversationOverview.tsx:96
+msgid "This summary is AI-generated and brief, for thorough analysis, use the Chat or Library."
+msgstr "Deze samenvatting is AI-gegenereerd en kort, voor een uitgebreide analyse, gebruik de Chat of Bibliotheek."
+
+#: src/components/project/ProjectPortalEditor.tsx:139
+msgid "This title is shown to participants when they start a conversation"
+msgstr "Deze titel wordt getoond aan deelnemers wanneer ze een gesprek starten"
+
+#: src/routes/project/chat/ProjectChat.tsx:166
+msgid "This will clear your current input. Are you sure?"
+msgstr "Dit zal uw huidige invoer wissen. Weet u het zeker?"
+
+#: src/routes/project/library/ProjectLibrary.tsx:389
+msgid "Time Created"
+msgstr "Tijd gemaakt"
+
+#: src/components/project/ProjectBasicEdit.tsx:80
+#~ msgid "Title"
+#~ msgstr "Titel"
+
+#: src/components/conversation/ConversationEdit.tsx:144
+msgid "To assign a new tag, please create it first in the project overview."
+msgstr "Om een nieuw trefwoord toe te wijzen, maak het eerst in het projectoverzicht."
+
+#: src/routes/project/library/ProjectLibrary.tsx:67
+#: src/routes/project/library/ProjectLibrary.tsx:155
+msgid "Topics"
+msgstr "Onderwerpen"
+
+#: src/components/layout/ProjectConversationLayout.tsx:26
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:156
+msgid "Transcript"
+msgstr "Transcript"
+
+#: src/routes/participant/Login.tsx:101
+#~ msgid "Transcript Name"
+#~ msgstr "Naam afschrift"
+
+#: src/components/layout/ProjectOverviewLayout.tsx:38
+#: src/components/project/ProjectTranscriptSettings.tsx:95
+msgid "Transcript Settings"
+msgstr "Transcriptie Instellingen"
+
+#: src/routes/project/chat/ProjectChat.tsx:506
+msgid "Type a message..."
+msgstr "Typ een bericht..."
+
+#: src/components/Message.tsx:308
+#~ msgid "Type a question here..."
+#~ msgstr "Typ hier een vraag..."
+
+#: src/components/Documents.tsx:99
+#: src/components/Message.tsx:217
+#~ msgid "Type context here..."
+#~ msgstr "Typ hier de context..."
+
+#: src/routes/participant/ParticipantConversation.tsx:1377
+msgid "Type your response here"
+msgstr "Typ hier uw reactie"
+
+#: src/components/form/UnsavedChanges.tsx:20
+#: src/components/project/ProjectEdit.tsx:91
+#: src/routes/project/resource/ProjectResourceOverview.tsx:115
+msgid "Unsaved changes"
+msgstr "Niet-opgeslagen wijzigingen"
+
+#: src/components/Documents.tsx:50
+#~ msgid "Upload documents"
+#~ msgstr "Upload documenten"
+
+#: src/routes/participant/ParticipantConversation.tsx:1194
+msgid "Upload in progress"
+msgstr "Upload bezig"
+
+#: src/components/resource/ResourceAccordion.tsx:22
+msgid "Upload resources"
+msgstr "Bronnen uploaden"
+
+#: src/routes/project/chat/ProjectChat.tsx:545
+msgid "Use Shift + Enter to add a new line"
+msgstr "Gebruik Shift + Enter om een nieuwe regel toe te voegen"
+
+#: src/components/view/View.tsx:47
+#: src/routes/project/library/ProjectLibraryAspect.tsx:54
+#: src/routes/project/library/ProjectLibraryView.tsx:33
+msgid "View"
+msgstr "View"
+
+#: src/routes/participant/ParticipantConversation.tsx:747
+msgid "View your responses"
+msgstr "Bekijk je reacties"
+
+#: src/routes/auth/CheckYourEmail.tsx:14
+msgid "We have sent you an email with next steps. If you don't see it, check your spam folder."
+msgstr "We hebben u een e-mail gestuurd met de volgende stappen. Als u het niet ziet, checkt u uw spammap."
+
+#: src/routes/participant/ParticipantConversation.tsx:706
+msgid "Welcome"
+msgstr "Welkom"
+
+#: src/routes/project/chat/ProjectChat.tsx:397
+msgid "Welcome to Dembrane Chat! Use the sidebar to select resources and conversations that you want to analyse. Then, you can ask questions about the selected resources and conversations."
+msgstr "Welkom bij Dembrane Chat! Gebruik de zijbalk om bronnen en gesprekken te selecteren die u wilt analyseren. Dan kunt u vragen stellen over de geselecteerde bronnen en gesprekken."
+
+#: src/routes/project/ProjectsHome.tsx:160
+msgid "Welcome to Your Home! Here you can see all your projects and get access to tutorial resources. Currently, you have no projects. Click \"Create\" to configure to get started!"
+msgstr "Welkom op je Home! Hier kun je al je projecten bekijken en toegang krijgen tot tutorialbronnen. Momenteel heb je nog geen projecten. Klik op \"Maak\" om te beginnen!"
+
+#: src/routes/auth/Login.tsx:139
+msgid "Welcome!"
+msgstr "Welkom!"
+
+#: src/components/Message.tsx:393
+#~ msgid "What kind of question do you want to ask for this document?"
+#~ msgstr "Wat voor soort vraag wil je stellen voor dit document?"
+
+#: src/components/session/SessionSelection.tsx:31
+#~ msgid "Workspaces"
+#~ msgstr "Werkruimtes"
+
+#: src/components/BaseMessage.tsx:32
+msgid "You"
+msgstr "Jij"
+
+#: src/routes/participant/ParticipantLogin.tsx:142
+#~ msgid "You can use this by yourself to share your own story, or you can record a conversation between several people, which can often be fun and insightful!"
+#~ msgstr "Je kan dit in je eentje gebruiken om je eigen verhaal te delen, of je kan een gesprek opnemen tussen meerdere mensen, wat vaak leuk en inzichtelijk kan zijn!"
+
+#: src/components/project/ProjectAnalysisRunStatus.tsx:101
+#~ msgid "You have some conversations that have not been processed yet. Regenerate the library to process them."
+#~ msgstr "Je hebt enkele gesprekken die nog niet zijn verwerkt. Regenerate de bibliotheek om ze te verwerken."
+
+#: src/routes/participant/ParticipantPostConversation.tsx:58
+msgid "You may also choose to record another conversation."
+msgstr "Je kunt er ook voor kiezen om een ander gesprek op te nemen."
+
+#: src/components/project/ProjectTranscriptSettings.tsx:18
+#~ msgid "You may choose to add a list of proper nouns, names, or other information that may be relevant to the conversation. This will be used to improve the quality of the transcripts."
+#~ msgstr "Je kunt er voor kiezen om een lijst met zelfstandige naamwoorden, namen of andere informatie toe te voegen die relevant kan zijn voor het gesprek. Dit wordt gebruikt om de kwaliteit van de transcripties te verbeteren."
+
+#: src/routes/auth/Login.tsx:129
+msgid "You must login with the same provider you used to sign up. If you face any issues, please contact support."
+msgstr "Je moet inloggen met dezelfde provider die u gebruikte om u aan te melden. Als u problemen ondervindt, neem dan contact op met de ondersteuning."
+
+#: src/routes/project/ProjectOverview.tsx:265
+#~ msgid "Your code is"
+#~ msgstr ""
+
+#: src/routes/project/library/ProjectLibrary.tsx:363
+msgid "Your library is empty. Create a library to see your first insights."
+msgstr "Je bibliotheek is leeg. Maak een bibliotheek om je eerste inzichten te bekijken."
+
+#: src/routes/participant/ParticipantPostConversation.tsx:55
+msgid "Your response has been recorded. You may now close this tab."
+msgstr "Je reactie is opgenomen. Je kunt dit tabblad nu sluiten."
+
+#: src/routes/participant/ParticipantConversation.tsx:756
+msgid "Your responses"
+msgstr "Je reacties"
+
+#: src/routes/project/library/ProjectLibrary.tsx:144
+msgid "Your view has been created. Please wait as we process and analyse the data."
+msgstr "Je weergave is gemaakt. Wacht aub terwijl we de data verwerken en analyseren."
+
+#: src/routes/project/library/ProjectLibrary.tsx:324
+msgid "Your Views"
+msgstr "Je weergaven"

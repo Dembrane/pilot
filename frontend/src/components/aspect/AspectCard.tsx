@@ -8,9 +8,13 @@ import {
   Pill,
   Text,
   Divider,
+  LoadingOverlay,
 } from "@mantine/core";
 import { IconArrowsDiagonal } from "@tabler/icons-react";
 import { Link, useParams } from "react-router-dom";
+import { I18nLink } from "@/components/common/i18nLink";
+import { Trans } from "@lingui/macro";
+import { useProjectById } from "@/lib/query";
 
 export const AspectCard = ({
   data,
@@ -21,9 +25,17 @@ export const AspectCard = ({
 }) => {
   const { projectId } = useParams();
 
+  const project = useProjectById({
+    projectId: projectId ?? "",
+    query: {
+      fields: ["image_generation_model"],
+    },
+  });
+
   return (
-    <Box className="place-self-stretch">
-      <Link
+    <Box className="relative mb-2 place-self-stretch">
+      <LoadingOverlay visible={project.isLoading} />
+      <I18nLink
         to={`/projects/${projectId}/library/views/${data.view_id}/aspects/${data.id}`}
       >
         <Paper
@@ -40,14 +52,16 @@ export const AspectCard = ({
                 variant="default"
                 leftSection={<IconArrowsDiagonal size="14" />}
               >
-                Open
+                <Trans>Open</Trans>
               </Button>
             </Box>
-            <img
-              src={data.image_url ?? "/placeholder.png"}
-              alt={data.name ?? ""}
-              className="h-[200px] w-full object-cover"
-            />
+            {project.data?.image_generation_model !== "PLACEHOLDER" && (
+              <img
+                src={data.image_url ?? "/placeholder.png"}
+                alt={data.name ?? ""}
+                className="h-[200px] w-full object-cover"
+              />
+            )}
           </Box>
 
           <Box p="md" className="flex-grow justify-between">
@@ -60,22 +74,22 @@ export const AspectCard = ({
                   {data.short_summary ?? data.description ?? ""}
                 </Text>
               </Stack>
-              <Stack className="pt-4">
+              {/* <Stack className="pt-4">
                 <Divider />
                 <Group>
                   <Pill>
                     <Group>
                       <Text className="font-semibold">
-                        {data.quotes_count ?? 0} Quotes
+                        {data.quotes_count ?? 0} <Trans>Quotes</Trans>
                       </Text>
                     </Group>
                   </Pill>
                 </Group>
-              </Stack>
+              </Stack> */}
             </Box>
           </Box>
         </Paper>
-      </Link>
+      </I18nLink>
     </Box>
   );
 };

@@ -1,4 +1,5 @@
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { CloseableAlert } from "@/components/common/ClosableAlert";
 import { Insight } from "@/components/insight/Insight";
 import { ProjectAnalysisRunStatus } from "@/components/project/ProjectAnalysisRunStatus";
 import { ViewExpandedCard } from "@/components/view/View";
@@ -12,6 +13,7 @@ import {
   useGenerateProjectViewMutation,
 } from "@/lib/query";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { t, Trans } from "@lingui/macro";
 import {
   Alert,
   Divider,
@@ -33,6 +35,7 @@ import {
   Collapse,
   Container,
   TextInput,
+  Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -53,21 +56,31 @@ const DummyViews = () => {
   return (
     <Stack>
       <Text c="gray">
-        These are your default view templates. Once you create your library
-        these will be your first two views.
+        <Trans>
+          These are your default view templates. Once you create your library
+          these will be your first two views.
+        </Trans>
       </Text>
       <Paper p="md">
         <SimpleGrid cols={3}>
           <Paper bg="white" p="md">
-            <Text className="font-xl font-semibold pb-2">Topics</Text>
+            <Text className="font-xl pb-2 font-semibold">
+              <Trans>Topics</Trans>
+            </Text>
             <Group>
-              <Pill>0 Aspects</Pill>
+              <Pill>
+                <Trans>0 Aspects</Trans>
+              </Pill>
             </Group>
           </Paper>
           <Paper bg="white" p="md">
-            <Text className="font-xl font-semibold pb-2">Sentiment</Text>
+            <Text className="font-xl pb-2 font-semibold">
+              <Trans>Sentiment</Trans>
+            </Text>
             <Group>
-              <Pill>0 Aspects</Pill>
+              <Pill>
+                <Trans>0 Aspects</Trans>
+              </Pill>
             </Group>
           </Paper>
         </SimpleGrid>
@@ -114,7 +127,9 @@ const CreateView = ({
             <CloseButton />
           </ActionIcon>
           <Icons.View />
-          <Text>Create new view</Text>
+          <Text>
+            <Trans>Create new view</Trans>
+          </Text>
         </Group>
 
         <form>
@@ -125,24 +140,26 @@ const CreateView = ({
               </Alert>
             )}
             {createViewMutation.isSuccess && (
-              <Alert variant="light" icon={<IconInfoCircle />}>
+              <CloseableAlert variant="light" icon={<IconInfoCircle />}>
                 <Text>
-                  Your view has been created. Please wait as we process and
-                  analyse the data.
+                  <Trans>
+                    Your view has been created. Please wait as we process and
+                    analyse the data.
+                  </Trans>
                 </Text>
-              </Alert>
+              </CloseableAlert>
             )}
             <TextInput
               {...register("query")}
-              label="Enter your query"
+              label={t`Enter your query`}
               required
-              placeholder="Topics"
+              placeholder={t`Topics`}
             />
             <Textarea
               rows={5}
               {...register("additionalContext")}
-              label="Add additional context (Optional)"
-              placeholder="Give me a list of 5-10 topics that are being discussed."
+              label={t`Add additional context (Optional)`}
+              placeholder={t`Give me a list of 5-10 topics that are being discussed.`}
             />
             <Group className="w-full" justify="flex-end">
               <Button
@@ -150,7 +167,7 @@ const CreateView = ({
                 loading={createViewMutation.isPending}
                 disabled={createViewMutation.isPending}
               >
-                Create View
+                <Trans>Create View</Trans>
               </Button>
             </Group>
           </Stack>
@@ -187,7 +204,7 @@ export const ProjectLibraryRoute = () => {
   if (conversationsQuery.isLoading) {
     return (
       <Container>
-        <Stack className="relative py-6 px-2 h-[400px]">
+        <Stack className="relative h-[400px] px-2 py-6">
           <LoadingOverlay visible />
         </Stack>
       </Container>
@@ -236,7 +253,11 @@ export const ProjectLibraryRoute = () => {
     viewsQuery && viewsQuery.data && viewsQuery.data.length > 0;
 
   const handleCreateLibrary = async () => {
-    if (window.confirm("Are you sure you want to generate the library?")) {
+    if (
+      window.confirm(
+        t`Are you sure you want to generate the library? This will take a while and overwrite your current views and insights.`,
+      )
+    ) {
       requestProjectLibraryMutation.mutate({
         projectId: projectId ?? "",
       });
@@ -244,18 +265,14 @@ export const ProjectLibraryRoute = () => {
   };
 
   return (
-    <Stack className="py-6 px-4 relative">
+    <Stack className="relative px-4 py-6">
       <Group justify="space-between">
         <Breadcrumbs
           items={[
             {
-              label: <Icons.Sidebar />,
-              link: `/projects/${projectId}/overview`,
-            },
-            {
               label: (
-                <Title order={1} size="md">
-                  Library
+                <Title order={1}>
+                  <Trans>Library</Trans>
                 </Title>
               ),
             },
@@ -268,20 +285,40 @@ export const ProjectLibraryRoute = () => {
             leftSection={<IconRefresh />}
             onClick={handleCreateLibrary}
           >
-            Regenerate Library
+            <Trans>Regenerate Library</Trans>
           </Button>
         ) : (
-          <Button
-            leftSection={<IconPlus />}
-            onClick={handleCreateLibrary}
-            loading={requestProjectLibraryMutation.isPending}
+          <Tooltip
+            label={
+              requestProjectLibraryMutation.isPending
+                ? t`Library creation is in progress`
+                : conversationsQuery.data?.length === 0
+                  ? t`No conversations available to create library`
+                  : latestRun?.processing_status === "PROCESSING"
+                    ? t`Library is currently being processed`
+                    : null
+            }
             disabled={
-              requestProjectLibraryMutation.isPending ||
-              latestRun?.processing_status === "PROCESSING"
+              !(
+                requestProjectLibraryMutation.isPending ||
+                conversationsQuery.data?.length === 0 ||
+                latestRun?.processing_status === "PROCESSING"
+              )
             }
           >
-            Create Library
-          </Button>
+            <Button
+              leftSection={<IconPlus />}
+              onClick={handleCreateLibrary}
+              loading={requestProjectLibraryMutation.isPending}
+              disabled={
+                requestProjectLibraryMutation.isPending ||
+                conversationsQuery.data?.length === 0 ||
+                latestRun?.processing_status === "PROCESSING"
+              }
+            >
+              <Trans>Create Library</Trans>
+            </Button>
+          </Tooltip>
         )}
       </Group>
 
@@ -289,26 +326,39 @@ export const ProjectLibraryRoute = () => {
 
       <ProjectAnalysisRunStatus projectId={projectId ?? ""} />
 
-      {!latestRun && (
-        <>
-          <Alert>
-            <Text>
-              This is your project library. Currently,{" "}
-              {conversationsQuery.data?.length ?? 0} conversations are waiting
-              to be processed.
-            </Text>
-          </Alert>
-        </>
+      {conversationsQuery.data?.length === 0 && (
+        <CloseableAlert variant="light" icon={<IconInfoCircle />}>
+          <Text>
+            <Trans>
+              No conversations available to create library. Please add some
+              conversations to get started.
+            </Trans>
+          </Text>
+        </CloseableAlert>
       )}
 
+      {!latestRun &&
+        conversationsQuery.data?.length &&
+        conversationsQuery.data?.length > 0 && (
+          <CloseableAlert>
+            <Trans>
+              This is your project library. Currently,
+              {conversationsQuery.data?.length} conversations are waiting to be
+              processed.
+            </Trans>
+          </CloseableAlert>
+        )}
+
       <Group justify="space-between">
-        <Title order={2}>Your Views</Title>
+        <Title order={2}>
+          <Trans>Your Views</Trans>
+        </Title>
         <Button
           leftSection={<IconPlus />}
           onClick={toggle}
           disabled={!(latestRun && latestRun.processing_status === "DONE")}
         >
-          Create View
+          <Trans>Create View</Trans>
         </Button>
       </Group>
 
@@ -317,12 +367,14 @@ export const ProjectLibraryRoute = () => {
       </Collapse>
 
       {!opened && latestRun && latestRun.processing_status === "DONE" && (
-        <Alert variant="light" icon={<Icons.View />}>
+        <CloseableAlert variant="light" icon={<Icons.View />}>
           <Text>
-            In order to better navigate through the quotes, create additional
-            views. The quotes will then be clustered based on your view.
+            <Trans>
+              In order to better navigate through the quotes, create additional
+              views. The quotes will then be clustered based on your view.
+            </Trans>
           </Text>
-        </Alert>
+        </CloseableAlert>
       )}
 
       <Stack>
@@ -331,12 +383,17 @@ export const ProjectLibraryRoute = () => {
           viewsQuery.data.map((v) => <ViewExpandedCard key={v.id} data={v} />)}
       </Stack>
 
-      <Title order={2}>All Insights</Title>
+      <Title order={2} id="insights">
+        <Trans>All Insights</Trans>
+      </Title>
 
       {!insightsExist && (
         <Alert variant="light" icon={<IconInfoCircle />}>
           <Text>
-            Your library is empty. Create a library to see your first insights.
+            <Trans>
+              Your library is empty. Create a library to see your first
+              insights.
+            </Trans>
           </Text>
         </Alert>
       )}
@@ -350,7 +407,7 @@ export const ProjectLibraryRoute = () => {
               variant={sortBy === "relevance" ? "filled" : "subtle"}
               leftSection={<IconSortAscending />}
             >
-              Relevance
+              <Trans>Relevance</Trans>
             </Button>
 
             <Button
@@ -359,11 +416,11 @@ export const ProjectLibraryRoute = () => {
               variant={sortBy === "default" ? "filled" : "subtle"}
               leftSection={<IconClock />}
             >
-              Time Created
+              <Trans>Time Created</Trans>
             </Button>
           </Group>
 
-          <div ref={parent} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div ref={parent} className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {insightsQuery.isLoading && (
               <>
                 <Skeleton height={100} />

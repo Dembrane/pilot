@@ -1,20 +1,23 @@
-import { Paper, LoadingOverlay, Stack } from "@mantine/core";
+import { Text, Paper, LoadingOverlay, Stack, Group } from "@mantine/core";
+import React from "react";
 
 type SummaryCardProps = {
   icon: React.ReactNode;
   label: string;
-  value: string;
+  value: string | React.ReactNode;
   loading?: boolean;
 };
 
 export const SummaryCard = (props: SummaryCardProps) => {
   return (
-    <Paper p="md" shadow="0">
+    <Paper p="md" shadow="0" className="h-full">
       <LoadingOverlay visible={props.loading} />
-      <Stack>
-        {props.icon}
-        <span>{props.label}</span>
-        <span>{props.value}</span>
+      <Stack align="start" justify="center" h="100%">
+        <Group gap="xs">
+          <div>{props.icon}</div>
+          <span>{props.label}</span>
+        </Group>
+        {props.value}
       </Stack>
     </Paper>
   );

@@ -22,7 +22,7 @@ export const CommonDropzone = ({
   ...props
 }: PropsWithChildren<CommonDropzoneProps>) => {
   return (
-    <MantineDropzone p="xs" {...props}>
+    <MantineDropzone p="sm" {...props}>
       <Group justify="center" gap="xl" style={{ pointerEvents: "none" }}>
         <MantineDropzone.Accept>
           {accept || (

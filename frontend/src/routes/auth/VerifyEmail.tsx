@@ -1,11 +1,12 @@
 import { useVerifyMutation } from "@/lib/query";
+import { t, Trans } from "@lingui/macro";
 import { Container, Group, Loader, Stack, Text, Title } from "@mantine/core";
 import { useDocumentTitle } from "@mantine/hooks";
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 
 export const VerifyEmailRoute = () => {
-  useDocumentTitle("Email Verification | Dembrane");
+  useDocumentTitle(t`Email Verification | Dembrane`);
   const [search, _setSearch] = useSearchParams();
 
   const verifyMutation = useVerifyMutation();
@@ -13,7 +14,7 @@ export const VerifyEmailRoute = () => {
   const handleVerify = () => {
     const token = search.get("token");
     if (!token) {
-      window.alert("Invalid token. Please try again.");
+      window.alert(t`Invalid token. Please try again.`);
     }
 
     verifyMutation.mutate({ token: token ?? "" });
@@ -33,22 +34,30 @@ export const VerifyEmailRoute = () => {
       <Stack className="h-full">
         <Stack className="flex-grow">
           <Group>
-            <Title order={1}>Email Verification</Title>
+            <Title order={1}>
+              <Trans>Email Verification</Trans>
+            </Title>
             {verifyMutation.isPending && <Loader />}
           </Group>
           {verifyMutation.isPending && (
-            <Text>Please wait while we verify your email address.</Text>
+            <Text>
+              <Trans>Please wait while we verify your email address.</Trans>
+            </Text>
           )}
           {verifyMutation.isSuccess && (
             <Text>
-              Email verified successfully. You will be redirected to the login
-              page in 5 seconds. If you are not redirected, please click{" "}
-              <a href="/login?new=true">here</a>.
+              <Trans>
+                Email verified successfully. You will be redirected to the login
+                page in 5 seconds. If you are not redirected, please click{" "}
+                <a href="/login?new=true">here</a>.
+              </Trans>
             </Text>
           )}
           {verifyMutation.isError && (
             <Text>
-              There was an error verifying your email. Please try again.
+              <Trans>
+                There was an error verifying your email. Please try again.
+              </Trans>
             </Text>
           )}
         </Stack>

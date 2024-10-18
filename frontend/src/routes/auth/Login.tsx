@@ -1,4 +1,5 @@
 import { DIRECTUS_PUBLIC_URL } from "@/config";
+import { usei18nNavigate } from "@/lib/usei18nNavigate";
 import { directus } from "@/lib/directus";
 import {
   useCreateProjectMutation,
@@ -26,6 +27,9 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
+import { I18nLink } from "@/components/common/i18nLink";
+import { Trans, t } from "@lingui/macro";
+import { useLanguage } from "@/lib/useLanguage";
 
 const LoginWithProvider = ({
   provider,
@@ -36,11 +40,12 @@ const LoginWithProvider = ({
   icon: React.ReactNode;
   label: string;
 }) => {
+  const {language} = useLanguage();
   return (
     <Button
       component="a"
       href={`${DIRECTUS_PUBLIC_URL}/auth/login/${provider}?redirect=${encodeURIComponent(
-        window.location.origin + "/projects",
+        window.location.origin + `/${language}/projects`,
       )}`}
       size="lg"
       c="gray"
@@ -55,7 +60,7 @@ const LoginWithProvider = ({
 };
 
 export const LoginRoute = () => {
-  useDocumentTitle("Login | Dembrane");
+  useDocumentTitle(t`Login | Dembrane`);
   const { register, handleSubmit } = useForm<{
     email: string;
     password: string;
@@ -68,7 +73,7 @@ export const LoginRoute = () => {
     queryFn: () => directus.request(readProviders()),
   });
 
-  const navigate = useNavigate();
+  const navigate = usei18nNavigate();
   const createProjectMutation = useCreateProjectMutation();
 
   const [error, setError] = useState("");
@@ -86,10 +91,10 @@ export const LoginRoute = () => {
         searchParams.get("new") === "true" && projectsCount.length === 0;
 
       if (isNewAccount) {
-        toast("Setting up your first project");
+        toast(t`Setting up your first project`);
         await loginMutation.mutateAsync([data.email, data.password]);
         const project = await createProjectMutation.mutateAsync({
-          name: "New Project",
+          name: t`New Project`,
         });
         navigate(`/projects/${project.id}/overview`);
         return;
@@ -97,9 +102,11 @@ export const LoginRoute = () => {
 
       const next = searchParams.get("next");
       if (!!next && next !== "/login") {
-        window.location.href = next;
+        // window.location.href = next;
+        navigate(next);
       } else {
-        window.location.href = "/projects";
+        // window.location.href = "/projects";
+        navigate("/projects");
       }
     } catch (error) {
       try {
@@ -107,19 +114,19 @@ export const LoginRoute = () => {
           setError((error as any).errors[0].message);
         }
       } catch {
-        setError("Something went wrong");
+        setError(t`Something went wrong`);
       }
     }
   });
 
   useEffect(() => {
     if (searchParams.get("reason") === "INVALID_CREDENTIALS") {
-      setError("Invalid credentials.");
+      setError(t`Invalid credentials.`);
     }
 
     if (searchParams.get("reason") === "INVALID_PROVIDER") {
       setError(
-        "You must login with the same provider you used to sign up. If you face any issues, please contact support.",
+        t`You must login with the same provider you used to sign up. If you face any issues, please contact support.`,
       );
     }
   }, [searchParams]);
@@ -128,11 +135,15 @@ export const LoginRoute = () => {
     <Container size="sm" className="!h-full">
       <Stack className="h-full">
         <Stack className="flex-grow" gap="md">
-          <Title order={1}>Welcome!</Title>
+          <Title order={1}>
+            <Trans>Welcome!</Trans>
+          </Title>
 
           {(searchParams.get("new") === "true" ||
             !!searchParams.get("next")) && (
-            <Text>Please login to continue.</Text>
+            <Text>
+              <Trans>Please login to continue.</Trans>
+            </Text>
           )}
 
           <form onSubmit={onSubmit}>
@@ -140,38 +151,40 @@ export const LoginRoute = () => {
               {error && <Alert color="red">{error}</Alert>}
 
               <TextInput
-                label="Email"
+                label={<Trans>Email</Trans>}
                 size="lg"
                 {...register("email")}
-                placeholder="Email"
+                placeholder={t`Email`}
                 required
                 type="email"
               />
               <PasswordInput
-                label="Password"
+                label={<Trans>Password</Trans>}
                 size="lg"
                 {...register("password")}
-                placeholder="Password"
+                placeholder={t`Password`}
                 required
               />
               <div className="w-full text-right">
-                <Link to="/request-password-reset">
-                  <Anchor variant="outline">Forgot your password?</Anchor>
-                </Link>
+                <I18nLink to="/request-password-reset">
+                  <Anchor variant="outline">
+                    <Trans>Forgot your password?</Trans>
+                  </Anchor>
+                </I18nLink>
               </div>
               <Button size="lg" type="submit" loading={loginMutation.isPending}>
-                Login
+                <Trans>Login</Trans>
               </Button>
             </Stack>
           </form>
 
           <Divider variant="dashed" label="or" labelPosition="center" />
 
-          <Link to="/register">
+          <I18nLink to="/register">
             <Button size="lg" variant="outline" fullWidth>
-              Register as a new user
+              <Trans>Register as a new user</Trans>
             </Button>
-          </Link>
+          </I18nLink>
 
           <Box>
             {providerQuery.data?.find(
@@ -180,7 +193,7 @@ export const LoginRoute = () => {
               <LoginWithProvider
                 provider="google"
                 icon={<IconBrandGoogle />}
-                label="Sign in with Google"
+                label={t`Sign in with Google`}
               />
             )}
           </Box>

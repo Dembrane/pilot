@@ -2894,7 +2894,7 @@ fields:
       options: null
       readonly: false
       required: false
-      sort: 8
+      sort: 6
       special: null
       translations: null
       validation: null
@@ -2939,7 +2939,7 @@ fields:
             value: multi
       readonly: false
       required: false
-      sort: 7
+      sort: 5
       special: null
       translations: null
       validation: null
@@ -2977,7 +2977,7 @@ fields:
       options: null
       readonly: false
       required: false
-      sort: 6
+      sort: 4
       special: null
       translations: null
       validation: null
@@ -3015,7 +3015,7 @@ fields:
       options: null
       readonly: false
       required: false
-      sort: 10
+      sort: 8
       special: null
       translations: null
       validation: null
@@ -3053,7 +3053,7 @@ fields:
       options: null
       readonly: false
       required: false
-      sort: 11
+      sort: 9
       special:
         - cast-boolean
       translations: null
@@ -3153,44 +3153,6 @@ fields:
       foreign_key_table: null
       foreign_key_column: null
   - collection: project
-    field: default_conversation_context
-    type: text
-    meta:
-      collection: project
-      conditions: null
-      display: null
-      display_options: null
-      field: default_conversation_context
-      group: null
-      hidden: false
-      interface: input-multiline
-      note: null
-      options: null
-      readonly: false
-      required: false
-      sort: 15
-      special: null
-      translations: null
-      validation: null
-      validation_message: null
-      width: full
-    schema:
-      name: default_conversation_context
-      table: project
-      data_type: text
-      default_value: null
-      max_length: null
-      numeric_precision: null
-      numeric_scale: null
-      is_nullable: true
-      is_unique: false
-      is_primary_key: false
-      is_generated: false
-      generation_expression: null
-      has_auto_increment: false
-      foreign_key_table: null
-      foreign_key_column: null
-  - collection: project
     field: default_conversation_finish_text
     type: text
     meta:
@@ -3206,7 +3168,7 @@ fields:
       options: null
       readonly: false
       required: false
-      sort: 14
+      sort: 15
       special: null
       translations: null
       validation: null
@@ -3249,7 +3211,7 @@ fields:
             value: EXTRAVAGANT
       readonly: false
       required: true
-      sort: 9
+      sort: 7
       special: null
       translations: null
       validation: null
@@ -3412,13 +3374,137 @@ fields:
       options: null
       readonly: false
       required: false
-      sort: null
+      sort: 20
       special:
         - o2m
       translations: null
       validation: null
       validation_message: null
       width: full
+  - collection: project
+    field: default_conversation_ask_for_participant_name
+    type: boolean
+    meta:
+      collection: project
+      conditions: null
+      display: null
+      display_options: null
+      field: default_conversation_ask_for_participant_name
+      group: null
+      hidden: false
+      interface: boolean
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 10
+      special:
+        - cast-boolean
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: default_conversation_ask_for_participant_name
+      table: project
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: project
+    field: default_conversation_tutorial_slug
+    type: string
+    meta:
+      collection: project
+      conditions: null
+      display: null
+      display_options: null
+      field: default_conversation_tutorial_slug
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: >-
+        Manually syncronize this with
+        https://admin-dembrane.azurewebsites.net/admin/content/echo__portal_tutorial
+      options:
+        choices:
+          - text: None
+            value: None
+          - text: Basic
+            value: basic
+          - text: Advanced
+            value: advanced
+      readonly: false
+      required: false
+      sort: 11
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: default_conversation_tutorial_slug
+      table: project
+      data_type: character varying
+      default_value: none
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: project
+    field: default_conversation_transcript_prompt
+    type: text
+    meta:
+      collection: project
+      conditions: null
+      display: null
+      display_options: null
+      field: default_conversation_transcript_prompt
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 14
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: default_conversation_transcript_prompt
+      table: project
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: project_analysis_run
     field: id
     type: uuid

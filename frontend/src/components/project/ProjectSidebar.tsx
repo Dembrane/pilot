@@ -1,15 +1,28 @@
 import { Icons } from "@/icons";
 import { useCreateChatMutation, useProjectById } from "@/lib/query";
-import { Group, LoadingOverlay, Stack, Title } from "@mantine/core";
-import { Link, useParams } from "react-router-dom";
+import {
+  ActionIcon,
+  Box,
+  Group,
+  LoadingOverlay,
+  Stack,
+  Title,
+  Tooltip,
+} from "@mantine/core";
+import { useParams } from "react-router-dom";
 import { ProjectAccordion } from "./ProjectAccordion";
 import { NavigationButton } from "../common/NavigationButton";
 import { Breadcrumbs } from "../common/Breadcrumbs";
+import { ProjectQRCode } from "./ProjectQRCode";
+import { I18nLink } from "../common/i18nLink";
+import { Trans, t } from "@lingui/macro";
 
 export const ProjectSidebar = () => {
   const { projectId, conversationId } = useParams();
 
   const projectQuery = useProjectById({ projectId: projectId ?? "" });
+
+  // const { isCollapsed, toggleSidebar } = useSidebarCollapsed();
 
   const createChatMutation = useCreateChatMutation();
 
@@ -32,32 +45,48 @@ export const ProjectSidebar = () => {
         <Breadcrumbs
           items={[
             {
-              label: <Icons.Home color="black" />,
+              label: (
+                <Tooltip label={t`Projects Home`}>
+                  <ActionIcon variant="transparent">
+                    <Icons.Home color="black" />
+                  </ActionIcon>
+                </Tooltip>
+              ),
               link: `/projects`,
             },
             {
               label: (
-                <Link to={`/projects/${projectId}/overview`}>
-                  <Title order={2} size="sm">
+                <I18nLink to={`/projects/${projectId}/overview`}>
+                  <Title
+                    order={2}
+                    size="lg"
+                    className="whitespace-break-spaces hover:underline"
+                  >
                     {projectQuery.data?.name}
                   </Title>
-                </Link>
+                </I18nLink>
               ),
             },
           ]}
         />
-
-        {/* <Tooltip label={t`Project Overview`}>
-          <Link to={`/projects/${projectId}/overview`}>
+        {/* 
+        <Tooltip label={t`Project Overview`}>
+          <I18nLink to={`/projects/${projectId}/overview`}>
             <ActionIcon
               component="a"
               variant="transparent"
-              aria-label="Project Oveview and Edit"
+              aria-label={t`Project Overview and Edit`}
             >
               <Icons.Gear color="black" />
             </ActionIcon>
-          </Link>
+          </I18nLink>
         </Tooltip> */}
+        {/* 
+        {!isCollapsed && (
+          <ActionIcon variant="transparent" onClick={toggleSidebar}>
+            <Icons.Sidebar />
+          </ActionIcon>
+        )} */}
       </Group>
 
       <NavigationButton
@@ -65,7 +94,7 @@ export const ProjectSidebar = () => {
         component="button"
         rightIcon={<Icons.Stars />}
       >
-        Ask
+        <Trans>Ask</Trans>
       </NavigationButton>
 
       <NavigationButton
@@ -73,8 +102,12 @@ export const ProjectSidebar = () => {
         component="a"
         rightIcon={<Icons.LightBulb />}
       >
-        Library
+        <Trans>Library</Trans>
       </NavigationButton>
+
+      <Box hiddenFrom="lg">
+        <ProjectQRCode project={projectQuery.data} />
+      </Box>
 
       <ProjectAccordion projectId={projectId} />
     </Stack>

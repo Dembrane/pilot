@@ -4,8 +4,6 @@ import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { Icons } from "@/icons";
 import { useViewById } from "@/lib/query";
 import {
-  Anchor,
-  Box,
   Divider,
   Group,
   LoadingOverlay,
@@ -15,7 +13,8 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { Trans } from "@lingui/macro";
 
 export const ProjectLibraryView = () => {
   const { projectId, viewId } = useParams();
@@ -23,19 +22,15 @@ export const ProjectLibraryView = () => {
   const view = useViewById(projectId ?? "", viewId ?? "");
 
   return (
-    <Stack className="py-6 px-4 min-h-dvh">
+    <Stack className="min-h-dvh px-4 py-6">
       <Breadcrumbs
         items={[
           {
-            label: <Icons.Sidebar />,
-            link: `/projects/${projectId}/overview`,
-          },
-          {
-            label: "Library",
+            label: <Trans>Library</Trans>,
             link: `/projects/${projectId}/library`,
           },
           {
-            label: "View",
+            label: <Trans>View</Trans>,
           },
         ]}
       />
@@ -47,14 +42,16 @@ export const ProjectLibraryView = () => {
         <Stack>
           <Group c="gray">
             <Icons.Aspect />
-            <Text className="font-semibold">Aspects</Text>
+            <Text className="font-semibold">
+              <Trans>Aspects</Trans>
+            </Text>
           </Group>
 
           <SimpleGrid
             cols={{
               sm: 2,
               md: 3,
-              xl: 5,
+              xl: 4,
             }}
             spacing="md"
           >
@@ -62,7 +59,7 @@ export const ProjectLibraryView = () => {
               <AspectCard
                 key={aspect.id}
                 data={aspect}
-                className="w-full h-full"
+                className="h-full w-full"
               />
             ))}
           </SimpleGrid>

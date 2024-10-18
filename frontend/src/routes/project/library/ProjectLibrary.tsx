@@ -35,6 +35,7 @@ import {
   Collapse,
   Container,
   TextInput,
+  Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -139,14 +140,14 @@ const CreateView = ({
               </Alert>
             )}
             {createViewMutation.isSuccess && (
-              <Alert variant="light" icon={<IconInfoCircle />}>
+              <CloseableAlert variant="light" icon={<IconInfoCircle />}>
                 <Text>
                   <Trans>
                     Your view has been created. Please wait as we process and
                     analyse the data.
                   </Trans>
                 </Text>
-              </Alert>
+              </CloseableAlert>
             )}
             <TextInput
               {...register("query")}
@@ -287,17 +288,37 @@ export const ProjectLibraryRoute = () => {
             <Trans>Regenerate Library</Trans>
           </Button>
         ) : (
-          <Button
-            leftSection={<IconPlus />}
-            onClick={handleCreateLibrary}
-            loading={requestProjectLibraryMutation.isPending}
+          <Tooltip
+            label={
+              requestProjectLibraryMutation.isPending
+                ? t`Library creation is in progress`
+                : conversationsQuery.data?.length === 0
+                  ? t`No conversations available to create library`
+                  : latestRun?.processing_status === "PROCESSING"
+                    ? t`Library is currently being processed`
+                    : null
+            }
             disabled={
-              requestProjectLibraryMutation.isPending ||
-              latestRun?.processing_status === "PROCESSING"
+              !(
+                requestProjectLibraryMutation.isPending ||
+                conversationsQuery.data?.length === 0 ||
+                latestRun?.processing_status === "PROCESSING"
+              )
             }
           >
-            <Trans>Create Library</Trans>
-          </Button>
+            <Button
+              leftSection={<IconPlus />}
+              onClick={handleCreateLibrary}
+              loading={requestProjectLibraryMutation.isPending}
+              disabled={
+                requestProjectLibraryMutation.isPending ||
+                conversationsQuery.data?.length === 0 ||
+                latestRun?.processing_status === "PROCESSING"
+              }
+            >
+              <Trans>Create Library</Trans>
+            </Button>
+          </Tooltip>
         )}
       </Group>
 
@@ -305,19 +326,28 @@ export const ProjectLibraryRoute = () => {
 
       <ProjectAnalysisRunStatus projectId={projectId ?? ""} />
 
-      {!latestRun && (
-        <>
-          <Alert>
-            <Text>
-              <Trans>
-                This is your project library. Currently,{" "}
-                {conversationsQuery.data?.length ?? 0} conversations are waiting
-                to be processed.
-              </Trans>
-            </Text>
-          </Alert>
-        </>
+      {conversationsQuery.data?.length === 0 && (
+        <CloseableAlert variant="light" icon={<IconInfoCircle />}>
+          <Text>
+            <Trans>
+              No conversations available to create library. Please add some
+              conversations to get started.
+            </Trans>
+          </Text>
+        </CloseableAlert>
       )}
+
+      {!latestRun &&
+        conversationsQuery.data?.length &&
+        conversationsQuery.data?.length > 0 && (
+          <CloseableAlert>
+            <Trans>
+              This is your project library. Currently,
+              {conversationsQuery.data?.length} conversations are waiting to be
+              processed.
+            </Trans>
+          </CloseableAlert>
+        )}
 
       <Group justify="space-between">
         <Title order={2}>

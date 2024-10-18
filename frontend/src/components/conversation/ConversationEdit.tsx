@@ -89,7 +89,7 @@ export const ConversationEdit = ({
   }, [isSubmitSuccessful, getValues, reset]);
 
   return (
-    <Stack>
+    <Stack key={conversation.id}>
       <Group>
         <Title order={2}>
           <Trans>Edit Conversation</Trans>

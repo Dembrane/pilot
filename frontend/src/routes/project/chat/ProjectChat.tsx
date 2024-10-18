@@ -45,6 +45,7 @@ import { formatDate } from "date-fns";
 import { cn } from "@/lib/utils";
 import { I18nLink } from "@/components/common/i18nLink";
 import { Trans, t } from "@lingui/macro";
+import { CloseableAlert } from "@/components/common/ClosableAlert";
 
 const ConversationLinks = ({
   conversations,
@@ -187,11 +188,11 @@ const TemplatesMenu = ({
       </Menu.Target>
       <Menu.Dropdown>
         <Stack p="md" gap="sm">
-          <Alert variant="info" title={t`Templates`}>
+          <CloseableAlert variant="info" title={t`Templates`}>
             <Trans>
               These are some helpful preset templates to get you started.
             </Trans>
-          </Alert>
+          </CloseableAlert>
           <SimpleGrid cols={2}>
             {templates.map((template) => (
               <Button

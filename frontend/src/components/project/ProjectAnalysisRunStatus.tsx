@@ -4,8 +4,13 @@ import { readItems } from "@directus/sdk";
 import { Trans } from "@lingui/macro";
 import { Alert, Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
+import { CloseableAlert } from "../common/ClosableAlert";
 
-export const ProjectAnalysisRunStatus = ({ projectId }: { projectId: string }) => {
+export const ProjectAnalysisRunStatus = ({
+  projectId,
+}: {
+  projectId: string;
+}) => {
   const latestRunQuery = useLatestProjectAnalysisRunByProjectId(
     projectId ?? "",
   );
@@ -55,12 +60,12 @@ export const ProjectAnalysisRunStatus = ({ projectId }: { projectId: string }) =
     return (
       <Stack className="italic text-gray-700">
         {!!conversationChunksQuery.data && conversationChunksQuery.data > 0 ? (
-          <Alert>
+          <CloseableAlert>
             <Trans>
               New conversations have been added since the library was generated.
               Regenerate the library to process them.
             </Trans>
-          </Alert>
+          </CloseableAlert>
         ) : (
           <></>
         )}

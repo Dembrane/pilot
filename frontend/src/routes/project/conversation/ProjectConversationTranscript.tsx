@@ -227,15 +227,20 @@ export const ProjectConversationTranscript = () => {
               <Trans>No transcript available for this conversation.</Trans>
             </Text>
           )}
-          {sorted?.map((chunk) => {
-            return (
-              <Chunk
-                key={chunk.id}
-                chunk={chunk}
-                showAudioPlayer={showAudioPlayer}
-              />
-            );
-          })}
+          {sorted
+            ?.filter(
+              (chunk) =>
+                !!chunk.transcript && chunk.transcript.trim().length > 0,
+            )
+            .map((chunk) => {
+              return (
+                <Chunk
+                  key={chunk.id}
+                  chunk={chunk}
+                  showAudioPlayer={showAudioPlayer}
+                />
+              );
+            })}
         </Stack>
       </Stack>
     </Stack>

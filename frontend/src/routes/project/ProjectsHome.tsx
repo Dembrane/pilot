@@ -39,6 +39,7 @@ import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { usei18nNavigate } from "@/lib/usei18nNavigate";
 import { Trans, t } from "@lingui/macro";
 import { useLanguage } from "@/lib/useLanguage";
+import { CloseableAlert } from "@/components/common/ClosableAlert";
 
 export const ProjectsHomeRoute = () => {
   useDocumentTitle(t`Projects | Dembrane`);
@@ -81,6 +82,7 @@ export const ProjectsHomeRoute = () => {
         default_conversation_ask_for_participant_name: true,
         default_conversation_tutorial_slug: "none",
         image_generation_model: "PLACEHOLDER",
+        default_conversation_transcript_prompt: "Dembrane",
       },
     });
     navigate(`/projects/${project.id}/overview`);
@@ -156,13 +158,13 @@ export const ProjectsHomeRoute = () => {
         {projectsQuery.data &&
           projectsQuery.data.length === 0 &&
           debouncedSearchValue === "" && (
-            <Alert icon={<IconInfoCircle />}>
+            <CloseableAlert icon={<IconInfoCircle />}>
               <Trans>
                 Welcome to Your Home! Here you can see all your projects and get
                 access to tutorial resources. Currently, you have no projects.
                 Click "Create" to configure to get started!
               </Trans>
-            </Alert>
+            </CloseableAlert>
           )}
 
         {!(

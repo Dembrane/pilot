@@ -187,6 +187,7 @@ export const ProjectConversationOverviewRoute = () => {
       {conversationQuery.data && projectQuery.data && (
         <>
           <ConversationEdit
+            key={conversationQuery.data.id}
             conversation={conversationQuery.data}
             projectTags={projectQuery.data.tags}
           />

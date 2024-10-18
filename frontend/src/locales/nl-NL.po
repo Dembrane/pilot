@@ -59,8 +59,8 @@ msgstr "*Een moment a.u.b.*"
 #~ msgid "*We make sure nothing can be traced back to you, and even if you accidentally say your name, we remove it before analysing everything. By using this tool, you agree to our privacy terms. Want to know more? Then read our [privacy statement]"
 #~ msgstr "*We zorgen dat niks terug te leiden is naar jou als persoon, ook al zeg je per ongeluk je naam, verwijderen wij deze voordat we alles analyseren. Door deze tool te gebruiken, ga je akkoord met onze privacy voorwaarden. Wil je meer weten? Lees dan onze [privacy verklaring]"
 
-#: src/routes/project/library/ProjectLibrary.tsx:71
-#: src/routes/project/library/ProjectLibrary.tsx:81
+#: src/routes/project/library/ProjectLibrary.tsx:72
+#: src/routes/project/library/ProjectLibrary.tsx:82
 msgid "0 Aspects"
 msgstr "0 Aspecten"
 
@@ -76,7 +76,7 @@ msgstr "0 Aspecten"
 msgid "Add"
 msgstr "Toevoegen"
 
-#: src/routes/project/library/ProjectLibrary.tsx:160
+#: src/routes/project/library/ProjectLibrary.tsx:161
 msgid "Add additional context (Optional)"
 msgstr "Voeg extra context toe (Optioneel)"
 
@@ -108,7 +108,7 @@ msgstr "Voeg toe aan dit gesprek"
 #~ msgid "Added context"
 #~ msgstr "Context toegevoegd"
 
-#: src/routes/project/chat/ProjectChat.tsx:482
+#: src/routes/project/chat/ProjectChat.tsx:483
 msgid "Adding Context:"
 msgstr "Context toevoegen:"
 
@@ -124,7 +124,7 @@ msgstr "Geavanceerd (Tips en trucs)"
 #~ msgid "All documents are uploaded and ready now. What research question are you interested in asking? Optionally, you can now open an individual analysis chat for each document."
 #~ msgstr "Alle documenten zijn geüpload en zijn nu klaar. Welke onderzoeksvraag wil je stellen? Optioneel kunt u nu voor elk document een individuele analysechat openen."
 
-#: src/routes/project/library/ProjectLibrary.tsx:357
+#: src/routes/project/library/ProjectLibrary.tsx:387
 msgid "All Insights"
 msgstr "Alle insights"
 
@@ -144,7 +144,7 @@ msgstr "Al toegevoegd aan dit gesprek"
 msgid "An error occurred while loading the Portal. Please contact the support team."
 msgstr "Er is een fout opgetreden bij het laden van de Portal. Neem contact op met de ondersteuningsteam."
 
-#: src/routes/project/chat/ProjectChat.tsx:461
+#: src/routes/project/chat/ProjectChat.tsx:462
 msgid "An error occurred."
 msgstr "Er is een fout opgetreden."
 
@@ -187,7 +187,7 @@ msgstr "Weet je zeker dat je deze opname wilt verwijderen?"
 msgid "Are you sure you want to finish?"
 msgstr "Weet je zeker dat je het wilt afmaken?"
 
-#: src/routes/project/library/ProjectLibrary.tsx:257
+#: src/routes/project/library/ProjectLibrary.tsx:258
 msgid "Are you sure you want to generate the library? This will take a while and overwrite your current views and insights."
 msgstr "Weet je zeker dat je de bibliotheek wilt genereren? Dit kan een tijdje duren en overschrijft je huidige views en insights."
 
@@ -237,7 +237,7 @@ msgstr "Aspect"
 msgid "Aspects"
 msgstr "Aspecten"
 
-#: src/routes/project/chat/ProjectChat.tsx:430
+#: src/routes/project/chat/ProjectChat.tsx:431
 msgid "Assistant is typing..."
 msgstr "Assistent is typen..."
 
@@ -267,7 +267,7 @@ msgstr "Door dit project te verwijderen, verwijder je alle gegevens die eraan ge
 
 #: src/components/conversation/ConversationEdit.tsx:166
 #: src/components/project/ProjectBasicEdit.tsx:111
-#: src/components/project/ProjectEdit.tsx:202
+#: src/components/project/ProjectEdit.tsx:204
 #: src/components/project/ProjectPortalEditor.tsx:195
 #: src/components/project/ProjectTranscriptSettings.tsx:169
 #: src/routes/project/resource/ProjectResourceOverview.tsx:151
@@ -278,11 +278,11 @@ msgstr "Annuleren"
 msgid "Changes are saved automatically as you continue to use the app. <0/>Once you have some unsaved changes, you can click anywhere to save the changes. <1/>You will also see a button to Cancel the changes."
 msgstr "Wijzigingen worden automatisch opgeslagen terwijl je de app gebruikt. <0/>Zodra je wijzigingen hebt die nog niet zijn opgeslagen, kun je op elk gedeelte van de pagina klikken om de wijzigingen op te slaan. <1/>Je zult ook een knop zien om de wijzigingen te annuleren."
 
-#: src/routes/project/chat/ProjectChat.tsx:385
+#: src/routes/project/chat/ProjectChat.tsx:386
 msgid "Chat"
 msgstr "Chat"
 
-#: src/routes/project/chat/ProjectChat.tsx:353
+#: src/routes/project/chat/ProjectChat.tsx:354
 msgid "Chat | Dembrane"
 msgstr "Chat | Dembrane"
 
@@ -299,11 +299,11 @@ msgstr "Controleer microfoontoegang"
 msgid "Check your email"
 msgstr "Controleer je email"
 
-#: src/routes/project/chat/ProjectChat.tsx:152
+#: src/routes/project/chat/ProjectChat.tsx:153
 msgid "Compare & Contrast"
 msgstr "Vergelijk en contrast   "
 
-#: src/routes/project/chat/ProjectChat.tsx:154
+#: src/routes/project/chat/ProjectChat.tsx:155
 msgid "Compare and contrast the following items provided in the context."
 msgstr "Vergelijk en contrast de volgende items die in de context zijn verstrekt.   "
 
@@ -321,7 +321,7 @@ msgstr "Bevestig wachtwoord"
 msgid "Context"
 msgstr "Context"
 
-#: src/routes/project/chat/ProjectChat.tsx:122
+#: src/routes/project/chat/ProjectChat.tsx:123
 msgid "Context added:"
 msgstr "Context toegevoegd:"
 
@@ -341,7 +341,7 @@ msgstr "Kopieer link"
 msgid "Copy transcript"
 msgstr "Kopieer transcript"
 
-#: src/routes/project/ProjectsHome.tsx:115
+#: src/routes/project/ProjectsHome.tsx:117
 msgid "Create"
 msgstr "Maak"
 
@@ -357,16 +357,16 @@ msgstr "Maak"
 msgid "Create an Account"
 msgstr "Maak een account aan"
 
-#: src/routes/project/library/ProjectLibrary.tsx:299
+#: src/routes/project/library/ProjectLibrary.tsx:319
 msgid "Create Library"
 msgstr "Maak bibliotheek aan"
 
-#: src/routes/project/library/ProjectLibrary.tsx:130
+#: src/routes/project/library/ProjectLibrary.tsx:131
 msgid "Create new view"
 msgstr "Maak nieuwe view aan"
 
-#: src/routes/project/library/ProjectLibrary.tsx:169
-#: src/routes/project/library/ProjectLibrary.tsx:331
+#: src/routes/project/library/ProjectLibrary.tsx:170
+#: src/routes/project/library/ProjectLibrary.tsx:361
 msgid "Create View"
 msgstr "Maak view aan"
 
@@ -452,7 +452,7 @@ msgid "Edit Conversation"
 msgstr "Gesprek bewerken"
 
 #: src/components/project/ProjectBasicEdit.tsx:75
-#: src/components/project/ProjectEdit.tsx:89
+#: src/components/project/ProjectEdit.tsx:91
 msgid "Edit Project"
 msgstr "Project bewerken"
 
@@ -493,7 +493,7 @@ msgstr "Voer een nieuwe naam in voor de chat:"
 #~ msgid "Enter your access code"
 #~ msgstr "Voer uw toegangscode in"
 
-#: src/routes/project/library/ProjectLibrary.tsx:153
+#: src/routes/project/library/ProjectLibrary.tsx:154
 msgid "Enter your query"
 msgstr "Voer uw query in"
 
@@ -541,11 +541,11 @@ msgstr "Voornaam"
 msgid "Forgot your password?"
 msgstr "Wachtwoord vergeten?"
 
-#: src/routes/project/chat/ProjectChat.tsx:159
+#: src/routes/project/chat/ProjectChat.tsx:160
 msgid "Generate structured meeting notes based on the following discussion points provided in the context."
 msgstr "Genereer gestructureerde vergaderingenotes op basis van de volgende discussiepunten die in de context zijn verstrekt."
 
-#: src/routes/project/library/ProjectLibrary.tsx:161
+#: src/routes/project/library/ProjectLibrary.tsx:162
 msgid "Give me a list of 5-10 topics that are being discussed."
 msgstr "Geef me een lijst van 5-10 onderwerpen die worden besproken."
 
@@ -562,7 +562,7 @@ msgstr "Ga naar home"
 #~ msgid "Great! Your documents are now being uploaded. While the documents are being processed, can you tell me what this analysis is about?"
 #~ msgstr "Geweldig! Uw documenten worden nu geüpload. Terwijl de documenten worden verwerkt, kunt u mij vertellen waar deze analyse over gaat?"
 
-#: src/routes/project/ProjectsHome.tsx:148
+#: src/routes/project/ProjectsHome.tsx:150
 msgid "Grid view"
 msgstr "Rasterweergave"
 
@@ -590,7 +590,7 @@ msgstr "Verbergen alles"
 msgid "Hide Conversations Without Content"
 msgstr "Verbergen gesprekken zonder inhoud"
 
-#: src/routes/project/ProjectsHome.tsx:101
+#: src/routes/project/ProjectsHome.tsx:103
 msgid "Home"
 msgstr "Home"
 
@@ -604,7 +604,7 @@ msgstr ""
 "* Wat is de noordsterdoel of belangrijkste maatstaf\n"
 "* Wat ziet eruit als succes"
 
-#: src/routes/project/library/ProjectLibrary.tsx:342
+#: src/routes/project/library/ProjectLibrary.tsx:372
 msgid "In order to better navigate through the quotes, create additional views. The quotes will then be clustered based on your view."
 msgstr "Om beter door de quotes te navigeren, maak aanvullende views aan. De quotes worden dan op basis van uw view geclusterd."
 
@@ -675,11 +675,19 @@ msgid "Last Name"
 msgstr "Achternaam"
 
 #: src/components/project/ProjectSidebar.tsx:105
-#: src/routes/project/library/ProjectLibrary.tsx:274
+#: src/routes/project/library/ProjectLibrary.tsx:275
 #: src/routes/project/library/ProjectLibraryAspect.tsx:50
 #: src/routes/project/library/ProjectLibraryView.tsx:29
 msgid "Library"
 msgstr "Bibliotheek"
+
+#: src/routes/project/library/ProjectLibrary.tsx:294
+msgid "Library creation is in progress"
+msgstr "Bibliotheek wordt aangemaakt"
+
+#: src/routes/project/library/ProjectLibrary.tsx:298
+msgid "Library is currently being processed"
+msgstr "Bibliotheek wordt momenteel verwerkt"
 
 #: src/components/common/DembraneLoadingSpinner/index.tsx:19
 msgid "Loading"
@@ -709,7 +717,7 @@ msgstr "Inloggen als bestaande gebruiker"
 msgid "Logout"
 msgstr "Uitloggen"
 
-#: src/routes/project/chat/ProjectChat.tsx:157
+#: src/routes/project/chat/ProjectChat.tsx:158
 msgid "Meeting Notes"
 msgstr "Vergaderingenotes"
 
@@ -728,7 +736,7 @@ msgstr "Toegang tot de microfoon wordt nog steeds geweigerd. Controleer uw inste
 msgid "Name"
 msgstr "Naam"
 
-#: src/components/project/ProjectAnalysisRunStatus.tsx:59
+#: src/components/project/ProjectAnalysisRunStatus.tsx:64
 msgid "New conversations have been added since the library was generated. Regenerate the library to process them."
 msgstr "Er zijn nieuwe gesprekken toegevoegd sinds de bibliotheek is gegenereerd. Genereer de bibliotheek opnieuw om ze te verwerken."
 
@@ -738,7 +746,7 @@ msgid "New Password"
 msgstr "Nieuw wachtwoord"
 
 #: src/routes/auth/Login.tsx:97
-#: src/routes/project/ProjectsHome.tsx:74
+#: src/routes/project/ProjectsHome.tsx:75
 msgid "New Project"
 msgstr "Nieuw project"
 
@@ -749,6 +757,14 @@ msgstr "Volgende"
 #: src/components/chat/ChatAccordion.tsx:103
 msgid "No chats found. Start a chat using the \"Ask\" button."
 msgstr "Geen chats gevonden. Start een chat met behulp van de \"Vraag\" knop."
+
+#: src/routes/project/library/ProjectLibrary.tsx:296
+msgid "No conversations available to create library"
+msgstr "Geen gesprekken beschikbaar om bibliotheek te maken"
+
+#: src/routes/project/library/ProjectLibrary.tsx:332
+msgid "No conversations available to create library. Please add some conversations to get started."
+msgstr "Geen gesprekken beschikbaar om bibliotheek te maken. Voeg enkele gesprekken toe om te beginnen."
 
 #: src/components/conversation/ConversationAccordion.tsx:270
 msgid "No conversations found. Start a conversation using the participation invite link from the <0><1>project overview.</1></0>"
@@ -766,7 +782,7 @@ msgstr "Geen inzichten beschikbaar. Genereer inzichten voor dit gesprek door naa
 msgid "No key terms or proper nouns have been added yet. Add them using the input above to improve transcript accuracy."
 msgstr "Er zijn nog geen sleuteltermen of eigennamen toegevoegd. Voeg ze toe met behulp van de invoer boven aan om de nauwkeurigheid van het transcript te verbeteren."
 
-#: src/routes/project/ProjectsHome.tsx:200
+#: src/routes/project/ProjectsHome.tsx:202
 msgid "No projects found for search term"
 msgstr "Geen projecten gevonden voor de zoekterm"
 
@@ -897,7 +913,7 @@ msgstr "Schakel deelneming in om delen mogelijk te maken"
 msgid "Please login to continue."
 msgstr "Log in om door te gaan."
 
-#: src/routes/project/chat/ProjectChat.tsx:149
+#: src/routes/project/chat/ProjectChat.tsx:150
 msgid "Please provide a concise summary of the following provided in the context."
 msgstr "Geef een korte samenvatting van het volgende dat in de context is verstrekt."
 
@@ -938,11 +954,11 @@ msgstr "Project Overzicht | Dembrane"
 #~ msgid "Project Overview and Edit"
 #~ msgstr "Project Overzicht en Bewerken"
 
-#: src/routes/project/ProjectsHome.tsx:121
+#: src/routes/project/ProjectsHome.tsx:123
 msgid "Projects"
 msgstr "Projecten"
 
-#: src/routes/project/ProjectsHome.tsx:44
+#: src/routes/project/ProjectsHome.tsx:45
 msgid "Projects | Dembrane"
 msgstr "Projecten | Dembrane"
 
@@ -968,7 +984,7 @@ msgstr "Citaten"
 msgid "Record another conversation"
 msgstr "Neem nog een gesprek op"
 
-#: src/routes/project/library/ProjectLibrary.tsx:287
+#: src/routes/project/library/ProjectLibrary.tsx:288
 msgid "Regenerate Library"
 msgstr "Bibliotheek opnieuw genereren"
 
@@ -980,7 +996,7 @@ msgstr "Registreer | Dembrane"
 msgid "Register as a new user"
 msgstr "Registreer als nieuwe gebruiker"
 
-#: src/routes/project/library/ProjectLibrary.tsx:380
+#: src/routes/project/library/ProjectLibrary.tsx:410
 msgid "Relevance"
 msgstr "Relevantie"
 
@@ -1018,11 +1034,11 @@ msgstr "Bronnen"
 msgid "Resume"
 msgstr "Hervatten"
 
-#: src/routes/project/chat/ProjectChat.tsx:469
+#: src/routes/project/chat/ProjectChat.tsx:470
 msgid "Retry"
 msgstr "Opnieuw proberen"
 
-#: src/components/project/ProjectEdit.tsx:194
+#: src/components/project/ProjectEdit.tsx:196
 #: src/routes/project/resource/ProjectResourceOverview.tsx:143
 msgid "Save"
 msgstr "Opslaan"
@@ -1031,7 +1047,7 @@ msgstr "Opslaan"
 msgid "Search conversations"
 msgstr "Zoek gesprekken"
 
-#: src/routes/project/ProjectsHome.tsx:188
+#: src/routes/project/ProjectsHome.tsx:190
 msgid "Search projects"
 msgstr "Zoek projecten"
 
@@ -1052,11 +1068,11 @@ msgstr "Selecteer tutorial"
 #~ msgid "Select your group"
 #~ msgstr "Selecteer je groep"
 
-#: src/routes/project/chat/ProjectChat.tsx:536
+#: src/routes/project/chat/ProjectChat.tsx:537
 msgid "Send"
 msgstr "Verzenden"
 
-#: src/routes/project/library/ProjectLibrary.tsx:77
+#: src/routes/project/library/ProjectLibrary.tsx:78
 msgid "Sentiment"
 msgstr "Gevoel"
 
@@ -1114,7 +1130,7 @@ msgstr "Opname starten"
 
 #: src/routes/participant/ParticipantConversation.tsx:1004
 #: src/routes/participant/ParticipantConversation.tsx:1313
-#: src/routes/project/chat/ProjectChat.tsx:439
+#: src/routes/project/chat/ProjectChat.tsx:440
 msgid "Stop"
 msgstr "Stop"
 
@@ -1124,7 +1140,7 @@ msgstr "Stop"
 msgid "Submit"
 msgstr "Stuur in"
 
-#: src/routes/project/chat/ProjectChat.tsx:147
+#: src/routes/project/chat/ProjectChat.tsx:148
 msgid "Summarize"
 msgstr "Samenvatten"
 
@@ -1138,8 +1154,8 @@ msgstr "Samenvatting"
 msgid "Tags"
 msgstr "Trefwoorden"
 
-#: src/routes/project/chat/ProjectChat.tsx:185
-#: src/routes/project/chat/ProjectChat.tsx:190
+#: src/routes/project/chat/ProjectChat.tsx:186
+#: src/routes/project/chat/ProjectChat.tsx:191
 msgid "Templates"
 msgstr "Sjablonen"
 
@@ -1167,11 +1183,11 @@ msgstr "De Portal is de website die wordt geladen wanneer deelnemers het QR-code
 msgid "There was an error verifying your email. Please try again."
 msgstr "Er is een fout opgetreden bij het verifiëren van uw e-mail. Probeer het alstublieft opnieuw."
 
-#: src/routes/project/chat/ProjectChat.tsx:191
+#: src/routes/project/chat/ProjectChat.tsx:192
 msgid "These are some helpful preset templates to get you started."
 msgstr "Dit zijn enkele nuttige voorbeeld sjablonen om u te helpen."
 
-#: src/routes/project/library/ProjectLibrary.tsx:58
+#: src/routes/project/library/ProjectLibrary.tsx:59
 msgid "These are your default view templates. Once you create your library these will be your first two views."
 msgstr "Dit zijn uw standaard weergave sjablonen. Zodra u uw bibliotheek hebt gemaakt, zullen deze uw eerste twee weergaven zijn."
 
@@ -1180,7 +1196,11 @@ msgstr "Dit zijn uw standaard weergave sjablonen. Zodra u uw bibliotheek hebt ge
 #~ msgstr "Met deze tool kan je gesprekken of verhalen opnemen om je stem te laten horen."
 
 #: src/routes/project/library/ProjectLibrary.tsx:312
-msgid "This is your project library. Currently, {0} conversations are waiting to be processed."
+#~ msgid "This is your project library. Currently, {0} conversations are waiting to be processed."
+#~ msgstr "Dit is uw projectbibliotheek. Momenteel zijn {0} gesprekken in behandeling om te worden verwerkt."
+
+#: src/routes/project/library/ProjectLibrary.tsx:344
+msgid "This is your project library. Currently,{0} conversations are waiting to be processed."
 msgstr "Dit is uw projectbibliotheek. Momenteel zijn {0} gesprekken in behandeling om te worden verwerkt."
 
 #: src/components/project/ProjectBasicEdit.tsx:93
@@ -1195,7 +1215,7 @@ msgstr "Deze pagina wordt getoond na het voltooien van het gesprek door de deeln
 msgid "This page is shown to participants when they start a conversation after they successfully complete the tutorial."
 msgstr "Deze pagina wordt getoond aan deelnemers wanneer ze een gesprek starten na het voltooien van de tutorial."
 
-#: src/components/project/ProjectAnalysisRunStatus.tsx:68
+#: src/components/project/ProjectAnalysisRunStatus.tsx:73
 msgid "This project library was generated on"
 msgstr "Deze projectbibliotheek is op"
 
@@ -1211,11 +1231,11 @@ msgstr "Deze samenvatting is AI-gegenereerd en kort, voor een uitgebreide analys
 msgid "This title is shown to participants when they start a conversation"
 msgstr "Deze titel wordt getoond aan deelnemers wanneer ze een gesprek starten"
 
-#: src/routes/project/chat/ProjectChat.tsx:166
+#: src/routes/project/chat/ProjectChat.tsx:167
 msgid "This will clear your current input. Are you sure?"
 msgstr "Dit zal uw huidige invoer wissen. Weet u het zeker?"
 
-#: src/routes/project/library/ProjectLibrary.tsx:389
+#: src/routes/project/library/ProjectLibrary.tsx:419
 msgid "Time Created"
 msgstr "Tijd gemaakt"
 
@@ -1227,8 +1247,8 @@ msgstr "Tijd gemaakt"
 msgid "To assign a new tag, please create it first in the project overview."
 msgstr "Om een nieuw trefwoord toe te wijzen, maak het eerst in het projectoverzicht."
 
-#: src/routes/project/library/ProjectLibrary.tsx:67
-#: src/routes/project/library/ProjectLibrary.tsx:155
+#: src/routes/project/library/ProjectLibrary.tsx:68
+#: src/routes/project/library/ProjectLibrary.tsx:156
 msgid "Topics"
 msgstr "Onderwerpen"
 
@@ -1246,7 +1266,7 @@ msgstr "Transcript"
 msgid "Transcript Settings"
 msgstr "Transcriptie Instellingen"
 
-#: src/routes/project/chat/ProjectChat.tsx:506
+#: src/routes/project/chat/ProjectChat.tsx:507
 msgid "Type a message..."
 msgstr "Typ een bericht..."
 
@@ -1264,7 +1284,7 @@ msgid "Type your response here"
 msgstr "Typ hier uw reactie"
 
 #: src/components/form/UnsavedChanges.tsx:20
-#: src/components/project/ProjectEdit.tsx:91
+#: src/components/project/ProjectEdit.tsx:93
 #: src/routes/project/resource/ProjectResourceOverview.tsx:115
 msgid "Unsaved changes"
 msgstr "Niet-opgeslagen wijzigingen"
@@ -1281,7 +1301,7 @@ msgstr "Upload bezig"
 msgid "Upload resources"
 msgstr "Bronnen uploaden"
 
-#: src/routes/project/chat/ProjectChat.tsx:545
+#: src/routes/project/chat/ProjectChat.tsx:546
 msgid "Use Shift + Enter to add a new line"
 msgstr "Gebruik Shift + Enter om een nieuwe regel toe te voegen"
 
@@ -1303,11 +1323,11 @@ msgstr "We hebben u een e-mail gestuurd met de volgende stappen. Als u het niet 
 msgid "Welcome"
 msgstr "Welkom"
 
-#: src/routes/project/chat/ProjectChat.tsx:397
+#: src/routes/project/chat/ProjectChat.tsx:398
 msgid "Welcome to Dembrane Chat! Use the sidebar to select resources and conversations that you want to analyse. Then, you can ask questions about the selected resources and conversations."
 msgstr "Welkom bij Dembrane Chat! Gebruik de zijbalk om bronnen en gesprekken te selecteren die u wilt analyseren. Dan kunt u vragen stellen over de geselecteerde bronnen en gesprekken."
 
-#: src/routes/project/ProjectsHome.tsx:160
+#: src/routes/project/ProjectsHome.tsx:162
 msgid "Welcome to Your Home! Here you can see all your projects and get access to tutorial resources. Currently, you have no projects. Click \"Create\" to configure to get started!"
 msgstr "Welkom op je Home! Hier kun je al je projecten bekijken en toegang krijgen tot tutorialbronnen. Momenteel heb je nog geen projecten. Klik op \"Maak\" om te beginnen!"
 
@@ -1351,7 +1371,7 @@ msgstr "Je moet inloggen met dezelfde provider die u gebruikte om u aan te melde
 #~ msgid "Your code is"
 #~ msgstr ""
 
-#: src/routes/project/library/ProjectLibrary.tsx:363
+#: src/routes/project/library/ProjectLibrary.tsx:393
 msgid "Your library is empty. Create a library to see your first insights."
 msgstr "Je bibliotheek is leeg. Maak een bibliotheek om je eerste inzichten te bekijken."
 
@@ -1363,10 +1383,10 @@ msgstr "Je reactie is opgenomen. Je kunt dit tabblad nu sluiten."
 msgid "Your responses"
 msgstr "Je reacties"
 
-#: src/routes/project/library/ProjectLibrary.tsx:144
+#: src/routes/project/library/ProjectLibrary.tsx:145
 msgid "Your view has been created. Please wait as we process and analyse the data."
 msgstr "Je weergave is gemaakt. Wacht aub terwijl we de data verwerken en analyseren."
 
-#: src/routes/project/library/ProjectLibrary.tsx:324
+#: src/routes/project/library/ProjectLibrary.tsx:354
 msgid "Your Views"
 msgstr "Je weergaven"

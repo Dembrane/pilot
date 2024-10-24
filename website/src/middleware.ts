@@ -1,52 +1,72 @@
-/*
- * For more info see
- * https://nextjs.org/docs/app/building-your-application/routing/internationalization
- * */
 import { type NextRequest, NextResponse } from 'next/server';
 
 import Negotiator from 'negotiator';
 import linguiConfig from '../lingui.config';
 
-const { locales } = linguiConfig;
+const { locales, sourceLocale } = linguiConfig;
+
+const DEBUG = false;
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (DEBUG)
+    console.log(`[Middleware] Processing request for path: ${pathname}`);
 
   const pathnameHasLocale = locales.some(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`,
   );
 
-  if (pathnameHasLocale) return;
+  if (pathnameHasLocale) {
+    if (DEBUG)
+      console.log(`[Middleware] Path already has locale, no redirect needed`);
 
-  // Redirect if there is no locale
-  const locale = getRequestLocale(request.headers);
+    return NextResponse.next({
+      headers: {
+        'Set-Cookie': `NEXT_LOCALE=${pathname.split('/')[1]}; Path=/; HttpOnly; SameSite=Strict`,
+      },
+    });
+  }
+
+  // Check for a cookie that stores the user's language preference
+  const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value;
+
+  // If a cookie exists, use that locale
+  if (cookieLocale && locales.includes(cookieLocale)) {
+    if (DEBUG)
+      console.log(`[Middleware] Using locale from cookie: ${cookieLocale}`);
+    request.nextUrl.pathname = `/${cookieLocale}${pathname}`;
+    return NextResponse.redirect(request.nextUrl, {
+      headers: {
+        'Set-Cookie': `NEXT_LOCALE=${cookieLocale}; Path=/; HttpOnly; SameSite=Strict`,
+      },
+    });
+  }
+
+  // If no cookie, use the negotiated locale
+  const locale = getRequestLocale(request);
+
+  if (DEBUG) console.log(`[Middleware] Using negotiated locale: ${locale}`);
   request.nextUrl.pathname = `/${locale}${pathname}`;
-  // e.g. incoming request is /products
-  // The new URL is now /en/products
-  return NextResponse.redirect(request.nextUrl);
+  return NextResponse.redirect(request.nextUrl, {
+    headers: {
+      'Set-Cookie': `NEXT_LOCALE=${locale}; Path=/; HttpOnly; SameSite=Strict`,
+    },
+  });
 }
 
-function getRequestLocale(requestHeaders: Headers): string {
-  const langHeader = requestHeaders.get('accept-language') || undefined;
+function getRequestLocale(request: NextRequest): string {
+  const langHeader = request.headers.get('accept-language');
   const languages = new Negotiator({
-    headers: { 'accept-language': langHeader },
-  }).languages(locales.slice());
+    headers: { 'accept-language': langHeader || undefined },
+  }).languages(locales);
 
-  const activeLocale = languages[0] || locales[0] || 'en';
-
-  return activeLocale;
+  return languages[0] || sourceLocale || 'en';
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
-     * Feel free to modify this pattern to include more paths.
-     */
-    '/((?!_next/static|_next/image|api|auth|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // Skip all internal paths (_next)
+    '/((?!_next|api|favicon.ico).*)',
   ],
 };

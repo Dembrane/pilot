@@ -1,36 +1,47 @@
-import '@/src/styles/globals.css';
+import '@styles/globals.css';
 import { Space_Grotesk } from 'next/font/google';
-import { Header } from '@/src/components/Header';
-import { Footer } from '@/src/components/Footer';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { notFound } from 'next/navigation';
-import i18nConfig from '@/i18nConfig';
+import { LinguiClientProvider } from '@/components/LinguiClientProvider';
+import { allMessages } from '@/appRouterI18n';
+import ThemeProviders from '@/components/ThemeProviders';
+import DembraneBackground from '@/components/animations/DembraneBackground';
+
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
-  variable: '--font-space-grotesk',
+  weight: ['300', '400', '500', '600', '700'],
 });
 
 type LayoutProps = {
-  params: { lang: string };
+  params: Promise<{ lang: string }>;
   children: React.ReactNode;
 };
 
-export default function RootLayout({ children, params }: LayoutProps) {
-    const { lang } = params;
-    const { locales } = i18nConfig;
+export default async function RootLayout(props: LayoutProps) {
+  const params = await props.params;
 
-    // Check if the current locale is supported
-    if (!locales.includes(lang)) {
-      notFound();
-    }
+  const {
+    children
+  } = props;
 
-  console.log(params.lang);
+  const { lang } = params;
+
   return (
-    <html lang={lang}>
-      <body className={`${spaceGrotesk.variable} font-sans`}>
-        <Header />
-        <main className="">{children}</main>
-        <Footer />
+    <html lang={lang} suppressHydrationWarning>
+      <body className={`${spaceGrotesk.className} bg-background`}>
+        <LinguiClientProvider
+          initialLocale={lang}
+          initialMessages={allMessages[lang]!}
+        >
+          <ThemeProviders>
+            <Header lang={lang} />
+            <main>{children}</main>
+            <Footer navigationId="footer" lang={lang} />
+            {/* <DembraneBackground /> */}
+          </ThemeProviders>
+        </LinguiClientProvider>
       </body>
     </html>
   );

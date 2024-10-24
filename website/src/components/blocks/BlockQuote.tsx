@@ -1,34 +1,68 @@
 import React from 'react';
-import { BlockQuote as BlockQuoteType } from '@/src/lib/types';
+import { BlockQuote as BlockQuoteType } from '@/lib/types';
+import { client } from '@/lib/directus';
+import { readItems } from '@directus/sdk';
+import QuoteShowcase from '@/components/QuoteShowcase';
 
 type BlockQuoteProps = {
-  block: BlockQuoteType;
+  block: {
+    id: string;
+    collection: string;
+    item: BlockQuoteType;
+  };
+  lang: string;
 };
 
-const BlockQuote: React.FC<BlockQuoteProps> = ({ block }) => {
-  return (
-    <div className="w-full px-4 py-8 bg-gray-100">
-      <div className="max-w-3xl mx-auto">
-        {block.content && (
-          <blockquote className="text-xl md:text-2xl font-serif italic text-gray-700 mb-4">
-            "{block.content}"
-          </blockquote>
-        )}
-        <div className="flex flex-col items-start">
-          {block.title && (
-            <cite className="text-lg font-semibold text-gray-900">
-              {block.title}
-            </cite>
-          )}
-          {block.subtitle && (
-            <span className="text-sm text-gray-600">
-              {block.subtitle}
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+const getBlockWithTranslations = async (blockId: string, lang: string) => {
+  try {
+    const response = await client.request<BlockQuoteType[]>(
+      readItems('block_quote', {
+        filter: {
+          id: {
+            _eq: blockId,
+          },
+        },
+        fields: [
+          'content',
+          'title',
+          'subtitle',
+          'translations.*',
+        ],
+      }),
+    );
+
+    if (response && response.length > 0) {
+      const block = response[0];
+      if (!block) {
+        return null;
+      }
+      const blockTranslation = block.translations?.find((t: any) => t.languages_code === lang);
+
+      return {
+        content: blockTranslation?.content || block.content,
+        title: blockTranslation?.title || block.title,
+        subtitle: blockTranslation?.subtitle || block.subtitle,
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching block quote:', error);
+    return null;
+  }
+};
+
+const BlockQuote: React.FC<BlockQuoteProps> = async ({ block, lang }) => {
+  if (!block.id) {
+    return null;
+  }
+
+  const blockData = await getBlockWithTranslations(block.item.id, lang);
+
+  if (!blockData) {
+    return <div>Error loading quote. Please try again later.</div>;
+  }
+
+  return <QuoteShowcase {...blockData} />;
 };
 
 export default BlockQuote;

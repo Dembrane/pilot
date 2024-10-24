@@ -1,8 +1,27 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2024-10-01 17:50+0200\n"
+"POT-Creation-Date: 2024-10-02 10:41+0200\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: en-US\n"
+
+#. js-lingui-explicit-id
+#: src/components/LanguageSelection.tsx:41
+msgid "change_language"
+msgstr "Change language"
+
+#. js-lingui-explicit-id
+#: src/components/LanguageSelection.tsx:48
+msgid "english"
+msgstr "English"
+
+#. js-lingui-explicit-id
+#: src/components/LanguageSelection.tsx:49
+msgid "dutch"
+msgstr "Dutch"
+
+#. js-lingui-explicit-id
+msgid "search_faqs"
+msgstr "Search FAQs..."

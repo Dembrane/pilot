@@ -1,68 +1,92 @@
 import React from 'react';
-import Image from 'next/image';
-import { BlockSteps as BlockStepsType, BlockStepItems } from '@/src/lib/types';
+import { BlockSteps as BlockStepsType } from '@/lib/types';
+import { client } from '@/lib/directus';
+import { readItems } from '@directus/sdk';
+import StepsShowcase from '@/components/StepsShowcase';
 
 type BlockStepsProps = {
-  block: BlockStepsType;
+  block: {
+    id: string;
+    collection: string;
+    item: BlockStepsType;
+  };
+  lang: string;
 };
 
-const BlockSteps = ({ block }: BlockStepsProps) => {
-    
-    if (!block || !block.id) {
-      return null; // or some fallback UI
-    }
+const getBlockWithSteps = async (blockId: string, lang: string) => {
+  try {
+    const response = await client.request<BlockStepsType[]>(
+      readItems('block_steps', {
+        filter: {
+          id: {
+            _eq: blockId,
+          },
+        },
+        fields: [
+          'id',
+          'title',
+          'headline',
+          'show_step_numbers',
+          'translations.*',
+          {
+            steps: [
+              'id',
+              'title',
+              'content',
+              'image',
+              'sort',
+              'translations.*',
+            ],
+          },
+        ],
+        sort: ['steps.sort'],
+      }),
+    );
 
-    const {
-      title,
-      headline,
-      alternate_image_position,
-      show_step_numbers,
-      steps = [],
-    } = block;
+    console.log(response);
 
-  return (
-    <div className="w-full px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        {block.title && (
-          <h2 className="text-2xl md:text-3xl font-bold mb-2 text-center">{block.title}</h2>
-        )}
-        {block.headline && (
-          <p className="text-lg md:text-xl mb-6 text-center">{block.headline}</p>
-        )}
-        <div className="space-y-8 md:space-y-12">
-          {steps.map((step: BlockStepItems, index: number) => (
-            <div key={step.id} className={`flex flex-col ${block.alternate_image_position && index % 2 !== 0 ? 'md:flex-row-reverse' : 'md:flex-row'} items-center`}>
-              {step.image && (
-                <div className="w-full md:w-1/2 mb-4 md:mb-0">
-                  <Image
-                    src={`/assets/${step.image}`}
-                    alt={step.title || `Step ${index + 1}`}
-                    width={500}
-                    height={300}
-                    objectFit="cover"
-                    className="rounded-lg"
-                  />
-                </div>
-              )}
-              <div className="w-full md:w-1/2 md:px-6">
-                {block.show_step_numbers && (
-                  <div className="text-2xl font-bold text-gray-300 mb-2">
-                    {(index + 1).toString().padStart(2, '0')}
-                  </div>
-                )}
-                {step.title && (
-                  <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                )}
-                {step.content && (
-                  <p className="text-gray-600">{step.content}</p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+    if (!response || response.length === 0) return null;
+
+    const block = response[0];
+    const blockTranslation = block.translations?.find(
+      (t: any) => t.languages_code === lang
+    );
+
+    const steps = block.steps.map((step: any) => {
+      const stepTranslation = step.translations?.find(
+        (t: any) => t.languages_code === lang
+      );
+      return {
+        id: step.id,
+        title: stepTranslation?.title || step.title,
+        content: stepTranslation?.content || step.content,
+        image: step.image,
+      };
+    });
+
+    return {
+      title: blockTranslation?.title || block.title,
+      headline: blockTranslation?.headline || block.headline,
+      tag: blockTranslation?.tag || block.tag,
+      show_step_numbers: block.show_step_numbers,
+      steps,
+    };
+  } catch (error) {
+    console.error('Error fetching block steps:', error);
+    return null;
+  }
+};
+
+const BlockSteps: React.FC<BlockStepsProps> = async ({ block, lang }) => {
+  const blockData = await getBlockWithSteps(block.item.id, lang);
+
+  console.log(blockData);
+
+  if (!blockData) {
+    return <div>Error loading steps block. Please try again later.</div>;
+  }
+
+  return <StepsShowcase blockData={blockData} />;
 };
 
 export default BlockSteps;

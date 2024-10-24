@@ -58,7 +58,7 @@ export default function InfiniteCarousel({
   }, [children]);
 
   return (
-    <section className="mt-40 flex flex-col w-full">
+    <div className="flex w-full flex-col">
       {title && (
         <h1 className="mb-2 min-w-full max-w-[80vw] px-2 text-5xl font-thin md:px-4 md:text-6xl lg:px-8">
           {title}
@@ -67,20 +67,20 @@ export default function InfiniteCarousel({
       <motion.div
         id={id}
         ref={carouselRef}
-        className={`${className} relative mb-4 flex snap-x snap-mandatory gap-8 overflow-x-auto p-2 md:p-4 lg:p-8 w-full`}
+        className={`${className} relative mb-4 flex w-full snap-x snap-mandatory gap-8 overflow-x-auto p-2 md:p-4 lg:p-8`}
         style={{
-          WebkitOverflowScrolling: "touch",
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
         }}
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.8}
         onDrag={handleDrag}
       >
-        {items.map((item, i) => (
+        {items.map((item, index) => (
           <div
-            key={i}
+            key={index}
             style={{ width: itemWidth, flexShrink: 0 }}
             className="snap-start scroll-mx-2 md:scroll-mx-4 lg:scroll-mx-8"
           >
@@ -88,6 +88,6 @@ export default function InfiniteCarousel({
           </div>
         ))}
       </motion.div>
-    </section>
+    </div>
   );
 }

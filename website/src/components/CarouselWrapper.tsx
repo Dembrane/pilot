@@ -7,12 +7,13 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@/src/components/ui/carousel';
-import WysiwygContent from '@/src/components/WysiwygContent';
-import type { CarouselApi } from '@/src/components/ui/carousel';
+} from '@/components/ui/carousel';
+import WysiwygContent from '@/components/WysiwygContent';
+import type { CarouselApi } from '@/components/ui/carousel';
 import type { AutoplayPlugin } from 'embla-carousel-autoplay';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { PlayIcon, PauseIcon } from '@radix-ui/react-icons';
+import AnimateLetters from './animations/AnimateLetters';
 
 type CarouselWrapperProps = {
   title?: string;
@@ -33,7 +34,8 @@ const CarouselWrapper: React.FC<CarouselWrapperProps> = ({ title, headline, chil
         const autoplayPlugin = AutoplayModule.default({ 
           delay: 2000, 
           stopOnInteraction: true,
-          playOnInit: false 
+          stopOnMouseEnter: true,
+          playOnInit: false,
         });
         setAutoplay(autoplayPlugin);
         setPlugins([autoplayPlugin]);
@@ -94,39 +96,44 @@ const CarouselWrapper: React.FC<CarouselWrapperProps> = ({ title, headline, chil
         setApi={setApi}
         className="w-full"
       >
-        <div className="mb-8 flex items-center justify-between">
-          {title && (
-            <h2 className="px-4 text-left text-3xl font-bold md:text-4xl">
-              {title}
-            </h2>
+        <div className="md:container">
+          <div className="mb-8 flex items-center justify-between">
+            {title && (
+              <AnimateLetters
+                text={title}
+                className="px-4 text-left text-4xl text-foreground sm:text-6xl md:text-9xl"
+              />
+            )}
+            <div className="flex items-center space-x-2 px-4">
+              <CarouselPrevious className="relative inset-auto transform-none" />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={toggleAutoplay}
+                className="relative inset-auto transform-none rounded-full"
+              >
+                {isAutoplayActive ? (
+                  <PauseIcon className="h-4 w-4" />
+                ) : (
+                  <PlayIcon className="h-4 w-4" />
+                )}
+              </Button>
+              <CarouselNext className="relative inset-auto transform-none" />
+            </div>
+          </div>
+
+          {headline && (
+            <div className="mb-4 max-w-xl px-4 text-left text-2xl text-muted-foreground md:text-4xl">
+              <WysiwygContent content={headline} />
+            </div>
           )}
-          <div className="flex items-center space-x-2 px-4">
-            <CarouselPrevious className="relative inset-auto transform-none" />
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={toggleAutoplay}
-              className="relative inset-auto transform-none rounded-full"
-            >
-              {isAutoplayActive ? (
-                <PauseIcon className="h-4 w-4" />
-              ) : (
-                <PlayIcon className="h-4 w-4" />
-              )}
-            </Button>
-            <CarouselNext className="relative inset-auto transform-none" />
-          </div>
         </div>
-        {headline && (
-          <div className="mb-8 px-4 text-left text-lg text-gray-600 md:text-xl">
-            <WysiwygContent content={headline} />
-          </div>
-        )}
         <CarouselContent className="ml-0">
           {React.Children.map(children, (child, index) => (
             <CarouselItem
               key={index}
-              className="basis-4/5 pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 2xl:basis-1/5 pb-4"
+              // className="basis-3/4 pb-4 pl-4 sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 2xl:basis-1/5"
+              className="basis-[400px]"
             >
               {child}
             </CarouselItem>

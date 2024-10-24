@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { BlockColumnsRows as BlockColumnsRowsType, BlockButtonGroup as BlockButtonGroupType } from '@/src/lib/types';
+import { BlockColumnsRows as BlockColumnsRowsType, BlockButtonGroup as BlockButtonGroupType } from '@/lib/types';
 import BlockButtonGroup from './BlockButtonGroup';
 
 type BlockColumnsRowsProps = {

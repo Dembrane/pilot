@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { BlockButton as BlockButtonType } from '@/src/lib/types';
+import { BlockButton as BlockButtonType } from '@/lib/types';
 
 type BlockButtonProps = {
   block: BlockButtonType;

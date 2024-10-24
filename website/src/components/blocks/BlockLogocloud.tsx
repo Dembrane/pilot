@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { BlockLogocloud as BlockLogocloudType, BlockLogocloudLogos } from '@/src/lib/types';
+import { BlockLogocloud as BlockLogocloudType, BlockLogocloudLogos } from '@/lib/types';
 
 type BlockLogocloudProps = {
   block: BlockLogocloudType;

@@ -1,1 +1,1 @@
-/*eslint-disable*/module.exports={messages:JSON.parse("{}")};
+/*eslint-disable*/module.exports={messages:JSON.parse("{\"error.loadingPage\":\"error.loadingPage\",\"error.loadingProduct\":\"error.loadingProduct\",\"search_faqs\":\"search_faqs\",\"english\":\"Engels\",\"dutch\":\"Nederlands\",\"change_language\":\"Wijzig taal\"}")};

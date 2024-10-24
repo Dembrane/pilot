@@ -1,5 +1,5 @@
 import React from 'react';
-import { BlockVideo as BlockVideoType } from '@/src/lib/types';
+import { BlockVideo as BlockVideoType } from '@/lib/types';
 
 type BlockVideoProps = {
   block: BlockVideoType;

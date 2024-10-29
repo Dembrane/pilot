@@ -10,9 +10,9 @@ dependencies = [
     "python-multipart==0.0.*",
     "celery[redis]>=5.4.0",
     # Langchain
-    "langchain==0.1.*",
-    "langchain-community==0.0.*",
-    "langchain-experimental==0.0.57",
+    "langchain==0.3.*",
+    "langchain-community==0.3.*",
+    "langchain-experimental==0.0.61",
     "langchain-openai==0.0.*",
     "pypdf==4.0.*",
     # OpenAI
@@ -20,7 +20,7 @@ dependencies = [
     # Data
     "pandas==2.2.*",
     "numpy==1.26.*",
-    "scikit-learn==1.4.*",
+    "scikit-learn==1.5.*",
     # Database
     "SQLAlchemy==2.0.*",
     "alembic==1.13.*",

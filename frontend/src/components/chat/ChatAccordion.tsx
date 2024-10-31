@@ -14,7 +14,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { useNavigate, useParams } from "react-router-dom";
+import {  useParams } from "react-router-dom";
 import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react";
 import { formatRelative } from "date-fns";
 import { NavigationButton } from "../common/NavigationButton";

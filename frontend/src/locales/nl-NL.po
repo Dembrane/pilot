@@ -974,7 +974,7 @@ msgstr "Projecten Home"
 #: src/routes/project/library/ProjectLibraryAspect.tsx:81
 #: src/routes/project/library/ProjectLibraryInsight.tsx:90
 msgid "Quotes"
-msgstr "Citaten"
+msgstr "Quotes"
 
 #: src/routes/participant/ParticipantLogin.tsx:148
 #~ msgid "Ready!"

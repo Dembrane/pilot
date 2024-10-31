@@ -3,12 +3,10 @@ import {
   Button,
   CopyButton,
   Group,
-  LoadingOverlay,
   Paper,
   Skeleton,
   Stack,
   Text,
-  Tooltip,
   rem,
 } from "@mantine/core";
 import { IconCheck, IconCopy, IconShare } from "@tabler/icons-react";
@@ -41,6 +39,18 @@ export const ProjectQRCode = ({ project }: ProjectQRCodeProps) => {
     return <Skeleton height={200} />;
   }
 
+  let canShare = false;
+  try {
+    if (navigator.canShare) {
+      canShare = navigator.canShare({
+        title: `Join the conversation on Dembrane`,
+        url: link,
+      });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
   return (
     <Paper
       p="md"
@@ -52,10 +62,7 @@ export const ProjectQRCode = ({ project }: ProjectQRCodeProps) => {
             <QRCode value={link} />
           </Box>
           <Stack gap="sm">
-            {navigator.canShare({
-              title: `Join ${project.default_conversation_title} on Dembrane`,
-              url: link,
-            }) && (
+            {canShare && (
               <Button
                 rightSection={<IconShare style={{ width: rem(16) }} />}
                 variant="outline"

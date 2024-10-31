@@ -41,7 +41,7 @@ services:
       - postgres
       - rabbitmq
     environment:
-      REFRESH_TOKEN_COOKIE_NAME: ${DIRECTUS_REFRESH_TOKEN_COOKIE_NAME:-directus_refresh_token}
+      SESSION_COOKIE_NAME: ${DIRECTUS_SESSION_COOKIE_NAME:-directus_session_token}
       PUBLIC_URL: ${DIRECTUS_PUBLIC_URL}
       PORT: 8055
       SECRET: ${DIRECTUS_SECRET}

@@ -6,7 +6,7 @@
 
 ## Architecture
 
-![Architecture](/docs/diagrams/architecture20240917.png)
+![Architecture](/developer-docs/diagrams/architecture20240917.png)
 
 ## Deployment
 

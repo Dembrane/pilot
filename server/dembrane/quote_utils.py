@@ -7,7 +7,6 @@ from typing import List, Optional
 import numpy as np
 import pandas as pd
 import tiktoken
-from openai import OpenAI
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from sklearn.cluster import KMeans  # type: ignore

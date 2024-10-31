@@ -18,7 +18,6 @@ services:
       - default
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    logging: *default-logging
 
   rabbitmq:
     image: rabbitmq:3.13
@@ -30,7 +29,6 @@ services:
       - default
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-    logging: *default-logging
 
   directus:
     restart: unless-stopped
@@ -124,7 +122,6 @@ services:
       - default
     depends_on:
       - directus
-    logging: *default-logging
 
   worker:
     build:
@@ -154,7 +151,6 @@ services:
       - default
     depends_on:
       - api-server
-    logging: *default-logging
 
   dashboard-frontend:
     build:
@@ -170,7 +166,6 @@ services:
     restart: unless-stopped
     depends_on:
       - api-server
-    logging: *default-logging
 
   participant-frontend:
     build:
@@ -187,7 +182,6 @@ services:
       - default
     depends_on:
       - dashboard-frontend
-    logging: *default-logging
 
 volumes:
   postgres_data:

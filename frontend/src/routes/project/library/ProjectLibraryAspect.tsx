@@ -1,13 +1,13 @@
 import { Icons } from "@/icons";
 import {
-  Divider,
-  LoadingOverlay,
-  Stack,
-  Title,
-  Text,
   Box,
   Container,
+  Divider,
+  LoadingOverlay,
   Skeleton,
+  Stack,
+  Text,
+  Title,
 } from "@mantine/core";
 import { useParams } from "react-router-dom";
 import { Quote } from "../../../components/quote/Quote";

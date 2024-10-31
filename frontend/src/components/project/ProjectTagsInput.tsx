@@ -4,7 +4,7 @@ import {
   useProjectById,
 } from "@/lib/query";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { t, Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 import {
   Alert,
   Box,

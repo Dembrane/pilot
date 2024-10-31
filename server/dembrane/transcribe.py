@@ -2,12 +2,8 @@ import os
 import logging
 from typing import Optional
 
-# import requests
-from openai import OpenAI
-
+from dembrane.openai import client
 from dembrane.database import DatabaseSession, ConversationModel, ConversationChunkModel
-
-openai_client = OpenAI()
 
 logger = logging.getLogger("transcribe")
 
@@ -37,7 +33,7 @@ def transcribe_audio_openai(
         }
 
         try:
-            transcription = openai_client.audio.transcriptions.create(**options)  # type: ignore
+            transcription = client.audio.transcriptions.create(**options)  # type: ignore
         except Exception as exc:
             logger.error(f"Failed to transcribe audio: {exc}")
             raise TranscriptionError(f"Failed to transcribe audio: {exc}") from exc

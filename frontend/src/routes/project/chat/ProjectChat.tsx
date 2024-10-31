@@ -8,22 +8,22 @@ import {
   useProjectChatContext,
 } from "@/lib/query";
 import {
-  Box,
-  Stack,
-  Title,
-  Divider,
-  Textarea,
-  Group,
-  Text,
-  Button,
-  LoadingOverlay,
+  ActionIcon,
   Alert,
+  Anchor,
+  Box,
+  Button,
+  CopyButton,
+  Divider,
+  Group,
+  LoadingOverlay,
   Menu,
   SimpleGrid,
-  CopyButton,
-  ActionIcon,
+  Stack,
+  Text,
+  Textarea,
+  Title,
   Tooltip,
-  Anchor,
 } from "@mantine/core";
 import { useDisclosure, useDocumentTitle } from "@mantine/hooks";
 import {
@@ -88,7 +88,7 @@ const ChatHistoryMessage = ({
           <Group w="100%" gap="xs">
             <Text className={cn("italic")} size="xs" c="gray.7">
               {formatDate(
-                // @ts-ignore
+                // @ts-expect-error message is not typed
                 new Date(message.createdAt ?? new Date()),
                 "MMM d, h:mm a",
               )}
@@ -250,7 +250,7 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
   } = useChat({
     api: `${API_BASE_URL}/chats/${chatId}`,
     credentials: "include",
-    // @ts-ignore
+    // @ts-expect-error chatHistoryQuery.data is not typed
     initialMessages: chatHistoryQuery.data ?? [],
     streamProtocol: "data",
     onResponse: (response) => {
@@ -295,7 +295,7 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
     };
 
     // publish the incomplete result to the backend
-    addChatMessageMutation.mutate(body as any);
+    addChatMessageMutation.mutate(body);
   };
 
   const customHandleSubmit = async () => {
@@ -328,10 +328,16 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
       chatHistoryQuery.data &&
       chatHistoryQuery.data.length > (messages?.length ?? 0)
     ) {
-      // @ts-ignore
+      // @ts-expect-error chatHistoryQuery.data is not typed
       setMessages(chatHistoryQuery.data ?? messages);
     }
-  }, [chatHistoryQuery.data, isLoading, chatHistoryQuery.isLoading, messages]);
+  }, [
+    chatHistoryQuery.data,
+    isLoading,
+    chatHistoryQuery.isLoading,
+    messages,
+    setMessages,
+  ]);
 
   return {
     isInitializing: chatHistoryQuery.isLoading,
@@ -390,12 +396,11 @@ export const ProjectChatRoute = () => {
       <Box className="flex-grow">
         <Stack py="sm" pb="xl" className="relative h-full w-full">
           <ChatHistoryMessage
-            // @ts-ignore
+            // @ts-expect-error chatHistoryQuery.data is not typed
             message={{
               id: "init",
               role: "assistant",
-              content:
-                t`Welcome to Dembrane Chat! Use the sidebar to select resources and conversations that you want to analyse. Then, you can ask questions about the selected resources and conversations.`,
+              content: t`Welcome to Dembrane Chat! Use the sidebar to select resources and conversations that you want to analyse. Then, you can ask questions about the selected resources and conversations.`,
             }}
           />
 
@@ -404,7 +409,7 @@ export const ProjectChatRoute = () => {
             messages.length > 0 &&
             messages.slice(0, -1).map((message, idx) => (
               <div key={message.id + idx}>
-                {/* @ts-ignore */}
+                {/* @ts-expect-error chatHistoryQuery.data is not typed */}
                 <ChatHistoryMessage message={message} />
               </div>
             ))}
@@ -414,7 +419,7 @@ export const ProjectChatRoute = () => {
             messages[messages.length - 1].role === "user" && (
               <div ref={lastMessageRef}>
                 <ChatHistoryMessage
-                  // @ts-ignore
+                  // @ts-expect-error chatHistoryQuery.data is not typed
                   message={messages[messages.length - 1]}
                   section={
                     !isLoading && (
@@ -446,7 +451,7 @@ export const ProjectChatRoute = () => {
             messages.length > 0 &&
             messages[messages.length - 1].role === "assistant" && (
               <div ref={lastMessageRef}>
-                {/* @ts-ignore */}
+                {/* @ts-expect-error chatHistoryQuery.data is not typed */}
                 <ChatHistoryMessage message={messages[messages.length - 1]} />
               </div>
             )}
@@ -483,7 +488,7 @@ export const ProjectChatRoute = () => {
                   <Trans>Adding Context:</Trans>
                 </Text>
                 <ConversationLinks
-                  // @ts-ignore
+                  // @ts-expect-error conversation_id is not typed
                   conversations={contextToBeAdded.conversations.map((c) => ({
                     id: c.conversation_id,
                     participant_name: c.conversation_participant_name,

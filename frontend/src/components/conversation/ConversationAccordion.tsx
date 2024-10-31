@@ -6,23 +6,23 @@ import {
   useProjectChatContext,
 } from "@/lib/query";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { t, Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 import {
   Accordion,
-  Group,
-  LoadingOverlay,
-  Stack,
-  Title,
-  Text,
-  Tooltip,
-  Anchor,
-  Pill,
-  Checkbox,
-  TextInput,
   ActionIcon,
-  Menu,
+  Anchor,
+  Checkbox,
+  Group,
   Loader,
+  LoadingOverlay,
+  Menu,
+  Pill,
   Skeleton,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+  Tooltip,
 } from "@mantine/core";
 import React, { useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";

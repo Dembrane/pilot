@@ -12,11 +12,12 @@ import ParticipantOnboardingCards, {
   LanguageCards,
 } from "@/components/participant/ParticipantOnboardingCards";
 import {
-  DirectusFiles,
   EchoPortalTutorial,
   EchoPortalTutorialCard,
   EchoPortalTutorialCardTranslations,
 } from "@/lib/typesDirectusContent";
+
+// FIXME: use a subset of lucide icons for onboarding cards instead
 import * as LucideIcons from "lucide-react";
 
 const getLucideIcon = (icon: string) => {

@@ -1,5 +1,5 @@
 import { useVerifyMutation } from "@/lib/query";
-import { t, Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 import { Container, Group, Loader, Stack, Text, Title } from "@mantine/core";
 import { useDocumentTitle } from "@mantine/hooks";
 import { useEffect, useRef } from "react";

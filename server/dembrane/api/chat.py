@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Literal, Optional, Generator
+from typing import Any, Dict, List, Literal, Optional, Generator
 
 from fastapi import Query, APIRouter, HTTPException
 from pydantic import BaseModel
@@ -15,11 +15,12 @@ from dembrane.database import (
 )
 from dembrane.chat_utils import (
     MAX_CHAT_CONTEXT_LENGTH,
+    create_system_messages,
     get_project_chat_history,
     stream_anthropic_chat_response,
 )
 from dembrane.quote_utils import count_tokens
-from dembrane.api.conversation import get_conversation_transcript, get_conversation_token_count
+from dembrane.api.conversation import get_conversation_token_count
 
 ChatRouter = APIRouter(tags=["chat"])
 
@@ -173,7 +174,6 @@ class ChatDeleteContextSchema(BaseModel):
     conversation_id: str
 
 
-#
 @ChatRouter.post("/{chat_id}/delete-context")
 async def delete_chat_context(
     chat_id: str, body: ChatDeleteContextSchema, db: DependencyInjectDatabase
@@ -204,9 +204,7 @@ async def delete_chat_context(
 
 
 @ChatRouter.post("/{chat_id}/lock-conversations", response_model=None)
-async def lock_conversations(
-    chat_id: str, db: DependencyInjectDatabase
-) -> List[ConversationModel]:
+async def lock_conversations(chat_id: str, db: DependencyInjectDatabase) -> List[ConversationModel]:
     db_messages = (
         db.query(ProjectChatMessageModel)
         .filter(ProjectChatMessageModel.project_chat_id == chat_id)
@@ -256,50 +254,6 @@ async def lock_conversations(
     return used_conversations
 
 
-async def create_prompt_message(
-    locked_conversation_id_list: List[str], db: DependencyInjectDatabase
-) -> Dict[str, str]:
-    conversation_transcripts = []
-
-    conversations = db.query(ConversationModel).filter(ConversationModel.id.in_(locked_conversation_id_list)).all()
-
-    for conversation in conversations:
-        conversation_transcripts.append(f"""
-<conversation>
-<name>{conversation.participant_name}</name>
-<tags>{", ".join([tag.text for tag in conversation.tags])}</tags>
-<transcript>
-{await get_conversation_transcript(conversation.id, db)}
-</transcript>
-</conversation>""")
-
-    newline = "\n"
-
-    prompt_message = {
-        "role": "user",
-        "content": f"""
-Your task is to answer questions and provide assistance based on the given context. Here's some important information:
-
-1. You have access to transcripts from conversations. Each conversation is enclosed in <conversation> tags and includes:
-    - The participant's name / name of transcript in <name> tags
-    - Tags associated with the conversation in <tags> tags
-    - The transcript content in <transcript> tags
-2. When referencing information from the conversations, mention the name if relavant
-3. If you need to quote from a transcript, use the format: "[Name]: quoted text"
-4. If you're unsure about something or need more information, don't hesitate to ask for clarification.
-5. Keep your responses concise and to the point, while still being helpful and informative.
-6. If the user's question isn't related to the provided conversations, answer to the best of your ability based on your general knowledge.
-
-Here are the conversation transcripts for context:
-
-{
-    newline.join(conversation_transcripts)
-}
-""",
-    }
-
-    return prompt_message
-
 
 class ChatBodyMessageSchema(BaseModel):
     role: Literal["user", "assistant", "dembrane"]
@@ -339,24 +293,15 @@ async def post_chat(
 
     if len(messages) == 0:
         logger.debug("initializing chat")
-    
+
     chat_context = await get_chat_context(chat_id, db)
     locked_conversation_id_list = chat_context.locked_conversation_id_list
 
-    prompt_message = await create_prompt_message(locked_conversation_id_list, db)
+    system_messages = await create_system_messages(locked_conversation_id_list, db)
 
     def stream_response() -> Generator[str, None, None]:
         with DatabaseSession() as db:
-            filtered_messages: List[Dict[str, str]] = []
-
-            filtered_messages.insert(0, prompt_message)
-            filtered_messages.insert(
-                1,
-                {
-                    "role": "assistant",
-                    "content": "Okay. I will answer your questions to the best of my ability.",
-                },
-            )
+            filtered_messages: List[Dict[str, Any]] = []
 
             for message in messages:
                 if message["role"] in ["user", "assistant"]:
@@ -374,7 +319,11 @@ async def post_chat(
                 filtered_messages = filtered_messages[:-1]
 
             try:
-                for chunk in stream_anthropic_chat_response(filtered_messages, protocol):
+                for chunk in stream_anthropic_chat_response(
+                    system=system_messages,
+                    messages=filtered_messages,
+                    protocol=protocol,
+                ):
                     yield chunk
             except Exception as e:
                 logger.error(f"Error in stream_anthropic_chat_response: {str(e)}")

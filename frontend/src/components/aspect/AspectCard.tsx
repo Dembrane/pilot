@@ -1,14 +1,14 @@
 import { cn } from "@/lib/utils";
 import {
-  Paper,
   Box,
   Button,
-  Stack,
-  Group,
-  Pill,
-  Text,
   Divider,
+  Group,
   LoadingOverlay,
+  Paper,
+  Pill,
+  Stack,
+  Text,
 } from "@mantine/core";
 import { IconArrowsDiagonal } from "@tabler/icons-react";
 import { Link, useParams } from "react-router-dom";

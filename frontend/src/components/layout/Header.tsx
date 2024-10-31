@@ -1,22 +1,22 @@
 import {
-  Paper,
+  ActionIcon,
+  Avatar,
   Group,
   Menu,
-  UnstyledButton,
-  Avatar,
-  Text,
+  Paper,
   Stack,
-  ActionIcon,
+  Text,
   Tooltip,
+  UnstyledButton,
 } from "@mantine/core";
 import { Logo } from "../common/Logo";
-import { IconLogout, IconSettings, IconChevronDown } from "@tabler/icons-react";
-import { useLogoutMutation, useCurrentUser } from "@/lib/query";
+import { IconChevronDown, IconLogout, IconSettings } from "@tabler/icons-react";
+import { useCurrentUser, useLogoutMutation } from "@/lib/query";
 import { useAuthenticated } from "@/lib/useAuthenticated";
 import { forwardRef } from "react";
 import { I18nLink } from "@/components/common/i18nLink";
 import { LanguagePicker } from "../language/LanguagePicker";
-import { t, Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 
 const User = ({
   image,

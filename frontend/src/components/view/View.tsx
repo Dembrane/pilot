@@ -1,12 +1,12 @@
 import { Icons } from "@/icons";
 import {
-  Paper,
-  Stack,
-  Group,
-  Pill,
   ActionIcon,
-  Text,
+  Group,
+  Paper,
+  Pill,
   Spoiler,
+  Stack,
+  Text,
 } from "@mantine/core";
 import { IconArrowsDiagonal } from "@tabler/icons-react";
 import { AspectCard } from "../aspect/AspectCard";

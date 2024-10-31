@@ -1,7 +1,7 @@
 import { I18nLink } from "@/components/common/i18nLink";
 import { ADMIN_BASE_URL } from "@/config";
 import { useRegisterMutation } from "@/lib/query";
-import { t, Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 import {
   Alert,
   Button,

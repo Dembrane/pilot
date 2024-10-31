@@ -1,42 +1,42 @@
 import {
+  UseQueryOptions,
   useMutation,
   useQuery,
   useQueryClient,
-  UseQueryOptions,
 } from "@tanstack/react-query";
-import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import {
+  addChatContext,
+  api,
+  deleteChatContext,
+  deleteResourceById,
+  generateProjectLibrary as generateProjectLibrary,
+  generateProjectView,
+  getChatHistory,
+  getConversationTranscriptString,
+  getLatestProjectAnalysisRunByProjectId,
+  getProjectChatContext,
+  getProjectInsights,
   getProjectViews,
+  getQuotesByConversationId,
+  getResourceById,
+  getResourcesByProjectId,
   initiateAndUploadConversationChunk,
   initiateConversation,
-  generateProjectLibrary as generateProjectLibrary,
+  lockConversations,
+  updateResourceById,
   uploadConversationChunk,
   uploadConversationText,
   uploadResourceByProjectId,
-  generateProjectView,
-  getLatestProjectAnalysisRunByProjectId,
-  getProjectInsights,
-  getResourceById,
-  getResourcesByProjectId,
-  updateResourceById,
-  deleteResourceById,
-  api,
-  getConversationTranscriptString,
-  getQuotesByConversationId,
-  getProjectChatContext,
-  addChatContext,
-  deleteChatContext,
-  getChatHistory,
-  lockConversations,
 } from "./api";
 import { toast } from "@/components/common/Toaster";
 import { directus } from "./directus";
 import {
+  Query,
   createItem,
   deleteItem,
   passwordRequest,
   passwordReset,
-  Query,
   readItem,
   readItems,
   readUser,
@@ -123,7 +123,7 @@ export const useLoginMutation = () => {
 };
 
 export const useRegisterMutation = () => {
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
   return useMutation({
     mutationFn: async (payload: Parameters<typeof registerUser>) => {
       try {
@@ -154,7 +154,7 @@ export const useRegisterMutation = () => {
 };
 
 export const useVerifyMutation = (doRedirect: boolean = true) => {
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
 
   return useMutation({
     mutationFn: async (data: { token: string }) => {
@@ -181,7 +181,7 @@ export const useVerifyMutation = (doRedirect: boolean = true) => {
 };
 
 export const useRequestPasswordResetMutation = () => {
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
   return useMutation({
     mutationFn: async (email: string) => {
       try {
@@ -204,7 +204,7 @@ export const useRequestPasswordResetMutation = () => {
 };
 
 export const useResetPasswordMutation = () => {
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
   return useMutation({
     mutationFn: async ({
       token,
@@ -238,7 +238,7 @@ export const useResetPasswordMutation = () => {
 
 export const useLogoutMutation = () => {
   const queryClient = useQueryClient();
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
 
   return useMutation({
     mutationFn: async ({
@@ -250,7 +250,9 @@ export const useLogoutMutation = () => {
     }) => {
       try {
         await directus.logout();
-      } catch (e) {}
+      } catch (e) {
+        throwWithMessage(e);
+      }
     },
     onMutate: async ({ next, reason, doRedirect }) => {
       queryClient.resetQueries();
@@ -619,7 +621,7 @@ export const useConversationsByProjectId = (
             { chunks: ["*"] },
           ],
           deep: {
-            // @ts-ignore
+            // @ts-expect-error chunks is not typed
             chunks: {
               _limit: loadChunks ? 1000 : 1,
             },
@@ -982,7 +984,7 @@ export const useInsightsByConversationId = (conversationId: string) => {
 };
 
 export const useCreateChatMutation = () => {
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: {
@@ -1019,8 +1021,6 @@ export const useCreateChatMutation = () => {
     },
   });
 };
-
-
 
 export const useDeleteChatMutation = () => {
   const queryClient = useQueryClient();

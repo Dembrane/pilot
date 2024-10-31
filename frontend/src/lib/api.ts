@@ -6,8 +6,7 @@ import axios, {
   CreateAxiosDefaults,
 } from "axios";
 import { directus, directusContent, directusParticipant } from "./directus";
-import { QueryAlias, readItem, readItems } from "@directus/sdk";
-import { Message } from "ai/react";
+import { readItem, readItems } from "@directus/sdk";
 import { EchoPortalTutorial } from "./typesDirectusContent";
 
 export const apiCommonConfig: CreateAxiosDefaults = {
@@ -493,7 +492,7 @@ export const deleteChatContext = async (
 // this will lock all unused conversations in the chat as a dembrane message
 export const lockConversations = async (chatId: string) => {
   return api.post<unknown, TProjectChatContext>(
-    `/chats/${chatId}/lock-conversations`
+    `/chats/${chatId}/lock-conversations`,
   );
 };
 

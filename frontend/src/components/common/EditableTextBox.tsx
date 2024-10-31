@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ActionIcon, InputBase, InputBaseProps, Tooltip } from "@mantine/core";
 import { IconDeviceFloppy, IconPencil } from "@tabler/icons-react";
 import { useDebouncedCallback } from "@mantine/hooks";
@@ -42,7 +42,7 @@ const EditableTextBox = ({
   };
 
   const handleChange = (e: React.ChangeEvent) => {
-    // @ts-ignore
+    // @ts-expect-error e.target.value is not typed
     const newValue = e.target.value;
     setLocalValue(newValue);
   };

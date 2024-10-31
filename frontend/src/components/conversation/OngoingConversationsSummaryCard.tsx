@@ -22,7 +22,7 @@ export const OngoingConversationsSummaryCard = ({
               project_id: projectId,
             },
             timestamp: {
-              // @ts-ignore
+              // @ts-expect-error _gt is not typed
               _gt: new Date(Date.now() - TIME_INTERVAL).toISOString(), // last chunk within 5 mins
             },
           },

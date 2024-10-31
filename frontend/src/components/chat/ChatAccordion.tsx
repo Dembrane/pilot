@@ -1,29 +1,29 @@
 import {
   useDeleteChatMutation,
-  useUpdateChatMutation,
   useProjectChats,
+  useUpdateChatMutation,
 } from "@/lib/query";
-import { t, Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 import {
   Accordion,
+  ActionIcon,
   Group,
   LoadingOverlay,
-  Stack,
-  Title,
-  Text,
-  ActionIcon,
   Menu,
+  Stack,
+  Text,
+  Title,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react";
 import { formatRelative } from "date-fns";
 import { NavigationButton } from "../common/NavigationButton";
-import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
 
 const ChatAccordionItemMenu = ({ chat }: { chat: Partial<ProjectChat> }) => {
   const deleteChatMutation = useDeleteChatMutation();
   const updateChatMutation = useUpdateChatMutation();
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
 
   return (
     <Menu shadow="md" position="right">
@@ -122,7 +122,7 @@ export const ChatAccordion = ({ projectId }: { projectId: string }) => {
               </Text>
             </NavigationButton>
           ))}
-      </Stack>
+        </Stack>
       </Accordion.Panel>
     </Accordion.Item>
   );

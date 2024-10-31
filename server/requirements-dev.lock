@@ -20,7 +20,7 @@ amqp==5.2.0
     # via kombu
 annotated-types==0.6.0
     # via pydantic
-anthropic==0.34.2
+anthropic==0.37.1
 anyio==4.3.0
     # via anthropic
     # via httpx
@@ -100,6 +100,7 @@ idna==3.7
     # via requests
     # via yarl
 isort==5.13.2
+jinja2==3.1.4
 jiter==0.5.0
     # via anthropic
 joblib==1.4.2
@@ -131,6 +132,7 @@ langsmith==0.1.59
 mako==1.3.5
     # via alembic
 markupsafe==2.1.5
+    # via jinja2
     # via mako
 marshmallow==3.21.2
     # via dataclasses-json

@@ -1,19 +1,19 @@
 import { Trans, t } from "@lingui/macro";
 import {
+  Alert,
+  Box,
+  Button,
+  Group,
+  Pill,
   Stack,
   Text,
-  Title,
-  Group,
-  Button,
   TextInput,
-  Pill,
-  Box,
-  Alert,
+  Title,
 } from "@mantine/core";
 import { useForm } from "react-hook-form";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
 import { IconX } from "@tabler/icons-react";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { UnsavedChanges } from "../form/UnsavedChanges";
 
 type ProjectTranscriptSettingsFormValues = {

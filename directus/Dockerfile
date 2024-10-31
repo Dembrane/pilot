@@ -1,7 +1,7 @@
-FROM directus/directus:10.13.1
+FROM directus/directus:10.13.3
 
-# COPY ./migrations/ ./migrations/
 # COPY ./extensions/ ./extensions/
+COPY ./migrations/ ./migrations/
 COPY ./templates ./templates/
 
 COPY ./snapshots/snapshot.yaml ./snapshot.yaml

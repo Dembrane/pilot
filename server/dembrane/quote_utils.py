@@ -7,7 +7,6 @@ from typing import List, Optional
 import numpy as np
 import pandas as pd
 import tiktoken
-from openai import OpenAI
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from sklearn.cluster import KMeans  # type: ignore
@@ -16,6 +15,7 @@ from langchain_experimental.text_splitter import SemanticChunker
 
 from dembrane.ner import anonymize_sentence
 from dembrane.utils import generate_uuid, get_utc_timestamp, download_image_and_get_public_url
+from dembrane.openai import client
 from dembrane.database import (
     ViewModel,
     QuoteModel,
@@ -34,8 +34,6 @@ logger.setLevel(logging.DEBUG)
 
 
 np.random.seed(0)
-
-client = OpenAI()
 
 
 lc_embedder = OpenAIEmbeddings(model="text-embedding-3-small")

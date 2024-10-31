@@ -1,5 +1,5 @@
 import { DIRECTUS_CONTENT_PUBLIC_URL, DIRECTUS_PUBLIC_URL } from "@/config";
-import { createDirectus, rest, authentication } from "@directus/sdk";
+import { authentication, createDirectus, rest } from "@directus/sdk";
 import { I18n } from "@lingui/core";
 import { CustomDirectusTypes as CustomDirectusTypesContent } from "./typesDirectusContent";
 

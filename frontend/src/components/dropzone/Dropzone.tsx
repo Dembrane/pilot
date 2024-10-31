@@ -1,5 +1,5 @@
 import { Group, rem } from "@mantine/core";
-import { Dropzone as MantineDropzone, FileRejection } from "@mantine/dropzone";
+import { FileRejection, Dropzone as MantineDropzone } from "@mantine/dropzone";
 import { IconUpload, IconX } from "@tabler/icons-react";
 import { PropsWithChildren, ReactNode } from "react";
 

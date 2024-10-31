@@ -1,5 +1,5 @@
 // Start of Selection
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./ParticipantOnboardingCards.css";
 
 import { useLanguage } from "@/lib/useLanguage";
@@ -95,6 +95,11 @@ const ParticipantOnboardingCards = ({
 
   const currentCard = allSlides[currentSlideIndex];
 
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimationDirection(""), 300);
+    return () => clearTimeout(timer);
+  }, [currentSlideIndex]);
+
   // If there's no valid card, render a fallback
   if (!currentCard) {
     return <div>No card available for the current language and section.</div>;
@@ -121,11 +126,6 @@ const ParticipantOnboardingCards = ({
       setCurrentSlideIndex((prev) => prev - 1);
     }
   };
-
-  useEffect(() => {
-    const timer = setTimeout(() => setAnimationDirection(""), 300);
-    return () => clearTimeout(timer);
-  }, [currentSlideIndex]);
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCheckboxStates((prev) => ({

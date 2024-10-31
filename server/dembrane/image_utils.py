@@ -1,13 +1,11 @@
 import json
 import logging
 
-from openai import OpenAI
-
 from dembrane.utils import download_image_and_get_public_url
+from dembrane.openai import client
 
 logger = logging.getLogger("image_utils")
 
-client = OpenAI()
 
 
 def generate_cliches_to_avoid(text: str) -> str:
@@ -136,6 +134,7 @@ def brilliant_image_generator_3000(text: str) -> str:
 
 
 if __name__ == "__main__":
+    ### To test 
     text = """Departmental Autonomy
 Departments struggle with balancing autonomy and standardization.
 Decentralized services offer flexibility but can be costly and inconsistent.

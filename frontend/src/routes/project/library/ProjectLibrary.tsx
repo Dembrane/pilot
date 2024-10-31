@@ -6,35 +6,35 @@ import { ViewExpandedCard } from "@/components/view/View";
 import { Icons } from "@/icons";
 import {
   useConversationsByProjectId,
+  useGenerateProjectLibraryMutation,
+  useGenerateProjectViewMutation,
+  useLatestProjectAnalysisRunByProjectId,
   useProjectInsights,
   useProjectViews,
-  useGenerateProjectLibraryMutation,
-  useLatestProjectAnalysisRunByProjectId,
-  useGenerateProjectViewMutation,
 } from "@/lib/query";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { t, Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 import {
+  ActionIcon,
   Alert,
-  Divider,
-  Group,
-  Skeleton,
-  Stack,
-  Title,
-  Text,
   Box,
   Button,
-  LoadingOverlay,
-  SimpleGrid,
-  Paper,
-  Pill,
-  ActionIcon,
   CloseButton,
-  Input,
-  Textarea,
   Collapse,
   Container,
+  Divider,
+  Group,
+  Input,
+  LoadingOverlay,
+  Paper,
+  Pill,
+  SimpleGrid,
+  Skeleton,
+  Stack,
+  Text,
   TextInput,
+  Textarea,
+  Title,
   Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";

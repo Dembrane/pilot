@@ -18,6 +18,17 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          ui: ["@mantine/core", "@mantine/hooks"],
+          icons: ["@tabler/icons-react", "lucide-react"],
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       "/api": {

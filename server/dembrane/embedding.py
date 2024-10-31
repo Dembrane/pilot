@@ -2,10 +2,8 @@ import logging
 from typing import List
 
 import backoff
-from openai import OpenAI
 
-client = OpenAI()
-
+from dembrane.openai import client
 
 EMBEDDING_DIM = 1536
 

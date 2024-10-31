@@ -39,6 +39,9 @@ if not os.path.exists(UPLOADS_DIR):
     os.makedirs(UPLOADS_DIR)
 logger.debug(f"UPLOADS_DIR: {UPLOADS_DIR}")
 
+PROMPT_TEMPLATES_DIR = os.path.join(BASE_DIR, "prompt_templates")
+logger.debug(f"PROMPT_TEMPLATES_DIR: {PROMPT_TEMPLATES_DIR}")
+
 RESOURCE_UPLOADS_DIR = os.path.join(UPLOADS_DIR, "resources")
 if not os.path.exists(RESOURCE_UPLOADS_DIR):
     os.makedirs(RESOURCE_UPLOADS_DIR)
@@ -76,9 +79,12 @@ REDIS_URL = os.environ.get("REDIS_URL")
 assert REDIS_URL, "REDIS_URL environment variable is not set"
 logger.debug("REDIS_URL: set")
 
+OPENAI_API_BASE_URL = os.environ.get("OPENAI_API_BASE_URL", "https://api.openai.com/v1")
+logger.debug(f"OPENAI_API_BASE_URL: {OPENAI_API_BASE_URL}")
+
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 assert OPENAI_API_KEY, "OPENAI_API_KEY environment variable is not set"
-logger.debug("OPENAI_API: set")
+logger.debug("OPENAI_API_KEY: set")
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 assert ANTHROPIC_API_KEY, "ANTHROPIC_API_KEY environment variable is not set"

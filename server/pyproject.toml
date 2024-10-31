@@ -15,12 +15,17 @@ dependencies = [
     "langchain-experimental==0.0.57",
     "langchain-openai==0.0.*",
     "pypdf==4.0.*",
-    # OpenAI
+    # SDKs for Models
     "openai==1.30.*",
+    "anthropic==0.37.*",
     # Data
     "pandas==2.2.*",
     "numpy==1.26.*",
     "scikit-learn==1.4.*",
+    # Tools
+    "jinja2==3.1.*",
+    "ffmpeg-python>=0.2.0",
+    "flower>=2.0.1",
     # Database
     "SQLAlchemy==2.0.*",
     "alembic==1.13.*",
@@ -32,6 +37,7 @@ dependencies = [
     "backoff==2.2.*",
     "aiofiles==23.2.*",
     "sentry-sdk[fastapi]",
+    "python-jose[cryptography]>=3.3.0",
     # Types
     "types-aiofiles==23.2.*",
     "types-tqdm > 4",
@@ -40,13 +46,9 @@ dependencies = [
     "ruff",
     "isort",
     "pandas-stubs>=2.2.2.240514",
-    # "trankit @ git+https://github.com/nlp-uoregon/trankit",
-    "ffmpeg-python>=0.2.0",
     "types-requests>=2.32.0.20240602",
-    "flower>=2.0.1",
-    "python-jose[cryptography]>=3.3.0",
     "types-python-jose>=3.3.4.20240106",
-    "anthropic>=0.34.2",
+    # "trankit @ git+https://github.com/nlp-uoregon/trankit",
 ]
 
 [tool.setuptools]

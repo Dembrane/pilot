@@ -1,6 +1,7 @@
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { cn } from "@/lib/utils";
-import { useEffect } from "react";
-import showdown from "showdown";
+import { useEffect } from 'react';
 
 export const Markdown = ({
   content,
@@ -9,8 +10,7 @@ export const Markdown = ({
   content: string;
   className?: string;
 }) => {
-  const generatedHTML = new showdown.Converter().makeHtml(content);
-
+  // FIXME: workaround to load Tally embeds
   useEffect(() => {
     try {
       if ((window as any).Tally) {
@@ -24,9 +24,11 @@ export const Markdown = ({
   }, []);
 
   return (
-    <div
+    <ReactMarkdown
       className={cn("prose", className)}
-      dangerouslySetInnerHTML={{ __html: generatedHTML }}
-    />
+      remarkPlugins={[remarkGfm]}
+    >
+      {content}
+    </ReactMarkdown>
   );
 };

@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Any, Dict, List, Optional, Generator
 
 from pydantic import BaseModel
@@ -6,9 +7,13 @@ from anthropic import Anthropic
 from sqlalchemy.orm import Session
 
 from dembrane.config import ANTHROPIC_API_KEY
-from dembrane.database import ProjectChatMessageModel
+from dembrane.prompts import render_prompt
+from dembrane.database import ConversationModel, ProjectChatMessageModel
+from dembrane.api.conversation import get_conversation_transcript
 
 MAX_CHAT_CONTEXT_LENGTH = 120000
+
+logger = logging.getLogger("chat_utils")
 
 
 class ClientAttachment(BaseModel):
@@ -44,7 +49,7 @@ def convert_to_openai_messages(messages: List[ClientMessage]) -> List[Dict[str, 
     return openai_messages
 
 
-def get_project_chat_history(chat_id: str, db: Session) -> List[Dict[str, str]]:
+def get_project_chat_history(chat_id: str, db: Session) -> List[Dict[str, Any]]:
     db_messages = (
         db.query(ProjectChatMessageModel)
         .filter(ProjectChatMessageModel.project_chat_id == chat_id)
@@ -63,6 +68,39 @@ def get_project_chat_history(chat_id: str, db: Session) -> List[Dict[str, str]]:
 
     return messages
 
+async def create_system_messages(
+    locked_conversation_id_list: List[str], db: Session
+) -> List[Dict[str, Any]]:
+    conversations = (
+        db.query(ConversationModel)
+        .filter(ConversationModel.id.in_(locked_conversation_id_list))
+        .all()
+    )
+
+    conversation_data_list = []
+    for conversation in conversations:
+        conversation_data_list.append(
+            {
+                "name": conversation.participant_name,
+                "tags": ", ".join([tag.text for tag in conversation.tags]),
+                "transcript": await get_conversation_transcript(conversation.id, db),
+            }
+        )
+
+    prompt_message = {
+        "type": "text",
+        "text": render_prompt("system_chat.jinja", {})
+    }
+
+    context_message = {
+        "type": "text",
+        "text": render_prompt("context_conversations.jinja", {"conversations": conversation_data_list}),
+        # Anthropic/Claude Prompt Caching
+        "cache_control": {"type": "ephemeral"},
+    }
+
+    return [prompt_message, context_message]
+
 
 anthropic_client = Anthropic(
     api_key=ANTHROPIC_API_KEY,
@@ -70,12 +108,15 @@ anthropic_client = Anthropic(
 
 
 def stream_anthropic_chat_response(
-    messages: List[Dict[str, str]], protocol: str = "data"
+        system: List[Dict[str, Any]],
+        messages: List[Dict[str, Any]],
+        protocol: str = "data"
 ) -> Generator[str, None, None]:
-    stream = anthropic_client.messages.create(
-        model="claude-3-sonnet-20240229",
+    stream = anthropic_client.beta.prompt_caching.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        system=system,  # type: ignore
         messages=messages,  # type: ignore
-        max_tokens=1000,
+        max_tokens=2048,
         stream=True,
     )
 

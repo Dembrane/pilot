@@ -14,14 +14,27 @@ const sentryCommonOpts: Partial<Sentry.BrowserOptions> = {
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration(),
+    Sentry.feedbackIntegration({
+      autoInject: false,
+      showBranding: false,
+      colorScheme: "light",
+      enableScreenshot: true,
+      showName: false,
+      isNameRequired: false,
+      showEmail: true,
+      isEmailRequired: true,
+      triggerLabel: "Report an issue",
+      triggerAriaLabel: "Report an issue",
+      formTitle: "Report an issue",
+      submitButtonLabel: "Submit",
+    }),
   ],
   // Performance Monitoring
-  tracesSampleRate: 1.0, //  Capture 100% of the transactions
+  tracesSampleRate: 0.5, //  Capture 50% of the transactions
   // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
   tracePropagationTargets: [
     "localhost",
-    /^https:\/\/admin.findcommonground\.app/,
-    /^https:\/\/participant.findcommonground\.app/,
+    /^https:\/\/(dashboard|portal|api|directus)(\.test)?\.dembrane\.com/,
   ],
   // Session Replay
   replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.

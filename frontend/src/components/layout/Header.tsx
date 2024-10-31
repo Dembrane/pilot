@@ -6,17 +6,16 @@ import {
   Paper,
   Stack,
   Text,
-  Tooltip,
-  UnstyledButton,
 } from "@mantine/core";
 import { Logo } from "../common/Logo";
-import { IconChevronDown, IconLogout, IconSettings } from "@tabler/icons-react";
+import { IconBug, IconLogout, IconSettings } from "@tabler/icons-react";
 import { useCurrentUser, useLogoutMutation } from "@/lib/query";
 import { useAuthenticated } from "@/lib/useAuthenticated";
-import { forwardRef } from "react";
 import { I18nLink } from "@/components/common/i18nLink";
 import { LanguagePicker } from "../language/LanguagePicker";
 import { Trans, t } from "@lingui/macro";
+import { useState, useEffect } from "react";
+import * as Sentry from "@sentry/react";
 
 const User = ({
   image,
@@ -48,6 +47,29 @@ const User = ({
     </Group>
   </div>
 );
+
+function CreateFeedbackButton() {
+  const feedback = Sentry.getFeedback();
+
+  if (!feedback) {
+    return null;
+  }
+
+  return (
+    <Menu.Item
+      leftSection={<IconBug color="gray" />}
+      onClick={async () => {
+        const form = await feedback?.createForm();
+        if (form) {
+          form.appendToDom();
+          form.open();
+        }
+      }}
+    >
+      <Trans>Report an issue</Trans>
+    </Menu.Item>
+  );
+}
 
 export const Header = () => {
   const logoutMutation = useLogoutMutation();
@@ -100,6 +122,9 @@ export const Header = () => {
                 >
                   <Trans>Logout</Trans>
                 </Menu.Item>
+
+                <CreateFeedbackButton />
+
                 <Menu.Divider />
 
                 <LanguagePicker />

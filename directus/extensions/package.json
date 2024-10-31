@@ -1,0 +1,6 @@
+{
+    "name": "directus-extensions",
+    "dependencies": {
+        "directus-extension-schema-management-module": "1.5.0"
+    }
+  }

@@ -10,9 +10,9 @@ dependencies = [
     "python-multipart==0.0.*",
     "celery[redis]>=5.4.0",
     # Langchain
-    "langchain==0.1.*",
-    "langchain-community==0.0.*",
-    "langchain-experimental==0.0.57",
+    "langchain==0.3.*",
+    "langchain-community==0.3.*",
+    "langchain-experimental==0.0.61",
     "langchain-openai==0.0.*",
     "pypdf==4.0.*",
     # SDKs for Models
@@ -21,7 +21,7 @@ dependencies = [
     # Data
     "pandas==2.2.*",
     "numpy==1.26.*",
-    "scikit-learn==1.4.*",
+    "scikit-learn==1.5.*",
     # Tools
     "jinja2==3.1.*",
     "ffmpeg-python>=0.2.0",

@@ -23,8 +23,8 @@
         "matangover.mypy",
         "ms-azuretools.vscode-docker",
         "jebbs.plantuml",
-        "EthanSK.restore-terminals",
-        "tamasfe.even-better-toml"
+        "tamasfe.even-better-toml",
+        "EthanSK.restore-terminals"
       ]
     }
   },

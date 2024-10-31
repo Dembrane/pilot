@@ -5,11 +5,11 @@ import { Outlet, useNavigate, useSearchParams } from "react-router-dom";
 import { PropsWithChildren, useEffect } from "react";
 import { Toaster } from "../common/Toaster";
 import { useAuthenticated } from "@/lib/useAuthenticated";
-import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
 
 export const AuthLayout = (props: PropsWithChildren) => {
   const [query] = useSearchParams();
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
 
   const auth = useAuthenticated();
 

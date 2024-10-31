@@ -1,6 +1,14 @@
 import { Icons } from "@/icons";
 import { t } from "@lingui/macro";
-import { PaperProps, Text, Paper, Group, Box, Stack, LoadingOverlay } from "@mantine/core";
+import {
+  Box,
+  Group,
+  LoadingOverlay,
+  Paper,
+  PaperProps,
+  Stack,
+  Text,
+} from "@mantine/core";
 import React, { PropsWithChildren } from "react";
 
 export const BaseMessage = (

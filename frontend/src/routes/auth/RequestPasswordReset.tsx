@@ -1,5 +1,5 @@
 import { useRequestPasswordResetMutation } from "@/lib/query";
-import { t, Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 import {
   Alert,
   Button,

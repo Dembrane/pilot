@@ -9,18 +9,18 @@ import {
   useUpdateProjectByIdMutation,
 } from "@/lib/query";
 import {
-  Text,
+  ActionIcon,
+  Alert,
   Box,
   Button,
   Container,
-  Group,
-  Stack,
-  Title,
-  Alert,
   Divider,
-  ActionIcon,
+  Group,
   Skeleton,
+  Stack,
+  Text,
   TextInput,
+  Title,
 } from "@mantine/core";
 import {
   useDebouncedValue,
@@ -36,7 +36,7 @@ import {
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
-import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import { Trans, t } from "@lingui/macro";
 import { useLanguage } from "@/lib/useLanguage";
 import { CloseableAlert } from "@/components/common/ClosableAlert";
@@ -64,7 +64,7 @@ export const ProjectsHomeRoute = () => {
     defaultValue: "list",
   });
 
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
   const createProjectMutation = useCreateProjectMutation();
   const updateProjectMutation = useUpdateProjectByIdMutation();
 

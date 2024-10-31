@@ -1,5 +1,5 @@
 import { SUPPORTED_LANGUAGES } from "@/config";
-import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import { useLanguage } from "@/lib/useLanguage";
 import { t } from "@lingui/macro";
 import { NativeSelect } from "@mantine/core";

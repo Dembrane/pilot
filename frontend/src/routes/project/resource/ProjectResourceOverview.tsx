@@ -5,29 +5,29 @@ import {
 } from "@/lib/query";
 import { Trans } from "@lingui/macro";
 import {
+  ActionIcon,
   Box,
   Button,
   Divider,
   Group,
   LoadingOverlay,
   Stack,
+  Text,
   TextInput,
   Textarea,
   Title,
-  Text,
   Tooltip,
-  ActionIcon,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import { IconExternalLink, IconTrash } from "@tabler/icons-react";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { apiCommonConfig } from "@/lib/api";
-import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
 
 const ResourceDangerZone = ({ resource }: { resource: TResource }) => {
   const deleteResourceByIdMutation = useDeleteResourceByIdMutation();
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
   const { projectId } = useParams();
 
   const handleDelete = () => {
@@ -97,7 +97,7 @@ const ResourceEdit = ({ resource }: { resource: TResource }) => {
     if (isSubmitSuccessful) {
       reset(getValues());
     }
-  }, [isSubmitSuccessful, reset]);
+  }, [getValues, isSubmitSuccessful, reset]);
 
   const onSubmit = (data: ResourceEditFormValues) => {
     updateResourceMutation.mutate({

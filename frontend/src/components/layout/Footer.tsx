@@ -1,7 +1,6 @@
 import { PRIVACY_POLICY_URL } from "@/config";
 import { Trans } from "@lingui/macro";
-import { Stack, Anchor, Text, Group } from "@mantine/core";
-import { LanguagePicker } from "../language/LanguagePicker";
+import { Anchor, Group, Stack, Text } from "@mantine/core";
 
 export const Footer = () => (
   <Stack gap="xs" justify="center" align="center">

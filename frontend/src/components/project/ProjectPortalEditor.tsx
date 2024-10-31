@@ -1,19 +1,19 @@
 import React, { useEffect, useRef } from "react";
 import {
-  Stack,
-  Group,
-  Title,
-  Divider,
-  Button,
-  NativeSelect,
-  Checkbox,
-  InputDescription,
   Alert,
+  Button,
+  Checkbox,
+  Divider,
+  Group,
+  InputDescription,
+  NativeSelect,
+  Stack,
   TextInput,
+  Title,
 } from "@mantine/core";
 import { ProjectTagsInput } from "./ProjectTagsInput";
 import { MarkdownWYSIWYG } from "../common/MarkdownWYSIWYG/MarkdownWYSIWYG";
-import { t, Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 import { useForm } from "react-hook-form";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
 import { IconX } from "@tabler/icons-react";

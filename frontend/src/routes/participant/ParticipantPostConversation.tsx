@@ -34,7 +34,7 @@ export const ParticipantPostConversation = () => {
   const text =
     project.data?.default_conversation_finish_text?.replace(
       /{{CONVERSATION_ID}}|{{PROJECT_ID}}/g,
-      // @ts-ignore
+      // @ts-expect-error variables is not typed
       (match) => variables[match],
     ) ?? null;
 

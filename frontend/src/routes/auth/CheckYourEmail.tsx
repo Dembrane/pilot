@@ -1,5 +1,5 @@
 import { Trans } from "@lingui/macro";
-import { Text, Container, Stack, Title } from "@mantine/core";
+import { Container, Stack, Text, Title } from "@mantine/core";
 import { useDocumentTitle } from "@mantine/hooks";
 
 export const CheckYourEmailRoute = () => {

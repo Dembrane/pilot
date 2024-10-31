@@ -28,7 +28,7 @@ export const ProjectAnalysisRunStatus = ({
         readItems("conversation_chunk", {
           filter: {
             timestamp: {
-              // @ts-ignore
+              // @ts-expect-error _gt is not typed
               _gt: projectAnalysisRun.created_at,
             },
           },

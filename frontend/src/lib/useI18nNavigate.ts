@@ -2,7 +2,7 @@ import { SUPPORTED_LANGUAGES } from "@/config";
 import { NavigateOptions, To, useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "./useLanguage";
 
-export function usei18nNavigate() {
+export function useI18nNavigate() {
   const navigate = useNavigate();
   const { language } = useParams<{ language?: string }>();
   const { language: i18nLanguage } = useLanguage();

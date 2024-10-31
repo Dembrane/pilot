@@ -1,5 +1,5 @@
 import { Trans } from "@lingui/macro";
-import { Text, Tooltip, Group } from "@mantine/core";
+import { Group, Text, Tooltip } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
 
 export const UnsavedChanges = () => {

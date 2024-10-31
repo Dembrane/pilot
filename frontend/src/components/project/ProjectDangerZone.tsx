@@ -1,12 +1,12 @@
 import { useDeleteProjectByIdMutation } from "@/lib/query";
-import { Stack, Title, Box, Button } from "@mantine/core";
+import { Box, Button, Stack, Title } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
-import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import { Trans, t } from "@lingui/macro";
 
 export const ProjectDangerZone = ({ project }: { project: Project }) => {
   const deleteProjectByIdMutation = useDeleteProjectByIdMutation();
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
 
   const handleDelete = () => {
     if (window.confirm(t`Are you sure you want to delete this project?`)) {

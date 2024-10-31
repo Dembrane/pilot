@@ -2,17 +2,17 @@ import { ProjectTagsInput } from "@/components/project/ProjectTagsInput";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
 import { Trans } from "@lingui/macro";
 import {
-  Stack,
+  Anchor,
+  Box,
+  Button,
+  Divider,
   Group,
+  NativeSelect,
+  Stack,
   Text,
-  Title,
   TextInput,
   Textarea,
-  NativeSelect,
-  Divider,
-  Box,
-  Anchor,
-  Button,
+  Title,
 } from "@mantine/core";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";

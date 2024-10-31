@@ -3,23 +3,23 @@ import {
   useInsightsByConversationId,
 } from "@/lib/query";
 import {
-  Stack,
-  Title,
-  Text,
-  Skeleton,
   Anchor,
-  Spoiler,
-  Group,
   Button,
   Divider,
+  Group,
   SimpleGrid,
+  Skeleton,
+  Spoiler,
+  Stack,
+  Text,
+  Title,
 } from "@mantine/core";
 import { Link, useParams } from "react-router-dom";
 import { Quote } from "../../../components/quote/Quote";
 import { Insight } from "@/components/insight/Insight";
 import { useState } from "react";
 import { I18nLink } from "@/components/common/i18nLink";
-import { t, Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 
 export const ProjectConversationAnalysis = () => {
   const { conversationId, projectId } = useParams();

@@ -27,7 +27,7 @@ export default defineConfig({
           icons: ["@tabler/icons-react", "lucide-react"],
         },
       },
-    }
+    },
   },
   server: {
     proxy: {

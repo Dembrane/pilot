@@ -1,19 +1,19 @@
-import { t, Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 import {
+  ActionIcon,
+  Anchor,
   Box,
   Button,
   Divider,
   Group,
   LoadingOverlay,
+  Pill,
   Stack,
+  Text,
   TextInput,
   Textarea,
   Title,
-  Text,
   Tooltip,
-  ActionIcon,
-  Anchor,
-  Pill,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import { IconDownload, IconTrash } from "@tabler/icons-react";
@@ -23,12 +23,12 @@ import {
   useConversationById,
   useConversationChunks,
   useDeleteConversationByIdMutation,
-  useUpdateConversationByIdMutation,
   useProjectById,
+  useUpdateConversationByIdMutation,
 } from "@/lib/query";
 import { apiCommonConfig } from "@/lib/api";
 import { InformationTooltip } from "@/components/common/InformationTooltip";
-import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import { ConversationEdit } from "@/components/conversation/ConversationEdit";
 
 const ConversationDangerZone = ({
@@ -37,7 +37,7 @@ const ConversationDangerZone = ({
   conversation: Conversation;
 }) => {
   const deleteConversationByIdMutation = useDeleteConversationByIdMutation();
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
   const { projectId } = useParams();
 
   const handleDelete = () => {

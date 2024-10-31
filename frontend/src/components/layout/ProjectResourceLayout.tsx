@@ -3,10 +3,10 @@ import { Trans } from "@lingui/macro";
 import { LoadingOverlay, Stack, Tabs, Title } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { Outlet, useLocation, useParams } from "react-router-dom";
-import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
 
 export const ProjectResourceLayout = () => {
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
   const { resourceId, projectId } = useParams();
   const resourceQuery = useResourceById(resourceId ?? "");
   const location = useLocation();

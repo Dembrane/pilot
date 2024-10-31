@@ -1,7 +1,7 @@
 import WelcomeImage from "@/assets/participant-welcome-pattern.png";
 import { Logo } from "@/components/common/Logo";
 import { Markdown } from "@/components/common/Markdown";
-import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import { I18nLink } from "@/components/common/i18nLink";
 import {
   useUploadConversationChunk,
@@ -74,7 +74,7 @@ const defaultMimeType = getSupportedMimeType();
 
 const checkPermissionError = async () => {
   try {
-    // @ts-ignore
+    // @ts-expect-error microphone is not available?
     const result = await navigator.permissions.query({ name: "microphone" });
     if (result.state === "denied") {
       return "denied" as const;
@@ -83,6 +83,7 @@ const checkPermissionError = async () => {
     } else if (result.state === "granted") {
       return "granted" as const;
     } else {
+      return "error" as const;
     }
   } catch (error) {
     console.error("Error checking microphone permissions", error);
@@ -830,7 +831,7 @@ export const ParticipantConversationChunkedAudioRoute = () =>
     const [troubleShootingGuideOpened, setTroubleShootingGuideOpened] =
       useState(false);
 
-    const navigate = usei18nNavigate();
+    const navigate = useI18nNavigate();
     const { language } = useLanguage();
 
     const handleCheckMicrophoneAccess = async () => {
@@ -1073,7 +1074,7 @@ export const ParticipantConversationAudioRoute = () => {
   const [troubleShootingGuideOpened, setTroubleShootingGuideOpened] =
     useState(false);
 
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
 
   const handleCheckMicrophoneAccess = async () => {
     const permissionError = await checkPermissionError();
@@ -1344,7 +1345,7 @@ export const ParticipantConversationTextRoute = () => {
     setText("");
   };
 
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
 
   const audioModeUrl = `/${projectId}/conversation/${conversationId}`;
   const finishUrl = `/${projectId}/conversation/${conversationId}/finish`;

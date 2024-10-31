@@ -5,7 +5,7 @@ import {
   useConversationChunks,
   useConversationTranscriptString,
 } from "@/lib/query";
-import { t, Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 import {
   ActionIcon,
   Group,

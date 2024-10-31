@@ -1,5 +1,5 @@
 import { DIRECTUS_PUBLIC_URL } from "@/config";
-import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import { directus } from "@/lib/directus";
 import {
   useCreateProjectMutation,
@@ -10,15 +10,15 @@ import { readItems, readProviders } from "@directus/sdk";
 import {
   Alert,
   Anchor,
+  Box,
   Button,
   Container,
   Divider,
   PasswordInput,
-  Text,
   Stack,
+  Text,
   TextInput,
   Title,
-  Box,
 } from "@mantine/core";
 import { useDocumentTitle } from "@mantine/hooks";
 import { IconBrandGoogle } from "@tabler/icons-react";
@@ -40,7 +40,7 @@ const LoginWithProvider = ({
   icon: React.ReactNode;
   label: string;
 }) => {
-  const {language} = useLanguage();
+  const { language } = useLanguage();
   return (
     <Button
       component="a"
@@ -73,7 +73,7 @@ export const LoginRoute = () => {
     queryFn: () => directus.request(readProviders()),
   });
 
-  const navigate = usei18nNavigate();
+  const navigate = useI18nNavigate();
   const createProjectMutation = useCreateProjectMutation();
 
   const [error, setError] = useState("");

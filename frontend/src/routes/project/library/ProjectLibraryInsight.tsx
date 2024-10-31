@@ -1,13 +1,13 @@
 import { useInsight, useProjectInsights } from "@/lib/query";
 import {
-  Divider,
-  Text,
-  LoadingOverlay,
-  Stack,
-  Title,
-  Group,
   ActionIcon,
   Container,
+  Divider,
+  Group,
+  LoadingOverlay,
+  Stack,
+  Text,
+  Title,
 } from "@mantine/core";
 import {
   IconArrowBack,
@@ -20,7 +20,7 @@ import { Quote } from "../../../components/quote/Quote";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { Icons } from "@/icons";
 import { I18nLink } from "@/components/common/i18nLink";
-import { usei18nNavigate } from "@/lib/usei18nNavigate";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import { Trans } from "@lingui/macro";
 
 export const ProjectLibraryInsight = () => {

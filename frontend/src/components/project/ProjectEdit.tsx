@@ -2,17 +2,17 @@ import { ProjectTagsInput } from "@/components/project/ProjectTagsInput";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
 import { Trans } from "@lingui/macro";
 import {
-  Stack,
+  Anchor,
+  Box,
+  Button,
+  Divider,
   Group,
+  NativeSelect,
+  Stack,
   Text,
-  Title,
   TextInput,
   Textarea,
-  NativeSelect,
-  Divider,
-  Box,
-  Anchor,
-  Button,
+  Title,
 } from "@mantine/core";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -35,7 +35,8 @@ export const ProjectEdit = ({ project }: { project: Project }) => {
     default_conversation_title: project.default_conversation_title ?? "",
     default_conversation_description:
       project.default_conversation_description ?? "",
-    default_conversation_context: project.default_conversation_context ?? "",
+    default_conversation_context:
+      project.default_conversation_transcript_prompt ?? "",
     default_conversation_finish_text:
       project.default_conversation_finish_text ?? "",
   };
@@ -58,7 +59,8 @@ export const ProjectEdit = ({ project }: { project: Project }) => {
       default_conversation_title: project.default_conversation_title ?? "",
       default_conversation_description:
         project.default_conversation_description ?? "",
-      default_conversation_context: project.default_conversation_context ?? "",
+      default_conversation_context:
+        project.default_conversation_transcript_prompt ?? "",
       default_conversation_finish_text:
         project.default_conversation_finish_text ?? "",
     };

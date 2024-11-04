@@ -3,17 +3,16 @@ import {
   Button,
   CopyButton,
   Group,
-  LoadingOverlay,
   Paper,
   Skeleton,
   Stack,
   Text,
-  Tooltip,
   rem,
 } from "@mantine/core";
 import { IconCheck, IconCopy, IconShare } from "@tabler/icons-react";
 import { QRCode } from "../common/QRCode";
 import { PARTICIPANT_BASE_URL } from "@/config";
+import { Trans, t } from "@lingui/macro";
 
 interface ProjectQRCodeProps {
   project?: Project;
@@ -23,7 +22,13 @@ export const useProjectSharingLink = (project?: Project) => {
   if (!project) {
     return null;
   }
-  const link = `${PARTICIPANT_BASE_URL}/${project.language}/${project.id}/login?pin=${project.pin}&transcription=live`;
+
+  const languageCode = {
+    en: "en-US",
+    nl: "nl-NL",
+  }[project.language as "en" | "nl"];
+
+  const link = `${PARTICIPANT_BASE_URL}/${languageCode}/${project.id}/start`;
   return link;
 };
 
@@ -32,6 +37,18 @@ export const ProjectQRCode = ({ project }: ProjectQRCodeProps) => {
 
   if (!link) {
     return <Skeleton height={200} />;
+  }
+
+  let canShare = false;
+  try {
+    if (navigator.canShare) {
+      canShare = navigator.canShare({
+        title: `Join the conversation on Dembrane`,
+        url: link,
+      });
+    }
+  } catch (e) {
+    console.error(e);
   }
 
   return (
@@ -45,21 +62,18 @@ export const ProjectQRCode = ({ project }: ProjectQRCodeProps) => {
             <QRCode value={link} />
           </Box>
           <Stack gap="sm">
-            {navigator.canShare({
-              title: `Join ${project.default_conversation_title} on Dembrane`,
-              url: link,
-            }) && (
+            {canShare && (
               <Button
                 rightSection={<IconShare style={{ width: rem(16) }} />}
                 variant="outline"
                 onClick={async () => {
                   await navigator.share({
-                    title: `Join ${project?.default_conversation_title} on Dembrane`,
+                    title: t`Join ${project?.default_conversation_title} on Dembrane`,
                     url: link,
                   });
                 }}
               >
-                Share
+                <Trans>Share</Trans>
               </Button>
             )}{" "}
             <CopyButton value={link} timeout={2000}>
@@ -75,14 +89,16 @@ export const ProjectQRCode = ({ project }: ProjectQRCodeProps) => {
                     )
                   }
                 >
-                  {copied ? "Copied" : "Copy link"}
+                  {copied ? t`Copied` : t`Copy link`}
                 </Button>
               )}
             </CopyButton>
           </Stack>
         </Group>
       ) : (
-        <Text size="sm">Please enable participation to enable sharing</Text>
+        <Text size="sm">
+          <Trans>Please enable participation to enable sharing</Trans>
+        </Text>
       )}
     </Paper>
   );

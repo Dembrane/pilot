@@ -10,6 +10,7 @@ from dembrane.utils import generate_uuid, get_utc_timestamp
 from dembrane.config import REDIS_URL, RABBITMQ_URL
 from dembrane.database import (
     ViewModel,
+    QuoteModel,
     AspectModel,
     DatabaseSession,
     ConversationModel,
@@ -199,8 +200,87 @@ def task_generate_quotes(
 ):
     with DatabaseSession() as db:
         try:
-            generate_quotes(db, project_analysis_run_id, conversation_id)
-        # FIXME - Add specific exceptions
+            # check if no new conversation chunks have been added since the last quote generation
+            # if the latest conversation chunk was created after the previous project analysis run was created
+            # then we need to create a new project analysis run,
+            # otherwise reuse the quotes from the previous project analysis run
+
+            # first we obtain the project ID
+            current_project_analysis_run = db.get(ProjectAnalysisRunModel, project_analysis_run_id)
+            if current_project_analysis_run is None:
+                logger.error(f"Project analysis run not found: {project_analysis_run_id}")
+                return
+            project_id = current_project_analysis_run.project_id
+
+            # then we obtain the previous project analysis runs
+            previous_project_analysis_runs = (
+                db.query(ProjectAnalysisRunModel)
+                .filter(ProjectAnalysisRunModel.project_id == project_id)
+                .order_by(ProjectAnalysisRunModel.created_at.desc())
+                # we need only 2
+                .limit(2)
+                .all()
+            )
+
+            # at this point we should have at least 1 project analysis run
+            # if there is no history then we go ahead and generate quotes
+            if len(previous_project_analysis_runs) == 1:
+                logger.info(
+                    "Generating quotes for project analysis run because there is no history"
+                )
+                generate_quotes(db, project_analysis_run_id, conversation_id)
+            elif len(previous_project_analysis_runs) == 2:
+                # if there is a history we need to check if the latest conversation chunk was created after the latest project analysis run
+                logger.info("Checking if we need to generate quotes for project analysis run")
+                comparison_project_analysis_run = previous_project_analysis_runs[1]
+
+                latest_conversation_chunk = (
+                    db.query(ConversationChunkModel)
+                    .filter(ConversationChunkModel.conversation_id == conversation_id)
+                    .order_by(ConversationChunkModel.timestamp.desc())
+                    .first()
+                )
+
+                if latest_conversation_chunk is None:
+                    logger.error(
+                        f"No conversation chunks found for conversation: {conversation_id}"
+                    )
+                    return
+
+                # conversation was updated since the last project analysis run so we need to generate new quotes
+                if latest_conversation_chunk.timestamp > comparison_project_analysis_run.created_at:
+                    logger.info(
+                        f"Have to generate quotes for project analysis run ({latest_conversation_chunk.id[:6]} ({latest_conversation_chunk.timestamp.strftime('%Y-%m-%d %H:%M:%S')}) > {comparison_project_analysis_run.id[:6]} ({comparison_project_analysis_run.created_at.strftime('%Y-%m-%d %H:%M:%S')}))"
+                    )
+                    generate_quotes(db, project_analysis_run_id, conversation_id)
+                else:
+                    # conversation was not updated since the last project analysis run so we reuse the quotes from the previous project analysis run
+                    # for all quotes (comparision run, conversation id) update with the latest project run id
+                    # we need to update the quote with the latest conversation chunk
+                    logger.info(
+                        f"Reusing quotes for project analysis run from {comparison_project_analysis_run.id[:6]} ({comparison_project_analysis_run.created_at.strftime('%Y-%m-%d %H:%M:%S')})"
+                    )
+                    latest_project_analysis_run = previous_project_analysis_runs[0]
+
+                    quotes_updated = (
+                        db.query(QuoteModel)
+                        .filter(
+                            QuoteModel.project_analysis_run_id
+                            == comparison_project_analysis_run.id,
+                            QuoteModel.conversation_id == conversation_id,
+                        )
+                        .update(
+                            {
+                                "project_analysis_run_id": latest_project_analysis_run.id,
+                            },
+                            synchronize_session=False,
+                        )
+                    )
+
+                    db.commit()
+
+                    logger.info(f"Updated {quotes_updated} quotes")
+
         except Exception as exc:
             logger.error(f"Error: {exc}")
             db.rollback()
@@ -539,3 +619,4 @@ def task_create_project_library(_self, project_id: str):
             logger.error(f"Error: {e}")
             db.rollback()
             raise
+

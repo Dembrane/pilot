@@ -1,41 +1,42 @@
 import {
+  UseQueryOptions,
   useMutation,
   useQuery,
   useQueryClient,
-  UseQueryOptions,
 } from "@tanstack/react-query";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import {
+  addChatContext,
+  api,
+  deleteChatContext,
+  deleteResourceById,
+  generateProjectLibrary as generateProjectLibrary,
+  generateProjectView,
+  getChatHistory,
+  getConversationTranscriptString,
+  getLatestProjectAnalysisRunByProjectId,
+  getProjectChatContext,
+  getProjectInsights,
   getProjectViews,
+  getQuotesByConversationId,
+  getResourceById,
+  getResourcesByProjectId,
   initiateAndUploadConversationChunk,
   initiateConversation,
-  generateProjectLibrary as generateProjectLibrary,
+  lockConversations,
+  updateResourceById,
   uploadConversationChunk,
   uploadConversationText,
   uploadResourceByProjectId,
-  generateProjectView,
-  getLatestProjectAnalysisRunByProjectId,
-  getProjectInsights,
-  getResourceById,
-  getResourcesByProjectId,
-  updateResourceById,
-  deleteResourceById,
-  api,
-  getConversationTranscriptString,
-  getQuotesByConversationId,
-  getProjectChatContext,
-  addChatContext,
-  deleteChatContext,
-  getChatHistory,
-  lockConversations,
 } from "./api";
 import { toast } from "@/components/common/Toaster";
 import { directus } from "./directus";
 import {
+  Query,
   createItem,
   deleteItem,
   passwordRequest,
   passwordReset,
-  Query,
   readItem,
   readItems,
   readUser,
@@ -122,7 +123,7 @@ export const useLoginMutation = () => {
 };
 
 export const useRegisterMutation = () => {
-  const navigate = useNavigate();
+  const navigate = useI18nNavigate();
   return useMutation({
     mutationFn: async (payload: Parameters<typeof registerUser>) => {
       try {
@@ -152,8 +153,10 @@ export const useRegisterMutation = () => {
   });
 };
 
-export const useVerifyMutation = (doRedirect: boolean = true) =>
-  useMutation({
+export const useVerifyMutation = (doRedirect: boolean = true) => {
+  const navigate = useI18nNavigate();
+
+  return useMutation({
     mutationFn: async (data: { token: string }) => {
       try {
         const response = await directus.request(registerUserVerify(data.token));
@@ -166,7 +169,8 @@ export const useVerifyMutation = (doRedirect: boolean = true) =>
       toast.success("Email verified successfully.");
       if (doRedirect) {
         setTimeout(() => {
-          window.location.href = `/login?new=true`;
+          // window.location.href = `/login?new=true`;
+          navigate(`/login?new=true`);
         }, 4500);
       }
     },
@@ -174,9 +178,10 @@ export const useVerifyMutation = (doRedirect: boolean = true) =>
       toast.error(e.message);
     },
   });
+};
 
 export const useRequestPasswordResetMutation = () => {
-  const navigate = useNavigate();
+  const navigate = useI18nNavigate();
   return useMutation({
     mutationFn: async (email: string) => {
       try {
@@ -199,7 +204,7 @@ export const useRequestPasswordResetMutation = () => {
 };
 
 export const useResetPasswordMutation = () => {
-  const navigate = useNavigate();
+  const navigate = useI18nNavigate();
   return useMutation({
     mutationFn: async ({
       token,
@@ -233,6 +238,7 @@ export const useResetPasswordMutation = () => {
 
 export const useLogoutMutation = () => {
   const queryClient = useQueryClient();
+  const navigate = useI18nNavigate();
 
   return useMutation({
     mutationFn: async ({
@@ -242,15 +248,20 @@ export const useLogoutMutation = () => {
       reason?: string;
       doRedirect: boolean;
     }) => {
-      await directus.logout();
+      try {
+        await directus.logout();
+      } catch (e) {
+        throwWithMessage(e);
+      }
     },
     onMutate: async ({ next, reason, doRedirect }) => {
       queryClient.resetQueries();
       if (doRedirect) {
-        window.location.href =
+        navigate(
           "/login" +
-          (next ? `?next=${encodeURIComponent(next)}` : "") +
-          (reason ? `&reason=${reason}` : "");
+            (next ? `?next=${encodeURIComponent(next)}` : "") +
+            (reason ? `&reason=${reason}` : ""),
+        );
       }
     },
   });
@@ -271,7 +282,7 @@ export const useProjectById = ({
   query?: Partial<Query<CustomDirectusTypes, Project>>;
 }) => {
   return useQuery({
-    queryKey: ["projects", projectId],
+    queryKey: ["projects", projectId, query],
     queryFn: () =>
       directus.request<Project>(readItem("project", projectId, query)),
   });
@@ -543,11 +554,8 @@ export const useUpdateConversationByIdMutation = () => {
         },
       );
       queryClient.invalidateQueries({
-        queryKey: ["conversations", variables.id],
+        queryKey: ["conversations"],
       });
-      // queryClient.invalidateQueries({
-      //   queryKey: ["conversationd", "all"],
-      // });
       toast.success("Conversation updated successfully");
     },
   });
@@ -613,7 +621,7 @@ export const useConversationsByProjectId = (
             { chunks: ["*"] },
           ],
           deep: {
-            // @ts-ignore
+            // @ts-expect-error chunks is not typed
             chunks: {
               _limit: loadChunks ? 1000 : 1,
             },
@@ -722,7 +730,7 @@ export const useUploadConversationChunk = () => {
     // Always refetch after error or success:
     onSettled: (_data, _error, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["conversations", variables.conversationId, "chunks"],
+        queryKey: ["conversations", variables.conversationId],
       });
 
       queryClient.invalidateQueries({
@@ -932,7 +940,13 @@ export const useLatestProjectAnalysisRunByProjectId = (projectId: string) => {
 export const useCurrentUser = () =>
   useQuery({
     queryKey: ["users", "me"],
-    queryFn: () => directus.request(readUser("me")),
+    queryFn: () => {
+      try {
+        return directus.request(readUser("me"));
+      } catch (error) {
+        return null;
+      }
+    },
   });
 
 export const useConversationTranscriptString = (conversationId: string) => {
@@ -969,42 +983,8 @@ export const useInsightsByConversationId = (conversationId: string) => {
   });
 };
 
-/**
- * 
- *  const { projectId, navigateToNewChat = true } = args;
-
-  const createChatMutation = useCreateChatMutation();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const handleCreateNewChat = async () => {
-    if (location.pathname.includes("chat")) {
-      return;
-    }
-
-    try {
-      const chat = await createChatMutation.mutateAsync({
-        project_id: {
-          id: projectId ?? "",
-        },
-      });
-
-      if (chat) {
-        if (navigateToNewChat) {
-          navigate(`/projects/${projectId}/chats/${chat.id}`);
-        }
-      } else {
-        alert("Failed to create chat");
-      }
-    } catch (error) {
-      console.error("Failed to create chat:", error);
-      alert("Failed to create chat");
-    }
-  };
- */
-
 export const useCreateChatMutation = () => {
-  const navigate = useNavigate();
+  const navigate = useI18nNavigate();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: {

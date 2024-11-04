@@ -3,6 +3,7 @@ import { LoadingOverlay } from "@mantine/core";
 import { PropsWithChildren } from "react";
 import { toast } from "../common/Toaster";
 import { CommonDropzone } from "./Dropzone";
+import { t } from "@lingui/macro";
 
 export const UploadConversationDropzone = (
   props: PropsWithChildren<{
@@ -37,7 +38,7 @@ export const UploadConversationDropzone = (
       maxSize={200 * 1024 * 1024}
       onReject={(files) => {
         toast.error(
-          `Something went wrong while uploading the file: ${files[0].errors[0].message}`,
+          t`Something went wrong while uploading the file: ${files[0].errors[0].message}`,
         );
       }}
       loading={uploadConversationMutation.isPending}

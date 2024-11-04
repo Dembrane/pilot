@@ -452,10 +452,12 @@ type Project = {
   context?: string | null;
   conversations: any[] | Conversation[];
   created_at: string;
-  default_conversation_context?: string | null;
+  default_conversation_ask_for_participant_name: boolean;
+  default_conversation_title?: string | null;
   default_conversation_description?: string | null;
   default_conversation_finish_text?: string | null;
-  default_conversation_title?: string | null;
+  default_conversation_tutorial_slug?: string | null;
+  default_conversation_transcript_prompt?: string | null;
   directus_user_id?: string | DirectusUsers | null;
   id: string;
   image_generation_model?: string | null;
@@ -654,6 +656,4 @@ type CustomDirectusTypes = {
   quote_aspect_1: QuoteAspect1[];
   quote_conversation_chunk: QuoteConversationChunk[];
   view: View[];
-  portal_tutorial: PortalTutorial[];
-  portal_tutorial_card: PortalTutorialCard[];
 };

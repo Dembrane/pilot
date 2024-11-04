@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { directus } from "@/lib/directus";
 import { useLogoutMutation } from "@/lib/query";
 
@@ -26,9 +26,11 @@ export const useAuthenticated = (doRedirect = false) => {
 
   useEffect(() => {
     setLoading(true);
-    checkAuth().finally(() => {
-      setLoading(false);
-    });
+    checkAuth()
+      .catch((_e) => {})
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   return { loading, isAuthenticated };

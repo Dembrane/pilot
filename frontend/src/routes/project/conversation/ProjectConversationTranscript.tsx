@@ -5,6 +5,7 @@ import {
   useConversationChunks,
   useConversationTranscriptString,
 } from "@/lib/query";
+import { Trans, t } from "@lingui/macro";
 import {
   ActionIcon,
   Group,
@@ -20,36 +21,48 @@ import {
   Checkbox,
   TextInput,
   CopyButton,
+  Switch,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconCheck, IconCopy, IconDownload } from "@tabler/icons-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import useSessionStorageState from "use-session-storage-state";
 
-const Chunk = ({ chunk }: { chunk: ConversationChunk }) => {
+const Chunk = ({
+  chunk,
+  showAudioPlayer = true,
+}: {
+  chunk: ConversationChunk;
+  showAudioPlayer?: boolean;
+}) => {
   const src = getConversationChunkContentLink(
     chunk.conversation_id as string,
     chunk.id,
   );
   return (
     <BaseMessage
-      title={"Speaker"}
+      title={t`Speaker`}
       rightSection={
         <span className="text-sm">
           {new Date(chunk.timestamp).toLocaleTimeString()}
         </span>
       }
       bottomSection={
-        <>
-          <Divider />
-          <audio
-            src={src}
-            className="h-6 w-full p-0"
-            crossOrigin="anonymous"
-            preload="metadata"
-            controls
-          />
-        </>
+        showAudioPlayer ? (
+          <>
+            <Divider />
+            <audio
+              src={src}
+              className="h-6 w-full p-0"
+              crossOrigin="anonymous"
+              preload="metadata"
+              controls
+            />
+          </>
+        ) : (
+          <> </>
+        )
       }
     >
       {/* {chunk.processing_error ? (
@@ -75,6 +88,13 @@ export const ProjectConversationTranscript = () => {
   const [opened, { open, close }] = useDisclosure(false);
   const [downloadWithTimestamps, setDownloadWithTimestamps] = useState(false);
   const [filename, setFilename] = useState("");
+
+  const [showAudioPlayer, setShowAudioPlayer] = useSessionStorageState<boolean>(
+    "conversation-transcript-show-audio-player",
+    {
+      defaultValue: false,
+    },
+  );
 
   if (conversationChunksQuery.isLoading) {
     return (
@@ -129,68 +149,98 @@ export const ProjectConversationTranscript = () => {
   return (
     <Stack>
       <Stack>
-        <Group>
-          <Title order={2}>Transcript</Title>
-          <Tooltip label="Download transcript">
-            <ActionIcon onClick={open} size="md" variant="subtle" color="gray">
-              <IconDownload size={48} />
-            </ActionIcon>
-          </Tooltip>
-          <CopyButton value={transcriptQuery.data ?? ""}>
-            {({ copied, copy }) => (
-              <Tooltip label="Copy transcript">
-                <ActionIcon
-                  size="md"
-                  variant="subtle"
-                  color="gray"
-                  loading={transcriptQuery.isLoading}
-                  onClick={copy}
-                >
-                  {!copied ? <IconCopy size={48} /> : <IconCheck size={48} />}
-                </ActionIcon>
-              </Tooltip>
-            )}
-          </CopyButton>
-          <Modal
-            opened={opened}
-            onClose={close}
-            title="Download Transcript Options"
-          >
-            <Stack>
-              <TextInput
-                label="Custom Filename"
-                placeholder="ConversationTitle-Email.md"
-                value={filename}
-                onChange={(event) => setFilename(event.currentTarget.value)}
-              />
-              <Checkbox
-                label="Include timestamps"
-                checked={downloadWithTimestamps}
-                onChange={(event) =>
-                  setDownloadWithTimestamps(event.currentTarget.checked)
-                }
-              />
-              <Button
-                onClick={() => {
-                  handleDownloadTranscript(downloadWithTimestamps, filename);
-                  close();
-                }}
-                rightSection={<IconDownload />}
+        <Group justify="space-between">
+          <Group>
+            {" "}
+            <Title order={2}>
+              <Trans>Transcript</Trans>
+            </Title>
+            <Tooltip label={t`Download transcript`}>
+              <ActionIcon
+                onClick={open}
+                size="md"
+                variant="subtle"
+                color="gray"
               >
-                Download
-              </Button>
-            </Stack>
-          </Modal>
+                <IconDownload size={48} />
+              </ActionIcon>
+            </Tooltip>
+            <CopyButton value={transcriptQuery.data ?? ""}>
+              {({ copied, copy }) => (
+                <Tooltip label={t`Copy transcript`}>
+                  <ActionIcon
+                    size="md"
+                    variant="subtle"
+                    color="gray"
+                    loading={transcriptQuery.isLoading}
+                    onClick={copy}
+                  >
+                    {!copied ? <IconCopy size={48} /> : <IconCheck size={48} />}
+                  </ActionIcon>
+                </Tooltip>
+              )}
+            </CopyButton>
+          </Group>
+
+          <Switch
+            checked={showAudioPlayer}
+            onChange={(event) =>
+              setShowAudioPlayer(event.currentTarget.checked)
+            }
+            label={t`Show audio player`}
+          />
         </Group>
+
+        <Modal
+          opened={opened}
+          onClose={close}
+          title={t`Download Transcript Options`}
+        >
+          <Stack>
+            <TextInput
+              label={t`Custom Filename`}
+              placeholder="ConversationTitle-Email.md"
+              value={filename}
+              onChange={(event) => setFilename(event.currentTarget.value)}
+            />
+            <Checkbox
+              label={t`Include timestamps`}
+              checked={downloadWithTimestamps}
+              onChange={(event) =>
+                setDownloadWithTimestamps(event.currentTarget.checked)
+              }
+            />
+            <Button
+              onClick={() => {
+                handleDownloadTranscript(downloadWithTimestamps, filename);
+                close();
+              }}
+              rightSection={<IconDownload />}
+            >
+              <Trans>Download</Trans>
+            </Button>
+          </Stack>
+        </Modal>
         <Stack>
           {sorted?.length === 0 && (
             <Text size="md">
-              No transcript available for this conversation.
+              <Trans>No transcript available for this conversation.</Trans>
             </Text>
           )}
-          {sorted?.map((chunk) => {
-            return <Chunk key={chunk.id} chunk={chunk} />;
-          })}
+          {sorted
+            ?.filter(
+              (chunk) =>
+                !!chunk.transcript && chunk.transcript.trim().length > 0,
+            )
+            .map((chunk) => {
+              return (
+                <Chunk
+                  key={chunk.id}
+                  chunk={chunk}
+                  showAudioPlayer={showAudioPlayer}
+                />
+              );
+            })}
         </Stack>
       </Stack>
     </Stack>

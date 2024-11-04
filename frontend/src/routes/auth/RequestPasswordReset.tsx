@@ -1,4 +1,5 @@
 import { useRequestPasswordResetMutation } from "@/lib/query";
+import { Trans, t } from "@lingui/macro";
 import {
   Alert,
   Button,
@@ -12,7 +13,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 export const RequestPasswordResetRoute = () => {
-  useDocumentTitle("Request Password Reset | Dembrane");
+  useDocumentTitle(t`Request Password Reset | Dembrane`);
   const { register, handleSubmit } = useForm<{ email: string }>();
 
   const requestPasswordResetMutation = useRequestPasswordResetMutation();
@@ -25,7 +26,9 @@ export const RequestPasswordResetRoute = () => {
     <Container size="sm" className="!h-full">
       <Stack className="h-full">
         <Stack className="flex-grow">
-          <Title order={1}>Request Password Reset</Title>
+          <Title order={1}>
+            <Trans>Request Password Reset</Trans>
+          </Title>
 
           <form onSubmit={onSubmit}>
             <Stack>
@@ -42,7 +45,7 @@ export const RequestPasswordResetRoute = () => {
                 type="submit"
                 loading={requestPasswordResetMutation.isPending}
               >
-                Submit
+                <Trans>Submit</Trans>
               </Button>
             </Stack>
           </form>

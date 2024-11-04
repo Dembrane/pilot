@@ -1,17 +1,18 @@
 import React, { useEffect, useRef } from "react";
 import {
-  Stack,
+  Button,
   Group,
-  Title,
+  NativeSelect,
+  Stack,
   TextInput,
   Textarea,
-  NativeSelect,
-  Button,
+  Title,
 } from "@mantine/core";
-import { Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 import { useForm } from "react-hook-form";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
 import { IconX } from "@tabler/icons-react";
+import { UnsavedChanges } from "../form/UnsavedChanges";
 
 type ProjectEditFormValues = {
   name: string;
@@ -73,26 +74,27 @@ export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
         <Title order={2}>
           <Trans>Edit Project</Trans>
         </Title>
-        {isDirty && <Trans>Unsaved changes</Trans>}
+        {isDirty && <UnsavedChanges />}
       </Group>
       <form onSubmit={handleSubmit(onSubmit)} onBlur={handleFormBlur}>
         <Stack className="relative">
-          <TextInput label="Title" {...register("name")} />
+          <TextInput label={t`Name`} {...register("name")} />
           <Textarea
-            label="Description"
+            label={t`Context`}
             rows={4}
             {...register("context")}
-            placeholder="How would you describe to a colleague what are you trying to accomplish with this project?
+            placeholder={t`How would you describe to a colleague what are you trying to accomplish with this project?
 
 * What is the north star goal or key metric
-* What does success look like"
+* What does success look like`}
           />
           <NativeSelect
-            label="Language"
+            label={t`Language`}
+            description={t`This language will be used for the Participant's Portal, transcription and analysis. To change the language of this application, please use the language picker in the header user menu instead.`}
             {...register("language")}
             data={[
-              { label: "English", value: "en" },
-              { label: "Dutch", value: "nl" },
+              { label: t`English`, value: "en" },
+              { label: t`Dutch`, value: "nl" },
             ]}
           />
         </Stack>

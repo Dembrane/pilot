@@ -2,6 +2,7 @@ import { useConversationById } from "@/lib/query";
 import { Stack, Title } from "@mantine/core";
 import { useParams } from "react-router-dom";
 import { TabsWithRouter } from "./TabsWithRouter";
+import { t } from "@lingui/macro";
 
 export const ProjectConversationLayout = () => {
   const { conversationId } = useParams();
@@ -14,16 +15,16 @@ export const ProjectConversationLayout = () => {
   });
 
   return (
-    <Stack className="relative py-4 px-2">
+    <Stack className="relative px-2 py-4">
       <Title order={1}>
         {conversationQuery.data?.participant_name ?? "Conversation"}
       </Title>
       <TabsWithRouter
         basePath="/projects/:projectId/conversation/:conversationId"
         tabs={[
-          { value: "overview", label: "Overview" },
-          { value: "transcript", label: "Transcript" },
-          { value: "analysis", label: "Analysis" },
+          { value: "overview", label: t`Overview` },
+          { value: "transcript", label: t`Transcript` },
+          { value: "analysis", label: t`Analysis` },
         ]}
         loading={false}
       />

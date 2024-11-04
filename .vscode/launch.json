@@ -24,6 +24,13 @@
       "request": "launch",
       "module": "dembrane.quote_utils",
       "cwd": "${workspaceFolder}/server"
+    },
+    {
+      "name": "openai",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "dembrane.openai",
+      "cwd": "${workspaceFolder}/server"
     }
   ]
 }

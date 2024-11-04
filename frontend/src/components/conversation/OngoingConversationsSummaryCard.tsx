@@ -3,6 +3,7 @@ import { SummaryCard } from "../common/SummaryCard";
 import { directus } from "@/lib/directus";
 import { useQuery } from "@tanstack/react-query";
 import { readItems } from "@directus/sdk";
+import { t } from "@lingui/macro";
 
 const TIME_INTERVAL = 1 * 60 * 1000; // 1 mins
 
@@ -21,7 +22,7 @@ export const OngoingConversationsSummaryCard = ({
               project_id: projectId,
             },
             timestamp: {
-              // @ts-ignore
+              // @ts-expect-error _gt is not typed
               _gt: new Date(Date.now() - TIME_INTERVAL).toISOString(), // last chunk within 5 mins
             },
           },
@@ -35,7 +36,7 @@ export const OngoingConversationsSummaryCard = ({
 
       return uniqueConversations.size;
     },
-    refetchInterval: 2000,
+    refetchInterval: 10000,
   });
 
   return (
@@ -43,7 +44,7 @@ export const OngoingConversationsSummaryCard = ({
       loading={conversationChunksQuery.isLoading}
       value={conversationChunksQuery.data ?? 0}
       icon={<IconUsersGroup size={24} />}
-      label="Ongoing Conversations"
+      label={t`Ongoing Conversations`}
     />
   );
 };

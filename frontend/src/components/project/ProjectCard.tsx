@@ -4,6 +4,8 @@ import { IconExternalLink } from "@tabler/icons-react";
 import { formatRelative } from "date-fns";
 import { PropsWithChildren } from "react";
 import { Link, useParams } from "react-router-dom";
+import { I18nLink } from "../common/i18nLink";
+import { Trans, t } from "@lingui/macro";
 
 export const ProjectCard = ({
   project,
@@ -23,27 +25,28 @@ export const ProjectCard = ({
                 {project.name}
               </Text>
             </Group>
-            <Link to={link}>
+            <I18nLink to={link}>
               <ActionIcon component="a" variant="subtle">
                 <Icons.Dots />
               </ActionIcon>
-            </Link>
+            </I18nLink>
           </Group>
           <Text size="sm" c="dimmed">
-            {project.conversations_count ?? 0} Conversation
-            {project.conversations_count === 1 ? "" : "s"} &middot; Edited{" "}
-            {formatRelative(new Date(project.updated_at), new Date())}
+            <Trans>
+              {project.conversations_count ?? 0} Conversations • Edited{" "}
+              {formatRelative(new Date(project.updated_at), new Date())}
+            </Trans>
           </Text>
         </Stack>
-        <Link to={link} style={{ width: "100%" }}>
+        <I18nLink to={link} style={{ width: "100%" }}>
           <Button
             rightSection={<IconExternalLink size={20} />}
             fullWidth
             variant="light"
           >
-            Open
+            <Trans>Open</Trans>
           </Button>
-        </Link>
+        </I18nLink>
       </Stack>
     </Paper>
   );

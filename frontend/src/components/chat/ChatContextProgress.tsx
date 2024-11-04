@@ -1,5 +1,6 @@
 import { useProjectChatContext } from "@/lib/query";
 import { capitalize } from "@/lib/utils";
+import { t } from "@lingui/macro";
 import { Box, Progress, Skeleton, Tooltip } from "@mantine/core";
 
 export const ChatContextProgress = ({ chatId }: { chatId: string }) => {
@@ -57,7 +58,7 @@ export const ChatContextProgress = ({ chatId }: { chatId: string }) => {
 
         {chatContextQuery.data?.messages.map((m) => (
           <Tooltip
-            label={`Messages from ${capitalize(m.role)} - ${Math.ceil(m.token_usage * 100)}%`}
+            label={t`Messages from ${capitalize(m.role)} - ${Math.ceil(m.token_usage * 100)}%`}
           >
             <Progress.Section value={m.token_usage * 100} color="gray.5" />
           </Tooltip>

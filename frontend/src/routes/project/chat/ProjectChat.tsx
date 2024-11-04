@@ -8,22 +8,22 @@ import {
   useProjectChatContext,
 } from "@/lib/query";
 import {
-  Box,
-  Stack,
-  Title,
-  Divider,
-  Textarea,
-  Group,
-  Text,
-  Button,
-  LoadingOverlay,
+  ActionIcon,
   Alert,
+  Anchor,
+  Box,
+  Button,
+  CopyButton,
+  Divider,
+  Group,
+  LoadingOverlay,
   Menu,
   SimpleGrid,
-  CopyButton,
-  ActionIcon,
+  Stack,
+  Text,
+  Textarea,
+  Title,
   Tooltip,
-  Anchor,
 } from "@mantine/core";
 import { useDisclosure, useDocumentTitle } from "@mantine/hooks";
 import {
@@ -43,6 +43,9 @@ import { Markdown } from "@/components/common/Markdown";
 import React, { useEffect, useMemo, useRef } from "react";
 import { formatDate } from "date-fns";
 import { cn } from "@/lib/utils";
+import { I18nLink } from "@/components/common/i18nLink";
+import { Trans, t } from "@lingui/macro";
+import { CloseableAlert } from "@/components/common/ClosableAlert";
 
 const ConversationLinks = ({
   conversations,
@@ -54,12 +57,12 @@ const ConversationLinks = ({
   return (
     <Group gap="xs" align="center">
       {conversations?.map((conversation) => (
-        <Link
+        <I18nLink
           key={conversation.id}
           to={`/projects/${projectId}/conversation/${conversation.id}/overview`}
         >
           <Anchor size="xs">{conversation.participant_name}</Anchor>
-        </Link>
+        </I18nLink>
       )) ?? null}
     </Group>
   );
@@ -85,7 +88,7 @@ const ChatHistoryMessage = ({
           <Group w="100%" gap="xs">
             <Text className={cn("italic")} size="xs" c="gray.7">
               {formatDate(
-                // @ts-ignore
+                // @ts-expect-error message is not typed
                 new Date(message.createdAt ?? new Date()),
                 "MMM d, h:mm a",
               )}
@@ -116,7 +119,9 @@ const ChatHistoryMessage = ({
     return (
       <ChatMessage key={message.id} role="dembrane" section={section}>
         <Group gap="xs" align="baseline">
-          <Text size="xs">Context added:</Text>
+          <Text size="xs">
+            <Trans>Context added:</Trans>
+          </Text>
           <ConversationLinks
             conversations={message._original.added_conversations.map(
               (ac) => ac.conversation_id,
@@ -140,29 +145,26 @@ const TemplatesMenu = ({
 }) => {
   const templates = [
     {
-      title: "Summarize",
+      title: t`Summarize`,
       icon: IconNotes,
-      content:
-        "Please provide a concise summary of the following provided in the context.",
+      content: t`Please provide a concise summary of the following provided in the context.`,
     },
     {
-      title: "Compare & Contrast",
+      title: t`Compare & Contrast`,
       icon: IconCalculator,
-      content:
-        "Compare and contrast the following items provided in the context.",
+      content: t`Compare and contrast the following items provided in the context.`,
     },
     {
-      title: "Meeting Notes",
+      title: t`Meeting Notes`,
       icon: IconNotes,
-      content:
-        "Generate structured meeting notes based on the following discussion points provided in the context.",
+      content: t`Generate structured meeting notes based on the following discussion points provided in the context.`,
     },
   ];
 
   const handleTemplateClick = (content: string) => {
     if (
       input.trim() !== "" &&
-      !window.confirm("This will clear your current input. Are you sure?")
+      !window.confirm(t`This will clear your current input. Are you sure?`)
     ) {
       return;
     }
@@ -181,14 +183,16 @@ const TemplatesMenu = ({
     >
       <Menu.Target>
         <Button variant="subtle" color="gray">
-          Templates
+          <Trans>Templates</Trans>
         </Button>
       </Menu.Target>
       <Menu.Dropdown>
         <Stack p="md" gap="sm">
-          <Alert variant="info" title="Templates">
-            These are some helpful preset templates to get you started.
-          </Alert>
+          <CloseableAlert variant="info" title={t`Templates`}>
+            <Trans>
+              These are some helpful preset templates to get you started.
+            </Trans>
+          </CloseableAlert>
           <SimpleGrid cols={2}>
             {templates.map((template) => (
               <Button
@@ -246,7 +250,7 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
   } = useChat({
     api: `${API_BASE_URL}/chats/${chatId}`,
     credentials: "include",
-    // @ts-ignore
+    // @ts-expect-error chatHistoryQuery.data is not typed
     initialMessages: chatHistoryQuery.data ?? [],
     streamProtocol: "data",
     onResponse: (response) => {
@@ -260,7 +264,7 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
     },
     onFinish: async (message) => {
       console.log("onFinish", message.content);
-      // do this for now because - i dont want to do the streamed text processing again in the backend
+      // do this for now because - i dont want to do the stream text processing again in the backend
       addChatMessageMutation.mutate({
         project_chat_id: {
           id: chatId,
@@ -291,7 +295,7 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
     };
 
     // publish the incomplete result to the backend
-    addChatMessageMutation.mutate(body as any);
+    addChatMessageMutation.mutate(body);
   };
 
   const customHandleSubmit = async () => {
@@ -324,10 +328,16 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
       chatHistoryQuery.data &&
       chatHistoryQuery.data.length > (messages?.length ?? 0)
     ) {
-      // @ts-ignore
+      // @ts-expect-error chatHistoryQuery.data is not typed
       setMessages(chatHistoryQuery.data ?? messages);
     }
-  }, [chatHistoryQuery.data, isLoading, chatHistoryQuery.isLoading, messages]);
+  }, [
+    chatHistoryQuery.data,
+    isLoading,
+    chatHistoryQuery.isLoading,
+    messages,
+    setMessages,
+  ]);
 
   return {
     isInitializing: chatHistoryQuery.isLoading,
@@ -347,7 +357,7 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
 };
 
 export const ProjectChatRoute = () => {
-  useDocumentTitle("Chat | Dembrane");
+  useDocumentTitle(t`Chat | Dembrane`);
 
   const { chatId } = useParams();
   const chatQuery = useProjectChat(chatId ?? "");
@@ -379,19 +389,18 @@ export const ProjectChatRoute = () => {
     <Stack className="relative flex min-h-full flex-col px-2 pr-4">
       {/* Header */}
       <Stack className="top-0 w-full bg-white pt-6">
-        <Title order={1}>{chatQuery.data?.name ?? "Chat"}</Title>
+        <Title order={1}>{chatQuery.data?.name ?? t`Chat`}</Title>
         <Divider />
       </Stack>
       {/* Body */}
       <Box className="flex-grow">
         <Stack py="sm" pb="xl" className="relative h-full w-full">
           <ChatHistoryMessage
-            // @ts-ignore
+            // @ts-expect-error chatHistoryQuery.data is not typed
             message={{
               id: "init",
               role: "assistant",
-              content:
-                "Welcome to Dembrane Chat! Use the sidebar to select resources and conversations that you want to analyse. Then, you can ask questions about the selected resources and conversations.",
+              content: t`Welcome to Dembrane Chat! Use the sidebar to select resources and conversations that you want to analyse. Then, you can ask questions about the selected resources and conversations.`,
             }}
           />
 
@@ -400,7 +409,7 @@ export const ProjectChatRoute = () => {
             messages.length > 0 &&
             messages.slice(0, -1).map((message, idx) => (
               <div key={message.id + idx}>
-                {/* @ts-ignore */}
+                {/* @ts-expect-error chatHistoryQuery.data is not typed */}
                 <ChatHistoryMessage message={message} />
               </div>
             ))}
@@ -410,7 +419,7 @@ export const ProjectChatRoute = () => {
             messages[messages.length - 1].role === "user" && (
               <div ref={lastMessageRef}>
                 <ChatHistoryMessage
-                  // @ts-ignore
+                  // @ts-expect-error chatHistoryQuery.data is not typed
                   message={messages[messages.length - 1]}
                   section={
                     !isLoading && (
@@ -424,7 +433,7 @@ export const ProjectChatRoute = () => {
           {isLoading && (
             <Group>
               <Text size="sm" className="italic">
-                Assistant is typing...
+                <Trans>Assistant is typing...</Trans>
               </Text>
               <Button
                 onClick={() => stop()}
@@ -433,7 +442,7 @@ export const ProjectChatRoute = () => {
                 size="sm"
                 rightSection={<IconSquare size={14} />}
               >
-                Stop
+                <Trans>Stop</Trans>
               </Button>
             </Group>
           )}
@@ -442,7 +451,7 @@ export const ProjectChatRoute = () => {
             messages.length > 0 &&
             messages[messages.length - 1].role === "assistant" && (
               <div ref={lastMessageRef}>
-                {/* @ts-ignore */}
+                {/* @ts-expect-error chatHistoryQuery.data is not typed */}
                 <ChatHistoryMessage message={messages[messages.length - 1]} />
               </div>
             )}
@@ -454,14 +463,16 @@ export const ProjectChatRoute = () => {
               color="red"
               variant="outline"
             >
-              <Text>An error occurred.</Text>
+              <Text>
+                <Trans>An error occurred.</Trans>
+              </Text>
               <Button
                 color="red"
                 onClick={() => reload()}
                 leftSection={<IconRefresh size="1rem" />}
                 mt="md"
               >
-                Retry
+                <Trans>Retry</Trans>
               </Button>
             </Alert>
           )}
@@ -473,9 +484,11 @@ export const ProjectChatRoute = () => {
           {contextToBeAdded && contextToBeAdded.conversations.length > 0 && (
             <ChatMessage role="dembrane">
               <Group gap="xs" align="baseline">
-                <Text size="xs">Adding Context:</Text>
+                <Text size="xs">
+                  <Trans>Adding Context:</Trans>
+                </Text>
                 <ConversationLinks
-                  // @ts-ignore
+                  // @ts-expect-error conversation_id is not typed
                   conversations={contextToBeAdded.conversations.map((c) => ({
                     id: c.conversation_id,
                     participant_name: c.conversation_participant_name,
@@ -496,7 +509,7 @@ export const ProjectChatRoute = () => {
             <Group>
               <Box className="grow">
                 <Textarea
-                  placeholder="Type a message..."
+                  placeholder={t`Type a message...`}
                   minRows={4}
                   autosize
                   value={input}
@@ -526,7 +539,7 @@ export const ProjectChatRoute = () => {
                     rightSection={<IconSend size={24} />}
                     disabled={input.trim() === "" || isLoading}
                   >
-                    Send
+                    <Trans>Send</Trans>
                   </Button>
                 </Box>
 
@@ -535,7 +548,7 @@ export const ProjectChatRoute = () => {
             </Group>
 
             <Text size="xs" className="mt-1 italic" c="dimmed">
-              Use Shift + Enter to add a new line
+              <Trans>Use Shift + Enter to add a new line</Trans>
             </Text>
           </form>
         </Stack>

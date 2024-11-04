@@ -1,28 +1,29 @@
 import {
   useDeleteChatMutation,
-  useUpdateChatMutation,
   useProjectChats,
+  useUpdateChatMutation,
 } from "@/lib/query";
-import { Trans } from "@lingui/macro";
+import { Trans, t } from "@lingui/macro";
 import {
   Accordion,
+  ActionIcon,
   Group,
   LoadingOverlay,
-  Stack,
-  Title,
-  Text,
-  ActionIcon,
   Menu,
+  Stack,
+  Text,
+  Title,
 } from "@mantine/core";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react";
 import { formatRelative } from "date-fns";
 import { NavigationButton } from "../common/NavigationButton";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
 
 const ChatAccordionItemMenu = ({ chat }: { chat: Partial<ProjectChat> }) => {
   const deleteChatMutation = useDeleteChatMutation();
   const updateChatMutation = useUpdateChatMutation();
-  const navigate = useNavigate();
+  const navigate = useI18nNavigate();
 
   return (
     <Menu shadow="md" position="right">
@@ -43,7 +44,7 @@ const ChatAccordionItemMenu = ({ chat }: { chat: Partial<ProjectChat> }) => {
             disabled={deleteChatMutation.isPending}
             onClick={() => {
               const newName = prompt(
-                "Enter new name for the chat:",
+                t`Enter new name for the chat:`,
                 chat.name ?? "",
               );
               if (newName) {
@@ -55,7 +56,7 @@ const ChatAccordionItemMenu = ({ chat }: { chat: Partial<ProjectChat> }) => {
               }
             }}
           >
-            Rename
+            <Trans>Rename</Trans>
           </Menu.Item>
           <Menu.Item
             leftSection={<IconTrash />}
@@ -68,7 +69,7 @@ const ChatAccordionItemMenu = ({ chat }: { chat: Partial<ProjectChat> }) => {
               navigate(`/projects/${chat.project_id}/overview`);
             }}
           >
-            Delete
+            <Trans>Delete</Trans>
           </Menu.Item>
         </Stack>
       </Menu.Dropdown>
@@ -89,7 +90,7 @@ export const ChatAccordion = ({ projectId }: { projectId: string }) => {
             <span className="min-w-[48px] pr-2 font-normal text-gray-500">
               {chatsQuery.data?.length ?? 0}
             </span>
-            Chats
+            <Trans>Chats</Trans>
           </Title>
         </Group>
       </Accordion.Control>

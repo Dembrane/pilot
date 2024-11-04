@@ -1,4 +1,4 @@
-# Dembrane
+# Dembrane ECHO
 
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
@@ -6,7 +6,7 @@
 
 ## Architecture
 
-![Architecture](/docs/diagrams/architecture20240917.png)
+![Architecture](/developer-docs/diagrams/architecture20240917.png)
 
 ## Deployment
 

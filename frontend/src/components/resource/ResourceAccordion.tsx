@@ -1,7 +1,7 @@
 import { Icons } from "@/icons";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Trans, t } from "@lingui/macro";
-import { Accordion, Group, Title, Text, Tooltip } from "@mantine/core";
+import { Accordion, Group, Text, Title, Tooltip } from "@mantine/core";
 import { UploadResourceDropzone } from "../dropzone/UploadResourceDropzone";
 
 // Resource Accordion
@@ -17,7 +17,7 @@ const ResourceAccordion = ({ projectId }: { projectId: string }) => {
             <span className="min-w-[48px] pr-2 font-normal text-gray-500">
               {resources.length}
             </span>
-            Resources
+            <Trans>Resources</Trans>
           </Title>
           <Tooltip label={t`Upload resources`}>
             <div>

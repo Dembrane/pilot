@@ -1,5 +1,5 @@
 version: 1
-directus: 10.13.1
+directus: 10.13.3
 vendor: postgres
 collections:
   - collection: aspect
@@ -460,6 +460,44 @@ collections:
       name: view
 fields:
   - collection: aspect
+    field: centroid_embedding
+    type: unknown
+    meta:
+      collection: aspect
+      conditions: null
+      display: null
+      display_options: null
+      field: centroid_embedding
+      group: null
+      hidden: false
+      interface: null
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: 8
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: centroid_embedding
+      table: aspect
+      data_type: vector
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: aspect
     field: id
     type: uuid
     meta:
@@ -525,11 +563,11 @@ fields:
       name: created_at
       table: aspect
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -564,11 +602,11 @@ fields:
       name: updated_at
       table: aspect
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -767,44 +805,6 @@ fields:
       foreign_key_table: view
       foreign_key_column: id
   - collection: aspect
-    field: centroid_embedding
-    type: unknown
-    meta:
-      collection: aspect
-      conditions: null
-      display: null
-      display_options: null
-      field: centroid_embedding
-      group: null
-      hidden: false
-      interface: null
-      note: null
-      options: null
-      readonly: true
-      required: false
-      sort: 8
-      special: null
-      translations: null
-      validation: null
-      validation_message: null
-      width: full
-    schema:
-      name: centroid_embedding
-      table: aspect
-      data_type: vector
-      default_value: null
-      max_length: null
-      numeric_precision: null
-      numeric_scale: null
-      is_nullable: true
-      is_unique: false
-      is_primary_key: false
-      is_generated: false
-      generation_expression: null
-      has_auto_increment: false
-      foreign_key_table: null
-      foreign_key_column: null
-  - collection: aspect
     field: image_url
     type: string
     meta:
@@ -953,11 +953,11 @@ fields:
       name: created_at
       table: conversation
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -992,11 +992,11 @@ fields:
       name: updated_at
       table: conversation
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -1640,11 +1640,11 @@ fields:
       name: created_at
       table: conversation_chunk
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -1679,11 +1679,11 @@ fields:
       name: updated_at
       table: conversation_chunk
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -2110,11 +2110,11 @@ fields:
       name: created_at
       table: document
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -2149,11 +2149,11 @@ fields:
       name: updated_at
       table: document
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -2571,11 +2571,11 @@ fields:
       name: created_at
       table: insight
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -2610,11 +2610,11 @@ fields:
       name: updated_at
       table: insight
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -2826,11 +2826,11 @@ fields:
       name: created_at
       table: project
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -2865,11 +2865,11 @@ fields:
       name: updated_at
       table: project
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -2894,7 +2894,7 @@ fields:
       options: null
       readonly: false
       required: false
-      sort: 8
+      sort: 6
       special: null
       translations: null
       validation: null
@@ -2939,7 +2939,7 @@ fields:
             value: multi
       readonly: false
       required: false
-      sort: 7
+      sort: 5
       special: null
       translations: null
       validation: null
@@ -2977,7 +2977,7 @@ fields:
       options: null
       readonly: false
       required: false
-      sort: 6
+      sort: 4
       special: null
       translations: null
       validation: null
@@ -3015,7 +3015,7 @@ fields:
       options: null
       readonly: false
       required: false
-      sort: 10
+      sort: 8
       special: null
       translations: null
       validation: null
@@ -3053,7 +3053,7 @@ fields:
       options: null
       readonly: false
       required: false
-      sort: 11
+      sort: 9
       special:
         - cast-boolean
       translations: null
@@ -3153,44 +3153,6 @@ fields:
       foreign_key_table: null
       foreign_key_column: null
   - collection: project
-    field: default_conversation_context
-    type: text
-    meta:
-      collection: project
-      conditions: null
-      display: null
-      display_options: null
-      field: default_conversation_context
-      group: null
-      hidden: false
-      interface: input-multiline
-      note: null
-      options: null
-      readonly: false
-      required: false
-      sort: 15
-      special: null
-      translations: null
-      validation: null
-      validation_message: null
-      width: full
-    schema:
-      name: default_conversation_context
-      table: project
-      data_type: text
-      default_value: null
-      max_length: null
-      numeric_precision: null
-      numeric_scale: null
-      is_nullable: true
-      is_unique: false
-      is_primary_key: false
-      is_generated: false
-      generation_expression: null
-      has_auto_increment: false
-      foreign_key_table: null
-      foreign_key_column: null
-  - collection: project
     field: default_conversation_finish_text
     type: text
     meta:
@@ -3206,7 +3168,7 @@ fields:
       options: null
       readonly: false
       required: false
-      sort: 14
+      sort: 15
       special: null
       translations: null
       validation: null
@@ -3249,7 +3211,7 @@ fields:
             value: EXTRAVAGANT
       readonly: false
       required: true
-      sort: 9
+      sort: 7
       special: null
       translations: null
       validation: null
@@ -3412,13 +3374,137 @@ fields:
       options: null
       readonly: false
       required: false
-      sort: null
+      sort: 20
       special:
         - o2m
       translations: null
       validation: null
       validation_message: null
       width: full
+  - collection: project
+    field: default_conversation_ask_for_participant_name
+    type: boolean
+    meta:
+      collection: project
+      conditions: null
+      display: null
+      display_options: null
+      field: default_conversation_ask_for_participant_name
+      group: null
+      hidden: false
+      interface: boolean
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 10
+      special:
+        - cast-boolean
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: default_conversation_ask_for_participant_name
+      table: project
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: project
+    field: default_conversation_tutorial_slug
+    type: string
+    meta:
+      collection: project
+      conditions: null
+      display: null
+      display_options: null
+      field: default_conversation_tutorial_slug
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: >-
+        Manually syncronize this with
+        https://admin-dembrane.azurewebsites.net/admin/content/echo__portal_tutorial
+      options:
+        choices:
+          - text: None
+            value: None
+          - text: Basic
+            value: basic
+          - text: Advanced
+            value: advanced
+      readonly: false
+      required: false
+      sort: 11
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: default_conversation_tutorial_slug
+      table: project
+      data_type: character varying
+      default_value: none
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: project
+    field: default_conversation_transcript_prompt
+    type: text
+    meta:
+      collection: project
+      conditions: null
+      display: null
+      display_options: null
+      field: default_conversation_transcript_prompt
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 14
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: default_conversation_transcript_prompt
+      table: project
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: project_analysis_run
     field: id
     type: uuid
@@ -3485,11 +3571,11 @@ fields:
       name: created_at
       table: project_analysis_run
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -3524,11 +3610,11 @@ fields:
       name: updated_at
       table: project_analysis_run
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -4139,6 +4225,44 @@ fields:
       validation: null
       validation_message: null
       width: full
+  - collection: project_chat
+    field: name
+    type: string
+    meta:
+      collection: project_chat
+      conditions: null
+      display: null
+      display_options: null
+      field: name
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 9
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: name
+      table: project_chat
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: project_chat_conversation
     field: id
     type: integer
@@ -4875,11 +4999,11 @@ fields:
       name: created_at
       table: project_tag
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -4914,11 +5038,11 @@ fields:
       name: updated_at
       table: project_tag
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -5033,6 +5157,44 @@ fields:
       validation_message: null
       width: full
   - collection: quote
+    field: embedding
+    type: unknown
+    meta:
+      collection: quote
+      conditions: null
+      display: raw
+      display_options: null
+      field: embedding
+      group: null
+      hidden: true
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      sort: 8
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: embedding
+      table: quote
+      data_type: vector
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: quote
     field: id
     type: uuid
     meta:
@@ -5097,11 +5259,11 @@ fields:
       name: created_at
       table: quote
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -5135,11 +5297,11 @@ fields:
       name: updated_at
       table: quote
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -5262,44 +5424,6 @@ fields:
       has_auto_increment: false
       foreign_key_table: insight
       foreign_key_column: id
-  - collection: quote
-    field: embedding
-    type: unknown
-    meta:
-      collection: quote
-      conditions: null
-      display: raw
-      display_options: null
-      field: embedding
-      group: null
-      hidden: true
-      interface: null
-      note: null
-      options: null
-      readonly: false
-      required: false
-      sort: 8
-      special: null
-      translations: null
-      validation: null
-      validation_message: null
-      width: full
-    schema:
-      name: embedding
-      table: quote
-      data_type: vector
-      default_value: null
-      max_length: null
-      numeric_precision: null
-      numeric_scale: null
-      is_nullable: false
-      is_unique: false
-      is_primary_key: false
-      is_generated: false
-      generation_expression: null
-      has_auto_increment: false
-      foreign_key_table: null
-      foreign_key_column: null
   - collection: quote
     field: project_analysis_run_id
     type: uuid
@@ -5895,11 +6019,11 @@ fields:
       name: created_at
       table: view
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -5934,11 +6058,11 @@ fields:
       name: updated_at
       table: view
       data_type: timestamp with time zone
-      default_value: now()
+      default_value: CURRENT_TIMESTAMP
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_primary_key: false
       is_generated: false
@@ -6299,7 +6423,7 @@ relations:
       column: view_id
       foreign_key_table: view
       foreign_key_column: id
-      constraint_name: aspect_view_id_fkey
+      constraint_name: aspect_view_id_foreign
       on_update: NO ACTION
       on_delete: SET NULL
   - collection: conversation
@@ -6320,7 +6444,7 @@ relations:
       column: project_id
       foreign_key_table: project
       foreign_key_column: id
-      constraint_name: conversation_project_id_fkey
+      constraint_name: conversation_project_id_foreign
       on_update: NO ACTION
       on_delete: CASCADE
   - collection: conversation_chunk
@@ -6341,7 +6465,7 @@ relations:
       column: conversation_id
       foreign_key_table: conversation
       foreign_key_column: id
-      constraint_name: conversation_chunk_conversation_id_fkey
+      constraint_name: conversation_chunk_conversation_id_foreign
       on_update: NO ACTION
       on_delete: CASCADE
   - collection: conversation_project_tag
@@ -6389,13 +6513,22 @@ relations:
   - collection: document
     field: project_id
     related_collection: project
-    meta: null
+    meta:
+      junction_field: null
+      many_collection: document
+      many_field: project_id
+      one_allowed_collections: null
+      one_collection: project
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
     schema:
       table: document
       column: project_id
       foreign_key_table: project
       foreign_key_column: id
-      constraint_name: document_project_id_fkey
+      constraint_name: document_project_id_foreign
       on_update: NO ACTION
       on_delete: CASCADE
   - collection: insight
@@ -6416,7 +6549,7 @@ relations:
       column: project_analysis_run_id
       foreign_key_table: project_analysis_run
       foreign_key_column: id
-      constraint_name: insight_project_analysis_run_id_fkey
+      constraint_name: insight_project_analysis_run_id_foreign
       on_update: NO ACTION
       on_delete: SET NULL
   - collection: project
@@ -6458,7 +6591,7 @@ relations:
       column: project_id
       foreign_key_table: project
       foreign_key_column: id
-      constraint_name: project_analysis_run_project_id_fkey
+      constraint_name: project_analysis_run_project_id_foreign
       on_update: NO ACTION
       on_delete: CASCADE
   - collection: project_chat
@@ -6689,7 +6822,7 @@ relations:
       column: project_id
       foreign_key_table: project
       foreign_key_column: id
-      constraint_name: project_tag_project_id_fkey
+      constraint_name: project_tag_project_id_foreign
       on_update: NO ACTION
       on_delete: CASCADE
   - collection: quote
@@ -6710,7 +6843,7 @@ relations:
       column: project_analysis_run_id
       foreign_key_table: project_analysis_run
       foreign_key_column: id
-      constraint_name: quote_project_analysis_run_id_fkey
+      constraint_name: quote_project_analysis_run_id_foreign
       on_update: NO ACTION
       on_delete: SET NULL
   - collection: quote
@@ -6731,19 +6864,28 @@ relations:
       column: insight_id
       foreign_key_table: insight
       foreign_key_column: id
-      constraint_name: quote_insight_id_fkey
+      constraint_name: quote_insight_id_foreign
       on_update: NO ACTION
       on_delete: SET NULL
   - collection: quote
     field: conversation_id
     related_collection: conversation
-    meta: null
+    meta:
+      junction_field: null
+      many_collection: quote
+      many_field: conversation_id
+      one_allowed_collections: null
+      one_collection: conversation
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
     schema:
       table: quote
       column: conversation_id
       foreign_key_table: conversation
       foreign_key_column: id
-      constraint_name: quote_conversation_id_fkey
+      constraint_name: quote_conversation_id_foreign
       on_update: NO ACTION
       on_delete: CASCADE
   - collection: quote_aspect
@@ -6890,6 +7032,6 @@ relations:
       column: project_analysis_run_id
       foreign_key_table: project_analysis_run
       foreign_key_column: id
-      constraint_name: view_project_analysis_run_id_fkey
+      constraint_name: view_project_analysis_run_id_foreign
       on_update: NO ACTION
       on_delete: SET NULL

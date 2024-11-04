@@ -4,7 +4,9 @@ import {
   useProjectById,
 } from "@/lib/query";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { Trans, t } from "@lingui/macro";
 import {
+  Alert,
   Box,
   Button,
   Group,
@@ -14,7 +16,6 @@ import {
   Stack,
   Text,
   TextInput,
-  Title,
 } from "@mantine/core";
 import { useState } from "react";
 
@@ -48,12 +49,18 @@ export const ProjectTagsInput = (props: { project: Project }) => {
   const [parent] = useAutoAnimate();
 
   const handleSubmit = () => {
-    createTagMutation.mutate({
-      project_id: {
-        id: props.project.id,
-        directus_user_id: (props.project.directus_user_id as string) ?? "",
-      },
-      text: tagInput,
+    const tags = tagInput
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag !== "");
+    tags.forEach((tag) => {
+      createTagMutation.mutate({
+        project_id: {
+          id: props.project.id,
+          directus_user_id: (props.project.directus_user_id as string) ?? "",
+        },
+        text: tag,
+      });
     });
     setTagInput("");
   };
@@ -70,46 +77,49 @@ export const ProjectTagsInput = (props: { project: Project }) => {
     <Stack className="relative">
       <LoadingOverlay visible={projectQuery.isLoading} />
       <Box>
-        <Title order={4}>Tags</Title>
-        <Group gap="sm" ref={parent}>
-          {(projectQuery.data?.tags?.length ?? 0) === 0 && (
-            <Text size="sm">
-              No tags have been added to this project yet. Add a tag using the
-              text input below to get started.
-            </Text>
-          )}
-          {projectQuery.data?.tags?.map((tag) => (
-            <ProjectTagPill key={tag.id} tag={tag} />
-          ))}
-        </Group>
-      </Box>
-      <Box>
         {createTagMutation.isError && (
           <Text c="red" size="sm">
             {createTagMutation.error.message}
           </Text>
         )}
-        <Group align="end">
-          <TextInput
-            label="Add Tag"
-            description="Participants will be able to select tags when creating conversations"
-            value={tagInput}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSubmit();
-              }
-            }}
-            onChange={(e) => setTagInput(e.currentTarget.value)}
-          />
-          <Button
-            loading={createTagMutation.isPending}
-            onClick={handleSubmit}
-            variant="outline"
-            disabled={!tagInput.trim()}
-          >
-            Add Tag
-          </Button>
-        </Group>
+        <Stack gap="sm">
+          <Group align="end">
+            <TextInput
+              label={t`Tags`}
+              description={t`Participants will be able to select tags when creating conversations`}
+              value={tagInput}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSubmit();
+                }
+              }}
+              onChange={(e) => setTagInput(e.currentTarget.value)}
+            />
+            <Button
+              loading={createTagMutation.isPending}
+              onClick={handleSubmit}
+              variant="outline"
+              disabled={!tagInput.trim() || createTagMutation.isPending}
+            >
+              {tagInput.includes(",") ? t`Add Tags` : t`Add Tag`}
+            </Button>
+          </Group>
+          <Group gap="sm" ref={parent}>
+            {(projectQuery.data?.tags?.length ?? 0) === 0 && (
+              <Alert>
+                <Text size="sm">
+                  <Trans>
+                    No tags have been added to this project yet. Add a tag using
+                    the text input above to get started.
+                  </Trans>
+                </Text>
+              </Alert>
+            )}
+            {projectQuery.data?.tags?.map((tag) => (
+              <ProjectTagPill key={tag.id} tag={tag} />
+            ))}
+          </Group>
+        </Stack>
       </Box>
     </Stack>
   );

@@ -1,14 +1,15 @@
 import { cn } from "@/lib/utils";
 import {
-  UnstyledButtonProps,
-  UnstyledButton,
-  Text,
   Group,
-  PolymorphicComponentProps,
   Paper,
+  PolymorphicComponentProps,
+  Text,
+  UnstyledButton,
+  UnstyledButtonProps,
 } from "@mantine/core";
 import { PropsWithChildren } from "react";
 import { Link } from "react-router-dom";
+import { I18nLink } from "@/components/common/i18nLink";
 
 type Props = {
   to?: string;
@@ -24,7 +25,7 @@ export const NavigationButton = ({
   rightSection, // not clickable
   rightIcon, // clickable
   active,
-  disabled,
+  disabled = false,
   ...props
 }: PropsWithChildren<Props>) => {
   return (
@@ -37,11 +38,9 @@ export const NavigationButton = ({
     >
       <Group align="center" wrap="nowrap">
         {to ? (
-          <Link to={to} className="flex-grow px-4 py-2">
+          <I18nLink to={to} className="flex-grow px-4 py-2">
             <UnstyledButton
               {...props}
-              // @ts-ignore
-              disabled={disabled}
               className={cn(
                 "w-full text-left",
                 disabled ? "cursor-not-allowed" : "cursor-pointer",
@@ -54,11 +53,10 @@ export const NavigationButton = ({
                 {!!rightIcon && rightIcon}
               </Group>
             </UnstyledButton>
-          </Link>
+          </I18nLink>
         ) : (
           <UnstyledButton
             {...props}
-            // @ts-ignore
             disabled={disabled}
             className={cn(
               "h-full w-full px-4 py-2 text-left",

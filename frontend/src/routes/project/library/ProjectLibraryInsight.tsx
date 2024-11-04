@@ -1,13 +1,13 @@
 import { useInsight, useProjectInsights } from "@/lib/query";
 import {
-  Divider,
-  Text,
-  LoadingOverlay,
-  Stack,
-  Title,
-  Group,
   ActionIcon,
   Container,
+  Divider,
+  Group,
+  LoadingOverlay,
+  Stack,
+  Text,
+  Title,
 } from "@mantine/core";
 import {
   IconArrowBack,
@@ -19,26 +19,32 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Quote } from "../../../components/quote/Quote";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { Icons } from "@/icons";
+import { I18nLink } from "@/components/common/i18nLink";
+import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import { Trans } from "@lingui/macro";
 
 export const ProjectLibraryInsight = () => {
   const { projectId, insightId } = useParams();
 
   const insightQuery = useInsight(insightId ?? "");
-  const navigate = useNavigate();
 
   if (!insightQuery.isLoading && !insightQuery.data) {
     return (
       <Stack className="px-2 py-6">
         <Group>
-          <Link to="..">
+          <I18nLink to="..">
             <ActionIcon>
               <IconArrowBack />
             </ActionIcon>
-          </Link>
-          <Title order={1}>Insight Library</Title>
+          </I18nLink>
+          <Title order={1}>
+            <Trans>Insight Library</Trans>
+          </Title>
         </Group>
         <Divider />
-        <p>Insight not found</p>
+        <Text>
+          <Trans>Insight not found</Trans>
+        </Text>
       </Stack>
     );
   }
@@ -63,7 +69,11 @@ export const ProjectLibraryInsight = () => {
         <Breadcrumbs
           items={[
             {
-              label: <Title order={2}>Insights</Title>,
+              label: (
+                <Title order={2}>
+                  <Trans>Insights</Trans>
+                </Title>
+              ),
               link: `/projects/${projectId}/library#insights`,
             },
             {
@@ -76,7 +86,9 @@ export const ProjectLibraryInsight = () => {
         <Text>{insight.summary}</Text>
 
         <Divider />
-        <Title order={2}>Quotes</Title>
+        <Title order={2}>
+          <Trans>Quotes</Trans>
+        </Title>
         <Stack>
           {quotes.map((quote) => (
             <Quote key={(quote as Quote).id} data={quote as Quote} />

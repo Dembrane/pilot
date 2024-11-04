@@ -1,17 +1,19 @@
 import { Icons } from "@/icons";
 import {
-  Paper,
-  Stack,
-  Group,
-  Pill,
   ActionIcon,
-  Text,
+  Group,
+  Paper,
+  Pill,
   Spoiler,
+  Stack,
+  Text,
 } from "@mantine/core";
 import { IconArrowsDiagonal } from "@tabler/icons-react";
 import { AspectCard } from "../aspect/AspectCard";
 import { Link, useParams } from "react-router-dom";
 import { Markdown } from "../common/Markdown";
+import { I18nLink } from "../common/i18nLink";
+import { Trans } from "@lingui/macro";
 
 export const ViewCard = ({ data }: { data: TView }) => {
   return (
@@ -22,7 +24,7 @@ export const ViewCard = ({ data }: { data: TView }) => {
           <Pill>
             <Group>
               <Text className="font-semibold">
-                {data.aspects?.length ?? 0} Aspects
+                {data.aspects?.length ?? 0} <Trans>Aspects</Trans>
               </Text>
             </Group>
           </Pill>
@@ -41,18 +43,20 @@ export const ViewExpandedCard = ({ data }: { data: View }) => {
         <Group justify="space-between">
           <Group c="gray">
             <Icons.View />
-            <Text className="font-semibold">View</Text>
+            <Text className="font-semibold">
+              <Trans>View</Trans>
+            </Text>
           </Group>
 
-          <Link to={`/projects/${projectId}/library/views/${data.id}`}>
+          <I18nLink to={`/projects/${projectId}/library/views/${data.id}`}>
             <ActionIcon component="a" variant="transparent" c="gray">
               <IconArrowsDiagonal />
             </ActionIcon>
-          </Link>
+          </I18nLink>
         </Group>
 
         {data.processing_status !== "DONE" && (
-          <Text className="text-gray-700 italic">
+          <Text className="italic text-gray-700">
             {data.processing_status}: {data.processing_message}
           </Text>
         )}
@@ -62,7 +66,7 @@ export const ViewExpandedCard = ({ data }: { data: View }) => {
           <Pill>
             <Group>
               <Text className="font-semibold">
-                {data.aspects?.length ?? 0} Aspects
+                {data.aspects?.length ?? 0} <Trans>Aspects</Trans>
               </Text>
             </Group>
           </Pill>
@@ -71,9 +75,9 @@ export const ViewExpandedCard = ({ data }: { data: View }) => {
           <Markdown content={data.summary ?? ""} />
         </Spoiler>
 
-        <div className="snap-x pb-2 flex w-full overflow-x-auto">
+        <div className="flex w-full snap-x overflow-x-auto pb-2">
           {data.aspects?.map((a) => (
-            <div className="scroll-ml-4 ml-4 snap-start grid" key={a.id}>
+            <div className="ml-4 grid snap-start scroll-ml-4" key={a.id}>
               <AspectCard data={a} />
             </div>
           ))}

@@ -1,22 +1,13 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Core configuration
-  serverExternalPackages: ['@lingui/loader'],
-  staticPageGenerationTimeout: 500,
+import { NextConfig } from "next";
 
-  // Webpack configuration (for non-Turbopack environments)
-  webpack: (config) => {
-    config.module.rules.push({
-      test: /\.po$/,
-      use: {
-        loader: '@lingui/loader',
-      },
-    });
-    return config;
-  },
+const nextConfig: NextConfig = {
+  // Core configuration
+  // serverExternalPackages: ['@lingui/loader'],
+  staticPageGenerationTimeout: 500,
 
   // Turbopack configuration
   experimental: {
+    swcPlugins: [['@lingui/swc-plugin', {}]],
     turbo: {
       rules: {
         '*.po': {
@@ -24,8 +15,8 @@ const nextConfig = {
           as: '*.js',
         },
       },
-      resolveExtensions: ['.po', '.tsx', '.ts', '.jsx', '.js', '.json'],
-      moduleIdStrategy: 'named', // Use 'named' for development
+      // resolveExtensions: ['.po', '.tsx', '.ts', '.jsx', '.js', '.json'],
+      // moduleIdStrategy: 'named', // Use 'named' for development
     },
   },
 
@@ -58,4 +49,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

@@ -4,10 +4,9 @@ import { Pages } from '@/lib/types';
 import { client } from '@/lib/directus';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getI18nInstance } from '@/appRouterI18n';
-import { I18nProvider, Trans } from '@lingui/react';
-import { withLinguiPage } from '@/withLingUI';
 import { getGlobalsByLang } from '@lib/globals';
+import { initLingui } from '@/initLingui';
+import { Trans } from '@lingui/macro';
 
 type PageProps = {
   params: Promise<{
@@ -35,8 +34,8 @@ export async function generateStaticParams() {
 }
 
 async function HomePage({ params }: PageProps) {
-  const { lang } = params;
-  const i18n = getI18nInstance(lang as 'en-US' | 'nl-NL');
+  const { lang } = (await params);
+  initLingui(lang as 'en-US' | 'nl-NL');
 
   if (!client) {
     throw new Error('Directus client not initialized');
@@ -76,4 +75,4 @@ async function HomePage({ params }: PageProps) {
   }
 }
 
-export default withLinguiPage(HomePage);
+export default HomePage;

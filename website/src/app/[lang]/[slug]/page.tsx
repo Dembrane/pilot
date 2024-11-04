@@ -3,8 +3,8 @@ import { client } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
 import { notFound } from 'next/navigation';
 import { getI18nInstance } from '@/appRouterI18n';
-import { Trans } from '@lingui/react';
-import { withLinguiPage } from '@/withLingUI';
+import { Trans } from '@lingui/macro';
+import { initLingui } from '@/initLingui';
 
 type PageProps = {
   params: Promise<{
@@ -62,8 +62,8 @@ export async function generateMetadata(props: PageProps) {
 }
 
 async function DynamicPage({ params }: PageProps) {
-  const { lang, slug } = params;
-  const i18n = getI18nInstance(lang as 'en' | 'nl');
+  const { lang, slug } = (await params);
+  initLingui(lang as 'en-US' | 'nl-NL');
 
   const slugWithLeadingSlash = `/${slug}`;
 
@@ -109,4 +109,4 @@ async function DynamicPage({ params }: PageProps) {
   }
 }
 
-export default withLinguiPage(DynamicPage);
+export default DynamicPage;

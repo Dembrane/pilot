@@ -1194,7 +1194,7 @@ export type CustomDirectusTypes = {
   navigation_navigation_items: NavigationNavigationItems;
   navigation_translations: NavigationTranslations;
   page_blocks: PageBlocks;
-  pages: Pages;
+  pages: Pages[];
   pages_blog: PagesBlog;
   pages_translations: PagesTranslations;
   partners: Partners;

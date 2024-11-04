@@ -3,8 +3,7 @@ import { client } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
 import { notFound } from 'next/navigation';
 import { getI18nInstance } from '@/appRouterI18n';
-import { Trans } from '@lingui/react';
-import { withLinguiPage } from '@/withLingUI';
+import { Trans } from '@lingui/macro';
 import { getGlobalsByLang } from '@/lib/globals';
 import { Metadata } from 'next';
 import ProductHero from '@/components/ProductHero';
@@ -37,8 +36,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
-  const params = await props.params;
-  const { lang, slug } = params;
+  const { lang, slug } = (await props.params);
+  initLingui(lang as 'en-US' | 'nl-NL');
   const globals = await getGlobalsByLang(lang);
 
   const products = await client.request(
@@ -131,4 +130,4 @@ async function ProductPage({ params }: PageProps) {
   }
 }
 
-export default withLinguiPage(ProductPage);
+export default ProductPage;

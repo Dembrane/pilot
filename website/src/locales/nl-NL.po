@@ -6,23 +6,55 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: nl-NL\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#. js-lingui-explicit-id
+#: src/components/FaqAccordion.tsx:51
+msgid "search_faqs"
+msgstr "Zoek in veelgestelde vragen..."
 
 #. js-lingui-explicit-id
 #: src/components/LanguageSelection.tsx:41
-msgid "change_language"
-msgstr "Wijzig taal"
+#~ msgid "change_language"
+#~ msgstr "Wijzig taal"
 
 #. js-lingui-explicit-id
 #: src/components/LanguageSelection.tsx:48
+#~ msgid "english"
+#~ msgstr "Engels"
+
+#. js-lingui-explicit-id
+#: src/components/LanguageSelection.tsx:49
+#~ msgid "dutch"
+#~ msgstr "Nederlands"
+
+#: src/components/LanguageSelection.tsx:67
+msgid "dutch"
+msgstr "Nederlands"
+
+#: src/components/LanguageSelection.tsx:53
 msgid "english"
 msgstr "Engels"
 
 #. js-lingui-explicit-id
-#: src/components/LanguageSelection.tsx:49
-msgid "dutch"
-msgstr "Nederlands"
+#: src/app/[lang]/[slug]/page.tsx:105
+msgid "error.loadingPage"
+msgstr "Fout bij het laden van de pagina. Probeer het opnieuw later."
+
+#: src/app/[lang]/page.tsx:74
+msgid "Error loading page. Please try again later."
+msgstr "Fout bij het laden van de pagina. Probeer het opnieuw later."
 
 #. js-lingui-explicit-id
-#: src/components/LanguageSelection.tsx:50
-msgid "search_faqs"
-msgstr "Zoek in veelgestelde vragen..."
+#: src/app/[lang]/products/[slug]/page.tsx:127
+msgid "error.loadingProduct"
+msgstr "Fout bij het laden van het product. Probeer het opnieuw later."
+
+#: src/components/ProductMenu.tsx:46
+msgid "products"
+msgstr "Producten"

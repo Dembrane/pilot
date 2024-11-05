@@ -39,9 +39,9 @@ const FaqAccordion: React.FC<FaqAccordionProps> = ({ blockData, faqs }) => {
   );
 
   return (
-    <div className="faq-accordion container mt-40 space-y-6">
+    <div className="faq-accordion md:container p-2 mt-40 space-y-2 md:space-y-6">
       <div className="mb-12 space-y-10">
-        <h2 className="text-6xl md:text-8xl">{blockData.title}</h2>
+        <h2 className="text-3xl md:text-8xl">{blockData.title}</h2>
         {blockData.headline && (
           <p className="text-2xl text-muted-foreground">{blockData.headline}</p>
         )}
@@ -61,8 +61,8 @@ const FaqAccordion: React.FC<FaqAccordionProps> = ({ blockData, faqs }) => {
             <AccordionTrigger className="flex items-center text-muted-foreground transition-colors hover:text-foreground">
               <div className="flex items-center">
                 {faq.icon_name &&
-                  getIconComponent(faq.icon_name, 'mr-2 h-8 w-8')}
-                <span className="text-2xl">{faq.question}</span>
+                  getIconComponent(faq.icon_name, 'mr-2 h-8 w-8 shrink-0')}
+                <span className="text-xl md:text-2xl text-left">{faq.question}</span>
               </div>
             </AccordionTrigger>
             <AccordionContent>

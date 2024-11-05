@@ -12,3 +12,4 @@ module.exports = {
     },
   ],
 };
+// command is npx lingui extract     , npm run compile                                                                         

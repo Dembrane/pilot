@@ -35,8 +35,8 @@ const overlayVariants = {
 };
 
 const titleVariants = {
-  initial: { width: 'auto', opacity: 0 },
-  active: { width: '100%', opacity: 1 },
+  initial: { width: 'auto' },
+  active: { width: '100%', transition: { duration: 0.3, ease: "easeInOut" } },
 };
 
 const contentVariants = {
@@ -47,6 +47,7 @@ const contentVariants = {
 const arrowVariants = {
   initial: { opacity: 0, x: -50 },
   active: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -50 },
 };
 
 const CaptionedImageLink: React.FC<CaptionedImageLinkProps> = ({
@@ -110,7 +111,7 @@ const CaptionedImageLink: React.FC<CaptionedImageLinkProps> = ({
   return (
     <div
       ref={ref}
-      className="relative block h-full overflow-hidden rounded-[50px] rounded-bl-none"
+      className="relative block h-full overflow-hidden rounded-[50px] rounded-bl-none cursor-pointer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -150,7 +151,7 @@ const CaptionedImageLink: React.FC<CaptionedImageLinkProps> = ({
           />
 
           <motion.div
-            className="absolute bottom-2 left-2 origin-bottom-left overflow-hidden"
+            className="absolute bottom-2 left-2 origin-bottom-left overflow-hidden transition-all duration-300 ease-in-out"
             variants={titleVariants}
             initial="initial"
             animate={isActive ? 'active' : 'initial'}
@@ -163,17 +164,22 @@ const CaptionedImageLink: React.FC<CaptionedImageLinkProps> = ({
                 >
                   {title}
                 </h3>
-                <motion.div
-                  className="mr-2 flex-shrink-0"
-                  variants={arrowVariants}
-                  initial="initial"
-                  animate={isActive ? 'active' : 'initial'}
-                  transition={{ duration: 0.3 }}
-                >
-                  <RiArrowRightUpLine
-                    className={`${isLarge ? 'h-10 w-10 md:h-24 md:w-24' : 'h-8 w-8 md:h-10 md:w-10'} `}
-                  />
-                </motion.div>
+                <AnimatePresence>
+                  {isActive && (
+                    <motion.div
+                      className="mr-2 flex-shrink-0"
+                      variants={arrowVariants}
+                      initial="initial"
+                      animate="active"
+                      exit="exit"
+                      transition={{ duration: 0.3 }}
+                    >
+                      <RiArrowRightUpLine
+                        className={`${isLarge ? 'h-10 w-10 md:h-24 md:w-24' : 'h-8 w-8 md:h-10 md:w-10'} `}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
               <AnimatePresence>
                 {isActive && (

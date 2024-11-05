@@ -81,8 +81,14 @@ const getTeamMembers = async (lang: string) => {
       }),
     );
 
-    return response.map(member => {
-      const memberTranslation = member.translations.find((t: any) => t.languages_code === lang);
+    if (!response) {
+      return [];
+    }
+
+    return response.map((member) => {
+      const memberTranslation = member.translations?.find(
+        (t: any) => t.languages_code === lang,
+      );
       return {
         id: member.id,
         name: memberTranslation?.name || member.name,

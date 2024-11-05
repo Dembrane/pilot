@@ -110,7 +110,6 @@ export const Footer: React.FC<FooterProps> = async ({ navigationId, lang }) => {
           </nav>
           <div className="w-full text-center md:w-1/3 md:text-right">
             <div className="flex items-center justify-end space-x-4">
-              <LanguageSwitcher />
               <ThemeToggle />
             </div>
           </div>

@@ -8,6 +8,7 @@ import { getGlobalsByLang } from '@/lib/globals';
 import { Metadata } from 'next';
 import ProductHero from '@/components/ProductHero';
 import { DIRECTUS_PUBLIC_ASSETS_URL } from '@/lib/directus';
+import { initLingui } from '@/initLingui';
 
 type PageProps = {
   params: Promise<{
@@ -66,7 +67,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 }
 
 async function ProductPage({ params }: PageProps) {
-  const { lang, slug } = params;
+  const { lang, slug } = await params;
   const i18n = getI18nInstance(lang as 'en-US' | 'nl-NL');
 
   try {

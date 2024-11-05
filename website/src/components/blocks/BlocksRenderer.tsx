@@ -22,30 +22,26 @@ type BlockComponentProps = {
 // Create a type for the dynamically imported component
 type DynamicBlockComponent = React.ComponentType<BlockComponentProps>;
 
-const BlocksRenderer: React.FC<BlocksRendererProps> = ({ blocks = [], lang }) => {
+const BlocksRenderer: React.FC<BlocksRendererProps> = async ({ blocks = [], lang }) => {
   if (!blocks || !Array.isArray(blocks)) {
     console.warn('BlocksRenderer received invalid blocks prop:', blocks);
     return null;
   }
 
-  return (
-    <>
-      {blocks.map((block) => {
-        const blockName = `Block${block.collection
-          .replace('block_', '')
-          .charAt(0)
-          .toUpperCase()}${block.collection.replace('block_', '').slice(1)}`;
+  const blockComponents = await Promise.all(
+    blocks.map(async (block) => {
+      const blockName = `Block${block.collection
+        .replace('block_', '')
+        .charAt(0)
+        .toUpperCase()}${block.collection.replace('block_', '').slice(1)}`;
 
-        const BlockComponent = dynamic(() => import(`./${blockName}`), {
-          loading: () => (
-            <Skeleton className="h-64 w-full my-4 rounded-md" />
-          ),
-        }) as DynamicBlockComponent;
+      const BlockComponent = (await import(`./${blockName}`)).default;
 
-        return <BlockComponent key={block.id} block={block} lang={lang} />;
-      })}
-    </>
+      return <BlockComponent key={block.id} block={block} lang={lang} />;
+    })
   );
+
+  return <>{blockComponents}</>;
 };
 
 export default BlocksRenderer;

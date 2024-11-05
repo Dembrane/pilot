@@ -59,6 +59,9 @@ const getBlockWithPartners = async (blockId: string, lang: string) => {
 };
 
 const BlockPartners: React.FC<BlockPartnersProps> = async ({ block, lang }) => {
+  if (!block.item) {
+    return null;
+  }
   const blockData = await getBlockWithPartners(block.item.id, lang);
 
   if (!blockData) {

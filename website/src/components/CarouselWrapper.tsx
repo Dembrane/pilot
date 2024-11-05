@@ -133,7 +133,7 @@ const CarouselWrapper: React.FC<CarouselWrapperProps> = ({ title, headline, chil
             <CarouselItem
               key={index}
               // className="basis-3/4 pb-4 pl-4 sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 2xl:basis-1/5"
-              className="basis-[400px]"
+              className="max-w-[80vw] basis-[400px]"
             >
               {child}
             </CarouselItem>

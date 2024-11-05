@@ -89,6 +89,9 @@ const getBlockWithProducts = async (blockId: string, lang: string) => {
 };
 
 const BlockProducts: React.FC<BlockProductsProps> = async ({ block, lang }) => {
+  if (!block.item) {
+    return null;
+  }
   const blockData = await getBlockWithProducts(block.item.id, lang);
 
   if (!blockData) {

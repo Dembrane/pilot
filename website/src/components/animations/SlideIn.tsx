@@ -12,7 +12,7 @@ const SlideIn: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       ref={ref}
       initial={{ opacity: 0, y: 100 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 100 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 1 }}
     >
       {children}
     </motion.div>

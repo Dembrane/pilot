@@ -18,7 +18,7 @@ const QuoteShowcase: React.FC<QuoteShowcaseProps> = ({
 }) => {
   return (
     <SlideIn>
-      <div className="container flex min-h-screen flex-col items-center justify-center px-4 py-8 text-center">
+      <div className="container flex min-h-[70vh] flex-col items-center justify-center px-4 py-8 text-center">
         <div className="relative h-min w-full">
           <div className="mx-auto max-w-3xl">
             <span className="absolute left-0 top-0">

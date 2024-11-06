@@ -103,7 +103,7 @@ const AnimatedHeroContent: React.FC<AnimatedHeroContentProps> = ({
           <motion.div variants={containerVariants}>
             <WysiwygContent
               content={headline}
-              className="mb-6 text-xl md:text-2xl lg:text-3xl"
+              className="mb-12 text-xl md:text-2xl lg:text-3xl"
             />
           </motion.div>
         )}
@@ -111,7 +111,7 @@ const AnimatedHeroContent: React.FC<AnimatedHeroContentProps> = ({
           <motion.div variants={containerVariants}>
             <WysiwygContent
               content={content}
-              className="mb-8 text-base md:text-lg"
+              className="mb-12 text-base md:text-lg"
             />
           </motion.div>
         )}

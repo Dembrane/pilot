@@ -75,7 +75,7 @@ const TeamShowcase: React.FC<TeamShowcaseProps> = ({ blockData, teamMembers }) =
                 </p>
               )}
               {member.cta && (
-                <div className="mt-4 flex overflow-hidden gap-2">
+                <div className="mt-4 flex gap-2 overflow-hidden">
                   {member.cta.map(
                     (item, index) =>
                       item.url && (
@@ -85,11 +85,13 @@ const TeamShowcase: React.FC<TeamShowcaseProps> = ({ blockData, teamMembers }) =
                           target="_blank"
                           rel="noopener noreferrer"
                           className={`group flex items-center justify-center rounded-md p-2 shadow-sm transition-all duration-200 hover:shadow-md ${
-                            index === 0 ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground'
+                            index === 0
+                              ? 'bg-secondary text-secondary-foreground'
+                              : 'bg-muted text-muted-foreground'
                           }`}
                         >
                           {getIconComponent(item.icon, 'w-6 h-6')}
-                          <span className="max-w-0 overflow-hidden whitespace-nowrap transition-all duration-200 group-hover:max-w-xs group-hover:ml-2 group-hover:mr-2">
+                          <span className="max-w-0 overflow-hidden whitespace-nowrap transition-all duration-200 group-hover:ml-2 group-hover:mr-2 group-hover:max-w-xs">
                             {item.label}
                           </span>
                         </Link>

@@ -14,6 +14,16 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/components/navigation/DesktopNav.tsx:77
+msgid "products"
+msgstr "Producten"
+
+#. js-lingui-explicit-id
+#: src/components/navigation/DesktopNav.tsx:92
+msgid "language"
+msgstr "Taal"
+
+#. js-lingui-explicit-id
 #: src/components/FaqAccordion.tsx:51
 msgid "search_faqs"
 msgstr "Zoek in veelgestelde vragen..."
@@ -34,12 +44,12 @@ msgstr "Zoek in veelgestelde vragen..."
 #~ msgstr "Nederlands"
 
 #: src/components/LanguageSelection.tsx:67
-msgid "dutch"
-msgstr "Nederlands"
+#~ msgid "dutch"
+#~ msgstr "Nederlands"
 
 #: src/components/LanguageSelection.tsx:53
-msgid "english"
-msgstr "Engels"
+#~ msgid "english"
+#~ msgstr "Engels"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/[slug]/page.tsx:105
@@ -55,6 +65,10 @@ msgstr "Fout bij het laden van de pagina. Probeer het opnieuw later."
 msgid "error.loadingProduct"
 msgstr "Fout bij het laden van het product. Probeer het opnieuw later."
 
+#: src/components/navigation/DesktopNav.tsx:84
+#~ msgid "language"
+#~ msgstr "Taal"
+
 #: src/components/ProductMenu.tsx:46
-msgid "products"
-msgstr "Producten"
+#~ msgid "products"
+#~ msgstr "Producten"

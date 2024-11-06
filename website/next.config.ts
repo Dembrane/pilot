@@ -24,6 +24,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: '/notion/:path*',
+        destination: '/notion/:path*',
+      },
+      {
         source: '/:lang/:slug*',
         destination: '/:lang/:slug*',
         has: [

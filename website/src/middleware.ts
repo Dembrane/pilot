@@ -7,14 +7,29 @@ const { locales, sourceLocale } = linguiConfig;
 
 const DEBUG = false;
 
+// Add this regex to match public files
+const PUBLIC_FILE = /\.(.*)$/;
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Add early return for public files and other static assets like Notion pages
+  if (
+    PUBLIC_FILE.test(pathname) ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/notion/') || // Add this line
+    pathname === '/favicon.ico'
+  ) {
+    return NextResponse.next();
+  }
 
   if (DEBUG)
     console.log(`[Middleware] Processing request for path: ${pathname}`);
 
   const pathnameHasLocale = locales.some(
-    (locale: string) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`,
+    (locale: string) =>
+      pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`,
   );
 
   if (pathnameHasLocale) {
@@ -66,7 +81,14 @@ function getRequestLocale(request: NextRequest): string {
 
 export const config = {
   matcher: [
-    // Skip all internal paths (_next)
-    '/((?!_next|api|favicon.ico).*)',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder files (public files)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.).*)'
   ],
 };

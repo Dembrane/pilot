@@ -14,7 +14,7 @@ const containerVariants = {
     opacity: 1,
     transition: {
       staggerChildren: 0.1, // Adjust the stagger timing as needed
-      delayChildren: 0.3,    // Adjust the delay before children start animating
+      delayChildren: 0,    // Adjust the delay before children start animating
     },
   },
 };

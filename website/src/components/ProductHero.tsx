@@ -25,8 +25,18 @@ const ProductHero: React.FC<ProductHeroProps> = ({ coverImage, title, type, head
   }, []);
 
   const imageVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 1.5 } },
+    hidden: { 
+      opacity: 0.05,
+      filter: 'blur(20px)',
+      transition: { 
+        duration: 5,
+        ease: [0.2, 0.65, 0.3, 0.9],
+      },
+    },
+    visible: {
+      opacity: 1,
+      filter: 'blur(0px)',
+    },
   };
 
   const contentVariants = {
@@ -66,19 +76,24 @@ const ProductHero: React.FC<ProductHeroProps> = ({ coverImage, title, type, head
   return (
     <div className="relative">
       <motion.div
-        className="relative h-screen overflow-hidden"
+        className="fixed top-0 left-0 w-full h-screen overflow-hidden -z-50"
         variants={imageVariants}
-        initial="hidden"
-        animate="visible"
+        initial="visible"
+        whileInView="hidden"
+        viewport={{ once: true }}
       >
         {coverImage && (
-          <Image
-            src={`${DIRECTUS_PUBLIC_ASSETS_URL}${coverImage}`}
-            alt={title}
-            layout="fill"
-            objectFit="cover"
-            priority
-          />
+          <motion.div
+            className="h-full w-full"
+          >
+            <Image
+              src={`${DIRECTUS_PUBLIC_ASSETS_URL}${coverImage}`}
+              alt={title}
+              layout="fill"
+              objectFit="cover"
+              priority
+            />
+          </motion.div>
         )}
       </motion.div>
 
@@ -96,15 +111,12 @@ const ProductHero: React.FC<ProductHeroProps> = ({ coverImage, title, type, head
           <AnimateLetters text={title} />
         </motion.h1>
 
-        <motion.div className="relative w-full" variants={itemVariants}>
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-foreground"></div>
-          </div>
-          <div className="relative flex justify-center">
-            <span className="bg-background px-4 text-xs uppercase tracking-widest">
-              {type}
-            </span>
-          </div>
+        <motion.div className="flex items-center justify-center gap-8 w-full" variants={itemVariants}>
+          <div className="w-full  border-t border-foreground"></div>
+          <span className="flex-shrink-0 text-xs uppercase tracking-widest">
+            {type}
+          </span>
+          <div className="w-full  border-t border-foreground"></div>
         </motion.div>
 
         <motion.h2

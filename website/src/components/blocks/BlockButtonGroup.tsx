@@ -34,7 +34,7 @@ const BlockButtonGroup: React.FC<BlockButtonGroupProps> = async ({ id, lang }) =
 
 
   const getButtonClass = (button: BlockButton) => {
-    let baseClass = 'px-6 py-3 rounded-full transition-colors duration-300 h-full ';
+    let baseClass = 'px-6 py-3 rounded-full transition-colors duration-300 h-full shrink-0 ';
 
     switch (button.variant) {
       case 'primary':
@@ -58,7 +58,7 @@ const BlockButtonGroup: React.FC<BlockButtonGroupProps> = async ({ id, lang }) =
   };
 
   return (
-    <div className={`flex gap-4 justify-center md:justify-start h-full`}>
+    <div className={`flex gap-4 justify-center md:justify-start h-full flex-wrap`}>
       {buttons.map((button, index) => {
         const translation = button.translations.find(t => t.languages_code === lang) || button.translations[0];
         return (

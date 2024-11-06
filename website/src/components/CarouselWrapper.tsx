@@ -35,7 +35,7 @@ const CarouselWrapper: React.FC<CarouselWrapperProps> = ({ title, headline, chil
           delay: 2000, 
           stopOnInteraction: true,
           stopOnMouseEnter: true,
-          playOnInit: false,
+          playOnInit: true,
         });
         setAutoplay(autoplayPlugin);
         setPlugins([autoplayPlugin]);
@@ -63,7 +63,7 @@ const CarouselWrapper: React.FC<CarouselWrapperProps> = ({ title, headline, chil
         autoplay.play();
         setIsAutoplayActive(true);
       }
-    }, 1000);
+    }, 0);
   }, [autoplay]);
 
   React.useEffect(() => {

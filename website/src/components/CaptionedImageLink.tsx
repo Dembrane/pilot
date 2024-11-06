@@ -64,7 +64,7 @@ const CaptionedImageLink: React.FC<CaptionedImageLinkProps> = ({
   const canFocus = useFocus();
 
   useEffect(() => {
-    if (!canFocus) {
+    if (!canFocus && ref.current) {
       const observer = new IntersectionObserver(
         ([entry]) => {
           if (entry.isIntersecting) {
@@ -74,9 +74,7 @@ const CaptionedImageLink: React.FC<CaptionedImageLinkProps> = ({
             const viewportCenterY = viewportHeight / 2;
             const distanceFromCenter = Math.abs(elementCenterY - viewportCenterY);
             
-            // Adjust this value to change the active area size
-            const activeAreaSize = viewportHeight * 0.8; // 20% of viewport height
-
+            const activeAreaSize = viewportHeight * 0.8;
             setIsActive(distanceFromCenter < activeAreaSize / 2);
           } else {
             setIsActive(false);
@@ -84,19 +82,17 @@ const CaptionedImageLink: React.FC<CaptionedImageLinkProps> = ({
         },
         { 
           threshold: 0.5,
-          rootMargin: '-40% 0px -40% 0px' // Adjust this to change the observed area
+          rootMargin: '-40% 0px -40% 0px'
         }
       );
 
-      if (ref.current) {
-        observer.observe(ref.current);
-      }
+      observer.observe(ref.current);
 
-      return () => {
-        if (ref.current) {
-          observer.unobserve(ref.current);
-        }
-      };
+      return () => observer.disconnect();
+    }
+    
+    if (canFocus) {
+      setIsActive(false);
     }
   }, [canFocus]);
 

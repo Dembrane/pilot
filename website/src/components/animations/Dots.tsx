@@ -448,8 +448,7 @@ export const DembraneSketch = ({
       //console.log(i,j);
       oldMouseX = p5.mouseX;
       oldMouseY = p5.mouseY;
-      //p5.fill("#ffffffde")
-      //p5.rect(0, 0, p5.width, p5.height)
+      
     }
   };
 

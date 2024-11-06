@@ -3,7 +3,7 @@ import Link from 'next/link';
 import LanguageSwitcher from './LanguageSelection';
 import { client } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
-import { ThemeToggle } from './ThemeToggle';
+import { ThemeToggle } from './settings/ThemeToggle';
 import { getGlobalsByLang } from '@lib/globals';
 
 type FooterProps = {

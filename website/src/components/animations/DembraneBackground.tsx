@@ -2,15 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { DembraneSketch } from '@/components/animations/Dots';
-   import { useTheme } from 'next-themes';
-
+import { useTheme } from 'next-themes';
+import { useBackground } from '@/lib/contexts/BackgroundContext';
 
 export default function DembraneBackground() {
   const { theme } = useTheme();
   const [opacity, setOpacity] = useState(0.3);
   const [paused, setPaused] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { isBackgroundEnabled } = useBackground();
 
-     console.log('Current theme:', theme);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,6 +37,11 @@ export default function DembraneBackground() {
         ?.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  // Don't render if background is disabled
+  if (!mounted || !isBackgroundEnabled) {
+    return null;
+  }
 
   return (
     <div

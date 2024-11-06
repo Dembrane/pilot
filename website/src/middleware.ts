@@ -13,12 +13,23 @@ const PUBLIC_FILE = /\.(.*)$/;
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Check for direct 32-character Notion ID URLs
+  const notionIdRegex = /^\/([0-9a-f]{32})$/;
+  const match = pathname.match(notionIdRegex);
+  
+  if (match) {
+    const notionId = match[1];
+    const url = request.nextUrl.clone();
+    url.pathname = `en-US/notion/${notionId}`;
+    return NextResponse.redirect(url);
+  }
+
   // Add early return for public files and other static assets like Notion pages
   if (
     PUBLIC_FILE.test(pathname) ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
-    pathname.startsWith('/notion/') || // Add this line
+    pathname.startsWith('/notion/') ||
     pathname === '/favicon.ico'
   ) {
     return NextResponse.next();

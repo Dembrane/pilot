@@ -82,7 +82,7 @@ const CarouselWrapper: React.FC<CarouselWrapperProps> = ({ title, headline, chil
   }, [api, autoplay, resetAutoplayTimeout]);
 
   return (
-    <div className="w-full overflow-visible">
+    <div className="w-full overflow-visible mt-24">
       <Carousel
         opts={{
           align: 'start',
@@ -123,12 +123,12 @@ const CarouselWrapper: React.FC<CarouselWrapperProps> = ({ title, headline, chil
           </div>
 
           {headline && (
-            <div className="mb-4 max-w-xl px-4 text-left text-2xl text-muted-foreground md:text-4xl">
+            <div className="mb-4 max-w-3xl px-4 text-left text-2xl text-muted-foreground md:text-4xl">
               <WysiwygContent content={headline} />
             </div>
           )}
         </div>
-        <CarouselContent className="ml-0">
+        <CarouselContent className="ml-0 my-6">
           {React.Children.map(children, (child, index) => (
             <CarouselItem
               key={index}

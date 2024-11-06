@@ -11,7 +11,7 @@ interface ThemeProvidersProps {
 
 export default function ThemeProviders({ children }: ThemeProvidersProps) {
   return (
-    <ThemeProvider attribute="class" enableSystem>
+    <ThemeProvider attribute="class" enableSystem defaultTheme="light">
       <TooltipProvider>{children}</TooltipProvider>
     </ThemeProvider>
   );

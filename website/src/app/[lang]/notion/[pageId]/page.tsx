@@ -14,6 +14,12 @@ const notion = new NotionAPI({
 
 export default async function NotionPage({ params }: PageProps) {
   const { pageId } = await params;
+  
+  // Add validation to prevent processing invalid pageIds
+  if (!pageId.match(/^[0-9a-f]{32}$/)) {
+    return <div>Invalid Notion page ID format</div>;
+  }
+
   const recordMap = await notion.getPage(pageId);
   console.log(pageId);
 

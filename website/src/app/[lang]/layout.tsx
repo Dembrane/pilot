@@ -1,4 +1,5 @@
 import '@styles/globals.css';
+import '@/styles/notion.css';
 import { Space_Grotesk } from 'next/font/google';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -7,6 +8,8 @@ import { LinguiClientProvider } from '@/components/LinguiClientProvider';
 import { allMessages } from '@/appRouterI18n';
 import ThemeProviders from '@/components/ThemeProviders';
 import DembraneBackground from '@/components/animations/DembraneBackground';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { BackgroundProvider } from '@/lib/contexts/BackgroundContext';
 
 
 const spaceGrotesk = Space_Grotesk({
@@ -31,17 +34,21 @@ export default async function RootLayout(props: LayoutProps) {
   return (
     <html lang={lang} suppressHydrationWarning>
       <body className={`${spaceGrotesk.className} bg-background`}>
-        <LinguiClientProvider
-          initialLocale={lang}
-          initialMessages={allMessages[lang]!}
-        >
-          <ThemeProviders>
-            <Header lang={lang} />
-            <main>{children}</main>
-            <Footer navigationId="footer" lang={lang} />
-            {/* <DembraneBackground /> */}
-          </ThemeProviders>
-        </LinguiClientProvider>
+        <ErrorBoundary>
+          <LinguiClientProvider
+            initialLocale={lang}
+            initialMessages={allMessages[lang]!}
+          >
+            <ThemeProviders>
+              <BackgroundProvider>
+                <Header lang={lang} />
+                <main>{children}</main>
+                <Footer navigationId="footer" lang={lang} />
+                <DembraneBackground />
+              </BackgroundProvider>
+            </ThemeProviders>
+          </LinguiClientProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

@@ -20,6 +20,9 @@ import { DIRECTUS_PUBLIC_ASSETS_URL } from '@/lib/directus';
 import React from "react";
 import { t } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
+import { useTheme } from 'next-themes';
+import { ThemeToggle } from '@/components/settings/ThemeToggle';
+import { BackgroundToggle } from '@/components/settings/BackgroundToggle';
 
 interface DesktopNavProps {
   navigationItems: NavigationItem[];
@@ -79,37 +82,54 @@ export function DesktopNav({ navigationItems, products }: DesktopNavProps) {
           </NavigationMenuTrigger>
           <DesktopProductMenu products={products} />
         </NavigationMenuItem>
-        <LanguageSelection>
-          {({
-            currentLocale,
-            availableLocales,
-            onLanguageChange,
-            getLanguageLabel,
-          }) => (
-            <NavigationMenuItem>
-              <NavigationMenuTrigger className="gap-2">
-                <PhosphorIcon name="Globe" />
-                {i18n._(t({ id: 'language' }))}
-              </NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <ul className="grid w-[min(200px,90vw)] gap-2 p-2">
-                  {availableLocales.map((locale) => (
-                    <li key={locale}>
-                      <NavigationMenuLink asChild>
-                        <button
-                          onClick={() => onLanguageChange(locale)}
-                          className="block w-full select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-secondary hover:text-secondary-foreground focus:bg-secondary focus:text-secondary-foreground"
-                        >
-                          <div className="">{getLanguageLabel(locale)}</div>
-                        </button>
-                      </NavigationMenuLink>
-                    </li>
-                  ))}
-                </ul>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          )}
-        </LanguageSelection>
+        <NavigationMenuItem>
+          <NavigationMenuTrigger>
+            <span className="flex items-center gap-2">
+              <PhosphorIcon name="Gear" />
+              {i18n._(t`Settings`)}
+            </span>
+          </NavigationMenuTrigger>
+          <NavigationMenuContent>
+            <div className="w-[min(300px,90vw)] p-4 space-y-4">
+              <LanguageSelection>
+                {({
+                  currentLocale,
+                  availableLocales,
+                  onLanguageChange,
+                  getLanguageLabel,
+                }) => (
+                  <div className="space-y-2">
+                    <div className="font-medium">{i18n._(t`Language`)}</div>
+                    <ul className="space-y-1">
+                      {availableLocales.map((locale) => (
+                        <li key={locale}>
+                          <button
+                            onClick={() => onLanguageChange(locale)}
+                            className={`w-full text-left rounded-md p-2 transition-colors hover:bg-secondary hover:text-secondary-foreground ${
+                              currentLocale === locale ? 'bg-secondary text-secondary-foreground' : ''
+                            }`}
+                          >
+                            {getLanguageLabel(locale)}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </LanguageSelection>
+
+              <div className="flex gap-2 justify-between items-center">
+                <div className="font-medium">{i18n._(t`Theme`)}</div>
+                <ThemeToggle />
+              </div>
+
+              <div className="flex gap-2 justify-between items-center">
+                <div className="font-medium">{i18n._(t`Simulation`)}</div>
+                <BackgroundToggle />
+              </div>
+            </div>
+          </NavigationMenuContent>
+        </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
   );

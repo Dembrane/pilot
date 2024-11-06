@@ -51,13 +51,13 @@ const FaqAccordion: React.FC<FaqAccordionProps> = ({ blockData, faqs }) => {
           placeholder={i18n._(t({ id: 'search_faqs' }))}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full max-w-md"
+          className="w-full max-w-md bg-background"
         />
       </div>
 
       <Accordion type="single" collapsible className="w-full">
         {filteredFaqs.map((faq) => (
-          <AccordionItem key={faq.id} value={faq.id}>
+          <AccordionItem key={faq.id} value={faq.id} className="hover:bg-background">
             <AccordionTrigger className="flex items-center text-muted-foreground transition-colors hover:text-foreground">
               <div className="flex items-center">
                 {faq.icon_name &&

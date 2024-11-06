@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button";
 import PhosphorIcon from '@/components/icons/PhosphorIcon';
 import Link from 'next/link';
 import { NavigationItem, Product } from '@/lib/services/navigation';
-import { ThemeToggle } from '../ThemeToggle';
+import { ThemeToggle } from '../settings/ThemeToggle';
 import LanguageSelection from '../LanguageSelection';
 import { GlobeIcon } from '@radix-ui/react-icons';
+import { BackgroundToggle } from '@/components/settings/BackgroundToggle';
+import { t } from "@lingui/macro";
+import { useLingui } from "@lingui/react";
 
 interface MobileNavProps {
   navigationItems: NavigationItem[];
@@ -16,6 +19,8 @@ interface MobileNavProps {
 }
 
 export function MobileNav({ navigationItems, products }: MobileNavProps) {
+  const { i18n } = useLingui();
+
   return (
     <div className="md:hidden">
       <Sheet>
@@ -39,7 +44,7 @@ export function MobileNav({ navigationItems, products }: MobileNavProps) {
                 {item.children && item.children.length > 0 ? (
                   <Accordion type="single" collapsible>
                     <AccordionItem value={item.id} className="border-none">
-                      <AccordionTrigger className="rounded-md px-4 py-2 hover:bg-secondary hover:no-underline">
+                      <AccordionTrigger className="rounded-md px-4 py-2 hover:bg-secondary hover:text-secondary-foreground hover:no-underline mb-2">
                         <span className="flex items-center gap-2">
                           {item.icon && <PhosphorIcon name={item.icon} />}
                           {item.label}
@@ -51,7 +56,7 @@ export function MobileNav({ navigationItems, products }: MobileNavProps) {
                             <Link
                               key={child.id}
                               href={child.url}
-                              className="rounded-md px-4 py-2 text-sm hover:bg-secondary"
+                              className="rounded-md px-4 py-2 text-sm hover:bg-secondary hover:text-secondary-foreground"
                             >
                               {child.label}
                             </Link>
@@ -63,7 +68,7 @@ export function MobileNav({ navigationItems, products }: MobileNavProps) {
                 ) : (
                   <Link
                     href={item.url}
-                    className="flex items-center gap-2 rounded-md px-4 py-2 hover:bg-secondary"
+                    className="flex items-center gap-2 rounded-md px-4 py-2 hover:bg-secondary hover:text-secondary-foreground"
                   >
                     {item.icon && <PhosphorIcon name={item.icon} />}
                     {item.label}
@@ -75,7 +80,7 @@ export function MobileNav({ navigationItems, products }: MobileNavProps) {
             {/* Products Section */}
             <Accordion type="single" collapsible>
               <AccordionItem value="products" className="border-none">
-                <AccordionTrigger className="rounded-md px-4 py-2 hover:bg-secondary hover:no-underline">
+                <AccordionTrigger className="rounded-md px-4 py-2 hover:bg-secondary hover:text-secondary-foreground hover:no-underline mb-2">
                   <span className="flex items-center gap-2">
                     <PhosphorIcon name="Package" />
                     Products
@@ -88,46 +93,75 @@ export function MobileNav({ navigationItems, products }: MobileNavProps) {
             </Accordion>
 
             {/* Settings Section */}
-            <div className="mt-auto border-t pt-4">
-              <div className="flex flex-col gap-4 px-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Theme</span>
-                  <ThemeToggle />
-                </div>
-                <LanguageSelection>
-                  {({
-                    currentLocale,
-                    availableLocales,
-                    onLanguageChange,
-                    getLanguageLabel,
-                  }) => (
+            <Accordion type="single" collapsible>
+              <AccordionItem value="settings" className="border-none">
+                <AccordionTrigger className="mb-2 rounded-md px-4 py-2 hover:bg-secondary hover:text-secondary-foreground hover:no-underline">
+                  <span className="flex items-center gap-2">
+                    <PhosphorIcon name="Gear" />
+                    {i18n._(t`Settings`)}
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="flex flex-col gap-4 px-4">
+                    {/* Language Settings */}
                     <Accordion type="single" collapsible>
-                      <AccordionItem value="language">
-                        <AccordionTrigger className="flex gap-2">
+                      <AccordionItem value="language" className="border-none">
+                        <AccordionTrigger className="mb-2 py-2 hover:no-underline">
                           <span className="flex items-center gap-2">
                             <GlobeIcon className="h-4 w-4" />
-                            {getLanguageLabel(currentLocale)}
+                            {i18n._(t`Language`)}
                           </span>
                         </AccordionTrigger>
                         <AccordionContent>
-                          <div className="space-y-2">
-                            {availableLocales.map((locale) => (
-                              <button
-                                key={locale}
-                                onClick={() => onLanguageChange(locale)}
-                                className="block w-full rounded-md p-2 text-left text-sm hover:bg-secondary"
-                              >
-                                {getLanguageLabel(locale)}
-                              </button>
-                            ))}
-                          </div>
+                          <LanguageSelection>
+                            {({
+                              currentLocale,
+                              availableLocales,
+                              onLanguageChange,
+                              getLanguageLabel,
+                            }) => (
+                              <div className="space-y-2">
+                                {availableLocales.map((locale) => (
+                                  <button
+                                    key={locale}
+                                    onClick={() => onLanguageChange(locale)}
+                                    className={`block w-full rounded-md p-2 text-left text-sm hover:bg-secondary hover:text-secondary-foreground ${
+                                      currentLocale === locale
+                                        ? 'bg-accent text-accent-foreground'
+                                        : ''
+                                    }`}
+                                  >
+                                    {getLanguageLabel(locale)}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </LanguageSelection>
                         </AccordionContent>
                       </AccordionItem>
                     </Accordion>
-                  )}
-                </LanguageSelection>
-              </div>
-            </div>
+
+                    {/* Theme Settings */}
+                    <div>
+                      <div className="mb-2 flex items-center gap-2 justify-between">
+                        {i18n._(t`Theme`)}
+
+                        <ThemeToggle />
+                      </div>
+                    </div>
+
+                    {/* Background Settings */}
+                    <div>
+                      <div className="mb-2 flex items-center gap-2 justify-between">
+                        {i18n._(t`Simulation`)}
+
+                        <BackgroundToggle />
+                      </div>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </nav>
         </SheetContent>
       </Sheet>

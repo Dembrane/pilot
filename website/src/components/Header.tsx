@@ -4,7 +4,7 @@ import { MobileNav } from '@/components/navigation/MobileNav';
 import { DesktopNav } from '@/components/navigation/DesktopNav';
 import { getNavigationItems, getProducts } from '@/lib/services/navigation';
 import { getGlobalsByLang } from '@lib/globals';
-import { ThemeToggle } from './ThemeToggle';
+import { ThemeToggle } from './settings/ThemeToggle';
 import LanguageSwitcher from './LanguageSelection';
 import { DIRECTUS_PUBLIC_ASSETS_URL } from '@lib/directus';
 import Logo from '@/components/Logo';
@@ -19,7 +19,7 @@ export async function Header({ lang }: HeaderProps) {
   const globals = await getGlobalsByLang(lang);
 
   return (
-    <header className="border-b border-border bg-background py-2 text-foreground md:py-4">
+    <header className="border-b border-border bg-background py-2 text-foreground md:py-4 sticky top-0 z-50">
       <div className="flex items-center justify-between px-4 md:container">
         <div className="flex items-center">
           {/* add logo */}
@@ -42,11 +42,6 @@ export async function Header({ lang }: HeaderProps) {
         {/* Desktop Navigation */}
         <DesktopNav navigationItems={navigationItems} products={products} />
 
-        {/* Theme Toggle and Language Switcher (Desktop only) */}
-        <div className="hidden items-center gap-4 md:flex">
-          <ThemeToggle />
-          <LanguageSwitcher currentLocale={lang} />
-        </div>
       </div>
     </header>
   );

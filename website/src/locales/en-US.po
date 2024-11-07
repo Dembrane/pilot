@@ -1,0 +1,74 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2024-10-02 10:41+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en-US\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#. js-lingui-explicit-id
+#: src/components/navigation/DesktopNav.tsx:77
+msgid "products"
+msgstr "Products"
+
+#. js-lingui-explicit-id
+#: src/components/navigation/DesktopNav.tsx:92
+msgid "language"
+msgstr "Language"
+
+#. js-lingui-explicit-id
+#: src/components/FaqAccordion.tsx:51
+msgid "search_faqs"
+msgstr "Search FAQs..."
+
+#. js-lingui-explicit-id
+#: src/components/LanguageSelection.tsx:41
+#~ msgid "change_language"
+#~ msgstr "Change language"
+
+#. js-lingui-explicit-id
+#: src/components/LanguageSelection.tsx:48
+#~ msgid "english"
+#~ msgstr "English"
+
+#. js-lingui-explicit-id
+#: src/components/LanguageSelection.tsx:49
+#~ msgid "dutch"
+#~ msgstr "Dutch"
+
+#: src/components/LanguageSelection.tsx:67
+#~ msgid "dutch"
+#~ msgstr "dutch"
+
+#: src/components/LanguageSelection.tsx:53
+#~ msgid "english"
+#~ msgstr "english"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/[slug]/page.tsx:105
+msgid "error.loadingPage"
+msgstr "Error loading page. Please try again later."
+
+#: src/app/[lang]/page.tsx:74
+msgid "Error loading page. Please try again later."
+msgstr "Error loading page. Please try again later."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/products/[slug]/page.tsx:127
+msgid "error.loadingProduct"
+msgstr "Error loading product. Please try again later."
+
+#: src/components/navigation/DesktopNav.tsx:84
+#~ msgid "language"
+#~ msgstr "Language"
+
+#: src/components/ProductMenu.tsx:46
+#~ msgid "products"
+#~ msgstr "Products"

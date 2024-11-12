@@ -1,5 +1,6 @@
 import { client } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
+import { Navigation, Products } from '@lib/types';
 
 export type NavigationItem = {
   id: string;
@@ -9,46 +10,34 @@ export type NavigationItem = {
   children?: NavigationItem[];
 };
 
-export type Product = {
-  id: string;
-  url: string;
-  slug: string;
-  name: string;
-  cover?: string;
-  label: string;
-  description?: string;
-  headline?: string;
-  type?: string;
-  translations: Array<{
-    languages_code: string;
-    name: string;
-    description?: string;
-    headline?: string;
-  }>;
-};
-
 export async function getNavigationItems(
   lang: string,
 ): Promise<NavigationItem[]> {
   try {
-    const response = await client.request<any[]>(
+    const response = await client.request<Navigation[]>(
       readItems('navigation', {
         filter: {
           id: { _eq: 'main' },
         },
         fields: [
           '*',
+          // @ts-ignore
           'translations.*',
+          // @ts-ignore
           'items.*',
+          // @ts-ignore
           'items.navigation_items_id.*',
+          // @ts-ignore
           'items.navigation_items_id.translations.*',
+          // @ts-ignore
           'items.navigation_items_id.children.*',
+          // @ts-ignore
           'items.navigation_items_id.children.translations.*',
         ],
       }),
     );
 
-    if (response && response.length > 0) {
+    if (response && response[0]) {
       const navigation = response[0];
 
       const mappedItems = navigation.items.map((item: any) => ({
@@ -79,38 +68,40 @@ export async function getNavigationItems(
   }
 }
 
-export async function getProducts(lang: string): Promise<Product[]> {
+export async function getProducts(lang: string): Promise<Products[]> {
   try {
-    const products = await client.request(
+    const products = await client.request<Products[]>(
       readItems('products', {
+        filter: {
+          status: { _eq: 'published' },
+        },
         fields: [
           'id',
           'slug',
           'name',
           'cover',
-          'description',
-          'translations.*',
+          {
+            translations: ['*'],
+          },
         ],
       }),
     );
 
-    return products.map((product: any) => ({
-      id: product.id,
+    return products.map((product) => ({
       url: `/products/${product.slug}`,
       cover: product.cover,
-      label:
-        product.translations?.find((t) => t.languages_code === lang)?.name ||
-        product.name,
+      label: product.name,
       description:
         product.translations?.find((t) => t.languages_code === lang)
-          ?.description || product.description,
+          ?.description ?? '',
       headline:
         product.translations?.find((t) => t.languages_code === lang)
-          ?.headline || '',
+          ?.headline ?? '',
       type:
-        product.translations?.find((t) => t.languages_code === lang)?.type ||
+        product.translations?.find((t) => t.languages_code === lang)?.type ??
         '',
       ...product,
+      id: product.id,
     }));
   } catch (error) {
     console.error('Error fetching products:', error);

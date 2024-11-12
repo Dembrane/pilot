@@ -11,9 +11,9 @@ const officialNotion = new Client({
 });
 
 interface PageProps {
-  params: {
+  params: Promise<{
     lang: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: PageProps) {
@@ -31,9 +31,9 @@ export default async function BlogPage({ params }: PageProps) {
     const data = await officialNotion.databases.query({
       database_id: process.env.NOTION_BLOG_DATABASE_ID!,
       filter: {
-        property: "Status",
+        property: 'Status',
         status: {
-          equals: "published",
+          equals: 'published',
         },
       },
     });
@@ -50,16 +50,14 @@ export default async function BlogPage({ params }: PageProps) {
 
     return (
       <main className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-8">
-          {i18n._(t`Blog`)}
-        </h1>
+        <h1 className="mb-8 text-4xl font-bold">{i18n._(t`Blog`)}</h1>
         <BlogList posts={posts} />
       </main>
     );
   } catch (error) {
     console.error('Error fetching blog posts:', error);
     return (
-      <div className="text-center py-12">
+      <div className="py-12 text-center">
         {i18n._(t`Error loading blog posts. Please try again later.`)}
       </div>
     );

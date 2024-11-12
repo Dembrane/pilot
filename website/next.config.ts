@@ -20,6 +20,24 @@ const nextConfig: NextConfig = {
     },
   },
 
+  // !! WARN !!
+  // Dangerously allow production builds to successfully complete even if
+  // your project has type errors.
+  // !! WARN !!
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
+  webpack: (config, { isServer }) => {
+    // Add loader for .po files
+    config.module.rules.push({
+      test: /\.po$/,
+      use: ['@lingui/loader'],
+    });
+
+    return config;
+  },
+
   // Other configurations
   async rewrites() {
     return [

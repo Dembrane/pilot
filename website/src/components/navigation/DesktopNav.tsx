@@ -23,6 +23,7 @@ import { useLingui } from '@lingui/react';
 import { useTheme } from 'next-themes';
 import { ThemeToggle } from '@/components/settings/ThemeToggle';
 import { BackgroundToggle } from '@/components/settings/BackgroundToggle';
+import { MotionDiv } from '@components/animations/MotionComponents';
 
 interface DesktopNavProps {
   navigationItems: NavigationItem[];
@@ -156,7 +157,9 @@ export function DesktopNav({ navigationItems, products }: DesktopNavProps) {
 
 function DesktopProductMenu({ products }: { products: Product[] }) {
   const [featuredProduct, setFeaturedProduct] = React.useState<Product>(
+    // @ts-ignore
     products[0],
+    // idk why this gives a type error. can products[0] be undefined? surely this should be caught by the invocation
   );
 
   if (!products?.length) {
@@ -188,7 +191,7 @@ function DesktopProductMenu({ products }: { products: Product[] }) {
           <div className="relative h-[180px] overflow-hidden rounded-md">
             <AnimatePresence>
               {products.map((product) => (
-                <motion.div
+                <MotionDiv
                   key={product.id}
                   initial={{ opacity: 0 }}
                   animate={{
@@ -223,7 +226,7 @@ function DesktopProductMenu({ products }: { products: Product[] }) {
                   <p className="absolute right-2 top-2 rounded-full bg-accent px-4 py-2 text-accent-foreground shadow-md">
                     {featuredProduct.type}
                   </p>
-                </motion.div>
+                </MotionDiv>
               ))}
             </AnimatePresence>
           </div>

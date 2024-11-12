@@ -17,14 +17,14 @@ async function loadCatalog(locale: SupportedLocales): Promise<{
 const catalogs = await Promise.all(locales.map(loadCatalog));
 
 // transform array of catalogs into a single object
-export const allMessages = catalogs.reduce((acc, oneCatalog) => {
+export const allMessages = catalogs.reduce((acc: any, oneCatalog: any) => {
   return { ...acc, ...oneCatalog };
 }, {});
 
 type AllI18nInstances = { [K in SupportedLocales]: I18n };
 
 export const allI18nInstances: AllI18nInstances = locales.reduce(
-  (acc, locale) => {
+  (acc: any, locale: any) => {
     const messages = allMessages[locale] ?? {};
     const i18n = setupI18n({
       locale,

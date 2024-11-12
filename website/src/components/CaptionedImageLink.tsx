@@ -8,6 +8,7 @@ import WysiwygContent from '@/components/WysiwygContent';
 import AnimateLetters from './animations/AnimateLetters';
 import { RiArrowRightUpLine } from 'react-icons/ri';
 import { useFocus } from '@/hooks/useFocus';
+import { MotionDiv } from './animations/MotionComponents';
 
 interface CaptionedImageLinkProps {
   imageSrc: string;
@@ -36,7 +37,7 @@ const overlayVariants = {
 
 const titleVariants = {
   initial: { width: 'auto' },
-  active: { width: '100%', transition: { duration: 0.3, ease: "easeInOut" } },
+  active: { width: '100%', transition: { duration: 0.3, ease: 'easeInOut' } },
 };
 
 const contentVariants = {
@@ -67,30 +68,32 @@ const CaptionedImageLink: React.FC<CaptionedImageLinkProps> = ({
     if (!canFocus && ref.current) {
       const observer = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting) {
+          if (entry && entry.isIntersecting) {
             const rect = entry.boundingClientRect;
             const viewportHeight = window.innerHeight;
             const elementCenterY = rect.top + rect.height / 2;
             const viewportCenterY = viewportHeight / 2;
-            const distanceFromCenter = Math.abs(elementCenterY - viewportCenterY);
-            
+            const distanceFromCenter = Math.abs(
+              elementCenterY - viewportCenterY,
+            );
+
             const activeAreaSize = viewportHeight * 0.8;
             setIsActive(distanceFromCenter < activeAreaSize / 2);
           } else {
             setIsActive(false);
           }
         },
-        { 
+        {
           threshold: 0.5,
-          rootMargin: '-40% 0px -40% 0px'
-        }
+          rootMargin: '-40% 0px -40% 0px',
+        },
       );
 
       observer.observe(ref.current);
 
       return () => observer.disconnect();
     }
-    
+
     if (canFocus) {
       setIsActive(false);
     }
@@ -107,22 +110,22 @@ const CaptionedImageLink: React.FC<CaptionedImageLinkProps> = ({
   return (
     <div
       ref={ref}
-      className="relative block h-full overflow-hidden rounded-[50px] rounded-bl-none cursor-pointer"
+      className="relative block h-full cursor-pointer overflow-hidden rounded-[50px] rounded-bl-none"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <Link href={href} className="group block h-full">
-        <motion.div
+        <MotionDiv
           className="relative h-full"
           animate={isActive ? 'active' : 'initial'}
           transition={{ duration: 0.1 }}
         >
-          <motion.div
-            className="absolute inset-0 bg-muted blur-xl -z-20 origin-center"
+          <MotionDiv
+            className="absolute inset-0 -z-20 origin-center bg-muted blur-xl"
             variants={cardVariants}
             transition={{ duration: 0.3 }}
           />
-          <motion.div
+          <MotionDiv
             className="origin-center"
             variants={imageVariants}
             transition={{ duration: 0.5 }}
@@ -138,22 +141,22 @@ const CaptionedImageLink: React.FC<CaptionedImageLinkProps> = ({
                 height={1080}
               />
             )}
-          </motion.div>
+          </MotionDiv>
 
-          <motion.div
+          <MotionDiv
             className="absolute inset-0"
             variants={overlayVariants}
             transition={{ duration: 0.3 }}
           />
 
-          <motion.div
+          <MotionDiv
             className="absolute bottom-2 left-2 origin-bottom-left overflow-hidden transition-all duration-300 ease-in-out"
             variants={titleVariants}
             initial="initial"
             animate={isActive ? 'active' : 'initial'}
             transition={{ duration: 0.3 }}
           >
-            <div className="w-min min-w-[70vw] bg-background px-6 py-4 text-foreground md:min-w-min rounded-[20px] rounded-bl-none">
+            <div className="w-min min-w-[70vw] rounded-[20px] rounded-bl-none bg-background px-6 py-4 text-foreground md:min-w-min">
               <div className="flex">
                 <h3
                   className={`${isLarge ? 'text-4xl md:text-8xl' : 'text-2xl md:text-4xl'} whitespace-nowrap`}
@@ -162,7 +165,7 @@ const CaptionedImageLink: React.FC<CaptionedImageLinkProps> = ({
                 </h3>
                 <AnimatePresence>
                   {isActive && (
-                    <motion.div
+                    <MotionDiv
                       className="mr-2 flex-shrink-0"
                       variants={arrowVariants}
                       initial="initial"
@@ -173,13 +176,13 @@ const CaptionedImageLink: React.FC<CaptionedImageLinkProps> = ({
                       <RiArrowRightUpLine
                         className={`${isLarge ? 'h-10 w-10 md:h-24 md:w-24' : 'h-8 w-8 md:h-10 md:w-10'} `}
                       />
-                    </motion.div>
+                    </MotionDiv>
                   )}
                 </AnimatePresence>
               </div>
               <AnimatePresence>
                 {isActive && (
-                  <motion.div
+                  <MotionDiv
                     className="mt-2"
                     variants={contentVariants}
                     initial="initial"
@@ -192,12 +195,12 @@ const CaptionedImageLink: React.FC<CaptionedImageLinkProps> = ({
                         <WysiwygContent content={`${tag}: ${description}`} />
                       </div>
                     </div>
-                  </motion.div>
+                  </MotionDiv>
                 )}
               </AnimatePresence>
             </div>
-          </motion.div>
-        </motion.div>
+          </MotionDiv>
+        </MotionDiv>
       </Link>
     </div>
   );

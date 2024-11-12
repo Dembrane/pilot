@@ -15,28 +15,30 @@ const officialNotion = new Client({
 });
 
 interface PageProps {
-  params: {
+  params: Promise<{
     lang: string;
     slug: string;
-  };
+  }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  
+
   try {
     const data = await officialNotion.databases.query({
       database_id: process.env.NOTION_BLOG_DATABASE_ID!,
       filter: {
         and: [
           {
-            property: "Status",
+            property: 'Status',
             status: {
-              equals: "published",
+              equals: 'published',
             },
           },
           {
-            property: "slug_DO_NOT_CHANGE",
+            property: 'slug_DO_NOT_CHANGE',
             rich_text: {
               equals: slug,
             },
@@ -53,7 +55,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     const page = data.results[0] as any;
     const title = page.properties.Name.title[0]?.plain_text || 'Untitled';
-    const description = page.properties.Description?.rich_text[0]?.plain_text || '';
+    const description =
+      page.properties.Description?.rich_text[0]?.plain_text || '';
 
     return {
       title,
@@ -72,9 +75,9 @@ export async function generateStaticParams() {
     const data = await officialNotion.databases.query({
       database_id: process.env.NOTION_BLOG_DATABASE_ID!,
       filter: {
-        property: "Status",
+        property: 'Status',
         status: {
-          equals: "published",
+          equals: 'published',
         },
       },
     });
@@ -84,8 +87,8 @@ export async function generateStaticParams() {
     return data.results.flatMap((page: any) => {
       const slug = page.properties.slug_DO_NOT_CHANGE.rich_text[0]?.plain_text;
       if (!slug) return [];
-      
-      return locales.map(lang => ({
+
+      return locales.map((lang) => ({
         lang,
         slug,
       }));
@@ -105,13 +108,13 @@ export default async function BlogPost({ params }: PageProps) {
       filter: {
         and: [
           {
-            property: "Status",
+            property: 'Status',
             status: {
-              equals: "published",
+              equals: 'published',
             },
           },
           {
-            property: "slug_DO_NOT_CHANGE",
+            property: 'slug_DO_NOT_CHANGE',
             rich_text: {
               equals: slug,
             },
@@ -121,6 +124,10 @@ export default async function BlogPost({ params }: PageProps) {
     });
 
     if (!data.results.length) {
+      return notFound();
+    }
+
+    if (!data.results[0]) {
       return notFound();
     }
 

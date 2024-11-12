@@ -62,13 +62,13 @@
   --notion-item-purple: rgba(103, 36, 222, 0.2);
   --notion-item-gray: rgba(155, 154, 151, 0.4);
 
-  --notion-max-width: 1080px;
+  --notion-max-width: 920px;
   --notion-header-height: 45px;
-  --notion-max-column-width: 720px;
+  --notion-max-column-width: 520px;
 }
 
 .dark-mode {
-  --fg-color: rgba(255, 255, 255, 0.9);
+  --fg-color: rgba(10, 10, 12, 0.9);
   --fg-color-0: var(--fg-color);
   --fg-color-1: var(--fg-color);
   --fg-color-2: var(--fg-color);
@@ -92,23 +92,23 @@
   --notion-orange: rgb(255, 163, 68);
   --notion-brown: rgb(147, 114, 100);
   --notion-gray: rgba(151, 154, 155, 0.95);
-  --notion-red_background: rgb(101, 63, 63);
-  --notion-pink_background: rgb(106, 63, 93);
-  --notion-blue_background: rgb(57, 89, 108);
-  --notion-purple_background: rgb(75, 66, 110);
-  --notion-teal_background: rgb(56, 102, 99);
-  --notion-yellow_background: rgb(108, 103, 58);
-  --notion-orange_background: rgb(107, 83, 57);
-  --notion-brown_background: rgb(80, 81, 84);
+  --notion-red_background: rgb(89, 65, 65);
+  --notion-pink_background: rgb(83, 59, 76);
+  --notion-blue_background: rgb(54, 73, 84);
+  --notion-purple_background: rgb(68, 63, 87);
+  --notion-teal_background: rgb(53, 76, 75);
+  --notion-yellow_background: rgb(89, 86, 59);
+  --notion-orange_background: rgb(89, 74, 58);
+  --notion-brown_background: rgb(67, 64, 64);
   --notion-gray_background: rgb(69, 75, 78);
-  --notion-red_background_co: rgba(101, 63, 63, 0.3);
-  --notion-pink_background_co: rgba(106, 63, 93, 0.3);
-  --notion-blue_background_co: rgba(57, 89, 108, 0.3);
-  --notion-purple_background_co: rgba(75, 66, 110, 0.3);
-  --notion-teal_background_co: rgba(56, 102, 99, 0.3);
-  --notion-yellow_background_co: rgba(108, 103, 58, 0.3);
-  --notion-orange_background_co: rgba(107, 83, 57, 0.3);
-  --notion-brown_background_co: rgba(80, 81, 84, 0.3);
+  --notion-red_background_co: rgba(89, 65, 65, 0.3);
+  --notion-pink_background_co: rgba(83, 59, 76, 0.3);
+  --notion-blue_background_co: rgba(120, 162, 187, 0.3);
+  --notion-purple_background_co: rgba(68, 63, 87, 0.3);
+  --notion-teal_background_co: rgba(53, 76, 75, 0.3);
+  --notion-yellow_background_co: rgba(89, 86, 59, 0.3);
+  --notion-orange_background_co: rgba(89, 74, 58, 0.3);
+  --notion-brown_background_co: rgba(67, 64, 64, 0.3);
   --notion-gray_background_co: rgba(69, 75, 78, 0.3);
 }
 
@@ -138,8 +138,7 @@
 }
 
 .notion-collection-page-properties {
-  max-width: var(--notion-max-column-width);
-  margin-left: auto;
+  margin-left: 0;
   margin-right: auto;
 }
 
@@ -686,8 +685,7 @@ svg.notion-page-icon {
   margin-top: 6px;
   margin-bottom: 6px;
   font-size: 1.2em;
-  max-width: var(--notion-max-column-width);
-  margin-left: auto;
+  margin-left: 0;
   margin-right: auto;
 }
 
@@ -791,30 +789,27 @@ svg.notion-page-icon {
 .notion-text,
 .notion-list,
 .notion-title {
-  max-width: var(--notion-max-column-width);
-  margin-left: auto;
+  margin-left: 0;
   margin-right: auto;
   width: 100%;
 }
 
 article > .notion-h {
-  max-width: var(--notion-max-column-width);
-  margin-left: auto;
+  margin-left: 0;
   margin-right: auto;
   width: 100%;
 }
 
 .notion-toggle .notion-h {
   max-width: 90%;
-  margin-left: auto;
+  margin-left: 0;
   margin-right: auto;
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
 
 .notion-toggle {
-  max-width: var(--notion-max-column-width);
-  margin-left: auto;
+  margin-left: 0;
   margin-right: auto;
 }
 
@@ -877,7 +872,7 @@ article > .notion-h {
   width: 100%;
   overflow: hidden;
   object-fit: fill;
-  margin-left: auto;
+  margin-left: 0;
   margin-right: auto;
 }
 
@@ -1214,8 +1209,7 @@ article > .notion-text {
   align-self: center;
   width: 100%;
   margin-top: 1rem;
-  max-width: var(--notion-max-column-width);
-  margin-left: auto;
+  margin-left: 0;
   margin-right: auto;
 }
 
@@ -2644,9 +2638,8 @@ article > .notion-text {
 }
 
 .notion-simple-table {
-  max-width: var(--notion-max-column-width);
   width: 100%;
-  margin-left: auto;
+  margin-left: 0;
   margin-right: auto;
   border: 1px solid var(--fg-color-5);
   border-collapse: collapse;

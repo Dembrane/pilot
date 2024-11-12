@@ -3,9 +3,9 @@ import NotionClientRenderer from '@/components/NotionClientRenderer';
 import TranslationNotice from '@/components/TranslationNotice';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     pageId: string;
-  };
+  }>;
 }
 
 const notion = new NotionAPI({
@@ -33,3 +33,5 @@ export default async function NotionPage({ params }: PageProps) {
 }
 
 export const dynamic = 'force-dynamic';
+
+export const revalidate = 3600;

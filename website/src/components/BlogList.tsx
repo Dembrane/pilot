@@ -6,7 +6,6 @@ import { useLingui } from '@lingui/react';
 import { t } from '@lingui/macro';
 import Image from 'next/image';
 
-
 interface Post {
   id: string;
   title: string;
@@ -23,8 +22,7 @@ interface BlogListProps {
 
 export default function BlogList({ posts }: BlogListProps) {
   const [searchQuery, setSearchQuery] = useState('');
-    const { i18n } = useLingui();
-
+  const { i18n } = useLingui();
 
   const filteredPosts = posts.filter(
     (post) =>
@@ -48,13 +46,13 @@ export default function BlogList({ posts }: BlogListProps) {
         {filteredPosts.map((post) => (
           <Link
             key={post.id}
-            href={`/blog/${post.slug}`}
+            href={`/${i18n.locale ?? 'en-US'}/blog/${post.slug}`}
             className="mb-6 block break-inside-avoid-column rounded-lg border bg-card transition-shadow hover:shadow-lg"
           >
             <Image src={post.cover} alt={post.title} width={500} height={300} />
-              <div className="flex items-start gap-2 p-6">
-                <span className="text-xl md:text-2xl">{post.emoji}</span>
-                <div className="">
+            <div className="flex items-start gap-2 p-6">
+              <span className="text-xl md:text-2xl">{post.emoji}</span>
+              <div className="">
                 <h2 className="mb-2 text-xl md:text-2xl">{post.title}</h2>
                 <time className="text-sm text-muted-foreground">
                   {new Date(post.date).toLocaleDateString('en-US', {
@@ -63,8 +61,8 @@ export default function BlogList({ posts }: BlogListProps) {
                     day: 'numeric',
                   })}
                 </time>
-                </div>
               </div>
+            </div>
           </Link>
         ))}
       </div>

@@ -10,6 +10,13 @@ import WysiwygContent from '@/components/WysiwygContent';
 import type { CarouselApi } from '@/components/ui/carousel';
 import AutoScrollPlugin from 'embla-carousel-auto-scroll';
 import { motion } from 'framer-motion';
+import { MotionDiv } from './animations/MotionComponents';
+
+type AngledShowcaseProps = {
+  title: string;
+  headline: string;
+  children: React.ReactNode;
+};
 
 const AngledShowcase: React.FC<AngledShowcaseProps> = ({
   title,
@@ -17,7 +24,7 @@ const AngledShowcase: React.FC<AngledShowcaseProps> = ({
   children,
 }) => {
   const [api, setApi] = React.useState<CarouselApi>();
-  const [plugins, setPlugins] = React.useState<AutoScrollPlugin[]>([]);
+  const [plugins, setPlugins] = React.useState<any[]>([]);
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -34,7 +41,7 @@ const AngledShowcase: React.FC<AngledShowcaseProps> = ({
   }, []);
 
   return (
-    <motion.div 
+    <MotionDiv
       initial={{ opacity: 0, x: -150 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 1, ease: 'linear' }}
@@ -56,13 +63,14 @@ const AngledShowcase: React.FC<AngledShowcaseProps> = ({
           {React.Children.map(children, (child, index) => (
             <CarouselItem
               key={index}
-              className="basis-4/5 sm:basis-1/3 pb-4 pl-4 dark:invert md:basis-1/4 lg:basis-1/6"
-            >{child}
+              className="basis-4/5 pb-4 pl-4 dark:invert sm:basis-1/3 md:basis-1/4 lg:basis-1/6"
+            >
+              {child}
             </CarouselItem>
           ))}
         </CarouselContent>
       </Carousel>
-    </motion.div>
+    </MotionDiv>
   );
 };
 

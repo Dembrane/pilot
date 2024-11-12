@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { MotionDiv } from './MotionComponents';
 
 interface FadeInProps {
   children: React.ReactNode;
@@ -23,7 +24,7 @@ const fadeVariants = {
 
 const FadeIn: React.FC<FadeInProps> = ({ children, index, className }) => {
   return (
-    <motion.div
+    <MotionDiv
       variants={fadeVariants}
       initial="hidden"
       animate="visible"
@@ -31,7 +32,7 @@ const FadeIn: React.FC<FadeInProps> = ({ children, index, className }) => {
       className={`h-full ${className || ''}`}
     >
       {children}
-    </motion.div>
+    </MotionDiv>
   );
 };
 

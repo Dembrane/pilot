@@ -10,7 +10,7 @@ import ThemeProviders from '@/components/ThemeProviders';
 import DembraneBackground from '@/components/animations/DembraneBackground';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { BackgroundProvider } from '@/lib/contexts/BackgroundContext';
-
+import { Toaster } from '@/components/ui/sonner';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -25,9 +25,7 @@ type LayoutProps = {
 export default async function RootLayout(props: LayoutProps) {
   const params = await props.params;
 
-  const {
-    children
-  } = props;
+  const { children } = props;
 
   const { lang } = params;
 
@@ -45,6 +43,7 @@ export default async function RootLayout(props: LayoutProps) {
                 <main>{children}</main>
                 <Footer navigationId="footer" lang={lang} />
                 <DembraneBackground />
+                <Toaster />
               </BackgroundProvider>
             </ThemeProviders>
           </LinguiClientProvider>

@@ -14,19 +14,49 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/components/navigation/DesktopNav.tsx:77
-msgid "products"
-msgstr "Products"
-
-#. js-lingui-explicit-id
-#: src/components/navigation/DesktopNav.tsx:92
-msgid "language"
-msgstr "Language"
+#: src/components/BlogList.tsx:40
+msgid "Search articles..."
+msgstr "Search articles..."
 
 #. js-lingui-explicit-id
 #: src/components/FaqAccordion.tsx:51
 msgid "search_faqs"
 msgstr "Search FAQs..."
+
+#. js-lingui-explicit-id
+#: src/components/navigation/DesktopNav.tsx:85
+msgid "products"
+msgstr "Products"
+
+#. js-lingui-explicit-id
+#: src/components/navigation/DesktopNav.tsx:94
+msgid "Settings"
+msgstr "Settings"
+
+#. js-lingui-explicit-id
+#: src/components/navigation/DesktopNav.tsx:108
+msgid "Language"
+msgstr "Language"
+
+#. js-lingui-explicit-id
+#: src/components/navigation/DesktopNav.tsx:131
+msgid "Theme"
+msgstr "Theme"
+
+#. js-lingui-explicit-id
+#: src/components/navigation/DesktopNav.tsx:136
+msgid "Simulation"
+msgstr "Simulation"
+
+#. js-lingui-explicit-id
+#: src/components/TranslationNotice.tsx:12
+msgid "This page has no translations available"
+msgstr "This page has no translations available"
+
+#. js-lingui-explicit-id
+#: src/components/navigation/DesktopNav.tsx:92
+#~ msgid "language"
+#~ msgstr "Language"
 
 #. js-lingui-explicit-id
 #: src/components/LanguageSelection.tsx:41
@@ -43,6 +73,18 @@ msgstr "Search FAQs..."
 #~ msgid "dutch"
 #~ msgstr "Dutch"
 
+#: src/components/LanguageButton.tsx:22
+msgid "{0}"
+msgstr "{0}"
+
+#: src/app/[lang]/blog/page.tsx:54
+msgid "Blog"
+msgstr "Blog"
+
+#: src/components/Footer.tsx:50
+msgid "Dembrane B.V. 2023, all rights reserved"
+msgstr "Dembrane B.V. 2023, all rights reserved"
+
 #: src/components/LanguageSelection.tsx:67
 #~ msgid "dutch"
 #~ msgstr "dutch"
@@ -50,6 +92,10 @@ msgstr "Search FAQs..."
 #: src/components/LanguageSelection.tsx:53
 #~ msgid "english"
 #~ msgstr "english"
+
+#: src/app/[lang]/blog/page.tsx:63
+msgid "Error loading blog posts. Please try again later."
+msgstr "Error loading blog posts. Please try again later."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/[slug]/page.tsx:105
@@ -65,10 +111,58 @@ msgstr "Error loading page. Please try again later."
 msgid "error.loadingProduct"
 msgstr "Error loading product. Please try again later."
 
+#: src/components/Footer.tsx:31
+msgid "Intrigued?"
+msgstr "Intrigued?"
+
 #: src/components/navigation/DesktopNav.tsx:84
 #~ msgid "language"
 #~ msgstr "Language"
 
+#: src/components/navigation/MobileNav.tsx:112
+msgid "Language"
+msgstr "Language"
+
+#: src/components/Footer.tsx:23
+msgid "logo"
+msgstr "logo"
+
+#: src/components/BlogList.tsx:74
+msgid "No posts found matching your search."
+msgstr "No posts found matching your search."
+
+#: src/components/Footer.tsx:41
+msgid "Or give us a call at:"
+msgstr "Or give us a call at:"
+
+#: src/components/Footer.tsx:48
+msgid "Privacy Statements"
+msgstr "Privacy Statements"
+
 #: src/components/ProductMenu.tsx:46
 #~ msgid "products"
 #~ msgstr "Products"
+
+#: src/components/BlogList.tsx:40
+#~ msgid "Search articles..."
+#~ msgstr "Search articles..."
+
+#: src/components/Footer.tsx:33
+msgid "Send us an email at:"
+msgstr "Send us an email at:"
+
+#: src/components/navigation/MobileNav.tsx:101
+msgid "Settings"
+msgstr "Settings"
+
+#: src/components/navigation/MobileNav.tsx:156
+msgid "Simulation"
+msgstr "Simulation"
+
+#: src/components/navigation/MobileNav.tsx:147
+msgid "Theme"
+msgstr "Theme"
+
+#: src/components/settings/BackgroundToggle.tsx:20
+msgid "Toggle animation background"
+msgstr "Toggle animation background"

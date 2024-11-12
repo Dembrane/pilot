@@ -34,7 +34,7 @@ export async function generateStaticParams() {
 }
 
 async function HomePage({ params }: PageProps) {
-  const { lang } = (await params);
+  const { lang } = await params;
   initLingui(lang as 'en-US' | 'nl-NL');
 
   if (!client) {
@@ -42,7 +42,7 @@ async function HomePage({ params }: PageProps) {
   }
 
   try {
-    const pages = await client.request(
+    const pages = await client.request<Pages[]>(
       readItems('pages', {
         filter: { permalink: { _eq: '/' } },
         fields: [
@@ -54,20 +54,22 @@ async function HomePage({ params }: PageProps) {
     );
 
     if (pages.length === 0) {
-      console.log('No pages found');
+      notFound();
     }
 
     const page = pages[0];
 
-    const translation = page?.translations.find((t) => t.languages_code === lang);
+    const translation = page?.translations.find(
+      (t) => t.languages_code === lang,
+    );
     // @ts-ignore
     const localizedTitle = translation?.title || page?.title!;
 
     return (
-        <div>
-          {/* @ts-ignore */}
-          {page.blocks && <BlocksRenderer blocks={page.blocks} lang={lang} />}
-        </div>
+      <div>
+        {/* @ts-ignore */}
+        {page.blocks && <BlocksRenderer blocks={page.blocks} lang={lang} />}
+      </div>
     );
   } catch (error) {
     console.error('Error fetching page:', error);

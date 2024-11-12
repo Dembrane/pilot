@@ -1,7 +1,14 @@
-"use client";
+'use client';
 
-import React, { useEffect, useRef, useState, ReactNode } from "react";
-import { motion, useAnimation, PanInfo } from "framer-motion";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  ReactNode,
+  useCallback,
+} from 'react';
+import { motion, useAnimation, PanInfo } from 'framer-motion';
+import { MotionDiv } from './animations/MotionComponents';
 
 interface InfiniteCarouselProps {
   id?: string;
@@ -16,7 +23,7 @@ export default function InfiniteCarousel({
   className,
   title,
   children,
-  itemWidth = "300px",
+  itemWidth = '300px',
 }: InfiniteCarouselProps) {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [items, setItems] = useState<ReactNode[]>([]);
@@ -30,32 +37,35 @@ export default function InfiniteCarousel({
     }
   }, [children]);
 
-  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+  const handleDrag = (
+    event: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo,
+  ) => {
     if (carouselRef.current) {
       carouselRef.current.scrollLeft -= info.delta.x;
     }
   };
 
-  const onScroll = () => {
+  const onScroll = useCallback(() => {
     if (children.length >= 4 && carouselRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
       if (scrollLeft > scrollWidth - clientWidth - 500) {
         setItems((prevItems) => [...prevItems, ...children]);
       }
     }
-  };
+  }, [children]);
 
   useEffect(() => {
     const refCurrent = carouselRef.current;
     if (refCurrent) {
-      refCurrent.addEventListener("scroll", onScroll);
+      refCurrent.addEventListener('scroll', onScroll);
     }
     return () => {
       if (refCurrent) {
-        refCurrent.removeEventListener("scroll", onScroll);
+        refCurrent.removeEventListener('scroll', onScroll);
       }
     };
-  }, [children]);
+  }, [children, onScroll]);
 
   return (
     <div className="flex w-full flex-col">
@@ -64,7 +74,7 @@ export default function InfiniteCarousel({
           {title}
         </h1>
       )}
-      <motion.div
+      <MotionDiv
         id={id}
         ref={carouselRef}
         className={`${className} relative mb-4 flex w-full snap-x snap-mandatory gap-8 overflow-x-auto p-2 md:p-4 lg:p-8`}
@@ -76,6 +86,7 @@ export default function InfiniteCarousel({
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.8}
+        // @ts-ignore
         onDrag={handleDrag}
       >
         {items.map((item, index) => (
@@ -87,7 +98,7 @@ export default function InfiniteCarousel({
             {item}
           </div>
         ))}
-      </motion.div>
+      </MotionDiv>
     </div>
   );
 }

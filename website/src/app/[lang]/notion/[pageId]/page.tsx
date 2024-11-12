@@ -1,10 +1,11 @@
 import { NotionAPI } from 'notion-client';
-import NotionClientRenderer from './NotionClientRenderer';
+import NotionClientRenderer from '@/components/NotionClientRenderer';
+import TranslationNotice from '@/components/TranslationNotice';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     pageId: string;
-  };
+  }>;
 }
 
 const notion = new NotionAPI({
@@ -14,7 +15,7 @@ const notion = new NotionAPI({
 
 export default async function NotionPage({ params }: PageProps) {
   const { pageId } = await params;
-  
+
   // Add validation to prevent processing invalid pageIds
   if (!pageId.match(/^[0-9a-f]{32}$/)) {
     return <div>Invalid Notion page ID format</div>;
@@ -23,7 +24,14 @@ export default async function NotionPage({ params }: PageProps) {
   const recordMap = await notion.getPage(pageId);
   console.log(pageId);
 
-  return <NotionClientRenderer recordMap={recordMap} />;
+  return (
+    <>
+      <TranslationNotice />
+      <NotionClientRenderer recordMap={recordMap} />
+    </>
+  );
 }
 
 export const dynamic = 'force-dynamic';
+
+export const revalidate = 3600;

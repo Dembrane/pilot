@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { MotionDiv } from './animations/MotionComponents';
 
 interface CaptiveScrollCarouselProps {
   background: string; // URL for image or color string
@@ -13,8 +14,8 @@ const CaptiveScrollCarousel: React.FC<CaptiveScrollCarouselProps> = ({
   background,
   children,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const [contentWidth, setContentWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
 
@@ -23,7 +24,7 @@ const CaptiveScrollCarousel: React.FC<CaptiveScrollCarouselProps> = ({
       const contentScrollWidth = contentRef.current.scrollWidth;
       const contentOffsetWidth = contentRef.current.offsetWidth;
       const containerWidth = containerRef.current.offsetWidth;
-      
+
       // Calculate the extra width needed for scrolling
       const extraWidth = Math.max(0, contentScrollWidth - containerWidth);
       setContentWidth(extraWidth);
@@ -34,6 +35,7 @@ const CaptiveScrollCarousel: React.FC<CaptiveScrollCarouselProps> = ({
   }, [children]);
 
   const { scrollYProgress } = useScroll({
+    // @ts-ignore
     target: containerRef,
     offset: ['start start', 'end start'],
   });
@@ -44,11 +46,12 @@ const CaptiveScrollCarousel: React.FC<CaptiveScrollCarouselProps> = ({
     background.startsWith('http') || background.startsWith('/');
 
   return (
-    <motion.div
+    <MotionDiv
+      // @ts-ignore
       ref={containerRef}
       className="relative h-[200vh]" // Adjust this to control when scrolling ends
     >
-      <motion.div
+      <MotionDiv
         className="sticky top-0 h-screen overflow-hidden"
         style={{
           willChange: 'transform',
@@ -68,21 +71,22 @@ const CaptiveScrollCarousel: React.FC<CaptiveScrollCarouselProps> = ({
             style={{ backgroundColor: background }}
           />
         )}
-        <motion.div
+        <MotionDiv
+          // @ts-ignore
           ref={contentRef}
           className="absolute inset-0 flex items-center"
           style={{ x: contentX }}
         >
-          <div className="flex space-x-8 px-8 w-full">
+          <div className="flex w-full space-x-8 px-8">
             {children.map((child, index) => (
               <div key={index} className="flex-shrink-0">
                 {child}
               </div>
             ))}
           </div>
-        </motion.div>
-      </motion.div>
-    </motion.div>
+        </MotionDiv>
+      </MotionDiv>
+    </MotionDiv>
   );
 };
 

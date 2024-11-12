@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/carousel';
 import WysiwygContent from '@/components/WysiwygContent';
 import type { CarouselApi } from '@/components/ui/carousel';
-import type { AutoplayPlugin } from 'embla-carousel-autoplay';
+import AutoplayPlugin, { AutoplayType } from 'embla-carousel-autoplay';
 import { Button } from '@/components/ui/button';
 import { PlayIcon, PauseIcon } from '@radix-ui/react-icons';
 import AnimateLetters from './animations/AnimateLetters';
@@ -21,18 +21,22 @@ type CarouselWrapperProps = {
   children: React.ReactNode;
 };
 
-const CarouselWrapper: React.FC<CarouselWrapperProps> = ({ title, headline, children }) => {
+const CarouselWrapper: React.FC<CarouselWrapperProps> = ({
+  title,
+  headline,
+  children,
+}) => {
   const [api, setApi] = React.useState<CarouselApi>();
-  const [autoplay, setAutoplay] = React.useState<AutoplayPlugin | null>(null);
-  const [plugins, setPlugins] = React.useState<AutoplayPlugin[]>([]);
+  const [autoplay, setAutoplay] = React.useState<AutoplayType | null>(null);
+  const [plugins, setPlugins] = React.useState<AutoplayType[]>([]);
   const [isAutoplayActive, setIsAutoplayActive] = React.useState(false);
   const autoplayTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       import('embla-carousel-autoplay').then((AutoplayModule) => {
-        const autoplayPlugin = AutoplayModule.default({ 
-          delay: 2000, 
+        const autoplayPlugin = AutoplayModule.default({
+          delay: 2000,
           stopOnInteraction: true,
           stopOnMouseEnter: true,
           playOnInit: true,
@@ -82,7 +86,7 @@ const CarouselWrapper: React.FC<CarouselWrapperProps> = ({ title, headline, chil
   }, [api, autoplay, resetAutoplayTimeout]);
 
   return (
-    <div className="w-full overflow-visible mt-24">
+    <div className="mt-24 w-full overflow-visible">
       <Carousel
         opts={{
           align: 'start',
@@ -128,7 +132,7 @@ const CarouselWrapper: React.FC<CarouselWrapperProps> = ({ title, headline, chil
             </div>
           )}
         </div>
-        <CarouselContent className="ml-0 my-6">
+        <CarouselContent className="my-6 ml-0">
           {React.Children.map(children, (child, index) => (
             <CarouselItem
               key={index}

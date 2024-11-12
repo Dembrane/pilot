@@ -25,9 +25,10 @@ const getBlockWithSteps = async (blockId: string, lang: string) => {
         fields: [
           'id',
           'title',
-          'headline',
           'show_step_numbers',
-          'translations.*',
+          {
+            translations: ['languages_code', 'title', 'headline', 'tag'],
+          },
           {
             steps: [
               'id',
@@ -39,22 +40,21 @@ const getBlockWithSteps = async (blockId: string, lang: string) => {
             ],
           },
         ],
+        // @ts-ignore
         sort: ['steps.sort'],
       }),
     );
 
-    console.log(response);
-
     if (!response || response.length === 0) return null;
 
     const block = response[0];
-    const blockTranslation = block.translations?.find(
-      (t: any) => t.languages_code === lang
+    const blockTranslation = block?.translations?.find(
+      (t: any) => t.languages_code === lang,
     );
 
-    const steps = block.steps.map((step: any) => {
+    const steps = block?.steps.map((step: any) => {
       const stepTranslation = step.translations?.find(
-        (t: any) => t.languages_code === lang
+        (t: any) => t.languages_code === lang,
       );
       return {
         id: step.id,
@@ -65,11 +65,11 @@ const getBlockWithSteps = async (blockId: string, lang: string) => {
     });
 
     return {
-      title: blockTranslation?.title || block.title,
-      headline: blockTranslation?.headline || block.headline,
-      tag: blockTranslation?.tag || block.tag,
-      show_step_numbers: block.show_step_numbers,
-      steps,
+      title: blockTranslation?.title ?? block?.title ?? '',
+      headline: blockTranslation?.headline ?? '',
+      tag: blockTranslation?.tag ?? '',
+      show_step_numbers: block?.show_step_numbers ?? false,
+      steps: steps ?? [],
     };
   } catch (error) {
     console.error('Error fetching block steps:', error);
@@ -80,13 +80,11 @@ const getBlockWithSteps = async (blockId: string, lang: string) => {
 const BlockSteps: React.FC<BlockStepsProps> = async ({ block, lang }) => {
   const blockData = await getBlockWithSteps(block.item.id, lang);
 
-  console.log(blockData);
-
   if (!blockData) {
     return <div>Error loading steps block. Please try again later.</div>;
   }
 
-  return <StepsShowcase blockData={blockData} />;
+  return <StepsShowcase blockData={blockData ?? []} />;
 };
 
 export default BlockSteps;

@@ -21,10 +21,14 @@ const getBlockWithProducts = async (blockId: string, lang: string) => {
   try {
     const blockData = await client.request<BlockProductsType[]>(
       readItems('block_products', {
-        filter: { id: { _eq: blockId } },
+        filter: {
+          id: { _eq: parseInt(blockId) },
+          status: { _eq: 'published' },
+        },
         fields: [
           'id',
           'title',
+          // @ts-ignore
           'translations.*',
           {
             products: [
@@ -35,6 +39,7 @@ const getBlockWithProducts = async (blockId: string, lang: string) => {
                   'name',
                   'slug',
                   'cover',
+                  'status',
                   'type',
                   'translations.*',
                 ],
@@ -42,10 +47,10 @@ const getBlockWithProducts = async (blockId: string, lang: string) => {
             ],
           },
         ],
-      })
+      }),
     );
 
-    if (!blockData || blockData.length === 0) {
+    if (!blockData || blockData[0] == null) {
       console.error('No data returned from Directus');
       return null;
     }
@@ -53,7 +58,7 @@ const getBlockWithProducts = async (blockId: string, lang: string) => {
     const block = blockData[0];
 
     const blockTranslation = block.translations.find(
-      (t: any) => t.languages_code === lang
+      (t: any) => t.languages_code === lang,
     );
 
     if (!blockTranslation) {
@@ -61,21 +66,24 @@ const getBlockWithProducts = async (blockId: string, lang: string) => {
       return null;
     }
 
-    const productsData = block.products.map((productLink: any) => {
-      const product = productLink.products_id;
-      const productTranslation = product.translations.find(
-        (t: any) => t.languages_code === lang
-      );
-      return {
-        id: product.id,
-        name: product.name,
-        cover: product.cover,
-        description: productTranslation?.description,
-        headline: productTranslation?.headline,
-        tag: productTranslation?.type,
-        slug: product.slug,
-      };
-    });
+    const productsData = block.products
+      .map((productLink: any) => {
+        const product = productLink.products_id;
+        const productTranslation = product.translations.find(
+          (t: any) => t.languages_code === lang,
+        );
+        return {
+          id: product.id,
+          status: product.status,
+          name: product.name,
+          cover: product.cover,
+          description: productTranslation?.description,
+          headline: productTranslation?.headline,
+          tag: productTranslation?.type,
+          slug: product.slug,
+        };
+      })
+      .filter((product) => product.status === 'published');
 
     return {
       title: blockTranslation.title,
@@ -92,7 +100,7 @@ const BlockProducts: React.FC<BlockProductsProps> = async ({ block, lang }) => {
   if (!block.item) {
     return null;
   }
-  const blockData = await getBlockWithProducts(block.item.id, lang);
+  const blockData = await getBlockWithProducts(block.item.id.toString(), lang);
 
   if (!blockData) {
     return <div>Error loading products. Please try again later.</div>;
@@ -127,13 +135,13 @@ const BlockProducts: React.FC<BlockProductsProps> = async ({ block, lang }) => {
                 imageSrc={
                   product.cover
                     ? `${DIRECTUS_PUBLIC_ASSETS_URL}${product.cover}`
-                    : null
+                    : ''
                 }
                 imageAlt={product.name || 'Product Image'}
                 title={product.name || 'Unnamed Product'}
                 description={product.headline || ''}
                 tag={product.tag || ''}
-                href={`/products/${product.slug}`}
+                href={`/${lang}/products/${product.slug}`}
                 isLarge={index < 1}
               />
             </div>

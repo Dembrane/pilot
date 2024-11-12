@@ -9,6 +9,7 @@ import { Metadata } from 'next';
 import ProductHero from '@/components/ProductHero';
 import { DIRECTUS_PUBLIC_ASSETS_URL } from '@/lib/directus';
 import { initLingui } from '@/initLingui';
+import { DirectusFiles, Products } from '@lib/types';
 
 type PageProps = {
   params: Promise<{
@@ -17,52 +18,64 @@ type PageProps = {
   }>;
 };
 
+export const dynamic = 'error';
+
 export async function generateStaticParams() {
   const locales = ['en-US', 'nl-NL']; // Fetch from Next.js config or Directus if dynamic
 
-  const pages = await client.request(
+  const pages = await client.request<Products[]>(
     readItems('products', {
       fields: ['slug'],
+      filter: {
+        status: { _eq: 'published' },
+      },
     }),
   );
 
   const params = locales.flatMap((lang) =>
-    pages.map((page: any) => ({
+    pages.map((page) => ({
       lang,
-      slug: page.permalink,
-    }))
+      slug: page.slug,
+    })),
   );
 
   return params;
 }
 
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
-  const { lang, slug } = (await props.params);
+  const { lang, slug } = await props.params;
   initLingui(lang as 'en-US' | 'nl-NL');
   const globals = await getGlobalsByLang(lang);
 
-  const products = await client.request(
+  const products = await client.request<Products[]>(
     readItems('products', {
       filter: { slug: { _eq: slug } },
       fields: [
         'slug',
         'name',
-        { translations: ['languages_code', 'name', 'description'] },
+        { translations: ['languages_code', 'description'] },
       ],
     }),
   );
 
-  const product = products[0] || {};
-  const translation = product.translations?.find(
-    (t: any) => t.languages_code === lang
-  ) || {};
+  if (!products[0]) {
+    return {
+      title: 'Dembrane',
+      description: '',
+    };
+  }
 
-  const localizedName = translation.name || product.name || 'Untitled Product';
+  const product = products[0];
+
+  const translation = product.translations?.find(
+    (t: any) => t.languages_code === lang,
+  );
+
+  const localizedName = product.name || 'Untitled Product';
 
   return {
     title: `${localizedName} | ${globals?.title || 'Dembrane'}`,
-    description: translation.description || '',
-    // Add other metadata fields as needed
+    description: translation?.description ?? '',
   };
 }
 
@@ -78,17 +91,10 @@ async function ProductPage({ params }: PageProps) {
           'id',
           'slug',
           'cover',
-          'type',
           'name',
           { blocks: ['id', 'collection', 'item.*'] },
           {
-            translations: [
-              'languages_code',
-              'name',
-              'description',
-              'headline',
-              'type',
-            ],
+            translations: ['languages_code', 'description', 'headline', 'type'],
           },
         ],
       }),
@@ -100,16 +106,17 @@ async function ProductPage({ params }: PageProps) {
     }
 
     const translation = product.translations?.find(
-      (t: any) => t.languages_code === lang
+      (t: any) => t.languages_code === lang,
     );
     const localizedName = product.name || 'Untitled Product';
     const localizedDescription = translation?.description || '';
     const localizedHeadline = translation?.headline || '';
-    const localizedType = translation?.type || product.type || '';
+    const localizedType = translation?.type || '';
 
     return (
       <main className="">
         <ProductHero
+          // @ts-ignore
           coverImage={product.cover}
           title={localizedName}
           type={localizedType}
@@ -117,7 +124,10 @@ async function ProductPage({ params }: PageProps) {
           description={localizedDescription}
         />
         <div className="mt-12 md:mt-24">
-          {product.blocks && <BlocksRenderer blocks={product.blocks} lang={lang} />}
+          {product.blocks && (
+            // @ts-ignore
+            <BlocksRenderer blocks={product.blocks} lang={lang} />
+          )}
         </div>
       </main>
     );

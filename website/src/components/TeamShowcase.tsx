@@ -10,6 +10,7 @@ import * as PIcon from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import CarouselWrapper from './CarouselWrapper';
 import Link from 'next/link';
+import { MotionDiv } from './animations/MotionComponents';
 
 type TeamShowcaseProps = {
   blockData: {
@@ -34,17 +35,27 @@ type TeamMember = {
   }[];
 };
 
-const TeamShowcase: React.FC<TeamShowcaseProps> = ({ blockData, teamMembers }) => {
+const TeamShowcase: React.FC<TeamShowcaseProps> = ({
+  blockData,
+  teamMembers,
+}) => {
   const getIconComponent = (iconName: string, className?: string) => {
-    const IconComponent = (PIcon as unknown as Record<string, React.ComponentType<PIcon.IconProps> | undefined>)[iconName];
-    return IconComponent ? <IconComponent size={42} weight="light" className={className} /> : null;
+    const IconComponent = (
+      PIcon as unknown as Record<
+        string,
+        React.ComponentType<PIcon.IconProps> | undefined
+      >
+    )[iconName];
+    return IconComponent ? (
+      <IconComponent size={42} weight="light" className={className} />
+    ) : null;
   };
 
   return (
     <section className="team-showcase mt-12 flex min-h-screen flex-col justify-center md:mt-24">
       <CarouselWrapper title={blockData.title} headline={blockData.headline}>
         {teamMembers.map((member) => (
-          <motion.div
+          <MotionDiv
             key={member.id}
             className="team-member my-4 flex max-w-[80vw] flex-col items-start rounded-lg bg-card shadow-md transition-shadow duration-300 hover:shadow-lg sm:max-w-[400px]"
             whileHover={{ scale: 1.05 }}
@@ -100,7 +111,7 @@ const TeamShowcase: React.FC<TeamShowcaseProps> = ({ blockData, teamMembers }) =
                 </div>
               )}
             </div>
-          </motion.div>
+          </MotionDiv>
         ))}
       </CarouselWrapper>
     </section>

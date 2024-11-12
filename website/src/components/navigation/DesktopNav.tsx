@@ -8,21 +8,22 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
+} from '@/components/ui/navigation-menu';
 import PhosphorIcon from '@/components/icons/PhosphorIcon';
 import Link from 'next/link';
 import { NavigationItem, Product } from '@/lib/services/navigation';
 import LanguageSelection from '../LanguageSelection';
 import { GlobeIcon } from '@radix-ui/react-icons';
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { DIRECTUS_PUBLIC_ASSETS_URL } from '@/lib/directus';
-import React from "react";
-import { t } from "@lingui/macro";
-import { useLingui } from "@lingui/react";
+import React from 'react';
+import { t } from '@lingui/macro';
+import { useLingui } from '@lingui/react';
 import { useTheme } from 'next-themes';
 import { ThemeToggle } from '@/components/settings/ThemeToggle';
 import { BackgroundToggle } from '@/components/settings/BackgroundToggle';
+import { MotionDiv } from '@components/animations/MotionComponents';
 
 interface DesktopNavProps {
   navigationItems: NavigationItem[];
@@ -31,7 +32,7 @@ interface DesktopNavProps {
 
 export function DesktopNav({ navigationItems, products }: DesktopNavProps) {
   const { i18n } = useLingui();
-    
+
   return (
     <NavigationMenu className="hidden md:flex">
       <NavigationMenuList>
@@ -41,7 +42,9 @@ export function DesktopNav({ navigationItems, products }: DesktopNavProps) {
               <>
                 <NavigationMenuTrigger>
                   <span className="flex items-center gap-2">
-                    {item.icon && <PhosphorIcon name={item.icon} />}
+                    {item.phosphor_icon && (
+                      <PhosphorIcon name={item.phosphor_icon} />
+                    )}
                     {item.label}
                   </span>
                 </NavigationMenuTrigger>
@@ -54,7 +57,13 @@ export function DesktopNav({ navigationItems, products }: DesktopNavProps) {
                             href={child.url}
                             className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-secondary hover:text-secondary-foreground focus:bg-secondary focus:text-secondary-foreground"
                           >
-                            <div className="text-sm font-medium leading-none">
+                            <div className="flex items-center gap-2 text-sm leading-none">
+                              {child.phosphor_icon && (
+                                <PhosphorIcon
+                                  name={child.phosphor_icon}
+                                  className="shrink-0"
+                                />
+                              )}
                               {child.label}
                             </div>
                           </Link>
@@ -67,7 +76,12 @@ export function DesktopNav({ navigationItems, products }: DesktopNavProps) {
             ) : (
               <Link href={item.url} legacyBehavior passHref>
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  {item.label}
+                  <span className="flex items-center gap-2">
+                    {item.phosphor_icon && (
+                      <PhosphorIcon name={item.phosphor_icon} />
+                    )}
+                    {item.label}
+                  </span>
                 </NavigationMenuLink>
               </Link>
             )}
@@ -86,11 +100,11 @@ export function DesktopNav({ navigationItems, products }: DesktopNavProps) {
           <NavigationMenuTrigger>
             <span className="flex items-center gap-2">
               <PhosphorIcon name="Gear" />
-              {i18n._(t`Settings`)}
+              {i18n._(t({ id: 'Settings' }))}
             </span>
           </NavigationMenuTrigger>
           <NavigationMenuContent>
-            <div className="w-[min(300px,90vw)] p-4 space-y-4">
+            <div className="w-[min(300px,90vw)] space-y-4 p-4">
               <LanguageSelection>
                 {({
                   currentLocale,
@@ -99,14 +113,18 @@ export function DesktopNav({ navigationItems, products }: DesktopNavProps) {
                   getLanguageLabel,
                 }) => (
                   <div className="space-y-2">
-                    <div className="font-medium">{i18n._(t`Language`)}</div>
+                    <div className="font-medium">
+                      {i18n._(t({ id: 'Language' }))}
+                    </div>
                     <ul className="space-y-1">
                       {availableLocales.map((locale) => (
                         <li key={locale}>
                           <button
                             onClick={() => onLanguageChange(locale)}
-                            className={`w-full text-left rounded-md p-2 transition-colors hover:bg-secondary hover:text-secondary-foreground ${
-                              currentLocale === locale ? 'bg-secondary text-secondary-foreground' : ''
+                            className={`w-full rounded-md p-2 text-left transition-colors hover:bg-secondary hover:text-secondary-foreground ${
+                              currentLocale === locale
+                                ? 'bg-secondary text-secondary-foreground'
+                                : ''
                             }`}
                           >
                             {getLanguageLabel(locale)}
@@ -118,13 +136,15 @@ export function DesktopNav({ navigationItems, products }: DesktopNavProps) {
                 )}
               </LanguageSelection>
 
-              <div className="flex gap-2 justify-between items-center">
-                <div className="font-medium">{i18n._(t`Theme`)}</div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="font-medium">{i18n._(t({ id: 'Theme' }))}</div>
                 <ThemeToggle />
               </div>
 
-              <div className="flex gap-2 justify-between items-center">
-                <div className="font-medium">{i18n._(t`Simulation`)}</div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="font-medium">
+                  {i18n._(t({ id: 'Simulation' }))}
+                </div>
                 <BackgroundToggle />
               </div>
             </div>
@@ -136,7 +156,11 @@ export function DesktopNav({ navigationItems, products }: DesktopNavProps) {
 }
 
 function DesktopProductMenu({ products }: { products: Product[] }) {
-  const [featuredProduct, setFeaturedProduct] = React.useState<Product>(products[0]);
+  const [featuredProduct, setFeaturedProduct] = React.useState<Product>(
+    // @ts-ignore
+    products[0],
+    // idk why this gives a type error. can products[0] be undefined? surely this should be caught by the invocation
+  );
 
   if (!products?.length) {
     return null;
@@ -167,7 +191,7 @@ function DesktopProductMenu({ products }: { products: Product[] }) {
           <div className="relative h-[180px] overflow-hidden rounded-md">
             <AnimatePresence>
               {products.map((product) => (
-                <motion.div
+                <MotionDiv
                   key={product.id}
                   initial={{ opacity: 0 }}
                   animate={{
@@ -202,7 +226,7 @@ function DesktopProductMenu({ products }: { products: Product[] }) {
                   <p className="absolute right-2 top-2 rounded-full bg-accent px-4 py-2 text-accent-foreground shadow-md">
                     {featuredProduct.type}
                   </p>
-                </motion.div>
+                </MotionDiv>
               ))}
             </AnimatePresence>
           </div>

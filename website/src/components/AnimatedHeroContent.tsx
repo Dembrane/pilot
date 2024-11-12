@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import WysiwygContent from '@/components/WysiwygContent';
 import { DIRECTUS_PUBLIC_ASSETS_URL } from '@/lib/directus';
 import BlockButtonGroup from '@/components/blocks/BlockButtonGroup';
+import { MotionDiv, MotionH1 } from './animations/MotionComponents';
 
 type AnimatedHeroContentProps = {
   title?: string;
@@ -15,8 +16,7 @@ type AnimatedHeroContentProps = {
   imagePosition?: 'left' | 'right';
   buttonGroup?: string;
   lang: string;
-  };
-
+};
 
 const AnimatedHeroContent: React.FC<AnimatedHeroContentProps> = ({
   title,
@@ -25,7 +25,7 @@ const AnimatedHeroContent: React.FC<AnimatedHeroContentProps> = ({
   image,
   imagePosition = 'right',
   buttonGroup,
-  lang
+  lang,
 }) => {
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -73,19 +73,22 @@ const AnimatedHeroContent: React.FC<AnimatedHeroContentProps> = ({
 
   return (
     <div className="relative flex min-h-[50vh] w-full flex-col items-center justify-around px-4 py-12 md:flex-row">
-      <motion.div
+      <MotionDiv
         className="flex w-full flex-col items-center justify-center px-8 py-4 text-center md:w-1/2 md:items-start md:p-8 md:text-left"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         {title && (
-          <motion.h1
+          <MotionH1
             className="mb-4 text-6xl md:text-8xl lg:text-9xl"
             variants={titleVariants}
           >
             {title.split(' ').map((word, wordIndex) => (
-              <span key={`word-${wordIndex}`} className="inline-block whitespace-nowrap mr-[0.25em]">
+              <span
+                key={`word-${wordIndex}`}
+                className="mr-[0.25em] inline-block whitespace-nowrap"
+              >
                 {word.split('').map((char, charIndex) => (
                   <motion.span
                     key={`char-${wordIndex}-${charIndex}`}
@@ -97,30 +100,30 @@ const AnimatedHeroContent: React.FC<AnimatedHeroContentProps> = ({
                 ))}
               </span>
             ))}
-          </motion.h1>
+          </MotionH1>
         )}
         {headline && (
-          <motion.div variants={containerVariants}>
+          <MotionDiv variants={containerVariants}>
             <WysiwygContent
               content={headline}
               className="mb-12 text-xl md:text-2xl lg:text-3xl"
             />
-          </motion.div>
+          </MotionDiv>
         )}
         {content && (
-          <motion.div variants={containerVariants}>
+          <MotionDiv variants={containerVariants}>
             <WysiwygContent
               content={content}
               className="mb-12 text-base md:text-lg"
             />
-          </motion.div>
+          </MotionDiv>
         )}
-        
+
         {buttonGroup && <BlockButtonGroup id={buttonGroup} lang={lang} />}
-      </motion.div>
+      </MotionDiv>
 
       {image && (
-        <motion.div
+        <MotionDiv
           className={`relative w-full md:h-full md:w-1/2 ${
             imagePosition === 'left' ? 'order-first' : 'order-last'
           }`}
@@ -138,7 +141,7 @@ const AnimatedHeroContent: React.FC<AnimatedHeroContentProps> = ({
               imagePosition === 'left' ? 'object-left' : 'object-center' // Corrected 'object-top' to 'object-left'
             }`}
           />
-        </motion.div>
+        </MotionDiv>
       )}
     </div>
   );

@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
   // Check for direct 32-character Notion ID URLs
   const notionIdRegex = /^\/([0-9a-f]{32})$/;
   const match = pathname.match(notionIdRegex);
-  
+
   if (match) {
     const notionId = match[1];
     const url = request.nextUrl.clone();
@@ -27,6 +27,7 @@ export function middleware(request: NextRequest) {
   // Add early return for public files and other static assets like Notion pages
   if (
     PUBLIC_FILE.test(pathname) ||
+    pathname.startsWith('/blog/') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/notion/') ||
@@ -100,6 +101,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder files (public files)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.).*)'
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.).*)',
   ],
 };

@@ -1,6 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BlockButtonGroup as BlockButtonGroupType, BlockButton } from '../../lib/types';
+import {
+  BlockButtonGroup as BlockButtonGroupType,
+  BlockButton,
+} from '../../lib/types';
 import { client } from '@/lib/directus';
 import { readItem } from '@directus/sdk';
 import FadeIn from '@/components/animations/FadeIn';
@@ -23,7 +26,10 @@ const buttonVariants = {
   }),
 };
 
-const BlockButtonGroup: React.FC<BlockButtonGroupProps> = async ({ id, lang }) => {
+const BlockButtonGroup: React.FC<BlockButtonGroupProps> = async ({
+  id,
+  lang,
+}) => {
   const data = await getBlockButtonGroupData(id, lang);
 
   if (!data) {
@@ -32,25 +38,30 @@ const BlockButtonGroup: React.FC<BlockButtonGroupProps> = async ({ id, lang }) =
 
   const { alignment, buttons } = data;
 
-
   const getButtonClass = (button: BlockButton) => {
-    let baseClass = 'px-6 py-3 rounded-full transition-colors duration-300 h-full shrink-0 ';
+    let baseClass =
+      'px-6 py-3 rounded-full transition-colors duration-300 h-full shrink-0 ';
 
     switch (button.variant) {
       case 'primary':
-        baseClass += 'bg-blue-600 text-white border-2 border-blue-600 hover:bg-blue-700 hover:border-blue-700';
+        baseClass +=
+          'bg-blue-600 text-white border-2 border-blue-600 hover:bg-blue-700 hover:border-blue-700';
         break;
       case 'secondary':
-        baseClass += 'bg-transparent text-blue-600 border-2 border-blue-600 hover:bg-blue-100';
+        baseClass +=
+          'bg-transparent text-blue-600 border-2 border-blue-600 hover:bg-blue-100';
         break;
       case 'tertiary':
-        baseClass += 'bg-transparent text-blue-600 hover:text-blue-700 border-2 border-transparent';
+        baseClass +=
+          'bg-transparent text-blue-600 hover:text-blue-700 border-2 border-transparent';
         break;
       case 'disabled':
-        baseClass += 'bg-transparent text-gray-400 border-2 border-gray-300 cursor-not-allowed';
+        baseClass +=
+          'bg-transparent text-gray-400 border-2 border-gray-300 cursor-not-allowed';
         break;
       default:
-        baseClass += 'bg-blue-600 text-white border-2 border-blue-600 hover:bg-blue-700 hover:border-blue-700';
+        baseClass +=
+          'bg-blue-600 text-white border-2 border-blue-600 hover:bg-blue-700 hover:border-blue-700';
         break;
     }
 
@@ -58,13 +69,17 @@ const BlockButtonGroup: React.FC<BlockButtonGroupProps> = async ({ id, lang }) =
   };
 
   return (
-    <div className={`flex gap-4 justify-center md:justify-start h-full flex-wrap`}>
+    <div
+      className={`flex h-full flex-wrap justify-center gap-4 md:justify-start`}
+    >
       {buttons.map((button, index) => {
-        const translation = button.translations.find(t => t.languages_code === lang) || button.translations[0];
+        const translation =
+          button.translations.find((t) => t.languages_code === lang) ||
+          button.translations[0];
         return (
-          <FadeIn key={button.id} index={index} className="h-full flex">
+          <FadeIn key={button.id} index={index} className="flex h-full">
             <Link
-              href={translation.external_url || '#'}
+              href={button.external_url || 'https://tally.so/r/npL14Z'}
               target="_blank"
               rel="noopener noreferrer"
               className={`${getButtonClass(button)} flex items-center`}
@@ -78,17 +93,22 @@ const BlockButtonGroup: React.FC<BlockButtonGroupProps> = async ({ id, lang }) =
   );
 };
 
-async function getBlockButtonGroupData(id: string, lang: string): Promise<BlockButtonGroupType | null> {
+async function getBlockButtonGroupData(
+  id: string,
+  lang: string,
+): Promise<BlockButtonGroupType | null> {
   try {
     const response = await client.request<BlockButtonGroupType>(
       readItem('block_button_group', id, {
         fields: [
-          'id', 'alignment',
-          'buttons.id', 'buttons.variant',
+          'id',
+          'alignment',
+          'buttons.id',
+          'buttons.variant',
           'buttons.translations.*',
         ],
-        sort: 'buttons.sort'
-      })
+        sort: 'buttons.sort',
+      }),
     );
 
     if (!response) {

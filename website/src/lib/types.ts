@@ -879,12 +879,12 @@ export type NavigationItems = {
   children: any[] | NavigationItems[];
   display_details: string;
   has_children?: boolean | null;
-  icon?: string | null;
   id: string;
   navigation: any[] | NavigationNavigationItems[];
   open_in_new_tab?: boolean | null;
   page?: string | Pages | null;
   parent?: string | NavigationItems | null;
+  phosphor_icon?: string | null;
   sort?: number | null;
   title?: string | null;
   translations: any[] | NavigationItemsTranslations[];

@@ -14,7 +14,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/components/BlogList.tsx:40
+#: src/components/BlogList.tsx:38
 msgid "Search articles..."
 msgstr "Zoek artikelen..."
 
@@ -24,27 +24,27 @@ msgid "search_faqs"
 msgstr "Zoek in veelgestelde vragen..."
 
 #. js-lingui-explicit-id
-#: src/components/navigation/DesktopNav.tsx:85
+#: src/components/navigation/DesktopNav.tsx:94
 msgid "products"
 msgstr "Producten"
 
 #. js-lingui-explicit-id
-#: src/components/navigation/DesktopNav.tsx:94
+#: src/components/navigation/DesktopNav.tsx:103
 msgid "Settings"
 msgstr "Instellingen"
 
 #. js-lingui-explicit-id
-#: src/components/navigation/DesktopNav.tsx:108
+#: src/components/navigation/DesktopNav.tsx:117
 msgid "Language"
 msgstr "Taal"
 
 #. js-lingui-explicit-id
-#: src/components/navigation/DesktopNav.tsx:131
+#: src/components/navigation/DesktopNav.tsx:140
 msgid "Theme"
 msgstr "Thema"
 
 #. js-lingui-explicit-id
-#: src/components/navigation/DesktopNav.tsx:136
+#: src/components/navigation/DesktopNav.tsx:146
 msgid "Simulation"
 msgstr "Simulatie"
 
@@ -77,11 +77,15 @@ msgstr "Deze pagina heeft geen vertalingen beschikbaar"
 msgid "{0}"
 msgstr "{0}"
 
-#: src/app/[lang]/blog/page.tsx:54
+#: src/app/[lang]/blog/page.tsx:53
 msgid "Blog"
 msgstr "Blog"
 
-#: src/components/Footer.tsx:50
+#: src/components/FooterContent.tsx:49
+msgid "Dembrane B.V. {0}, all rights reserved"
+msgstr "Dembrane B.V. {0}, alle rechten voorbehouden"
+
+#: src/components/Footer.tsx:57
 msgid "Dembrane B.V. 2023, all rights reserved"
 msgstr "Dembrane B.V. 2023, alle rechten voorbehouden"
 
@@ -93,25 +97,26 @@ msgstr "Dembrane B.V. 2023, alle rechten voorbehouden"
 #~ msgid "english"
 #~ msgstr "Engels"
 
-#: src/app/[lang]/blog/page.tsx:63
+#: src/app/[lang]/blog/page.tsx:61
 msgid "Error loading blog posts. Please try again later."
 msgstr "Fout bij het laden van de blog posts. Probeer het opnieuw later."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/[slug]/page.tsx:105
+#: src/app/[lang]/[slug]/page.tsx:129
 msgid "error.loadingPage"
 msgstr "Fout bij het laden van de pagina. Probeer het opnieuw later."
 
-#: src/app/[lang]/page.tsx:74
+#: src/app/[lang]/page.tsx:76
 msgid "Error loading page. Please try again later."
 msgstr "Fout bij het laden van de pagina. Probeer het opnieuw later."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/products/[slug]/page.tsx:127
+#: src/app/[lang]/products/[slug]/page.tsx:137
 msgid "error.loadingProduct"
 msgstr "Fout bij het laden van het product. Probeer het opnieuw later."
 
-#: src/components/Footer.tsx:31
+#: src/components/Footer.tsx:37
+#: src/components/FooterContent.tsx:26
 msgid "Intrigued?"
 msgstr "Interesse?"
 
@@ -123,19 +128,21 @@ msgstr "Interesse?"
 msgid "Language"
 msgstr "Taal"
 
-#: src/components/Footer.tsx:23
+#: src/components/Footer.tsx:29
 msgid "logo"
 msgstr "Logo"
 
-#: src/components/BlogList.tsx:74
+#: src/components/BlogList.tsx:72
 msgid "No posts found matching your search."
 msgstr "Geen posts gevonden die overeenkomen met je zoekopdracht."
 
-#: src/components/Footer.tsx:41
+#: src/components/Footer.tsx:47
+#: src/components/FooterContent.tsx:38
 msgid "Or give us a call at:"
 msgstr "Of bel ons op:"
 
-#: src/components/Footer.tsx:48
+#: src/components/Footer.tsx:54
+#: src/components/FooterContent.tsx:46
 msgid "Privacy Statements"
 msgstr "Privacy Documenten"
 
@@ -147,7 +154,8 @@ msgstr "Privacy Documenten"
 #~ msgid "Search articles..."
 #~ msgstr "Zoek artikelen..."
 
-#: src/components/Footer.tsx:33
+#: src/components/Footer.tsx:39
+#: src/components/FooterContent.tsx:29
 msgid "Send us an email at:"
 msgstr "Stuur een e-mail naar:"
 

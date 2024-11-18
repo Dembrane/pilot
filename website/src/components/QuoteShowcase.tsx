@@ -19,23 +19,27 @@ const QuoteShowcase: React.FC<QuoteShowcaseProps> = ({
   return (
     <SlideIn>
       <div className="container flex min-h-[70vh] flex-col items-center justify-center px-4 py-8 text-center">
-        <div className="relative h-min w-full">
+        <div className="relative h-min w-full px-12">
           <div className="mx-auto max-w-3xl">
             <span className="absolute left-0 top-0">
-              <Quotes size={90} style={{ transform: 'scaleX(-1)' }} weight="thin" />
+              <Quotes
+                size={45}
+                style={{ transform: 'scaleX(-1)' }}
+                weight="thin"
+              />
             </span>
             <WysiwygContent
               content={content}
               className="relative mb-4 text-2xl leading-loose md:text-4xl"
             />
             <span className="absolute bottom-0 right-0">
-              <Quotes size={90} weight="thin" />
+              <Quotes size={45} weight="thin" />
             </span>
-            <div className="flex flex-col items-center mt-8">
-              {title && <cite className="text-lg">{title}</cite>}
-              {subtitle && <span className="text-sm">{subtitle}</span>}
-            </div>
           </div>
+        </div>
+        <div className="mt-8 flex flex-col items-center">
+          {title && <cite className="text-lg">{title}</cite>}
+          {subtitle && <span className="text-sm">{subtitle}</span>}
         </div>
       </div>
     </SlideIn>

@@ -187,7 +187,7 @@ function DesktopProductMenu({ products }: { products: Product[] }) {
           ))}
         </ul>
 
-        <div className="flex flex-col space-y-4">
+        <Link href={featuredProduct.url} className="flex flex-col space-y-4">
           <div className="relative h-[180px] overflow-hidden rounded-md">
             <AnimatePresence>
               {products.map((product) => (

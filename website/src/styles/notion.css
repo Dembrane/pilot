@@ -68,7 +68,7 @@
 }
 
 .dark-mode {
-  --fg-color: rgba(10, 10, 12, 0.9);
+  --fg-color: rgb(255, 255, 255);
   --fg-color-0: var(--fg-color);
   --fg-color-1: var(--fg-color);
   --fg-color-2: var(--fg-color);
@@ -78,7 +78,7 @@
   --fg-color-6: #fff;
   --fg-color-icon: #fff;
 
-  --bg-color: #ffffff;
+  --bg-color: #080808;
   --bg-color-0: rgb(197, 204, 209);
   --bg-color-1: rgb(150, 154, 157);
   --bg-color-2: rgba(163, 161, 153, 0.15);

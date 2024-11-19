@@ -42,12 +42,12 @@ export default function BlogList({ posts }: BlogListProps) {
         />
       </div>
 
-      <div className="columns-1 gap-6 sm:columns-2 lg:columns-3">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {filteredPosts.map((post) => (
           <Link
             key={post.id}
             href={`/${i18n.locale ?? 'en-US'}/blog/${post.slug}`}
-            className="mb-6 block break-inside-avoid-column rounded-lg border bg-card transition-shadow hover:shadow-lg"
+            className="block break-inside-avoid-column rounded-lg border bg-card transition-shadow hover:shadow-lg "
           >
             <Image src={post.cover} alt={post.title} width={500} height={300} />
             <div className="flex items-start gap-2 p-6">

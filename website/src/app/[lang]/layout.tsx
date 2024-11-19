@@ -34,10 +34,7 @@ export default async function RootLayout(props: LayoutProps) {
   return (
     <html lang={lang} suppressHydrationWarning>
 
-      <Head>
         <Script defer data-domain="dembrane.com" src="https://plausible.io/js/script.js"></Script>
-      </Head>
-
       <body className={`${spaceGrotesk.className} bg-background`}>
         <ErrorBoundary>
           <LinguiClientProvider

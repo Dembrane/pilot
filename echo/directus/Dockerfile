@@ -7,7 +7,7 @@ WORKDIR /extensions
 COPY extensions .
 
 RUN npm install
-# Move all extensions the starts with directus-extension-, using find, to the /extensions/directus folder
+# Move all extensions the starts with 'directus-extension-', using find, to the /extensions/directus folder
 RUN mkdir -p ./directus
 
 RUN cd node_modules && find . -maxdepth 1 -type d -name "directus-extension-*" -exec mv {} ../directus \;
@@ -25,6 +25,6 @@ COPY ./snapshots/snapshot.yaml ./snapshot.yaml
 CMD : \
     # this step also runs the migrations (before the snapshot is applied!)
     && node cli.js bootstrap \
-    && npx directus schema apply --yes ./snapshot.yaml \
+    # && npx directus schema apply --yes ./snapshot.yaml \
     && pm2-runtime start ecosystem.config.cjs \
     ;

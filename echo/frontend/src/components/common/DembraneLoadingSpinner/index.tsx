@@ -3,6 +3,7 @@ import "./DembraneLoading.css";
 import dembraneLogoHQ from "../../../assets/dembrane-logo-hq.png";
 import { cn } from "@/lib/utils";
 import { t } from "@lingui/macro";
+
 interface DembraneLoadingSpinnerProps {
   isLoading: boolean;
   className?: string;
@@ -16,6 +17,7 @@ const DembraneLoadingSpinner: React.FC<DembraneLoadingSpinnerProps> = ({
   const [visible, setVisible] = useState(true);
 
   const messages = [
+    t`Welcome to Dembrane!`,
     t`Loading`,
     t`Preparing your experience`,
     t`Almost there`,

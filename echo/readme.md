@@ -20,11 +20,6 @@
   cd server
   cp .env.sample .env
   ```
-- Add your env keys to `directus/.env`
-  ```
-  cd directus
-  cp .env.sample .env
-  ```
 - In VSCode, open the command palette(CMD+Shift+P) and "Reopen in Container". It takes 10-15 mins the first time around.
 - Run setup `./setup.sh`
 - Install the "Restore Terminals" extension in VSCode

@@ -28,7 +28,10 @@ const getLucideIcon = (icon: string) => {
 };
 
 const transformCard = (card?: EchoPortalTutorial): LanguageCards => {
-  const languageCards: LanguageCards = {};
+  const languageCards: LanguageCards = {
+    "en-US": [],
+    "nl-NL": [],
+  };
 
   if (!card || !Array.isArray(card.cards)) {
     return languageCards;

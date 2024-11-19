@@ -57,6 +57,7 @@
     "html-react-parser": "5.1.18",
     "ms": "3.0.0-canary.1",
     "negotiator": "0.6.3",
+    "@sentry/nextjs": "^8",
     "next": "15.0.2",
     "next-themes": "0.3.0",
     "notion-client": "7.0.1",

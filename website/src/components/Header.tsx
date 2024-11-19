@@ -30,7 +30,7 @@ export async function Header({ lang }: HeaderProps) {
             href={`/${lang}`}
             className="text-xl text-foreground md:text-2xl"
           >
-            {globals?.title || 'error'}
+            {globals?.title || 'Dembrane'}
           </Link>
         </div>
 

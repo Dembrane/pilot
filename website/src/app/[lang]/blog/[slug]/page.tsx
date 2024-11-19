@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import NotionClientRenderer from '@/components/NotionClientRenderer';
 import { Metadata } from 'next';
 import TranslationNotice from '@/components/TranslationNotice';
+import { withRetry } from '@/lib/notion-utils';
 
 const notion = new NotionAPI({
   activeUser: process.env.NOTION_ACTIVE_USER,
@@ -27,24 +28,26 @@ export async function generateMetadata({
   const { slug } = await params;
 
   try {
-    const data = await officialNotion.databases.query({
-      database_id: process.env.NOTION_BLOG_DATABASE_ID!,
-      filter: {
-        and: [
-          {
-            property: 'Status',
-            status: {
-              equals: 'published',
+    const data = await withRetry(async () => {
+      return await officialNotion.databases.query({
+        database_id: process.env.NOTION_BLOG_DATABASE_ID!,
+        filter: {
+          and: [
+            {
+              property: 'Status',
+              status: {
+                equals: 'published',
+              },
             },
-          },
-          {
-            property: 'slug_DO_NOT_CHANGE',
-            rich_text: {
-              equals: slug,
+            {
+              property: 'slug_DO_NOT_CHANGE',
+              rich_text: {
+                equals: slug,
+              },
             },
-          },
-        ],
-      },
+          ],
+        },
+      });
     });
 
     if (!data.results.length) {
@@ -103,24 +106,26 @@ export default async function BlogPost({ params }: PageProps) {
   const { slug } = await params;
 
   try {
-    const data = await officialNotion.databases.query({
-      database_id: process.env.NOTION_BLOG_DATABASE_ID!,
-      filter: {
-        and: [
-          {
-            property: 'Status',
-            status: {
-              equals: 'published',
+    const data = await withRetry(async () => {
+      return await officialNotion.databases.query({
+        database_id: process.env.NOTION_BLOG_DATABASE_ID!,
+        filter: {
+          and: [
+            {
+              property: 'Status',
+              status: {
+                equals: 'published',
+              },
             },
-          },
-          {
-            property: 'slug_DO_NOT_CHANGE',
-            rich_text: {
-              equals: slug,
+            {
+              property: 'slug_DO_NOT_CHANGE',
+              rich_text: {
+                equals: slug,
+              },
             },
-          },
-        ],
-      },
+          ],
+        },
+      });
     });
 
     if (!data.results.length) {
@@ -132,7 +137,9 @@ export default async function BlogPost({ params }: PageProps) {
     }
 
     const pageId = data.results[0].id;
-    const recordMap = await notion.getPage(pageId);
+    const recordMap = await withRetry(async () => {
+      return await notion.getPage(pageId);
+    });
 
     return (
       <>
@@ -145,3 +152,7 @@ export default async function BlogPost({ params }: PageProps) {
     return notFound();
   }
 }
+
+export const dynamicParams = true;
+
+export const revalidate = 3600;

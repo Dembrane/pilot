@@ -11,6 +11,8 @@ import DembraneBackground from '@/components/animations/DembraneBackground';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { BackgroundProvider } from '@/lib/contexts/BackgroundContext';
 import { Toaster } from '@/components/ui/sonner';
+import Head from 'next/head';
+import Script from 'next/script';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -31,6 +33,11 @@ export default async function RootLayout(props: LayoutProps) {
 
   return (
     <html lang={lang} suppressHydrationWarning>
+
+      <Head>
+        <Script defer data-domain="dembrane.com" src="https://plausible.io/js/script.js"></Script>
+      </Head>
+
       <body className={`${spaceGrotesk.className} bg-background`}>
         <ErrorBoundary>
           <LinguiClientProvider

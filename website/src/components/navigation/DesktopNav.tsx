@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import PhosphorIcon from '@/components/icons/PhosphorIcon';
 import Link from 'next/link';
-import { NavigationItem, Product } from '@/lib/services/navigation';
+import { NavigationItem, NavigationProduct } from '@/lib/services/navigation';
 import LanguageSelection from '../LanguageSelection';
 import { GlobeIcon } from '@radix-ui/react-icons';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,7 +27,7 @@ import { MotionDiv } from '@components/animations/MotionComponents';
 
 interface DesktopNavProps {
   navigationItems: NavigationItem[];
-  products: Product[];
+  products: NavigationProduct[];
 }
 
 export function DesktopNav({ navigationItems, products }: DesktopNavProps) {
@@ -155,12 +155,13 @@ export function DesktopNav({ navigationItems, products }: DesktopNavProps) {
   );
 }
 
-function DesktopProductMenu({ products }: { products: Product[] }) {
-  const [featuredProduct, setFeaturedProduct] = React.useState<Product>(
-    // @ts-ignore
-    products[0],
-    // idk why this gives a type error. can products[0] be undefined? surely this should be caught by the invocation
-  );
+function DesktopProductMenu({ products }: { products: NavigationProduct[] }) {
+  const [featuredProduct, setFeaturedProduct] =
+    React.useState<NavigationProduct>(
+      // @ts-ignore
+      products[0],
+      // idk why this gives a type error. can products[0] be undefined? surely this should be caught by the invocation
+    );
 
   if (!products?.length) {
     return null;
@@ -187,7 +188,7 @@ function DesktopProductMenu({ products }: { products: Product[] }) {
           ))}
         </ul>
 
-        <div className="flex flex-col space-y-4">
+        <Link href={featuredProduct.url} className="flex flex-col space-y-4">
           <div className="relative h-[180px] overflow-hidden rounded-md">
             <AnimatePresence>
               {products.map((product) => (
@@ -213,7 +214,7 @@ function DesktopProductMenu({ products }: { products: Product[] }) {
                         ? `${DIRECTUS_PUBLIC_ASSETS_URL}${product.cover}`
                         : '/placeholder-image.jpg'
                     }
-                    alt={product.label}
+                    alt={product.label ?? ''}
                     width={320}
                     height={180}
                     className="h-full w-full object-cover"
@@ -235,7 +236,7 @@ function DesktopProductMenu({ products }: { products: Product[] }) {
               {featuredProduct.headline || 'No description available'}
             </p>
           </div>
-        </div>
+        </Link>
       </div>
     </NavigationMenuContent>
   );

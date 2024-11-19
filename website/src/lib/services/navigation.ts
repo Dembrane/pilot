@@ -1,6 +1,6 @@
 import { client } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
-import { Navigation, Products } from '@lib/types';
+import { DirectusFiles, Navigation, Products } from '@lib/types';
 
 export type NavigationItem = {
   id: string;
@@ -68,7 +68,17 @@ export async function getNavigationItems(
   }
 }
 
-export async function getProducts(lang: string): Promise<Products[]> {
+export type NavigationProduct = {
+  url: `/products/${string}`;
+  cover?: string | DirectusFiles | null;
+  label?: string | null;
+  description?: string | null;
+  headline?: string | null;
+  type?: string | null;
+  id: string;
+};
+
+export async function getProducts(lang: string): Promise<NavigationProduct[]> {
   try {
     const products = await client.request<Products[]>(
       readItems('products', {

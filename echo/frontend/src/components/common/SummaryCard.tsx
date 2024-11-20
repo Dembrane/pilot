@@ -1,4 +1,4 @@
-import { Group, LoadingOverlay, Paper, Stack, Text } from "@mantine/core";
+import { Group, LoadingOverlay, Paper, Stack } from "@mantine/core";
 import React from "react";
 
 type SummaryCardProps = {

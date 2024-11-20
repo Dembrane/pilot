@@ -77,6 +77,45 @@ const ParticipantOnboardingCards = ({
         ],
       },
     ],
+    "de-DE": [
+      ...initialCards["de-DE"],
+      {
+        section: "Bereit zum Start?",
+        slides: [
+          {
+            title: "Bereit zum Start?",
+            icon: Play,
+            component: InitiateFormComponent,
+          },
+        ],
+      },
+    ],
+    "fr-FR": [
+      ...initialCards["fr-FR"],
+      {
+        section: "Prêt à commencer?",
+        slides: [
+          {
+            title: "Prêt à commencer?",
+            icon: Play,
+            component: InitiateFormComponent,
+          },
+        ],
+      },
+    ],
+    "es-ES": [
+      ...initialCards["es-ES"],
+      {
+        section: "¿Listo para empezar?",
+        slides: [
+          {
+            title: "¿Listo para empezar?",
+            icon: Play,
+            component: InitiateFormComponent,
+          },
+        ],
+      },
+    ],
   };
 
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);

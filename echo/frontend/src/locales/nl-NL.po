@@ -100,7 +100,7 @@ msgstr "Trefwoord toevoegen"
 msgid "Add Tags"
 msgstr "Trefwoorden toevoegen"
 
-#: src/components/conversation/ConversationAccordion.tsx:84
+#: src/components/conversation/ConversationAccordion.tsx:95
 msgid "Add to this chat"
 msgstr "Voeg toe aan dit gesprek"
 
@@ -132,15 +132,15 @@ msgstr "Alle insights"
 msgid "Allow participants using the link to start new conversations"
 msgstr "Sta deelnemers toe om met behulp van de link nieuwe gesprekken te starten"
 
-#: src/components/common/DembraneLoadingSpinner/index.tsx:21
+#: src/components/common/DembraneLoadingSpinner/index.tsx:23
 msgid "Almost there"
 msgstr "Bijna klaar"
 
-#: src/components/conversation/ConversationAccordion.tsx:81
+#: src/components/conversation/ConversationAccordion.tsx:92
 msgid "Already added to this chat"
 msgstr "Al toegevoegd aan dit gesprek"
 
-#: src/routes/participant/ParticipantStart.tsx:136
+#: src/routes/participant/ParticipantStart.tsx:142
 msgid "An error occurred while loading the Portal. Please contact the support team."
 msgstr "Er is een fout opgetreden bij het laden van de Portal. Neem contact op met de ondersteuningsteam."
 
@@ -249,7 +249,11 @@ msgstr "Assistent is typen..."
 #~ msgid "Audio Recording"
 #~ msgstr "Audio opname"
 
-#: src/components/participant/ParticipantOnboardingCards.tsx:219
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:204
+msgid "Audio recordings are scheduled to be deleted after 30 days from the recording date"
+msgstr ""
+
+#: src/components/participant/ParticipantOnboardingCards.tsx:258
 msgid "Back"
 msgstr "Terug"
 
@@ -325,19 +329,19 @@ msgstr "Context"
 msgid "Context added:"
 msgstr "Context toegevoegd:"
 
-#: src/components/conversation/ConversationAccordion.tsx:196
+#: src/components/conversation/ConversationAccordion.tsx:224
 msgid "Conversations"
 msgstr "Gesprekken"
 
-#: src/components/project/ProjectQRCode.tsx:92
+#: src/components/project/ProjectQRCode.tsx:113
 msgid "Copied"
 msgstr "Gekopieerd"
 
-#: src/components/project/ProjectQRCode.tsx:92
+#: src/components/project/ProjectQRCode.tsx:113
 msgid "Copy link"
 msgstr "Kopieer link"
 
-#: src/routes/project/conversation/ProjectConversationTranscript.tsx:170
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:179
 msgid "Copy transcript"
 msgstr "Kopieer transcript"
 
@@ -374,7 +378,7 @@ msgstr "Maak view aan"
 msgid "Created on"
 msgstr "Gemaakt op"
 
-#: src/routes/project/conversation/ProjectConversationTranscript.tsx:201
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:216
 msgid "Custom Filename"
 msgstr "Aangepaste bestandsnaam"
 
@@ -419,7 +423,7 @@ msgstr "Verwijder project"
 #~ msgid "Documents"
 #~ msgstr "Documenten"
 
-#: src/routes/project/conversation/ProjectConversationTranscript.tsx:220
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:235
 msgid "Download"
 msgstr "Downloaden"
 
@@ -431,11 +435,11 @@ msgstr "Download alle transcripten"
 #~ msgid "Download audio"
 #~ msgstr "Download audio"
 
-#: src/routes/project/conversation/ProjectConversationTranscript.tsx:158
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:167
 msgid "Download transcript"
 msgstr "Download transcript"
 
-#: src/routes/project/conversation/ProjectConversationTranscript.tsx:197
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:212
 msgid "Download Transcript Options"
 msgstr "Download transcript opties"
 
@@ -519,7 +523,7 @@ msgstr "Fout bij laden van quotes"
 msgid "Export"
 msgstr "Exporteer"
 
-#: src/components/conversation/ConversationAccordion.tsx:251
+#: src/components/conversation/ConversationAccordion.tsx:280
 msgid "Filter"
 msgstr "Filteren"
 
@@ -586,7 +590,7 @@ msgstr "Verbergen alles"
 msgid "Hide all insights"
 msgstr "Verbergen alles"
 
-#: src/components/conversation/ConversationAccordion.tsx:256
+#: src/components/conversation/ConversationAccordion.tsx:285
 msgid "Hide Conversations Without Content"
 msgstr "Verbergen gesprekken zonder inhoud"
 
@@ -612,7 +616,7 @@ msgstr "Om beter door de quotes te navigeren, maak aanvullende views aan. De quo
 #~ msgid "Inactive"
 #~ msgstr "Inactief"
 
-#: src/routes/project/conversation/ProjectConversationTranscript.tsx:207
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:222
 msgid "Include timestamps"
 msgstr "Inclusief tijdstempels"
 
@@ -657,11 +661,11 @@ msgstr "Ongeldig token. Probeer het opnieuw."
 #~ msgid "Join"
 #~ msgstr "Aansluiten"
 
-#: src/components/project/ProjectQRCode.tsx:71
+#: src/components/project/ProjectQRCode.tsx:92
 msgid "Join {0} on Dembrane"
 msgstr "Aansluiten {0} op Dembrane"
 
-#: src/components/common/DembraneLoadingSpinner/index.tsx:22
+#: src/components/common/DembraneLoadingSpinner/index.tsx:24
 msgid "Just a moment"
 msgstr "Gewoon een momentje"
 
@@ -689,11 +693,11 @@ msgstr "Bibliotheek wordt aangemaakt"
 msgid "Library is currently being processed"
 msgstr "Bibliotheek wordt momenteel verwerkt"
 
-#: src/components/common/DembraneLoadingSpinner/index.tsx:19
+#: src/components/common/DembraneLoadingSpinner/index.tsx:21
 msgid "Loading"
 msgstr "Bezig met laden"
 
-#: src/components/conversation/ConversationAccordion.tsx:53
+#: src/components/conversation/ConversationAccordion.tsx:64
 msgid "Loading..."
 msgstr "Bezig met laden..."
 
@@ -736,6 +740,14 @@ msgstr "Toegang tot de microfoon wordt nog steeds geweigerd. Controleer uw inste
 msgid "Name"
 msgstr "Naam"
 
+#: src/components/conversation/ConversationAccordion.tsx:179
+msgid "Name A-Z"
+msgstr ""
+
+#: src/components/conversation/ConversationAccordion.tsx:180
+msgid "Name Z-A"
+msgstr ""
+
 #: src/components/project/ProjectAnalysisRunStatus.tsx:64
 msgid "New conversations have been added since the library was generated. Regenerate the library to process them."
 msgstr "Er zijn nieuwe gesprekken toegevoegd sinds de bibliotheek is gegenereerd. Genereer de bibliotheek opnieuw om ze te verwerken."
@@ -750,7 +762,11 @@ msgstr "Nieuw wachtwoord"
 msgid "New Project"
 msgstr "Nieuw project"
 
-#: src/components/participant/ParticipantOnboardingCards.tsx:231
+#: src/components/conversation/ConversationAccordion.tsx:177
+msgid "Newest First"
+msgstr ""
+
+#: src/components/participant/ParticipantOnboardingCards.tsx:270
 msgid "Next"
 msgstr "Volgende"
 
@@ -766,7 +782,7 @@ msgstr "Geen gesprekken beschikbaar om bibliotheek te maken"
 msgid "No conversations available to create library. Please add some conversations to get started."
 msgstr "Geen gesprekken beschikbaar om bibliotheek te maken. Voeg enkele gesprekken toe om te beginnen."
 
-#: src/components/conversation/ConversationAccordion.tsx:270
+#: src/components/conversation/ConversationAccordion.tsx:327
 msgid "No conversations found. Start a conversation using the participation invite link from the <0><1>project overview.</1></0>"
 msgstr "Geen gesprekken gevonden. Start een gesprek met behulp van de deelname-uitnodigingslink uit het <0><1>projectoverzicht.</1></0>"
 
@@ -806,13 +822,17 @@ msgstr "Geen trefwoorden gevonden"
 msgid "No tags have been added to this project yet. Add a tag using the text input above to get started."
 msgstr "Er zijn nog geen trefwoorden toegevoegd aan dit project. Voeg een trefwoord toe met behulp van de tekstinvoer boven aan om te beginnen."
 
-#: src/routes/project/conversation/ProjectConversationTranscript.tsx:227
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:242
 msgid "No transcript available for this conversation."
 msgstr "Er is geen transcript beschikbaar voor dit gesprek."
 
 #: src/components/project/ProjectPortalEditor.tsx:107
 msgid "No tutorial (only Privacy statements)"
 msgstr "Geen tutorial (alleen Privacyverklaring)"
+
+#: src/components/conversation/ConversationAccordion.tsx:178
+msgid "Oldest First"
+msgstr ""
 
 #: src/components/conversation/OngoingConversationsSummaryCard.tsx:47
 msgid "Ongoing Conversations"
@@ -846,7 +866,7 @@ msgstr "Open de probleemoplossingsgids"
 #~ msgstr "Originele bestandsnaam"
 
 #: src/components/layout/ProjectConversationLayout.tsx:25
-#: src/components/layout/ProjectOverviewLayout.tsx:36
+#: src/components/layout/ProjectOverviewLayout.tsx:33
 #: src/components/layout/ProjectResourceLayout.tsx:45
 msgid "Overview"
 msgstr "Overzicht"
@@ -901,7 +921,7 @@ msgstr "Pauze"
 msgid "Please do not close your browser"
 msgstr "Sluit uw browser alstublieft niet"
 
-#: src/components/project/ProjectQRCode.tsx:100
+#: src/components/project/ProjectQRCode.tsx:121
 msgid "Please enable participation to enable sharing"
 msgstr "Schakel deelneming in om delen mogelijk te maken"
 
@@ -925,12 +945,12 @@ msgstr "Neem uw antwoord op door op de knop \"Opname starten\" hieronder te klik
 msgid "Please wait while we verify your email address."
 msgstr "Wacht aub terwijl we uw e-mailadres verifiëren."
 
-#: src/components/layout/ProjectOverviewLayout.tsx:37
+#: src/components/layout/ProjectOverviewLayout.tsx:34
 #: src/components/project/ProjectPortalEditor.tsx:84
 msgid "Portal Editor"
 msgstr "Portal Editor"
 
-#: src/components/common/DembraneLoadingSpinner/index.tsx:20
+#: src/components/common/DembraneLoadingSpinner/index.tsx:22
 msgid "Preparing your experience"
 msgstr "Uw ervaring voorbereiden"
 
@@ -1000,7 +1020,7 @@ msgstr "Registreer als nieuwe gebruiker"
 msgid "Relevance"
 msgstr "Relevantie"
 
-#: src/components/conversation/ConversationAccordion.tsx:83
+#: src/components/conversation/ConversationAccordion.tsx:94
 msgid "Remove from this chat"
 msgstr "Verwijder van dit gesprek"
 
@@ -1047,7 +1067,7 @@ msgstr "Opnieuw proberen"
 msgid "Save"
 msgstr "Opslaan"
 
-#: src/components/conversation/ConversationAccordion.tsx:232
+#: src/components/conversation/ConversationAccordion.tsx:260
 msgid "Search conversations"
 msgstr "Zoek gesprekken"
 
@@ -1072,7 +1092,7 @@ msgstr "Selecteer tutorial"
 #~ msgid "Select your group"
 #~ msgstr "Selecteer je groep"
 
-#: src/routes/project/chat/ProjectChat.tsx:542
+#: src/routes/project/chat/ProjectChat.tsx:543
 msgid "Send"
 msgstr "Verzenden"
 
@@ -1088,7 +1108,7 @@ msgstr "Installeer je eerste project"
 #~ msgid "Settings"
 #~ msgstr "Instellingen"
 
-#: src/components/project/ProjectQRCode.tsx:76
+#: src/components/project/ProjectQRCode.tsx:97
 msgid "Share"
 msgstr "Delen"
 
@@ -1096,7 +1116,7 @@ msgstr "Delen"
 msgid "Show all"
 msgstr "Toon alles"
 
-#: src/routes/project/conversation/ProjectConversationTranscript.tsx:190
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:200
 msgid "Show audio player"
 msgstr "Toon audiospeler"
 
@@ -1119,7 +1139,11 @@ msgstr "Er ging iets mis tijdens het uploaden van het bestand: {0}"
 msgid "Something went wrong. Please try again."
 msgstr "Er is iets misgegaan. Probeer het alstublieft opnieuw."
 
-#: src/routes/project/conversation/ProjectConversationTranscript.tsx:45
+#: src/components/conversation/ConversationAccordion.tsx:296
+msgid "Sort"
+msgstr ""
+
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:46
 msgid "Speaker"
 msgstr "Spreker"
 
@@ -1257,7 +1281,7 @@ msgid "Topics"
 msgstr "Onderwerpen"
 
 #: src/components/layout/ProjectConversationLayout.tsx:26
-#: src/routes/project/conversation/ProjectConversationTranscript.tsx:156
+#: src/routes/project/conversation/ProjectConversationTranscript.tsx:165
 msgid "Transcript"
 msgstr "Transcript"
 
@@ -1265,7 +1289,7 @@ msgstr "Transcript"
 #~ msgid "Transcript Name"
 #~ msgstr "Naam afschrift"
 
-#: src/components/layout/ProjectOverviewLayout.tsx:38
+#: src/components/layout/ProjectOverviewLayout.tsx:35
 #: src/components/project/ProjectTranscriptSettings.tsx:95
 msgid "Transcript Settings"
 msgstr "Transcriptie Instellingen"
@@ -1305,7 +1329,7 @@ msgstr "Upload bezig"
 msgid "Upload resources"
 msgstr "Bronnen uploaden"
 
-#: src/routes/project/chat/ProjectChat.tsx:551
+#: src/routes/project/chat/ProjectChat.tsx:552
 msgid "Use Shift + Enter to add a new line"
 msgstr "Gebruik Shift + Enter om een nieuwe regel toe te voegen"
 
@@ -1330,6 +1354,10 @@ msgstr "Welkom"
 #: src/routes/project/chat/ProjectChat.tsx:403
 msgid "Welcome to Dembrane Chat! Use the sidebar to select resources and conversations that you want to analyse. Then, you can ask questions about the selected resources and conversations."
 msgstr "Welkom bij Dembrane Chat! Gebruik de zijbalk om bronnen en gesprekken te selecteren die u wilt analyseren. Dan kunt u vragen stellen over de geselecteerde bronnen en gesprekken."
+
+#: src/components/common/DembraneLoadingSpinner/index.tsx:20
+msgid "Welcome to Dembrane!"
+msgstr "Welkom bij Dembrane!"
 
 #: src/routes/project/ProjectsHome.tsx:162
 msgid "Welcome to Your Home! Here you can see all your projects and get access to tutorial resources. Currently, you have no projects. Click \"Create\" to configure to get started!"

@@ -23,10 +23,31 @@ export const useProjectSharingLink = (project?: Project) => {
     return null;
   }
 
+  // map the project.language to the language code
   const languageCode = {
     en: "en-US",
     nl: "nl-NL",
-  }[project.language as "en" | "nl"];
+    de: "de-DE",
+    fr: "fr-FR",
+    es: "es-ES",
+    "en-US": "en-US",
+    "nl-NL": "nl-NL",
+    "de-DE": "de-DE",
+    "fr-FR": "fr-FR",
+    "es-ES": "es-ES",
+  }[
+    project.language as
+      | "en"
+      | "nl"
+      | "de"
+      | "fr"
+      | "es"
+      | "en-US"
+      | "nl-NL"
+      | "de-DE"
+      | "fr-FR"
+      | "es-ES"
+  ];
 
   const link = `${PARTICIPANT_BASE_URL}/${languageCode}/${project.id}/start`;
   return link;

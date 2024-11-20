@@ -17,6 +17,13 @@ export const DISABLE_SENTRY = import.meta.env.VITE_DISABLE_SENTRY === "1";
 
 export const BUILD_VERSION = import.meta.env.VITE_BUILD_VERSION ?? "dev";
 
-export const SUPPORTED_LANGUAGES = ["en-US", "nl-NL"] as const;
+export const SUPPORTED_LANGUAGES = [
+  "en-US",
+  "nl-NL",
+  "de-DE",
+  "fr-FR",
+  "es-ES",
+] as const;
+
 export const PRIVACY_POLICY_URL =
   "https://dembrane.notion.site/Privacy-statements-all-languages-fa97a183f9d841f7a1089079e77ffb52" as const;

@@ -1,4 +1,5 @@
 import { BaseMessage } from "@/components/BaseMessage";
+import { InformationTooltip } from "@/components/common/InformationTooltip";
 import { getConversationChunkContentLink } from "@/lib/api";
 import {
   useConversationById,
@@ -146,6 +147,14 @@ export const ProjectConversationTranscript = () => {
     window.URL.revokeObjectURL(url);
   };
 
+  // Add function to check if conversation is older than 30 days
+  const isAudioExpired = () => {
+    if (!conversationQuery.data?.created_at) return false;
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return new Date(conversationQuery.data.created_at) < thirtyDaysAgo;
+  };
+
   return (
     <Stack>
       <Stack>
@@ -182,13 +191,19 @@ export const ProjectConversationTranscript = () => {
             </CopyButton>
           </Group>
 
-          <Switch
-            checked={showAudioPlayer}
-            onChange={(event) =>
-              setShowAudioPlayer(event.currentTarget.checked)
-            }
-            label={t`Show audio player`}
-          />
+          <Group>
+            <Switch
+              checked={showAudioPlayer}
+              onChange={(event) =>
+                setShowAudioPlayer(event.currentTarget.checked)
+              }
+              label={t`Show audio player`}
+              disabled={isAudioExpired()}
+            />
+            <InformationTooltip
+              label={t`Audio recordings are scheduled to be deleted after 30 days from the recording date`}
+            />
+          </Group>
         </Group>
 
         <Modal

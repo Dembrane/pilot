@@ -25,6 +25,6 @@ COPY ./snapshots/snapshot.yaml ./snapshot.yaml
 CMD : \
     # this step also runs the migrations (before the snapshot is applied!)
     && node cli.js bootstrap \
-    # && npx directus schema apply --yes ./snapshot.yaml \
+    && npx directus schema apply --yes ./snapshot.yaml \
     && pm2-runtime start ecosystem.config.cjs \
     ;

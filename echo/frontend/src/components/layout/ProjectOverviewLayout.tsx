@@ -18,13 +18,10 @@ export const ProjectOverviewLayout = () => {
     <Stack className="relative px-2 py-4">
       <LoadingOverlay visible={projectQuery.isLoading} />
       <div className="grid grid-cols-12 place-content-stretch gap-3">
-        <Box visibleFrom="lg" className="col-span-5 h-full">
+        <Box visibleFrom="lg" className="col-span-4 h-full">
           <ProjectQRCode project={projectQuery.data} />
         </Box>
-        <Stack
-          gap="sm"
-          className="col-span-12 h-full lg:col-span-7 2xl:col-span-4"
-        >
+        <Stack gap="sm" className="col-span-12 h-full lg:col-span-8">
           <OpenForParticipationSummaryCard projectId={projectId ?? ""} />
           <OngoingConversationsSummaryCard projectId={projectId ?? ""} />
         </Stack>

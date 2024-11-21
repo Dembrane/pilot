@@ -16,7 +16,7 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/lib/directus.ts:53
 msgid "You are not authenticated"
-msgstr "Je bent niet geauthenticeerd"
+msgstr "Je bent niet ingelogd"
 
 #. js-lingui-explicit-id
 #: src/lib/directus.ts:59
@@ -90,7 +90,7 @@ msgstr "Vink aan wat van toepassing is"
 
 #: src/components/project/ProjectTranscriptSettings.tsx:106
 msgid "Add key terms or proper nouns to improve transcript quality and accuracy."
-msgstr "Voeg sleuteltermen of eigennamen toe om de kwaliteit en nauwkeurigheid van het transcript te verbeteren."
+msgstr "Voeg belangrijke woorden of namen toe om de kwaliteit en nauwkeurigheid van het transcript te verbeteren."
 
 #: src/components/project/ProjectTagsInput.tsx:104
 msgid "Add Tag"
@@ -239,7 +239,7 @@ msgstr "Aspecten"
 
 #: src/routes/project/chat/ProjectChat.tsx:436
 msgid "Assistant is typing..."
-msgstr "Assistent is typen..."
+msgstr "Assistent is aan het typen..."
 
 #: src/components/Message.tsx:193
 #~ msgid "Attach as many documents as you like to analyse"

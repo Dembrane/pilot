@@ -534,6 +534,7 @@ type ProjectTag = {
   id: string;
   project_id: string | Project;
   text?: string | null;
+  sort?: number | null;
   updated_at: string;
 };
 

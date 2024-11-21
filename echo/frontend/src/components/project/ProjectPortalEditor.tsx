@@ -93,6 +93,16 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
       </CloseableAlert>
       <form onSubmit={handleSubmit(onSubmit)} onBlur={handleFormBlur}>
         <Stack gap="lg">
+          <Checkbox
+            label={<Trans>Ask for Name?</Trans>}
+            description={
+              <Trans>
+                Ask participants to provide their name when they start a
+                conversation
+              </Trans>
+            }
+            {...register("default_conversation_ask_for_participant_name")}
+          />
           <NativeSelect
             label={<Trans>Select tutorial</Trans>}
             description={
@@ -117,16 +127,7 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
             ]}
             {...register("default_conversation_tutorial_slug")}
           />
-          <Checkbox
-            label={<Trans>Ask for Name?</Trans>}
-            description={
-              <Trans>
-                Ask participants to provide their name when they start a
-                conversation
-              </Trans>
-            }
-            {...register("default_conversation_ask_for_participant_name")}
-          />
+
           <ProjectTagsInput project={project} />
           <Divider />
           <TextInput

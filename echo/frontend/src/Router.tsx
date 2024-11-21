@@ -4,7 +4,6 @@ import { ProjectsHomeRoute } from "./routes/project/ProjectsHome";
 import {
   ProjectPortalSettingsRoute,
   ProjectSettingsRoute,
-  ProjectTranscriptSettingsRoute,
 } from "./routes/project/ProjectRoutes";
 import { ProjectLayout } from "./components/layout/ProjectLayout";
 import { ProjectResourceLayout } from "./components/layout/ProjectResourceLayout";
@@ -120,18 +119,18 @@ export const mainRouter = createBrowserRouter([
                     element: <ProjectOverviewLayout />,
                     children: [
                       {
-                        index: true,
                         path: "overview",
                         element: <ProjectSettingsRoute />,
                       },
                       {
+                        index: true,
                         path: "portal-editor",
                         element: <ProjectPortalSettingsRoute />,
                       },
-                      {
-                        path: "transcript-settings",
-                        element: <ProjectTranscriptSettingsRoute />,
-                      },
+                      // {
+                      //   path: "transcript-settings",
+                      //   element: <ProjectTranscriptSettingsRoute />,
+                      // },
                     ],
                   },
                   {

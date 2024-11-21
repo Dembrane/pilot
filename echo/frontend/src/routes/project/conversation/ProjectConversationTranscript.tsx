@@ -87,7 +87,6 @@ export const ProjectConversationTranscript = () => {
   const transcriptQuery = useConversationTranscriptString(conversationId ?? "");
 
   const [opened, { open, close }] = useDisclosure(false);
-  const [downloadWithTimestamps, setDownloadWithTimestamps] = useState(false);
   const [filename, setFilename] = useState("");
 
   const [showAudioPlayer, setShowAudioPlayer] = useSessionStorageState<boolean>(
@@ -107,23 +106,9 @@ export const ProjectConversationTranscript = () => {
     );
   }
 
-  const sorted = conversationChunksQuery.data?.sort((a, b) => {
-    return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-  });
-
-  const handleDownloadTranscript = (
-    includeTimestamps: boolean,
-    filename: string,
-  ) => {
-    let text: string[];
-
-    if (includeTimestamps) {
-      text = sorted?.map((v) => `${v.timestamp}: ${v.transcript}\n`) ?? [""];
-    } else {
-      text = sorted?.map((v) => `${v.transcript}\n`) ?? [""];
-    }
-
-    const blob = new Blob(text, { type: "text/markdown" });
+  const handleDownloadTranscript = (filename: string) => {
+    const text = transcriptQuery.data ?? "";
+    const blob = new Blob([text], { type: "text/markdown" });
 
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -143,7 +128,6 @@ export const ProjectConversationTranscript = () => {
     }
 
     a.click();
-
     window.URL.revokeObjectURL(url);
   };
 
@@ -164,6 +148,7 @@ export const ProjectConversationTranscript = () => {
             <Title order={2}>
               <Trans>Transcript</Trans>
             </Title>
+            {/* open the download modal */}
             <Tooltip label={t`Download transcript`}>
               <ActionIcon
                 onClick={open}
@@ -218,16 +203,9 @@ export const ProjectConversationTranscript = () => {
               value={filename}
               onChange={(event) => setFilename(event.currentTarget.value)}
             />
-            <Checkbox
-              label={t`Include timestamps`}
-              checked={downloadWithTimestamps}
-              onChange={(event) =>
-                setDownloadWithTimestamps(event.currentTarget.checked)
-              }
-            />
             <Button
               onClick={() => {
-                handleDownloadTranscript(downloadWithTimestamps, filename);
+                handleDownloadTranscript(filename);
                 close();
               }}
               rightSection={<IconDownload />}
@@ -236,13 +214,14 @@ export const ProjectConversationTranscript = () => {
             </Button>
           </Stack>
         </Modal>
+
         <Stack>
-          {sorted?.length === 0 && (
+          {conversationChunksQuery.data?.length === 0 && (
             <Text size="md">
               <Trans>No transcript available for this conversation.</Trans>
             </Text>
           )}
-          {sorted
+          {conversationChunksQuery.data
             ?.filter(
               (chunk) =>
                 !!chunk.transcript && chunk.transcript.trim().length > 0,

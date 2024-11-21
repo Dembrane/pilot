@@ -273,9 +273,15 @@ export const useProjectById = ({
     fields: [
       "*",
       {
-        tags: ["id", "created_at", "text"],
+        tags: ["id", "created_at", "text", "sort"],
       },
     ],
+    deep: {
+      // @ts-expect-error tags won't be typed
+      tags: {
+        _sort: "sort",
+      },
+    },
   },
 }: {
   projectId: string;
@@ -383,6 +389,25 @@ export const useAspectById = (projectId: string, aspectId: string) => {
           ],
         }),
       ),
+  });
+};
+
+export const useUpdateProjectTagByIdMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      project_id: string;
+      payload: Partial<ProjectTag>;
+    }) => directus.request<ProjectTag>(updateItem("project_tag", id, payload)),
+    onSuccess: (_values, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["projects", variables.project_id],
+      });
+    },
   });
 };
 
@@ -899,6 +924,7 @@ export const useCreateProjectTagMutation = () => {
         directus_user_id: string;
       };
       text: string;
+      sort?: number;
     }) => directus.request(createItem("project_tag", payload as any)),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({

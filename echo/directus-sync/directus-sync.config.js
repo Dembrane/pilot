@@ -1,9 +1,13 @@
-const directusBaseUrl = process.env.DIRECTUS_BASE_URL || 'http://localhost:8055';
-const directusToken = process.env.DIRECTUS_TOKEN || '';
+const directusBaseUrl = process.env.DIRECTUS_BASE_URL;
+const directusToken = process.env.DIRECTUS_TOKEN;
+
+if (!directusBaseUrl || !directusToken) {
+    throw new Error('DIRECTUS_BASE_URL and DIRECTUS_TOKEN must be set');
+}
 
 module.exports = {
-    directusUrl: 'http://localhost:8055',
-    directusToken: '',
+    directusUrl: directusBaseUrl,
+    directusToken: directusToken,
     dumpPath: './directus-config',
     // Additional options...
 };

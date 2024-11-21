@@ -30,9 +30,8 @@ export const ProjectOverviewLayout = () => {
       <TabsWithRouter
         basePath="/projects/:projectId"
         tabs={[
-          { value: "overview", label: t`Overview` },
           { value: "portal-editor", label: t`Portal Editor` },
-          { value: "transcript-settings", label: t`Transcript Settings` },
+          { value: "overview", label: t`Project Settings` },
         ]}
         loading={projectQuery.isLoading}
       />

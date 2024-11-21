@@ -3,6 +3,7 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
+  useInfiniteQuery,
 } from "@tanstack/react-query";
 import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import {
@@ -896,6 +897,48 @@ export const useConversationChunks = (
           sort: "timestamp",
         }),
       ),
+    refetchInterval,
+  });
+};
+
+export const useInfiniteConversationChunks = (
+  conversationId: string,
+  options?: {
+    initialLimit?: number;
+    refetchInterval?: number | false;
+  },
+) => {
+  const defaultOptions = {
+    initialLimit: 10,
+    refetchInterval: 30000,
+  };
+
+  const { initialLimit, refetchInterval } = { ...defaultOptions, ...options };
+
+  return useInfiniteQuery({
+    queryKey: ["conversations", conversationId, "chunks", "infinite"],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await directus.request(
+        readItems("conversation_chunk", {
+          filter: {
+            conversation_id: {
+              _eq: conversationId,
+            },
+          },
+          sort: ["timestamp"],
+          limit: initialLimit,
+          offset: pageParam * initialLimit,
+        }),
+      );
+
+      return {
+        chunks: response,
+        nextOffset:
+          response.length === initialLimit ? pageParam + 1 : undefined,
+      };
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => lastPage.nextOffset,
     refetchInterval,
   });
 };

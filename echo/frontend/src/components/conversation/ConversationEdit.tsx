@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -47,20 +47,48 @@ export const ConversationEdit = ({
 
   const updateConversationMutation = useUpdateConversationByIdMutation();
 
-  const onSubmit = (data: ConversationEditFormValues) => {
-    if (isDirty) {
-      updateConversationMutation.mutate({
-        id: conversation.id,
-        payload: {
-          participant_name: data.participant_name,
-          tags:
-            data.tagIdList.map((id) => ({
-              project_tag_id: id,
-            })) ?? [],
-        },
-      });
-    }
-  };
+  const onSubmit = useCallback(
+    (data: ConversationEditFormValues) => {
+      if (isDirty) {
+        const existingTagIds =
+          conversation.tags
+            ?.map((tag) => {
+              if (typeof tag.project_tag_id === "string") {
+                return tag.project_tag_id;
+              } else if (tag.project_tag_id?.id) {
+                return tag.project_tag_id.id;
+              } else {
+                return null;
+              }
+            })
+            .filter((id): id is string => id !== null) ?? [];
+
+        const newTagIds = data.tagIdList ?? [];
+
+        const tagsToCreate = newTagIds.filter(
+          (id) => !existingTagIds.includes(id),
+        );
+        const tagsToDelete = existingTagIds.filter(
+          (id) => !newTagIds.includes(id),
+        );
+
+        updateConversationMutation.mutate({
+          id: conversation.id,
+          payload: {
+            participant_name: data.participant_name,
+            tags: {
+              // @ts-expect-error TODO: fix this
+              create: tagsToCreate.map((tagId) => ({
+                project_tag_id: tagId,
+              })),
+              delete: tagsToDelete,
+            },
+          },
+        });
+      }
+    },
+    [isDirty, updateConversationMutation, conversation.id, conversation.tags],
+  );
 
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 

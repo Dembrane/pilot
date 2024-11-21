@@ -4,7 +4,6 @@ import {
   useProjectById,
   useUpdateProjectTagByIdMutation,
 } from "@/lib/query";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Trans, t } from "@lingui/macro";
 import {
   ActionIcon,
@@ -13,8 +12,6 @@ import {
   Button,
   Group,
   LoadingOverlay,
-  Modal,
-  Pill,
   Skeleton,
   Stack,
   Text,
@@ -37,19 +34,24 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Icons } from "@/icons";
 import { IconX } from "@tabler/icons-react";
 
 export const ProjectTagPill = ({ tag }: { tag: ProjectTag }) => {
   const deleteTagMutation = useDeleteTagByIdMutation();
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ 
-      id: tag.id,
-      // @ts-expect-error prevent accidental drag
-      activationConstraint: {
-        distance: 8,
-      }
-    });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: tag.id,
+    // @ts-expect-error prevent accidental drag
+    activationConstraint: {
+      distance: 8,
+    },
+  });
 
   if (!tag || !tag.text) {
     return null;
@@ -63,7 +65,10 @@ export const ProjectTagPill = ({ tag }: { tag: ProjectTag }) => {
 
   const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    if (!isDragging && window.confirm(t`Are you sure you want to delete this tag?`)) {
+    if (
+      !isDragging &&
+      window.confirm(t`Are you sure you want to delete this tag?`)
+    ) {
       deleteTagMutation.mutate(tag.id);
     }
   };

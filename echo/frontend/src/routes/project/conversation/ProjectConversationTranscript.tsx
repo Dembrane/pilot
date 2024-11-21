@@ -3,14 +3,13 @@ import { InformationTooltip } from "@/components/common/InformationTooltip";
 import { getConversationChunkContentLink } from "@/lib/api";
 import {
   useConversationById,
-  useConversationChunks,
   useConversationTranscriptString,
+  useInfiniteConversationChunks,
 } from "@/lib/query";
 import { Trans, t } from "@lingui/macro";
 import {
   ActionIcon,
   Group,
-  // LoadingOverlay,
   Text,
   Stack,
   Tooltip,
@@ -19,16 +18,16 @@ import {
   Divider,
   Modal,
   Button,
-  Checkbox,
   TextInput,
   CopyButton,
   Switch,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconCheck, IconCopy, IconDownload } from "@tabler/icons-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useSessionStorageState from "use-session-storage-state";
+import { useInView } from "react-intersection-observer";
 
 const Chunk = ({
   chunk,
@@ -83,8 +82,24 @@ export const ProjectConversationTranscript = () => {
     conversationId: conversationId ?? "",
     loadConversationChunks: true,
   });
-  const conversationChunksQuery = useConversationChunks(conversationId ?? "");
+
+  const { ref: loadMoreRef, inView } = useInView();
+
+  const {
+    data: chunksData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteConversationChunks(conversationId ?? "");
+
   const transcriptQuery = useConversationTranscriptString(conversationId ?? "");
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const [opened, { open, close }] = useDisclosure(false);
   const [filename, setFilename] = useState("");
@@ -96,7 +111,7 @@ export const ProjectConversationTranscript = () => {
     },
   );
 
-  if (conversationChunksQuery.isLoading) {
+  if (status === "pending") {
     return (
       <Stack>
         {[0, 1, 2].map((i) => (
@@ -105,6 +120,8 @@ export const ProjectConversationTranscript = () => {
       </Stack>
     );
   }
+
+  const allChunks = chunksData?.pages.flatMap((page) => page.chunks) ?? [];
 
   const handleDownloadTranscript = (filename: string) => {
     const text = transcriptQuery.data ?? "";
@@ -216,25 +233,31 @@ export const ProjectConversationTranscript = () => {
         </Modal>
 
         <Stack>
-          {conversationChunksQuery.data?.length === 0 && (
+          {allChunks.length === 0 && (
             <Text size="md">
               <Trans>No transcript available for this conversation.</Trans>
             </Text>
           )}
-          {conversationChunksQuery.data
-            ?.filter(
+          {allChunks
+            .filter(
               (chunk) =>
                 !!chunk.transcript && chunk.transcript.trim().length > 0,
             )
-            .map((chunk) => {
+            .map((chunk, index, array) => {
+              const isLastChunk = index === array.length - 1;
               return (
-                <Chunk
-                  key={chunk.id}
-                  chunk={chunk}
-                  showAudioPlayer={showAudioPlayer}
-                />
+                <div key={chunk.id} ref={isLastChunk ? loadMoreRef : undefined}>
+                  <Chunk chunk={chunk} showAudioPlayer={showAudioPlayer} />
+                </div>
               );
             })}
+          {isFetchingNextPage && (
+            <Stack>
+              {[0, 1].map((i) => (
+                <Skeleton key={i} height={200} />
+              ))}
+            </Stack>
+          )}
         </Stack>
       </Stack>
     </Stack>

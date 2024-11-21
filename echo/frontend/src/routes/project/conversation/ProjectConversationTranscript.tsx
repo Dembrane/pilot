@@ -21,9 +21,16 @@ import {
   TextInput,
   CopyButton,
   Switch,
+  Alert,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconCheck, IconCopy, IconDownload } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconCopy,
+  IconDownload,
+  IconAlertCircle,
+} from "@tabler/icons-react";
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useSessionStorageState from "use-session-storage-state";
@@ -122,6 +129,9 @@ export const ProjectConversationTranscript = () => {
   }
 
   const allChunks = chunksData?.pages.flatMap((page) => page.chunks) ?? [];
+  const hasValidTranscripts = allChunks.some(
+    (chunk) => chunk.transcript && chunk.transcript.trim().length > 0,
+  );
 
   const handleDownloadTranscript = (filename: string) => {
     const text = transcriptQuery.data ?? "";
@@ -233,24 +243,46 @@ export const ProjectConversationTranscript = () => {
         </Modal>
 
         <Stack>
-          {allChunks.length === 0 && (
-            <Text size="md">
-              <Trans>No transcript available for this conversation.</Trans>
-            </Text>
+          {allChunks.length === 0 ? (
+            <Alert
+              icon={<IconAlertCircle size={16} />}
+              title={t`No Transcript Available`}
+              color="gray"
+            >
+              <Trans>
+                No transcript exists for this conversation yet. Please check
+                back later.
+              </Trans>
+            </Alert>
+          ) : !hasValidTranscripts ? (
+            <Alert
+              icon={<IconAlertCircle size={16} />}
+              title={t`Processing Transcript`}
+              color="gray"
+            >
+              <Trans>
+                The transcript for this conversation is being processed. Please
+                check back later.
+              </Trans>
+            </Alert>
+          ) : (
+            allChunks
+              .filter(
+                (chunk) =>
+                  !!chunk.transcript && chunk.transcript.trim().length > 0,
+              )
+              .map((chunk, index, array) => {
+                const isLastChunk = index === array.length - 1;
+                return (
+                  <div
+                    key={chunk.id}
+                    ref={isLastChunk ? loadMoreRef : undefined}
+                  >
+                    <Chunk chunk={chunk} showAudioPlayer={showAudioPlayer} />
+                  </div>
+                );
+              })
           )}
-          {allChunks
-            .filter(
-              (chunk) =>
-                !!chunk.transcript && chunk.transcript.trim().length > 0,
-            )
-            .map((chunk, index, array) => {
-              const isLastChunk = index === array.length - 1;
-              return (
-                <div key={chunk.id} ref={isLastChunk ? loadMoreRef : undefined}>
-                  <Chunk chunk={chunk} showAudioPlayer={showAudioPlayer} />
-                </div>
-              );
-            })}
           {isFetchingNextPage && (
             <Stack>
               {[0, 1].map((i) => (

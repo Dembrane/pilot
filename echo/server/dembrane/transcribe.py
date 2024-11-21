@@ -95,6 +95,9 @@ def transcribe_audio(
 DEFAULT_WHISPER_PROMPTS = {
     "en": "Hi, lets get started. First we'll have a round of introductions and then we can get into the topic for today.",
     "nl": "Hallo, laten we beginnen. Eerst even een introductieronde en dan kunnen we aan de slag met de thema van vandaag.",
+    "de": "Hallo, lasst uns beginnen. Zuerst ein paar Einführungen und dann können wir mit dem Thema des Tages beginnen.",
+    "fr": "Bonjour, commençons. D'abord un tour de table et ensuite nous pourrons aborder le sujet du jour.",
+    "es": "Hola, comencemos. Primero, un round de introducción y luego podremos empezar con el tema de hoy.",
 }
 
 

@@ -40,7 +40,7 @@ from dembrane.api.conversation import get_conversation, get_conversation_chunks
 logger = getLogger("api.project")
 
 ProjectRouter = APIRouter(tags=["project"])
-PROJECT_ALLOWED_LANGUAGES = ["en", "nl"]
+PROJECT_ALLOWED_LANGUAGES = ["en", "nl", "de", "fr", "es"]
 
 
 class CreateProjectRequestSchema(BaseModel):

@@ -88,6 +88,12 @@ export const useProjects = ({
               tags: ["*"],
             },
           ],
+          deep: {
+            // @ts-expect-error tags is not typed
+            tags: {
+              _sort: "sort",
+            },
+          },
           ...query,
         }),
       ),
@@ -582,7 +588,54 @@ export const useUpdateConversationByIdMutation = () => {
       queryClient.invalidateQueries({
         queryKey: ["conversations"],
       });
-      toast.success("Conversation updated successfully");
+    },
+  });
+};
+
+// you always need to provide all the tags
+export const useUpdateConversationTagsMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      conversationId,
+      projectId,
+      projectTagIdList,
+    }: {
+      projectId: string;
+      conversationId: string;
+      projectTagIdList: string[];
+    }) => {
+      const validTags = await directus.request<ProjectTag[]>(
+        readItems("project_tag", {
+          filter: {
+            id: {
+              _in: projectTagIdList,
+            },
+            project_id: {
+              _eq: projectId,
+            },
+          },
+          fields: ["*"],
+        }),
+      );
+
+      return directus.request<Conversation>(
+        updateItem("conversation", conversationId, {
+          tags: validTags.map((tag) => ({
+            project_tag_id: tag.id,
+            conversation_id: conversationId,
+          })),
+        }),
+      );
+    },
+    onSuccess: (_values, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["conversations", variables.conversationId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["projects", variables.projectId],
+      });
     },
   });
 };
@@ -625,8 +678,9 @@ export const useConversationsByProjectId = (
 ) => {
   return useQuery({
     queryKey: [
-      "conversations",
+      "projects",
       projectId,
+      "conversations",
       loadChunks ? "chunks" : "no-chunks",
       loadWhereTranscriptExists ? "transcript" : "no-transcript",
       query,

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import {
-  Alert,
   Button,
   Checkbox,
   Divider,
@@ -26,6 +25,7 @@ type ProjectPortalFormValues = {
   default_conversation_title: string;
   default_conversation_description: string;
   default_conversation_finish_text: string;
+  language: "en" | "nl" | "de" | "fr" | "es";
 };
 
 export const ProjectPortalEditor = ({ project }: { project: Project }) => {
@@ -39,6 +39,7 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
       project.default_conversation_description ?? "",
     default_conversation_finish_text:
       project.default_conversation_finish_text ?? "",
+    language: (project.language as "en" | "nl" | "de" | "fr" | "es") ?? "en",
   };
 
   const {
@@ -93,6 +94,18 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
       </CloseableAlert>
       <form onSubmit={handleSubmit(onSubmit)} onBlur={handleFormBlur}>
         <Stack gap="lg">
+          <NativeSelect
+            label={t`Language`}
+            description={t`This language will be used for the Participant's Portal and transcription. To change the language of this application, please use the language picker through the settings in the header.`}
+            {...register("language")}
+            data={[
+              { label: t`English`, value: "en" },
+              { label: t`Dutch`, value: "nl" },
+              { label: t`German`, value: "de" },
+              { label: t`Spanish`, value: "es" },
+              { label: t`French`, value: "fr" },
+            ]}
+          />
           <Checkbox
             label={<Trans>Ask for Name?</Trans>}
             description={
@@ -113,22 +126,23 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
             }
             data={[
               {
-                value: "none",
                 label: t`No tutorial (only Privacy statements)`,
+                value: "none",
               },
               {
-                value: "basic",
                 label: t`Basic (Essential tutorial slides)`,
+                value: "basic",
               },
               {
-                value: "advanced",
                 label: t`Advanced (Tips and tricks)`,
+                value: "advanced",
               },
             ]}
             {...register("default_conversation_tutorial_slug")}
           />
 
           <ProjectTagsInput project={project} />
+
           <Divider />
           <TextInput
             label={

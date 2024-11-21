@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 import {
   Button,
   Group,
-  NativeSelect,
   Stack,
   TextInput,
   Textarea,
@@ -17,7 +16,6 @@ import { UnsavedChanges } from "../form/UnsavedChanges";
 type ProjectEditFormValues = {
   name: string;
   context: string;
-  language: "en" | "nl";
 };
 
 type ProjectBasicEditProps = {
@@ -30,7 +28,6 @@ export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
   const defaultValues: ProjectEditFormValues = {
     name: project.name ?? "",
     context: project.context ?? "",
-    language: (project.language as ProjectEditFormValues["language"]) ?? "en",
   };
 
   const {
@@ -87,15 +84,6 @@ export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
 
 * What is the north star goal or key metric
 * What does success look like`}
-          />
-          <NativeSelect
-            label={t`Language`}
-            description={t`This language will be used for the Participant's Portal, transcription and analysis. To change the language of this application, please use the language picker in the header user menu instead.`}
-            {...register("language")}
-            data={[
-              { label: t`English`, value: "en" },
-              { label: t`Dutch`, value: "nl" },
-            ]}
           />
         </Stack>
       </form>

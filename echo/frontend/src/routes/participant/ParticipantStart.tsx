@@ -120,8 +120,6 @@ export const ParticipantStartRoute = () => {
     project?.default_conversation_tutorial_slug ?? "",
   );
 
-  console.log(tutorialCard);
-
   const [loadingFinished, setLoadingFinished] = useSessionStorageState(
     "loadingFinished",
     {

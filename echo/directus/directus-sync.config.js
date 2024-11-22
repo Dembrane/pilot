@@ -3,7 +3,8 @@ module.exports = {
   // this NEEDS to be done after the build is complete
   // OR needs to be run in the same container as the directus server
   directusUrl: "http://directus:8055",
-  directusToken: "admin",
+  directusEmail: "admin@dembrane.com",
+  directusPassword: "dembrane2024",
   dumpPath: "./sync",
   preserveIds: ["roles", "policies", "dashboards", "panels"],
   hooks: {

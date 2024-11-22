@@ -394,7 +394,6 @@ export const initiateAndUploadConversationChunk = async (payload: {
     }
 
     if (blob instanceof File) {
-      console.log("Blob is actually File");
       name += blob.name;
 
       const isxm4a = blob.type === "audio/x-m4a";

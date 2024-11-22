@@ -31,6 +31,9 @@ const transformCard = (card?: EchoPortalTutorial): LanguageCards => {
   const languageCards: LanguageCards = {
     "en-US": [],
     "nl-NL": [],
+    "de-DE": [],
+    "fr-FR": [],
+    "es-ES": [],
   };
 
   if (!card || !Array.isArray(card.cards)) {

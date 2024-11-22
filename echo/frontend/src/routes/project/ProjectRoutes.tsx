@@ -1,6 +1,5 @@
 import ProjectBasicEdit from "@/components/project/ProjectBasicEdit";
 import { ProjectDangerZone } from "@/components/project/ProjectDangerZone";
-import { ProjectEdit } from "@/components/project/ProjectEdit";
 import { ProjectPortalEditor } from "@/components/project/ProjectPortalEditor";
 import { ProjectTranscriptSettings } from "@/components/project/ProjectTranscriptSettings";
 import { getProjectTranscriptsLink } from "@/lib/api";
@@ -75,22 +74,7 @@ export const ProjectPortalSettingsRoute = () => {
         </Alert>
       )}
       {projectQuery.data && <ProjectPortalEditor project={projectQuery.data} />}
-    </Stack>
-  );
-};
-
-export const ProjectTranscriptSettingsRoute = () => {
-  const { projectId } = useParams();
-  const projectQuery = useProjectById({ projectId: projectId ?? "" });
-
-  return (
-    <Stack className="relative px-2 py-2">
-      {projectQuery.isLoading && <LoadingOverlay visible />}
-      {projectQuery.isError && (
-        <Alert variant="outline" color="red">
-          <Trans>Error loading project</Trans>
-        </Alert>
-      )}
+      <Divider />
       {projectQuery.data && (
         <ProjectTranscriptSettings project={projectQuery.data} />
       )}

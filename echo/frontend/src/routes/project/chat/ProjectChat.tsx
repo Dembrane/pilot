@@ -511,6 +511,7 @@ export const ProjectChatRoute = () => {
                 <Textarea
                   placeholder={t`Type a message...`}
                   minRows={4}
+                  maxRows={10}
                   autosize
                   value={input}
                   onChange={handleInputChange}

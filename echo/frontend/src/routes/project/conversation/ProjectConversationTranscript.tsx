@@ -1,15 +1,15 @@
 import { BaseMessage } from "@/components/BaseMessage";
+import { InformationTooltip } from "@/components/common/InformationTooltip";
 import { getConversationChunkContentLink } from "@/lib/api";
 import {
   useConversationById,
-  useConversationChunks,
   useConversationTranscriptString,
+  useInfiniteConversationChunks,
 } from "@/lib/query";
 import { Trans, t } from "@lingui/macro";
 import {
   ActionIcon,
   Group,
-  // LoadingOverlay,
   Text,
   Stack,
   Tooltip,
@@ -18,16 +18,23 @@ import {
   Divider,
   Modal,
   Button,
-  Checkbox,
   TextInput,
   CopyButton,
   Switch,
+  Alert,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconCheck, IconCopy, IconDownload } from "@tabler/icons-react";
-import { useState } from "react";
+import {
+  IconCheck,
+  IconCopy,
+  IconDownload,
+  IconAlertCircle,
+} from "@tabler/icons-react";
+
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useSessionStorageState from "use-session-storage-state";
+import { useInView } from "react-intersection-observer";
 
 const Chunk = ({
   chunk,
@@ -82,11 +89,26 @@ export const ProjectConversationTranscript = () => {
     conversationId: conversationId ?? "",
     loadConversationChunks: true,
   });
-  const conversationChunksQuery = useConversationChunks(conversationId ?? "");
+
+  const { ref: loadMoreRef, inView } = useInView();
+
+  const {
+    data: chunksData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteConversationChunks(conversationId ?? "");
+
   const transcriptQuery = useConversationTranscriptString(conversationId ?? "");
 
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   const [opened, { open, close }] = useDisclosure(false);
-  const [downloadWithTimestamps, setDownloadWithTimestamps] = useState(false);
   const [filename, setFilename] = useState("");
 
   const [showAudioPlayer, setShowAudioPlayer] = useSessionStorageState<boolean>(
@@ -96,7 +118,7 @@ export const ProjectConversationTranscript = () => {
     },
   );
 
-  if (conversationChunksQuery.isLoading) {
+  if (status === "pending") {
     return (
       <Stack>
         {[0, 1, 2].map((i) => (
@@ -106,23 +128,14 @@ export const ProjectConversationTranscript = () => {
     );
   }
 
-  const sorted = conversationChunksQuery.data?.sort((a, b) => {
-    return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-  });
+  const allChunks = chunksData?.pages.flatMap((page) => page.chunks) ?? [];
+  const hasValidTranscripts = allChunks.some(
+    (chunk) => chunk.transcript && chunk.transcript.trim().length > 0,
+  );
 
-  const handleDownloadTranscript = (
-    includeTimestamps: boolean,
-    filename: string,
-  ) => {
-    let text: string[];
-
-    if (includeTimestamps) {
-      text = sorted?.map((v) => `${v.timestamp}: ${v.transcript}\n`) ?? [""];
-    } else {
-      text = sorted?.map((v) => `${v.transcript}\n`) ?? [""];
-    }
-
-    const blob = new Blob(text, { type: "text/markdown" });
+  const handleDownloadTranscript = (filename: string) => {
+    const text = transcriptQuery.data ?? "";
+    const blob = new Blob([text], { type: "text/markdown" });
 
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -142,8 +155,15 @@ export const ProjectConversationTranscript = () => {
     }
 
     a.click();
-
     window.URL.revokeObjectURL(url);
+  };
+
+  // Add function to check if conversation is older than 30 days
+  const isAudioExpired = () => {
+    if (!conversationQuery.data?.created_at) return false;
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return new Date(conversationQuery.data.created_at) < thirtyDaysAgo;
   };
 
   return (
@@ -155,6 +175,7 @@ export const ProjectConversationTranscript = () => {
             <Title order={2}>
               <Trans>Transcript</Trans>
             </Title>
+            {/* open the download modal */}
             <Tooltip label={t`Download transcript`}>
               <ActionIcon
                 onClick={open}
@@ -182,13 +203,19 @@ export const ProjectConversationTranscript = () => {
             </CopyButton>
           </Group>
 
-          <Switch
-            checked={showAudioPlayer}
-            onChange={(event) =>
-              setShowAudioPlayer(event.currentTarget.checked)
-            }
-            label={t`Show audio player`}
-          />
+          <Group>
+            <Switch
+              checked={showAudioPlayer}
+              onChange={(event) =>
+                setShowAudioPlayer(event.currentTarget.checked)
+              }
+              label={t`Show audio player`}
+              disabled={isAudioExpired()}
+            />
+            <InformationTooltip
+              label={t`Audio recordings are scheduled to be deleted after 30 days from the recording date`}
+            />
+          </Group>
         </Group>
 
         <Modal
@@ -203,16 +230,9 @@ export const ProjectConversationTranscript = () => {
               value={filename}
               onChange={(event) => setFilename(event.currentTarget.value)}
             />
-            <Checkbox
-              label={t`Include timestamps`}
-              checked={downloadWithTimestamps}
-              onChange={(event) =>
-                setDownloadWithTimestamps(event.currentTarget.checked)
-              }
-            />
             <Button
               onClick={() => {
-                handleDownloadTranscript(downloadWithTimestamps, filename);
+                handleDownloadTranscript(filename);
                 close();
               }}
               rightSection={<IconDownload />}
@@ -221,26 +241,55 @@ export const ProjectConversationTranscript = () => {
             </Button>
           </Stack>
         </Modal>
+
         <Stack>
-          {sorted?.length === 0 && (
-            <Text size="md">
-              <Trans>No transcript available for this conversation.</Trans>
-            </Text>
+          {allChunks.length === 0 ? (
+            <Alert
+              icon={<IconAlertCircle size={16} />}
+              title={t`No Transcript Available`}
+              color="gray"
+            >
+              <Trans>
+                No transcript exists for this conversation yet. Please check
+                back later.
+              </Trans>
+            </Alert>
+          ) : !hasValidTranscripts ? (
+            <Alert
+              icon={<IconAlertCircle size={16} />}
+              title={t`Processing Transcript`}
+              color="gray"
+            >
+              <Trans>
+                The transcript for this conversation is being processed. Please
+                check back later.
+              </Trans>
+            </Alert>
+          ) : (
+            allChunks
+              .filter(
+                (chunk) =>
+                  !!chunk.transcript && chunk.transcript.trim().length > 0,
+              )
+              .map((chunk, index, array) => {
+                const isLastChunk = index === array.length - 1;
+                return (
+                  <div
+                    key={chunk.id}
+                    ref={isLastChunk ? loadMoreRef : undefined}
+                  >
+                    <Chunk chunk={chunk} showAudioPlayer={showAudioPlayer} />
+                  </div>
+                );
+              })
           )}
-          {sorted
-            ?.filter(
-              (chunk) =>
-                !!chunk.transcript && chunk.transcript.trim().length > 0,
-            )
-            .map((chunk) => {
-              return (
-                <Chunk
-                  key={chunk.id}
-                  chunk={chunk}
-                  showAudioPlayer={showAudioPlayer}
-                />
-              );
-            })}
+          {isFetchingNextPage && (
+            <Stack>
+              {[0, 1].map((i) => (
+                <Skeleton key={i} height={200} />
+              ))}
+            </Stack>
+          )}
         </Stack>
       </Stack>
     </Stack>

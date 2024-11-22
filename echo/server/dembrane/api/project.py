@@ -40,7 +40,7 @@ from dembrane.api.conversation import get_conversation, get_conversation_chunks
 logger = getLogger("api.project")
 
 ProjectRouter = APIRouter(tags=["project"])
-PROJECT_ALLOWED_LANGUAGES = ["en", "nl"]
+PROJECT_ALLOWED_LANGUAGES = ["en", "nl", "de", "fr", "es"]
 
 
 class CreateProjectRequestSchema(BaseModel):
@@ -92,17 +92,40 @@ async def generate_transcript_file(conversation_id: str, db: Session) -> Optiona
     conversation = await get_conversation(conversation_id, db, load_chunks=False)
     email = conversation.participant_email
     name = conversation.participant_name
+    # Add timestamp to make filename unique
+    timestamp = conversation.created_at.strftime("%Y%m%d_%H%M%S")
 
-    name_for_file = ""
+    name_for_file = f"{timestamp}"
+
+    def sanitize_for_filename(text: str, max_length: int = 30) -> str:
+        """Sanitize text to be used in filenames by replacing invalid chars with underscore."""
+        if not text:
+            return ""
+        # Replace any non-alphanumeric chars with underscore
+        safe_text = "".join(c if c.isalnum() else "_" for c in text)
+        # Collapse multiple underscores
+        safe_text = "_".join(filter(None, safe_text.split("_")))
+        return safe_text[:max_length]
+
     if name:
-        name_for_file += name.replace(" ", "_")
+        safe_name = sanitize_for_filename(name, max_length=50)
+        if safe_name:  # Only add if we have valid chars left
+            name_for_file += f"_{safe_name}"
+            
     if email:
-        name_for_file += f"_{email}"
+        # Extract username part and sanitize
+        email_part = email.split('@')[0]
+        safe_email = sanitize_for_filename(email_part, max_length=30)
+        if safe_email:  # Only add if we have valid chars left
+            name_for_file += f"_{safe_email}"
+    
+    # Add conversation ID to ensure uniqueness
+    name_for_file += f"_{conversation_id[:8]}"
 
     conversation_dir = os.path.join(AUDIO_CHUNKS_DIR, conversation_id)
-
     os.makedirs(conversation_dir, exist_ok=True)
-    file_path = os.path.join(conversation_dir, name_for_file + "-transcript.md")
+    
+    file_path = os.path.join(conversation_dir, f"{name_for_file}-transcript.md")
 
     with open(file_path, "w") as file:
         for chunk in chunks:
@@ -150,9 +173,11 @@ async def get_project_transcripts(
     filename_futures = [
         generate_transcript_file(conversation.id, db) for conversation in conversations
     ]
-    filenames = await asyncio.gather(*filename_futures)
 
-    filenames = [filename for filename in filenames if filename]
+    filenames_with_none: List[str | None] = await asyncio.gather(*filename_futures)
+
+    filenames: List[str] = [filename for filename in filenames_with_none if filename is not None]
+
     if not filenames:
         raise HTTPException(status_code=404, detail="No transcripts available for this project")
 
@@ -173,12 +198,14 @@ async def get_project_transcripts(
 
     response = StreamingResponse(iterfile(), media_type="application/zip")
     response.headers["Content-Disposition"] = f"attachment; filename={zip_file_name}"
+    
     # Schedule cleanup task to run after the response has been sent
     background_tasks.add_task(
         cleanup_files,
-        response.headers["Content-Disposition"].split("=")[1],
-        [os.path.join(AUDIO_CHUNKS_DIR, project_id, "transcript.md")],
+        zip_file_name,  # Pass the actual zip filename
+        filenames  # Pass the actual list of generated transcript files
     )
+
     return response
 
 

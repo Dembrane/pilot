@@ -17,6 +17,7 @@ import {
   LoadingOverlay,
   Menu,
   Pill,
+  Radio,
   Skeleton,
   Stack,
   Text,
@@ -25,7 +26,7 @@ import {
   Tooltip,
 } from "@mantine/core";
 import React, { useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { UploadConversationDropzone } from "../dropzone/UploadConversationDropzone";
 import { useDebouncedValue } from "@mantine/hooks";
 import { IconFilter, IconSearch, IconX } from "@tabler/icons-react";
@@ -33,6 +34,16 @@ import { formatRelative } from "date-fns";
 import { NavigationButton } from "../common/NavigationButton";
 import { cn } from "@/lib/utils";
 import { I18nLink } from "@/components/common/i18nLink";
+import { useSessionStorage } from "@mantine/hooks";
+
+type SortOption = {
+  label: string;
+  value:
+    | "-created_at"
+    | "created_at"
+    | "-participant_name"
+    | "participant_name";
+};
 
 const ConversationAccordionLabelChatSelection = ({
   conversation,
@@ -162,8 +173,24 @@ const ConversationAccordionItem = ({
 
 // Conversation Accordion
 export const ConversationAccordion = ({ projectId }: { projectId: string }) => {
+  const SORT_OPTIONS: SortOption[] = [
+    { label: t`Newest First`, value: "-created_at" },
+    { label: t`Oldest First`, value: "created_at" },
+    { label: t`Name A-Z`, value: "participant_name" },
+    { label: t`Name Z-A`, value: "-participant_name" },
+  ];
+
   const [hideConversationsWithoutContent, setHideConversationsWithoutContent] =
-    useState(true);
+    useSessionStorage({
+      key: "hide-empty-conversations",
+      defaultValue: true,
+    });
+
+  const [sortBy, setSortBy] = useSessionStorage<SortOption["value"]>({
+    key: "conversations-sort",
+    defaultValue: "-created_at",
+  });
+
   const { conversationId: activeConversationId } = useParams();
   const [conversationSearch, setConversationSearch] = useState("");
   const [debouncedConversationSearchValue] = useDebouncedValue(
@@ -177,6 +204,7 @@ export const ConversationAccordion = ({ projectId }: { projectId: string }) => {
     hideConversationsWithoutContent,
     {
       search: debouncedConversationSearchValue,
+      sort: sortBy,
     },
   );
 
@@ -246,19 +274,48 @@ export const ConversationAccordion = ({ projectId }: { projectId: string }) => {
                   </ActionIcon>
                 </Menu.Target>
                 <Menu.Dropdown>
-                  <Stack py="md" px="lg" gap="sm">
-                    <Text size="lg" className="font-semibold">
-                      <Trans>Filter</Trans>
-                    </Text>
-                    <Checkbox
-                      size="sm"
-                      disabled={conversationsQuery.isLoading}
-                      label={t`Hide Conversations Without Content`}
-                      checked={hideConversationsWithoutContent}
-                      onChange={() =>
-                        setHideConversationsWithoutContent((prev) => !prev)
-                      }
-                    />
+                  <Stack py="md" px="lg" gap="md">
+                    <Stack gap="xs">
+                      <Text size="lg">
+                        <Trans>Filter</Trans>
+                      </Text>
+                      <Checkbox
+                        size="sm"
+                        disabled={conversationsQuery.isLoading}
+                        label={t`Hide Conversations Without Content`}
+                        checked={hideConversationsWithoutContent}
+                        onChange={(event) =>
+                          setHideConversationsWithoutContent(
+                            event.currentTarget.checked,
+                          )
+                        }
+                      />
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text size="lg">
+                        <Trans>Sort</Trans>
+                      </Text>
+                      <Stack gap="xs">
+                        <Radio.Group
+                          value={sortBy}
+                          onChange={(value) =>
+                            setSortBy(value as SortOption["value"])
+                          }
+                          name="sortOptions"
+                        >
+                          <Stack gap="xs">
+                            {SORT_OPTIONS.map((option) => (
+                              <Radio
+                                key={option.value}
+                                value={option.value}
+                                label={option.label}
+                                size="sm"
+                              />
+                            ))}
+                          </Stack>
+                        </Radio.Group>
+                      </Stack>
+                    </Stack>
                   </Stack>
                 </Menu.Dropdown>
               </Menu>

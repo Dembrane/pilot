@@ -56,7 +56,7 @@ export const ProjectSidebar = () => {
             },
             {
               label: (
-                <I18nLink to={`/projects/${projectId}/overview`}>
+                <I18nLink to={`/projects/${projectId}/portal-editor`}>
                   <Title
                     order={2}
                     size="lg"

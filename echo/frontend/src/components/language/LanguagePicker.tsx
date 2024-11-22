@@ -1,12 +1,14 @@
 import { SUPPORTED_LANGUAGES } from "@/config";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import { useLanguage } from "@/lib/useLanguage";
-import { t } from "@lingui/macro";
 import { NativeSelect } from "@mantine/core";
 import { ChangeEvent } from "react";
 import { useLocation } from "react-router-dom";
 
-const data = [
+const data: Array<{
+  language: (typeof SUPPORTED_LANGUAGES)[number];
+  label: string;
+  flag: string;
+}> = [
   {
     language: "nl-NL",
     label: "Nederlands",
@@ -16,6 +18,21 @@ const data = [
     language: "en-US",
     label: "English",
     flag: "🇺🇸",
+  },
+  {
+    language: "de-DE",
+    label: "Deutsch",
+    flag: "🇩🇪",
+  },
+  {
+    language: "fr-FR",
+    label: "Français",
+    flag: "🇫🇷",
+  },
+  {
+    language: "es-ES",
+    label: "Español",
+    flag: "🇪🇸",
   },
 ];
 

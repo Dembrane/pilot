@@ -13,18 +13,21 @@ RUN mkdir -p ./directus
 RUN cd node_modules && find . -maxdepth 1 -type d -name "directus-extension-*" -exec mv {} ../directus \;
 
 
-FROM directus/directus:10.13.3
+FROM directus/directus:11.2.2
 
 # for extensions installed via npm
+
+COPY ./directus-sync.config.js ./directus-sync.config.js
+
 COPY --from=third-party-ext /extensions/directus ./extensions
 COPY ./templates ./templates/
 COPY ./migrations/ ./migrations/
-COPY ./snapshots/snapshot.yaml ./snapshot.yaml
 
 # https://github.com/directus/directus/blob/main/Dockerfile
 CMD : \
     # this step also runs the migrations (before the snapshot is applied!)
     && node cli.js bootstrap \
-    # && npx directus schema apply --yes ./snapshot.yaml \
+    # Run this manually when you want to pull the latest changes from the database
+    # && npx directus-sync push \
     && pm2-runtime start ecosystem.config.cjs \
     ;

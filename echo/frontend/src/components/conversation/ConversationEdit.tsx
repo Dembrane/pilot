@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -11,7 +11,10 @@ import {
 } from "@mantine/core";
 import { Trans, t } from "@lingui/macro";
 import { Controller, useForm } from "react-hook-form";
-import { useUpdateConversationByIdMutation } from "@/lib/query";
+import {
+  useUpdateConversationByIdMutation,
+  useUpdateConversationTagsMutation,
+} from "@/lib/query";
 import { IconX } from "@tabler/icons-react";
 import { UnsavedChanges } from "../form/UnsavedChanges";
 import { CloseableAlert } from "../common/ClosableAlert";
@@ -36,7 +39,7 @@ export const ConversationEdit = ({
   const {
     register,
     handleSubmit,
-    formState: { isSubmitSuccessful, isDirty, dirtyFields },
+    formState: { isSubmitSuccessful, isDirty },
     reset,
     getValues,
     setValue,
@@ -46,21 +49,33 @@ export const ConversationEdit = ({
   });
 
   const updateConversationMutation = useUpdateConversationByIdMutation();
+  const updateConversationTagsMutation = useUpdateConversationTagsMutation();
 
-  const onSubmit = (data: ConversationEditFormValues) => {
-    if (isDirty) {
-      updateConversationMutation.mutate({
-        id: conversation.id,
-        payload: {
-          participant_name: data.participant_name,
-          tags:
-            data.tagIdList.map((id) => ({
-              project_tag_id: id,
-            })) ?? [],
-        },
-      });
-    }
-  };
+  const onSubmit = useCallback(
+    async (data: ConversationEditFormValues) => {
+      if (isDirty) {
+        await updateConversationMutation.mutateAsync({
+          id: conversation.id,
+          payload: {
+            participant_name: data.participant_name,
+          },
+        });
+
+        await updateConversationTagsMutation.mutateAsync({
+          conversationId: conversation.id,
+          projectId: conversation.project_id as string,
+          projectTagIdList: data.tagIdList,
+        });
+      }
+    },
+    [
+      isDirty,
+      updateConversationMutation,
+      conversation.id,
+      conversation.project_id,
+      updateConversationTagsMutation,
+    ],
+  );
 
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 

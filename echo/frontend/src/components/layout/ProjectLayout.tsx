@@ -33,6 +33,7 @@ export const ProjectLayout = () => {
           size={{ width: sidebarWidth }}
           minWidth={300}
           maxWidth="45%"
+          maxHeight={"100%"}
           onResizeStop={(_e, _direction, _ref, d) => {
             setSidebarWidth(sidebarWidth + d.width);
           }}

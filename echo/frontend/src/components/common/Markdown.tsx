@@ -25,7 +25,10 @@ export const Markdown = ({
 
   return (
     <ReactMarkdown
-      className={cn("prose", className)}
+      className={cn(
+        "prose prose-table:block prose-table:w-full prose-table:overflow-x-scroll",
+        className,
+      )}
       remarkPlugins={[remarkGfm]}
     >
       {content}

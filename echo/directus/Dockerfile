@@ -16,6 +16,9 @@ RUN cd node_modules && find . -maxdepth 1 -type d -name "directus-extension-*" -
 FROM directus/directus:11.2.2
 
 # for extensions installed via npm
+
+COPY ./directus-sync.config.js ./directus-sync.config.js
+
 COPY --from=third-party-ext /extensions/directus ./extensions
 COPY ./templates ./templates/
 COPY ./migrations/ ./migrations/

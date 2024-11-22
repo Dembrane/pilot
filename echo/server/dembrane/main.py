@@ -64,13 +64,17 @@ origins = [
     PARTICIPANT_BASE_URL,
 ]
 
+logger.info(f"CORS origins: {origins}")
+
 middleware = [
     Middleware(
         CORSMiddleware,
         allow_origins=origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
-        allow_headers=["Content-Type", "Authorization"],
+        allow_headers=["*"],
+        expose_headers=["*"],
+        max_age=86400,
     )
 ]
 

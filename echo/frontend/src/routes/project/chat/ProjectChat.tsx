@@ -253,9 +253,6 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
     // @ts-expect-error chatHistoryQuery.data is not typed
     initialMessages: chatHistoryQuery.data ?? [],
     streamProtocol: "data",
-    onResponse: (response) => {
-      console.log("onResponse", response);
-    },
     onError: (error) => {
       if (lastInput.current) {
         setInput(lastInput.current);
@@ -263,7 +260,6 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
       console.log("onError", error);
     },
     onFinish: async (message) => {
-      console.log("onFinish", message.content);
       // do this for now because - i dont want to do the stream text processing again in the backend
       addChatMessageMutation.mutate({
         project_chat_id: {

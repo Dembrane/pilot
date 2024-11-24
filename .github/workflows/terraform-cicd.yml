@@ -19,14 +19,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Azure login
-      uses: azure/login@v2
+    - uses: azure/login@v2
       with:
-        auth-type: IDENTITY
-        client-id: ${{ vars.AZURE_CLIENT_ID }}
-        tenant-id: ${{ vars.AZURE_TENANT_ID }}
-        subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-        enable-AzPSSession: true
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1

@@ -1,0 +1,110 @@
+## participant portal + admin dashboard can be static
+
+name: containers-cicd
+
+on:
+  push:
+    branches:
+      - main
+      - development
+      - 'feature/infra*'
+
+env:
+  ACR_REGISTRY_URL: ${{ vars.ACR_REGISTRY_URL }}
+
+jobs:
+  api-server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6
+      - name: Generate valid tag
+        id: gentag
+        run: echo "tag=$(echo ${{ steps.branch-name.outputs.current_branch }} | sed 's/\//-/g')" >> $GITHUB_OUTPUT
+      - name: Azure Container Registry Login
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ vars.ACR_REGISTRY_URL }}
+          username: ${{ vars.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - name: Build and push API Server image
+        run: |
+          docker build -t ${{ env.ACR_REGISTRY_URL }}/api-server:${{ steps.gentag.outputs.tag }}-${{ github.sha }} \
+            --build-arg COMMAND="/bin/sh /code/server/prod.sh" \
+            -f ./server/DockerfileCICD ./server
+          docker push ${{ env.ACR_REGISTRY_URL }}/api-server:${{ steps.gentag.outputs.tag }}-${{ github.sha }}
+          docker tag ${{ env.ACR_REGISTRY_URL }}/api-server:${{ steps.gentag.outputs.tag }}-${{ github.sha }} ${{ env.ACR_REGISTRY_URL }}/api-server:${{ steps.gentag.outputs.tag }}-latest
+          docker push ${{ env.ACR_REGISTRY_URL }}/api-server:${{ steps.gentag.outputs.tag }}-latest
+
+  directus:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6
+      - name: Generate valid tag
+        id: gentag
+        run: echo "tag=$(echo ${{ steps.branch-name.outputs.current_branch }} | sed 's/\//-/g')" >> $GITHUB_OUTPUT
+      - name: Azure Container Registry Login
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ vars.ACR_REGISTRY_URL }}
+          username: ${{ vars.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - name: Build and push Directus image
+        run: |
+          docker build -t ${{ env.ACR_REGISTRY_URL }}/directus:${{ steps.gentag.outputs.tag }}-${{ github.sha }} -f ./directus/Dockerfile ./directus
+          docker push ${{ env.ACR_REGISTRY_URL }}/directus:${{ steps.gentag.outputs.tag }}-${{ github.sha }}
+          docker tag ${{ env.ACR_REGISTRY_URL }}/directus:${{ steps.gentag.outputs.tag }}-${{ github.sha }} ${{ env.ACR_REGISTRY_URL }}/directus:${{ steps.gentag.outputs.tag }}-latest
+          docker push ${{ env.ACR_REGISTRY_URL }}/directus:${{ steps.gentag.outputs.tag }}-latest
+
+  worker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6
+      - name: Generate valid tag
+        id: gentag
+        run: echo "tag=$(echo ${{ steps.branch-name.outputs.current_branch }} | sed 's/\//-/g')" >> $GITHUB_OUTPUT
+      - name: Azure Container Registry Login
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ vars.ACR_REGISTRY_URL }}
+          username: ${{ vars.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - name: Build and push Worker image
+        run: |
+          docker build -t ${{ env.ACR_REGISTRY_URL }}/worker:${{ steps.gentag.outputs.tag }}-${{ github.sha }} \
+            --build-arg COMMAND="/bin/sh /code/server/prod-worker.sh" \
+            -f ./server/DockerfileCICD ./server
+          docker push ${{ env.ACR_REGISTRY_URL }}/worker:${{ steps.gentag.outputs.tag }}-${{ github.sha }}
+          docker tag ${{ env.ACR_REGISTRY_URL }}/worker:${{ steps.gentag.outputs.tag }}-${{ github.sha }} ${{ env.ACR_REGISTRY_URL }}/worker:${{ steps.gentag.outputs.tag }}-latest
+          docker push ${{ env.ACR_REGISTRY_URL }}/worker:${{ steps.gentag.outputs.tag }}-latest
+
+  participant-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6
+      - name: Generate valid tag
+        id: gentag
+        run: echo "tag=$(echo ${{ steps.branch-name.outputs.current_branch }} | sed 's/\//-/g')" >> $GITHUB_OUTPUT
+      - name: Azure Container Registry Login
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ vars.ACR_REGISTRY_URL }}
+          username: ${{ vars.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - name: Build and push Participant Frontend image
+        run: |
+          docker build -t ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }} -f ./frontend/Dockerfile ./frontend
+          docker push ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }}
+          docker tag ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }} ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-latest
+          docker push ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-latest

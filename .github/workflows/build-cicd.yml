@@ -33,7 +33,7 @@ jobs:
         run: |
           docker build -t ${{ env.ACR_REGISTRY_URL }}/api-server:${{ steps.gentag.outputs.tag }}-${{ github.sha }} \
             --build-arg COMMAND="/bin/sh /code/server/prod.sh" \
-            -f ./server/DockerfileCICD ./server
+            -f ./echo/server/DockerfileCICD ./echo/server
           docker push ${{ env.ACR_REGISTRY_URL }}/api-server:${{ steps.gentag.outputs.tag }}-${{ github.sha }}
           docker tag ${{ env.ACR_REGISTRY_URL }}/api-server:${{ steps.gentag.outputs.tag }}-${{ github.sha }} ${{ env.ACR_REGISTRY_URL }}/api-server:${{ steps.gentag.outputs.tag }}-latest
           docker push ${{ env.ACR_REGISTRY_URL }}/api-server:${{ steps.gentag.outputs.tag }}-latest
@@ -56,7 +56,7 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
       - name: Build and push Directus image
         run: |
-          docker build -t ${{ env.ACR_REGISTRY_URL }}/directus:${{ steps.gentag.outputs.tag }}-${{ github.sha }} -f ./directus/Dockerfile ./directus
+          docker build -t ${{ env.ACR_REGISTRY_URL }}/directus:${{ steps.gentag.outputs.tag }}-${{ github.sha }} -f ./echo/directus/Dockerfile ./echo/directus
           docker push ${{ env.ACR_REGISTRY_URL }}/directus:${{ steps.gentag.outputs.tag }}-${{ github.sha }}
           docker tag ${{ env.ACR_REGISTRY_URL }}/directus:${{ steps.gentag.outputs.tag }}-${{ github.sha }} ${{ env.ACR_REGISTRY_URL }}/directus:${{ steps.gentag.outputs.tag }}-latest
           docker push ${{ env.ACR_REGISTRY_URL }}/directus:${{ steps.gentag.outputs.tag }}-latest
@@ -81,7 +81,7 @@ jobs:
         run: |
           docker build -t ${{ env.ACR_REGISTRY_URL }}/worker:${{ steps.gentag.outputs.tag }}-${{ github.sha }} \
             --build-arg COMMAND="/bin/sh /code/server/prod-worker.sh" \
-            -f ./server/DockerfileCICD ./server
+            -f ./echo/server/DockerfileCICD ./echo/server
           docker push ${{ env.ACR_REGISTRY_URL }}/worker:${{ steps.gentag.outputs.tag }}-${{ github.sha }}
           docker tag ${{ env.ACR_REGISTRY_URL }}/worker:${{ steps.gentag.outputs.tag }}-${{ github.sha }} ${{ env.ACR_REGISTRY_URL }}/worker:${{ steps.gentag.outputs.tag }}-latest
           docker push ${{ env.ACR_REGISTRY_URL }}/worker:${{ steps.gentag.outputs.tag }}-latest
@@ -104,7 +104,7 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
       - name: Build and push Participant Frontend image
         run: |
-          docker build -t ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }} -f ./frontend/Dockerfile ./frontend
+          docker build -t ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }} -f ./echo/frontend/Dockerfile ./echo/frontend
           docker push ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }}
           docker tag ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }} ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-latest
           docker push ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-latest

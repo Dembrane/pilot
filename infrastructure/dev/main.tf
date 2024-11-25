@@ -210,6 +210,10 @@ resource "azurerm_container_group" "participant_frontend" {
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   container {
     name   = "participant-frontend"
     image  = "${data.azurerm_container_registry.acr.login_server}/participant-frontend:development-latest"
@@ -221,6 +225,13 @@ resource "azurerm_container_group" "participant_frontend" {
     }
   }
 }
+
+resource "azurerm_role_assignment" "acr_pull" {
+  principal_id   = azurerm_container_group.participant_frontend.identity[0].principal_id
+  role_definition_name = "AcrPull"
+  scope          = azurerm_container_registry.acr.id
+}
+
 
 ### Data
 
@@ -278,7 +289,7 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
 
   administrator_login_password = "1n1t14l_p@ssw0rd"
   coordinator_storage_quota_in_mb = 32768
-  coordinator_vcore_count = 1
+  coordinator_vcore_count = 2
 }
 
 resource "azurerm_postgresql_database" "cosmo" {

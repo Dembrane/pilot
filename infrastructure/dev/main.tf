@@ -309,8 +309,14 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
   node_count          = 0
 
   administrator_login_password = "1n1t14l_p@ssw0rd"
-  coordinator_storage_quota_in_mb = 0.128
-  coordinator_vcore_count = 2
+
+  coordinator_storage_quota_in_mb = 65536
+  coordinator_vcore_count         = 1
+  coordinator_server_edition      = "BurstableMemoryOptimized"
+  
+  node_server_edition             = "MemoryOptimized"
+  node_storage_quota_in_mb        = 65536
+  node_vcores                     = 2
 }
 
 resource "azurerm_postgresql_database" "cosmo" {

@@ -202,7 +202,25 @@ resource "azurerm_container_group" "rabbitmq" {
   }
 }
 
+## Deploy participant-frontend by tag "development-latest" from ACR
 
+resource "azurerm_container_group" "participant_frontend" {
+  name                = "DBR-${var.environment}-Workers-ParticipantFrontend-ACI"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  os_type             = "Linux"
+
+  container {
+    name   = "participant-frontend"
+    image  = "${data.azurerm_container_registry.acr.login_server}/participant-frontend:development-latest"
+    cpu    = "1"
+    memory = "2"
+    ports {
+      port     = 80
+      protocol = "TCP"
+    }
+  }
+}
 
 ### Data
 

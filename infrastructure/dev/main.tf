@@ -17,6 +17,14 @@ variable "subscription_id" {
   description = "The Azure subscription ID"
 }
 
+variable "acr_username" {
+  description = "The username for the Azure Container Registry"
+}
+
+variable "acr_password" {
+  description = "The password for the Azure Container Registry"
+}
+
 ### Networking
 
 variable "functional_scope" {
@@ -178,21 +186,6 @@ data "azurerm_container_registry" "acr" {
   resource_group_name = "DBR-cicd-Infrastructure-Main-RG"
 }
 
-## managed identity for container groups to pull from ACR
-
-resource "azurerm_user_assigned_identity" "aci" {
-  name                = "DBR-${var.environment}-Workers-ACI-Identity"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-}
-
-## assign contributor to aci identity
-
-resource "azurerm_role_assignment" "aci_contributor" {
-  scope                = azurerm_resource_group.rg.id
-  role_definition_name = "Contributor"
-  principal_id         = azurerm_user_assigned_identity.aci.principal_id
-}
 
 ## RabitMQ azure container instance based on rabbitmq:3.13
 
@@ -201,11 +194,6 @@ resource "azurerm_container_group" "rabbitmq" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
-
-  identity {
-    type = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.aci.id]
-  }
 
   container {
     name   = "rabbitmq"
@@ -224,7 +212,8 @@ resource "azurerm_container_group" "rabbitmq" {
 
   image_registry_credential {
     server   = data.azurerm_container_registry.acr.login_server
-    user_assigned_identity_id = azurerm_user_assigned_identity.aci.id
+    username = var.acr_username
+    password = var.acr_password
   }
 
   depends_on = [azurerm_user_assigned_identity.aci]
@@ -237,11 +226,6 @@ resource "azurerm_container_group" "participant_frontend" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
-
-  identity {
-    type = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.aci.id]
-  }
 
   container {
     name   = "participant-frontend"
@@ -256,7 +240,8 @@ resource "azurerm_container_group" "participant_frontend" {
 
   image_registry_credential {
     server   = data.azurerm_container_registry.acr.login_server
-    user_assigned_identity_id = azurerm_user_assigned_identity.aci.id
+    username = var.acr_username
+    password = var.acr_password
   }
 
   depends_on = [azurerm_user_assigned_identity.aci]

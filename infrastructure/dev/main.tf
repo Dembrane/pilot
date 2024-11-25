@@ -185,12 +185,8 @@ resource "azurerm_user_assigned_identity" "aci" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 }
+## role assignment is done manually because pipeline is only "contributor" and therefore has no permissions to change permissions. 
 
-resource "azurerm_role_assignment" "aci" {
-  scope                = azurerm_user_assigned_identity.aci.id
-  role_definition_name = "AcrPull"
-  principal_id         = azurerm_user_assigned_identity.aci.principal_id
-}
 
 ## RabitMQ azure container instance based on rabbitmq:3.13
 
@@ -303,7 +299,7 @@ output "redis_ssl_port" {
 #}
 
 resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
-  name                = "dbr-prod-backend-database-psql"
+  name                = "dbr-dev-backend-database-psql"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   node_count          = 0
@@ -313,18 +309,10 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
   coordinator_storage_quota_in_mb = 65536
   coordinator_vcore_count         = 1
   coordinator_server_edition      = "BurstableMemoryOptimized"
-  
+
   node_server_edition             = "MemoryOptimized"
   node_storage_quota_in_mb        = 65536
   node_vcores                     = 2
-}
-
-resource "azurerm_postgresql_database" "cosmo" {
-  name                = "citus"
-  resource_group_name = azurerm_resource_group.rg.name
-  server_name         = azurerm_cosmosdb_postgresql_cluster.cosmo.name
-  charset             = "UTF8"
-  collation           = "en_US.UTF8"
 }
 
 ### OAI

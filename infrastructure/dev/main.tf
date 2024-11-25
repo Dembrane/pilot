@@ -185,8 +185,14 @@ resource "azurerm_user_assigned_identity" "aci" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 }
-## role assignment is done manually because pipeline is only "contributor" and therefore has no permissions to change permissions. 
 
+## assign contributor to aci identity
+
+resource "azurerm_role_assignment" "aci_contributor" {
+  scope                = azurerm_resource_group.rg.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_user_assigned_identity.aci.principal_id
+}
 
 ## RabitMQ azure container instance based on rabbitmq:3.13
 

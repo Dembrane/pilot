@@ -349,9 +349,19 @@ resource "azurerm_cognitive_deployment" "four_o" {
   }
 }
 
+resource "azurerm_cognitive_account" "openai-switzerland" {
+  name                = "DBR-${var.environment}-OAI-Main-CA-switzerland"
+  location            = "switzerlandnorth"
+  resource_group_name = azurerm_resource_group.openai_rg.name
+  kind                = "OpenAI"
+  sku_name            = "S0"  # Adjust as needed
+  custom_subdomain_name = "dbr-${var.environment}-oai-main-ca-emb"
+}
+
+
 resource "azurerm_cognitive_deployment" "embedding" {
   name                 = "DBR-${var.environment}-OAI-Main-embedding-small"
-  cognitive_account_id = azurerm_cognitive_account.openai.id
+  cognitive_account_id = azurerm_cognitive_account.openai-switzerland.id
 
   model {
     format  = "OpenAI"

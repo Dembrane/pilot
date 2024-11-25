@@ -216,7 +216,6 @@ resource "azurerm_container_group" "rabbitmq" {
     password = var.acr_password
   }
 
-  depends_on = [azurerm_user_assigned_identity.aci]
 }
 
 ## Deploy participant-frontend by tag "development-latest" from ACR
@@ -243,8 +242,6 @@ resource "azurerm_container_group" "participant_frontend" {
     username = var.acr_username
     password = var.acr_password
   }
-
-  depends_on = [azurerm_user_assigned_identity.aci]
 
 }
 

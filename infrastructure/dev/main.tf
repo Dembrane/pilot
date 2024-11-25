@@ -222,6 +222,11 @@ resource "azurerm_container_group" "rabbitmq" {
     }
   }
 
+  image_registry_credential {
+    server   = data.azurerm_container_registry.acr.login_server
+    user_assigned_identity_id = azurerm_user_assigned_identity.aci.id
+  }
+
   depends_on = [azurerm_user_assigned_identity.aci]
 }
 
@@ -249,7 +254,12 @@ resource "azurerm_container_group" "participant_frontend" {
     }
   }
 
-    depends_on = [azurerm_user_assigned_identity.aci]
+  image_registry_credential {
+    server   = data.azurerm_container_registry.acr.login_server
+    user_assigned_identity_id = azurerm_user_assigned_identity.aci.id
+  }
+
+  depends_on = [azurerm_user_assigned_identity.aci]
 
 }
 
@@ -317,7 +327,7 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
   coordinator_server_edition      = "BurstableMemoryOptimized"
 
   node_server_edition             = "MemoryOptimized"
-  node_storage_quota_in_mb        = 65536
+  node_storage_quota_in_mb        = 524288
   node_vcores                     = 2
 }
 

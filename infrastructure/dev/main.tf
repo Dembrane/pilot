@@ -178,6 +178,14 @@ data "azurerm_container_registry" "acr" {
   resource_group_name = "DBR-cicd-Infrastructure-Main-RG"
 }
 
+## managed identity for container groups to pull from ACR
+
+resource "azurerm_user_assigned_identity" "aci" {
+  name                = "DBR-${var.environment}-Workers-ACI-Identity"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
 ## RabitMQ azure container instance based on rabbitmq:3.13
 
 resource "azurerm_container_group" "rabbitmq" {
@@ -185,6 +193,11 @@ resource "azurerm_container_group" "rabbitmq" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
+
+  identity {
+    type = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.aci.id]
+  }
 
   container {
     name   = "rabbitmq"
@@ -200,6 +213,8 @@ resource "azurerm_container_group" "rabbitmq" {
       protocol = "TCP"
     }
   }
+
+  depends_on = [azurerm_user_assigned_identity.aci]
 }
 
 ## Deploy participant-frontend by tag "development-latest" from ACR
@@ -211,7 +226,8 @@ resource "azurerm_container_group" "participant_frontend" {
   os_type             = "Linux"
 
   identity {
-    type = "SystemAssigned"
+    type = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.aci.id]
   }
 
   container {
@@ -224,6 +240,9 @@ resource "azurerm_container_group" "participant_frontend" {
       protocol = "TCP"
     }
   }
+
+    depends_on = [azurerm_user_assigned_identity.aci]
+
 }
 
 resource "azurerm_role_assignment" "acr_pull" {
@@ -288,7 +307,6 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
   node_count          = 0
 
   administrator_login_password = "1n1t14l_p@ssw0rd"
-  coordinator_storage_quota_in_mb = 32768
   coordinator_vcore_count = 2
 }
 

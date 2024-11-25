@@ -400,7 +400,6 @@ resource "azurerm_key_vault" "DBR-prod-Backend-RuntimeConfig-KeyVault" {
   sku_name                    = "standard"
 
   purge_protection_enabled = true
-  soft_delete_enabled      = true
 }
 
 # Key Vault Secrets (sensitive values)

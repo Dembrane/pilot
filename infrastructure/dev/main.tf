@@ -387,4 +387,85 @@ resource "azurerm_cognitive_deployment" "embedding" {
   }
 }
 
-#+ dall-e-3
+## params
+
+
+# Azure Key Vault
+resource "azurerm_key_vault" "DBR-prod-Backend-RuntimeConfig-KeyVault" {
+  name                        = "DBR-${var.environment}-AppData-RuntimeConfig-KeyVault"
+  location                    = "westeurope"
+  resource_group_name         = azurerm_resource_group.DBR-prod-Backend-ResourceGroup.name
+  tenant_id                   = data.azurerm_client_config.current.tenant_id
+  sku_name                    = "standard"
+
+  purge_protection_enabled = true
+  soft_delete_enabled      = true
+}
+
+# Key Vault Secrets (sensitive values)
+resource "azurerm_key_vault_secret" "postgres_password" {
+  name         = "POSTGRES_PASSWORD"
+  value        = "dembrane"
+  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_secret" "rabbitmq_password" {
+  name         = "RABBITMQ_DEFAULT_PASS"
+  value        = "dembrane"
+  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_secret" "directus_secret" {
+  name         = "DIRECTUS_SECRET"
+  value        = "replace-with-secure-secret"
+  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_secret" "directus_admin_password" {
+  name         = "DIRECTUS_ADMIN_PASSWORD"
+  value        = "replace-with-secure-password"
+  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_secret" "smtp_password" {
+  name         = "SMTP_PASSWORD"
+  value        = "replace-with-secure-password"
+  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_secret" "auth_google_client_secret" {
+  name         = "AUTH_GOOGLE_CLIENT_SECRET"
+  value        = "replace-with-secure-secret"
+  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+}
+
+# Key Vault Key Parameters (non-sensitive values)
+resource "azurerm_key_vault_key" "directus_session_cookie_name" {
+  name         = "DIRECTUS_SESSION_COOKIE_NAME"
+  key_type     = "RSA"
+  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_key" "public_url" {
+  name         = "DIRECTUS_PUBLIC_URL"
+  key_type     = "RSA"
+  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_key" "smtp_from" {
+  name         = "SMTP_FROM"
+  key_type     = "RSA"
+  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_key" "smtp_host" {
+  name         = "SMTP_HOST"
+  key_type     = "RSA"
+  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_key" "admin_base_url" {
+  name         = "ADMIN_BASE_URL"
+  key_type     = "RSA"
+  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+}

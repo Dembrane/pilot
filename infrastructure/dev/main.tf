@@ -389,12 +389,13 @@ resource "azurerm_cognitive_deployment" "embedding" {
 
 ## params
 
+data "azurerm_client_config" "current" {}
 
 # Azure Key Vault
 resource "azurerm_key_vault" "DBR-prod-Backend-RuntimeConfig-KeyVault" {
   name                        = "DBR-${var.environment}-AppData-RuntimeConfig-KeyVault"
   location                    = "westeurope"
-  resource_group_name         = azurerm_resource_group.DBR-prod-Backend-ResourceGroup.name
+  resource_group_name         = azurerm_resource_group.rg.name
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   sku_name                    = "standard"
 

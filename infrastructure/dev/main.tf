@@ -186,6 +186,12 @@ resource "azurerm_user_assigned_identity" "aci" {
   resource_group_name = azurerm_resource_group.rg.name
 }
 
+resource "azurerm_role_assignment" "aci" {
+  scope                = azurerm_user_assigned_identity.aci.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_user_assigned_identity.aci.principal_id
+}
+
 ## RabitMQ azure container instance based on rabbitmq:3.13
 
 resource "azurerm_container_group" "rabbitmq" {
@@ -245,11 +251,7 @@ resource "azurerm_container_group" "participant_frontend" {
 
 }
 
-resource "azurerm_role_assignment" "acr_pull" {
-  principal_id   = azurerm_container_group.participant_frontend.identity[0].principal_id
-  role_definition_name = "AcrPull"
-  scope          = data.azurerm_container_registry.acr.id
-}
+
 
 
 ### Data
@@ -307,6 +309,7 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
   node_count          = 0
 
   administrator_login_password = "1n1t14l_p@ssw0rd"
+  coordinator_storage_quota_in_mb = 0.128
   coordinator_vcore_count = 2
 }
 

@@ -197,7 +197,7 @@ resource "azurerm_container_group" "rabbitmq" {
 
   container {
     name   = "rabbitmq"
-    image  = "${data.azurerm_container_registry.acr.login_server}/rabbitmq:3.13"
+    image  = "mcr.microsoft.com/azurelinux/base/rabbitmq-server:3.13"
     cpu    = "1"
     memory = "2"
     ports {
@@ -232,7 +232,7 @@ resource "azurerm_container_group" "participant_frontend" {
     cpu    = "1"
     memory = "2"
     ports {
-      port     = 80
+      port     = 5173
       protocol = "TCP"
     }
   }

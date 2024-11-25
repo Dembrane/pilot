@@ -216,6 +216,10 @@ resource "azurerm_container_group" "rabbitmq" {
     password = var.acr_password
   }
 
+  lifecycle {
+    ignore_changes = [image_registry_credential]
+  }
+
 }
 
 ## Deploy participant-frontend by tag "development-latest" from ACR
@@ -241,6 +245,10 @@ resource "azurerm_container_group" "participant_frontend" {
     server   = data.azurerm_container_registry.acr.login_server
     username = var.acr_username
     password = var.acr_password
+  }
+
+  lifecycle {
+    ignore_changes = [image_registry_credential]
   }
 
 }
@@ -379,7 +387,7 @@ resource "azurerm_cognitive_deployment" "embedding" {
   model {
     format  = "OpenAI"
     name    = "text-embedding-3-small" 
-   // version = "2024-05-13" 
+    version = "1"
   }
 
   sku {
@@ -393,7 +401,7 @@ data "azurerm_client_config" "current" {}
 
 # Azure Key Vault
 resource "azurerm_key_vault" "DBR-prod-Backend-RuntimeConfig-KeyVault" {
-  name                        = "DBR-${var.environment}-AppData-RuntimeConfig-KeyVault"
+  name                        = "DBR-${var.environment}-RuntimeConfig-KV"
   location                    = "westeurope"
   resource_group_name         = azurerm_resource_group.rg.name
   tenant_id                   = data.azurerm_client_config.current.tenant_id
@@ -402,70 +410,115 @@ resource "azurerm_key_vault" "DBR-prod-Backend-RuntimeConfig-KeyVault" {
   purge_protection_enabled = true
 }
 
-# Key Vault Secrets (sensitive values)
+
+# Key Vault Secrets
 resource "azurerm_key_vault_secret" "postgres_password" {
-  name         = "POSTGRES_PASSWORD"
-  value        = "dembrane"
+  name         = "POSTGRES-PASSWORD"
+  value        = ""
   key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 resource "azurerm_key_vault_secret" "rabbitmq_password" {
-  name         = "RABBITMQ_DEFAULT_PASS"
-  value        = "dembrane"
+  name         = "RABBITMQ-DEFAULT-PASS"
+  value        = ""
   key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 resource "azurerm_key_vault_secret" "directus_secret" {
-  name         = "DIRECTUS_SECRET"
-  value        = "replace-with-secure-secret"
+  name         = "DIRECTUS-SECRET"
+  value        = ""
   key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 resource "azurerm_key_vault_secret" "directus_admin_password" {
-  name         = "DIRECTUS_ADMIN_PASSWORD"
-  value        = "replace-with-secure-password"
+  name         = "DIRECTUS-ADMIN-PASSWORD"
+  value        = ""
   key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 resource "azurerm_key_vault_secret" "smtp_password" {
-  name         = "SMTP_PASSWORD"
-  value        = "replace-with-secure-password"
+  name         = "SMTP-PASSWORD"
+  value        = ""
   key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 resource "azurerm_key_vault_secret" "auth_google_client_secret" {
-  name         = "AUTH_GOOGLE_CLIENT_SECRET"
-  value        = "replace-with-secure-secret"
+  name         = "AUTH-GOOGLE-CLIENT-SECRET"
+  value        = ""
   key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
-# Key Vault Key Parameters (non-sensitive values)
-resource "azurerm_key_vault_key" "directus_session_cookie_name" {
-  name         = "DIRECTUS_SESSION_COOKIE_NAME"
-  key_type     = "RSA"
+# Additional Configuration Parameters
+resource "azurerm_key_vault_secret" "directus_session_cookie_name" {
+  name         = "DIRECTUS-SESSION-COOKIE-NAME"
+  value        = ""
   key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
-resource "azurerm_key_vault_key" "public_url" {
-  name         = "DIRECTUS_PUBLIC_URL"
-  key_type     = "RSA"
+resource "azurerm_key_vault_secret" "public_url" {
+  name         = "PUBLIC-URL"
+  value        = ""
   key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
-resource "azurerm_key_vault_key" "smtp_from" {
-  name         = "SMTP_FROM"
-  key_type     = "RSA"
+resource "azurerm_key_vault_secret" "smtp_from" {
+  name         = "SMTP-FROM"
+  value        = ""
   key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
-resource "azurerm_key_vault_key" "smtp_host" {
-  name         = "SMTP_HOST"
-  key_type     = "RSA"
+resource "azurerm_key_vault_secret" "smtp_host" {
+  name         = "SMTP-HOST"
+  value        = ""
   key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
-resource "azurerm_key_vault_key" "admin_base_url" {
-  name         = "ADMIN_BASE_URL"
-  key_type     = "RSA"
+resource "azurerm_key_vault_secret" "admin_base_url" {
+  name         = "ADMIN-BASE-URL"
+  value        = ""
   key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }

@@ -18,6 +18,7 @@ interface ProjectQRCodeProps {
   project?: Project;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useProjectSharingLink = (project?: Project) => {
   if (!project) {
     return null;

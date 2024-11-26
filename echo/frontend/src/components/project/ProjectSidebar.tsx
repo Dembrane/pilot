@@ -39,7 +39,7 @@ export const ProjectSidebar = () => {
   }
 
   return (
-    <Stack className="h-full px-4 py-6">
+    <Stack className="h-full w-full px-4 py-6">
       <LoadingOverlay visible={projectQuery.isLoading} />
       <Group justify="space-between">
         <Breadcrumbs

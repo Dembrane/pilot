@@ -24,6 +24,8 @@
         "ms-azuretools.vscode-docker",
         "jebbs.plantuml",
         "tamasfe.even-better-toml",
+        // twice, yes
+        "ethansk.restore-terminals",
         "EthanSK.restore-terminals",
         "dbaeumer.vscode-eslint"
       ]

@@ -8,7 +8,34 @@ export const theme = createTheme({
   headings: {
     fontFamily: "'Space Grotesk Variable', sans-serif",
     fontWeight: "500",
+    sizes: {
+      h1: {
+        fontSize: "calc(2.125rem * var(--mantine-scale))",
+        lineHeight: "1.3",
+      },
+      h2: {
+        fontSize: "calc(1.875rem * var(--mantine-scale))",
+        lineHeight: "1.35",
+      },
+      h3: {
+        fontSize: "calc(1.5rem * var(--mantine-scale))",
+        lineHeight: "1.4",
+      },
+      h4: {
+        fontSize: "calc(1.25rem * var(--mantine-scale))",
+        lineHeight: "1.45",
+      },
+      h5: {
+        fontSize: "calc(1rem * var(--mantine-scale))",
+        lineHeight: "1.5",
+      },
+      h6: {
+        fontSize: "calc(0.875rem * var(--mantine-scale))",
+        lineHeight: "1.5",
+      },
+    },
   },
+
   // Updated to match Tailwind shadows
   shadows: {
     sm: "0 1px 2px 0 rgb(0 0 0 / 0.05)",

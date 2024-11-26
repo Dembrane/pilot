@@ -109,7 +109,7 @@ export const ConversationEdit = ({
         <Title order={2}>
           <Trans>Edit Conversation</Trans>
         </Title>
-        {isDirty && <UnsavedChanges />}
+        <UnsavedChanges isDirty={isDirty} />
       </Group>
       <form onSubmit={handleSubmit(onSubmit)} onBlur={handleFormBlur}>
         <Stack className="relative">

@@ -67,7 +67,9 @@ export const ProjectTagPill = ({ tag }: { tag: ProjectTag }) => {
     e.stopPropagation();
     if (
       !isDragging &&
-      window.confirm(t`Are you sure you want to delete this tag?`)
+      window.confirm(
+        t`Are you sure you want to delete this tag? This will remove the tag from existing conversations that contain it.`,
+      )
     ) {
       deleteTagMutation.mutate(tag.id);
     }
@@ -77,16 +79,29 @@ export const ProjectTagPill = ({ tag }: { tag: ProjectTag }) => {
     <>
       <div
         ref={setNodeRef}
-        style={style}
+        style={{
+          ...style,
+          height: "var(--pill-height)",
+          background: "var(--mantine-color-primary-1)",
+          paddingInline: "0.8em",
+          display: "inline-flex",
+          alignItems: "center",
+          borderRadius: "var(--pill-radius, 1000rem)",
+          lineHeight: 1,
+          whiteSpace: "nowrap",
+        }}
         {...attributes}
         {...listeners}
-        className="flex items-center gap-2 rounded-md bg-blue-200 px-2"
       >
-        <div className="">{tag.text}</div>
+        <Text size="sm" className="font-normal">
+          {tag.text}
+        </Text>
         <ActionIcon
           onClick={(e) => handleDelete(e)}
           size="xs"
           variant="transparent"
+          c="gray.8"
+          className="ml-2"
           onPointerDown={(e) => e.stopPropagation()}
         >
           <IconX />
@@ -108,7 +123,9 @@ export const ProjectTagsInput = (props: { project: Project }) => {
     useSensor(KeyboardSensor),
   );
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!tagInput.trim()) return;
+
     const tags = tagInput
       .split(",")
       .map((tag) => tag.trim())
@@ -119,16 +136,20 @@ export const ProjectTagsInput = (props: { project: Project }) => {
       ...(projectQuery.data?.tags?.map((t) => t.sort ?? 0) ?? []),
     );
 
-    tags.forEach((tag, index) => {
-      createTagMutation.mutate({
-        project_id: {
-          id: props.project.id,
-          directus_user_id: (props.project.directus_user_id as string) ?? "",
-        },
-        text: tag,
-        sort: currentMaxSort + index + 1, // New tags get appended to the end
-      });
-    });
+    // Wait for all tag creation mutations to complete
+    await Promise.all(
+      tags.map((tag, index) =>
+        createTagMutation.mutateAsync({
+          // @ts-expect-error directus user id is not required
+          project_id: {
+            id: props.project.id,
+          },
+          text: tag,
+          sort: currentMaxSort + index + 1,
+        }),
+      ),
+    );
+
     setTagInput("");
   };
 

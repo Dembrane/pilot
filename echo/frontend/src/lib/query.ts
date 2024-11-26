@@ -45,7 +45,6 @@ import {
   registerUserVerify,
   updateItem,
 } from "@directus/sdk";
-import { useLocation, useNavigate } from "react-router-dom";
 import { ADMIN_BASE_URL } from "@/config";
 import { AxiosError } from "axios";
 
@@ -97,6 +96,41 @@ export const useProjects = ({
           ...query,
         }),
       ),
+  });
+};
+
+export const useInfiniteProjects = ({
+  query,
+  options = {
+    initialLimit: 15,
+  },
+}: {
+  query: Partial<Query<CustomDirectusTypes, Project>>;
+  options?: {
+    initialLimit?: number;
+  };
+}) => {
+  const { initialLimit = 15 } = options;
+
+  return useInfiniteQuery({
+    queryKey: ["projects", query],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await directus.request(
+        readItems("project", {
+          ...query,
+          limit: initialLimit,
+          offset: pageParam * initialLimit,
+        }),
+      );
+
+      return {
+        projects: response,
+        nextOffset:
+          response.length === initialLimit ? pageParam + 1 : undefined,
+      };
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => lastPage.nextOffset,
   });
 };
 

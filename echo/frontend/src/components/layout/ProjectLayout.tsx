@@ -8,13 +8,8 @@ import { useMediaQuery } from "@mantine/hooks";
 
 // can be rendered inside BaseLayout
 export const ProjectLayout = () => {
-  const {
-    isCollapsed,
-    setIsCollapsed,
-    sidebarWidth,
-    setSidebarWidth,
-    toggleSidebar,
-  } = useSidebarCollapsed();
+  const { isCollapsed, sidebarWidth, setSidebarWidth, toggleSidebar } =
+    useSidebarCollapsed();
 
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -37,7 +32,26 @@ export const ProjectLayout = () => {
           onResizeStop={(_e, _direction, _ref, d) => {
             setSidebarWidth(sidebarWidth + d.width);
           }}
-          enable={{ right: !isCollapsed }}
+          enable={{
+            right: !isCollapsed,
+            bottom: false,
+            bottomLeft: false,
+            bottomRight: false,
+            top: false,
+            topLeft: false,
+            topRight: false,
+            left: false,
+          }}
+          handleStyles={{
+            right: {
+              width: "8px",
+              right: "-4px",
+              cursor: "col-resize",
+            },
+          }}
+          handleClasses={{
+            right: "hover:bg-blue-500/20 transition-colors",
+          }}
         >
           <aside
             className={`h-full overflow-y-auto border-r transition-all duration-300 ${isCollapsed ? "w-0" : ""}`}

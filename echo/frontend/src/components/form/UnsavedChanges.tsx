@@ -2,7 +2,15 @@ import { Trans } from "@lingui/macro";
 import { Group, Text, Tooltip } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
 
-export const UnsavedChanges = () => {
+export const UnsavedChanges = ({ isDirty }: { isDirty: boolean }) => {
+  if (!isDirty) {
+    return (
+      <Text size="xs" c="gray">
+        <Trans>Changes will be saved automatically</Trans>
+      </Text>
+    );
+  }
+
   return (
     <Text size="xs" c="gray">
       <Tooltip

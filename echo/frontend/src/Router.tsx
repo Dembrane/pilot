@@ -210,6 +210,10 @@ export const participantRouter = createBrowserRouter([
     errorElement: <NotFoundRoute />,
     children: [
       {
+        path: "",
+        element: <Navigate to="start" />,
+      },
+      {
         path: "start",
         element: <ParticipantStartRoute />,
       },

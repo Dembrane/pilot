@@ -66,15 +66,15 @@ export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
   }, [isSubmitSuccessful, getValues, reset]);
 
   return (
-    <Stack>
+    <Stack gap="1.5rem">
       <Group>
         <Title order={2}>
           <Trans>Edit Project</Trans>
         </Title>
-        {isDirty && <UnsavedChanges />}
+        <UnsavedChanges isDirty={isDirty} />
       </Group>
       <form onSubmit={handleSubmit(onSubmit)} onBlur={handleFormBlur}>
-        <Stack className="relative">
+        <Stack gap="2rem" className="relative">
           <TextInput label={t`Name`} {...register("name")} />
           <Textarea
             label={t`Context`}

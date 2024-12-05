@@ -156,15 +156,17 @@ const ConversationAccordionItem = ({
         <Group gap="4" pr="sm" wrap="wrap">
           {conversation.tags &&
             conversation.tags.length > 0 &&
-            conversation.tags.map((tag) => (
-              <React.Fragment key={tag.id}>
-                {tag.project_tag_id && (
-                  <Pill size="sm" className="font-normal">
-                    {(tag?.project_tag_id as unknown as ProjectTag)?.text}
-                  </Pill>
-                )}
-              </React.Fragment>
-            ))}
+            conversation.tags
+              .filter((tag) => tag.project_tag_id && tag.project_tag_id != null)
+              .map((tag) => (
+                <React.Fragment key={tag.id}>
+                  {tag.project_tag_id && (
+                    <Pill size="sm" className="font-normal">
+                      {(tag?.project_tag_id as unknown as ProjectTag)?.text}
+                    </Pill>
+                  )}
+                </React.Fragment>
+              ))}
         </Group>
       </Stack>
     </NavigationButton>

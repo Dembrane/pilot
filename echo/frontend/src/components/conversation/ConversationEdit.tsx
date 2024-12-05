@@ -33,7 +33,10 @@ export const ConversationEdit = ({
 }) => {
   const defaultValues: ConversationEditFormValues = {
     participant_name: conversation.participant_name ?? "",
-    tagIdList: conversation.tags?.map((tag) => tag.project_tag_id.id) ?? [],
+    tagIdList:
+      conversation.tags
+        ?.filter((tag) => tag.project_tag_id != null)
+        .map((tag) => tag.project_tag_id.id) ?? [],
   };
 
   const {
@@ -138,12 +141,14 @@ export const ConversationEdit = ({
               control={control}
               render={({ field }) => (
                 <MultiSelect
-                  label={t`Tags`}
-                  data={projectTags.map((tag) => ({
-                    value: tag.id ?? "",
-                    label: tag.text ?? "",
-                  }))}
                   {...field}
+                  label={t`Tags`}
+                  data={projectTags
+                    .filter((tag) => tag && tag.id != null && tag.text != null)
+                    .map((tag) => ({
+                      value: tag.id ?? "",
+                      label: tag.text ?? "",
+                    }))}
                   onChange={(value) => {
                     field.onChange(value);
                     setValue("tagIdList", value, { shouldDirty: true });

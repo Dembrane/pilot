@@ -22,7 +22,7 @@ export const ProjectDangerZone = ({ project }: { project: Project }) => {
   };
 
   return (
-    <Stack>
+    <Stack gap="1.5rem">
       <Title order={2}>
         <Trans>Danger Zone</Trans>
       </Title>

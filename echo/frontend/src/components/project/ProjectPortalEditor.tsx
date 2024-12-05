@@ -177,7 +177,7 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
 
   useEffect(() => {
     console.log("[ProjectPortalEditor] Setting up form watch");
-    const subscription = watch((values, { name, type }) => {
+    const subscription = watch((values, { type }) => {
       if (type === "change" && values) {
         console.log("[ProjectPortalEditor] Form values changed:", values);
         dispatchAutoSave(values as ProjectPortalFormValues);

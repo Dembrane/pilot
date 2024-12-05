@@ -1,18 +1,27 @@
 import { Trans } from "@lingui/macro";
 import { Group, Text } from "@mantine/core";
-import { IconCheck, IconExclamationCircle, IconX } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconChecks,
+  IconExclamationCircle,
+  IconX,
+} from "@tabler/icons-react";
 import { formatDistance } from "date-fns";
+import { FieldErrors } from "react-hook-form";
+import { LoadingSpinner } from "../common/LoadingSpinner";
 
 type SaveStatusProps = {
-  savedAt: string | null;
+  savedAt: Date | null;
   isPendingSave: boolean;
   isSaving: boolean;
+  formErrors: FieldErrors;
   isError: boolean;
 };
 
 export const SaveStatus = ({
   savedAt,
   isPendingSave,
+  formErrors,
   isSaving,
   isError,
 }: SaveStatusProps) => {
@@ -24,9 +33,17 @@ export const SaveStatus = ({
     );
   }
 
-  if (isSaving) {
+  if (Object.keys(formErrors).length > 0) {
     return (
       <StatusIcon icon={IconExclamationCircle}>
+        <Trans>Please check your inputs for errors.</Trans>
+      </StatusIcon>
+    );
+  }
+
+  if (isSaving) {
+    return (
+      <StatusIcon icon={LoadingSpinner}>
         <Trans>Saving...</Trans>
       </StatusIcon>
     );
@@ -34,14 +51,14 @@ export const SaveStatus = ({
 
   if (!savedAt || isPendingSave) {
     return (
-      <StatusIcon icon={IconExclamationCircle}>
-        <Trans>Not saved yet.</Trans>
+      <StatusIcon icon={IconCheck}>
+        <Trans>Your inputs will be saved automatically.</Trans>
       </StatusIcon>
     );
   }
 
   return (
-    <StatusIcon icon={IconCheck}>
+    <StatusIcon icon={IconChecks}>
       <Trans>
         Last saved{" "}
         {formatDistance(new Date(savedAt), new Date(), { addSuffix: true })}

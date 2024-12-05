@@ -1,13 +1,11 @@
 import {
   BlockTypeSelect,
   BoldItalicUnderlineToggles,
-  ChangeAdmonitionType,
   CreateLink,
   ListsToggle,
   MDXEditor,
   MDXEditorProps,
   UndoRedo,
-  directivesPlugin,
   headingsPlugin,
   linkDialogPlugin,
   listsPlugin,
@@ -40,7 +38,7 @@ export function MarkdownWYSIWYG(props: MDXEditorProps) {
           ),
         }),
       ]}
-      contentEditableClassName="prose min-h-[200px]"
+      contentEditableClassName="prose min-h-[200px] space-grotesk"
       className="rounded border border-gray-200"
       {...props}
     />

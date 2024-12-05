@@ -25,16 +25,20 @@ import { FormLabel } from "../form/FormLabel";
 import { useForm, Controller } from "react-hook-form";
 import { useAutoSave } from "@/lib/useAutoSave";
 import { SaveStatus } from "../form/SaveStatus";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type ProjectPortalFormValues = {
-  language: "en" | "nl" | "de" | "fr" | "es";
-  default_conversation_ask_for_participant_name: boolean;
-  default_conversation_tutorial_slug: string;
-  default_conversation_title: string;
-  default_conversation_description: string;
-  default_conversation_finish_text: string;
-  default_conversation_transcript_prompt: string;
-};
+const FormSchema = z.object({
+  language: z.enum(["en", "nl", "de", "fr", "es"]),
+  default_conversation_ask_for_participant_name: z.boolean(),
+  default_conversation_tutorial_slug: z.string(),
+  default_conversation_title: z.string(),
+  default_conversation_description: z.string(),
+  default_conversation_finish_text: z.string(),
+  default_conversation_transcript_prompt: z.string(),
+});
+
+type ProjectPortalFormValues = z.infer<typeof FormSchema>;
 
 const ProperNounInput = ({
   value,
@@ -116,39 +120,34 @@ const ProperNounInput = ({
 };
 
 export const ProjectPortalEditor = ({ project }: { project: Project }) => {
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const link = useProjectSharingLink(project);
   const [previewKey, setPreviewKey] = useState(0);
   const [previewWidth, setPreviewWidth] = useState(400);
   const [previewHeight, setPreviewHeight] = useState(300);
-  const [lastSavedAt, setLastSavedAt] = useState<string | null>(
-    project.updated_at,
-  );
 
-  const {
-    control,
-    handleSubmit,
-    watch,
-    formState: { dirtyFields },
-    reset,
-  } = useForm<ProjectPortalFormValues>({
-    defaultValues: {
-      default_conversation_tutorial_slug:
-        project.default_conversation_tutorial_slug ?? "none",
-      default_conversation_ask_for_participant_name:
-        project.default_conversation_ask_for_participant_name ?? false,
-      default_conversation_title: project.default_conversation_title ?? "",
-      default_conversation_description:
-        project.default_conversation_description ?? "",
-      default_conversation_finish_text:
-        project.default_conversation_finish_text ?? "",
-      language: (project.language as "en" | "nl" | "de" | "fr" | "es") ?? "en",
-      default_conversation_transcript_prompt:
-        project.default_conversation_transcript_prompt ?? "",
-    },
-    // for validation
-    mode: "onBlur",
-  });
+  const { control, handleSubmit, watch, formState, reset } =
+    useForm<ProjectPortalFormValues>({
+      defaultValues: {
+        default_conversation_tutorial_slug:
+          project.default_conversation_tutorial_slug ?? "none",
+        default_conversation_ask_for_participant_name:
+          project.default_conversation_ask_for_participant_name ?? false,
+        default_conversation_title: project.default_conversation_title ?? "",
+        default_conversation_description:
+          project.default_conversation_description ?? "",
+        default_conversation_finish_text:
+          project.default_conversation_finish_text ?? "",
+        language:
+          (project.language as "en" | "nl" | "de" | "fr" | "es") ?? "en",
+        default_conversation_transcript_prompt:
+          project.default_conversation_transcript_prompt ?? "",
+      },
+      // for validation
+      resolver: zodResolver(FormSchema),
+      mode: "onChange",
+      reValidateMode: "onChange",
+    });
 
   const updateProjectMutation = useUpdateProjectByIdMutation();
 
@@ -159,7 +158,6 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
       payload: values,
     });
     console.log("[ProjectPortalEditor] Save response:", data);
-    setLastSavedAt(data.updated_at);
 
     // Reset the form with the current values to clear the dirty state
     reset(values, { keepDirty: false, keepValues: true });
@@ -171,8 +169,10 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
     isPendingSave,
     isSaving,
     isError,
+    lastSavedAt,
   } = useAutoSave({
     onSave,
+    initialLastSavedAt: project.updated_at,
   });
 
   useEffect(() => {
@@ -203,6 +203,7 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
               <Trans>Portal Editor</Trans>
             </Title>
             <SaveStatus
+              formErrors={formState.errors}
               savedAt={lastSavedAt}
               isPendingSave={isPendingSave}
               isSaving={isSaving}
@@ -245,7 +246,8 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
                           label={
                             <FormLabel
                               label={t`Language`}
-                              isDirty={dirtyFields.language}
+                              isDirty={formState.dirtyFields.language}
+                              error={formState.errors.language?.message}
                             />
                           }
                           description={t`This language will be used for the Participant's Portal and transcription.`}
@@ -269,7 +271,13 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
                             <FormLabel
                               label={t`Ask for Name?`}
                               isDirty={
-                                dirtyFields.default_conversation_ask_for_participant_name
+                                formState.dirtyFields
+                                  .default_conversation_ask_for_participant_name
+                              }
+                              error={
+                                formState.errors
+                                  .default_conversation_ask_for_participant_name
+                                  ?.message
                               }
                             />
                           }
@@ -295,7 +303,12 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
                             <FormLabel
                               label={t`Select tutorial`}
                               isDirty={
-                                dirtyFields.default_conversation_tutorial_slug
+                                formState.dirtyFields
+                                  .default_conversation_tutorial_slug
+                              }
+                              error={
+                                formState.errors
+                                  .default_conversation_tutorial_slug?.message
                               }
                             />
                           }
@@ -342,7 +355,13 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
                           label={
                             <FormLabel
                               label={t`Page Title`}
-                              isDirty={dirtyFields.default_conversation_title}
+                              isDirty={
+                                formState.dirtyFields.default_conversation_title
+                              }
+                              error={
+                                formState.errors.default_conversation_title
+                                  ?.message
+                              }
                             />
                           }
                           description={
@@ -359,7 +378,13 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
                     <Stack gap="xs">
                       <FormLabel
                         label={t`Page Content`}
-                        isDirty={dirtyFields.default_conversation_description}
+                        isDirty={
+                          formState.dirtyFields.default_conversation_description
+                        }
+                        error={
+                          formState.errors.default_conversation_description
+                            ?.message
+                        }
                       />
                       <InputDescription>
                         <Trans>
@@ -383,7 +408,13 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
                     <Stack gap="xs">
                       <FormLabel
                         label={t`Thank You Page Content`}
-                        isDirty={dirtyFields.default_conversation_finish_text}
+                        isDirty={
+                          formState.dirtyFields.default_conversation_finish_text
+                        }
+                        error={
+                          formState.errors.default_conversation_finish_text
+                            ?.message
+                        }
                       />
                       <InputDescription>
                         <Trans>
@@ -417,8 +448,8 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
                     render={({ field }) => (
                       <ProperNounInput
                         isDirty={
-                          dirtyFields.default_conversation_transcript_prompt ??
-                          false
+                          formState.dirtyFields
+                            .default_conversation_transcript_prompt ?? false
                         }
                         value={field.value}
                         onChange={field.onChange}
@@ -428,15 +459,6 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
                 </Stack>
 
                 <Divider />
-
-                <Text size="sm" c="dimmed">
-                  <SaveStatus
-                    savedAt={lastSavedAt}
-                    isPendingSave={isPendingSave}
-                    isSaving={isSaving}
-                    isError={isError}
-                  />
-                </Text>
               </Stack>
             </form>
           </div>

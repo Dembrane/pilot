@@ -1,12 +1,14 @@
 import { Group, Text, Tooltip } from "@mantine/core";
 import { Trans } from "@lingui/macro";
+import { cn } from "@/lib/utils";
 
 interface FormLabelProps {
   label: React.ReactNode;
+  error?: string | boolean;
   isDirty?: boolean;
 }
 
-export const FormLabel = ({ label, isDirty }: FormLabelProps) => {
+export const FormLabel = ({ label, isDirty, error }: FormLabelProps) => {
   return (
     <Group gap="xs" align="center">
       <Text size="sm" fw={500}>
@@ -15,7 +17,10 @@ export const FormLabel = ({ label, isDirty }: FormLabelProps) => {
       {isDirty && (
         <Tooltip label={<Trans>Unsaved changes</Trans>}>
           <div
-            className="h-1.5 w-1.5 rounded-full bg-blue-500"
+            className={cn(
+              `h-1.5 w-1.5 rounded-full`,
+              error ? "bg-red-500" : "bg-blue-500",
+            )}
             role="presentation"
           />
         </Tooltip>

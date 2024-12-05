@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Box,
-  Button,
   Group,
   MultiSelect,
   Stack,
@@ -15,9 +14,10 @@ import {
   useUpdateConversationByIdMutation,
   useUpdateConversationTagsMutation,
 } from "@/lib/query";
-import { IconX } from "@tabler/icons-react";
-import { UnsavedChanges } from "../form/UnsavedChanges";
 import { CloseableAlert } from "../common/ClosableAlert";
+import { useAutoSave } from "@/lib/useAutoSave";
+import { FormLabel } from "../form/FormLabel";
+import { SaveStatus } from "../form/SaveStatus";
 
 type ConversationEditFormValues = {
   participant_name: string;
@@ -42,11 +42,12 @@ export const ConversationEdit = ({
   const {
     register,
     handleSubmit,
-    formState: { isSubmitSuccessful, isDirty },
+    formState,
     reset,
     getValues,
     setValue,
     control,
+    watch,
   } = useForm<ConversationEditFormValues>({
     defaultValues,
   });
@@ -54,14 +55,12 @@ export const ConversationEdit = ({
   const updateConversationMutation = useUpdateConversationByIdMutation();
   const updateConversationTagsMutation = useUpdateConversationTagsMutation();
 
-  const onSubmit = useCallback(
-    async (data: ConversationEditFormValues) => {
-      if (isDirty) {
+  const { dispatchAutoSave, isPendingSave, isSaving, isError, lastSavedAt } =
+    useAutoSave({
+      onSave: async (data: ConversationEditFormValues) => {
         await updateConversationMutation.mutateAsync({
           id: conversation.id,
-          payload: {
-            participant_name: data.participant_name,
-          },
+          payload: { participant_name: data.participant_name },
         });
 
         await updateConversationTagsMutation.mutateAsync({
@@ -69,42 +68,21 @@ export const ConversationEdit = ({
           projectId: conversation.project_id as string,
           projectTagIdList: data.tagIdList,
         });
+
+        reset(data, { keepDirty: false, keepValues: true });
+      },
+      initialLastSavedAt: conversation.updated_at,
+    });
+
+  useEffect(() => {
+    const subscription = watch((values, { type }) => {
+      if (type === "change" && values) {
+        dispatchAutoSave(values as ConversationEditFormValues);
       }
-    },
-    [
-      isDirty,
-      updateConversationMutation,
-      conversation.id,
-      conversation.project_id,
-      updateConversationTagsMutation,
-    ],
-  );
+    });
 
-  const cancelButtonRef = useRef<HTMLButtonElement>(null);
-
-  const handleFormBlur = (event: React.FocusEvent<HTMLFormElement>) => {
-    if (isDirty && event.relatedTarget !== cancelButtonRef.current) {
-      handleSubmit(onSubmit)(event);
-    }
-  };
-
-  const [lastTagChange, setLastTagChange] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (lastTagChange !== null) {
-      const timer = setTimeout(() => {
-        handleSubmit(onSubmit)();
-      }, 250); // 500ms delay
-
-      return () => clearTimeout(timer);
-    }
-  }, [lastTagChange, handleSubmit, onSubmit]);
-
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      reset(getValues());
-    }
-  }, [isSubmitSuccessful, getValues, reset]);
+    return () => subscription.unsubscribe();
+  }, [watch, dispatchAutoSave]);
 
   return (
     <Stack key={conversation.id}>
@@ -112,11 +90,18 @@ export const ConversationEdit = ({
         <Title order={2}>
           <Trans>Edit Conversation</Trans>
         </Title>
-        <UnsavedChanges isDirty={isDirty} />
+        <SaveStatus
+          formErrors={formState.errors}
+          savedAt={lastSavedAt}
+          isPendingSave={isPendingSave}
+          isSaving={isSaving}
+          isError={isError}
+        />
       </Group>
-      <form onSubmit={handleSubmit(onSubmit)} onBlur={handleFormBlur}>
-        <Stack className="relative">
-          {updateConversationMutation.error && (
+
+      <form>
+        <Stack gap="2rem">
+          {isError && (
             <CloseableAlert color="red">
               <Text size="sm">
                 <Trans>Something went wrong</Trans>
@@ -133,7 +118,15 @@ export const ConversationEdit = ({
             </Text>
           </Box>
 
-          <TextInput label={t`Name`} {...register("participant_name")} />
+          <TextInput
+            label={
+              <FormLabel
+                label={t`Name`}
+                isDirty={formState.dirtyFields.participant_name}
+              />
+            }
+            {...register("participant_name")}
+          />
 
           {projectTags && projectTags.length > 0 ? (
             <Controller
@@ -142,7 +135,15 @@ export const ConversationEdit = ({
               render={({ field }) => (
                 <MultiSelect
                   {...field}
-                  label={t`Tags`}
+                  label={
+                    <FormLabel
+                      label={t`Tags`}
+                      isDirty={
+                        formState.dirtyFields.tagIdList &&
+                        formState.dirtyFields.tagIdList.length > 0
+                      }
+                    />
+                  }
                   data={projectTags
                     .filter((tag) => tag && tag.id != null && tag.text != null)
                     .map((tag) => ({
@@ -152,7 +153,6 @@ export const ConversationEdit = ({
                   onChange={(value) => {
                     field.onChange(value);
                     setValue("tagIdList", value, { shouldDirty: true });
-                    setLastTagChange(Date.now());
                   }}
                 />
               )}
@@ -174,19 +174,6 @@ export const ConversationEdit = ({
           )}
         </Stack>
       </form>
-      <Group>
-        {isDirty && (
-          <Button
-            ref={cancelButtonRef}
-            type="button"
-            variant="outline"
-            onClick={() => reset(defaultValues)}
-            rightSection={<IconX />}
-          >
-            <Trans>Cancel</Trans>
-          </Button>
-        )}
-      </Group>
     </Stack>
   );
 };

@@ -4,10 +4,15 @@ const AUTOSAVE_DEBOUNCE_TIME = 1000;
 
 export const useAutoSave = <T>({
   onSave,
+  initialLastSavedAt,
 }: {
   onSave: (data: T) => Promise<void>;
+  initialLastSavedAt?: string | Date | undefined;
 }) => {
   console.log("[useAutoSave] Initializing hook");
+  const [lastSavedAt, setLastSavedAt] = useState<Date>(
+    initialLastSavedAt ? new Date(initialLastSavedAt) : new Date(),
+  );
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(
     null,
   );
@@ -23,6 +28,7 @@ export const useAutoSave = <T>({
     try {
       await onSave(formData);
       console.log("[useAutoSave] Save successful");
+      setLastSavedAt(new Date());
       setIsPendingSave(false);
     } catch (e) {
       console.error("[useAutoSave] Save failed:", e);
@@ -60,5 +66,6 @@ export const useAutoSave = <T>({
     isPendingSave,
     isSaving,
     isError,
+    lastSavedAt,
   };
 };

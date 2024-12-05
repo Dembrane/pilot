@@ -147,24 +147,29 @@ const ConversationAccordionItem = ({
       }
     >
       <Stack gap="4" className="pb-[3px]">
-        <Text className="pl-[4px] text-sm font-normal">
-          {conversation.participant_email ?? conversation.participant_name}
-        </Text>
-        <Text size="xs" c="gray.6" className="pl-[4px]">
-          {formatRelative(new Date(conversation.created_at), new Date())}
-        </Text>
+        <div>
+          <Text className="pl-[4px] text-sm font-normal">
+            {conversation.participant_email ?? conversation.participant_name}
+          </Text>
+        </div>
+        <div>
+          <Text size="xs" c="gray.6" className="pl-[4px]">
+            {formatRelative(new Date(conversation.created_at), new Date())}
+          </Text>
+        </div>
         <Group gap="4" pr="sm" wrap="wrap">
           {conversation.tags &&
-            conversation.tags.length > 0 &&
-            conversation.tags.map((tag) => (
-              <React.Fragment key={tag.id}>
-                {tag.project_tag_id && (
-                  <Pill size="sm" className="font-normal">
-                    {(tag?.project_tag_id as unknown as ProjectTag)?.text}
-                  </Pill>
-                )}
-              </React.Fragment>
-            ))}
+            conversation.tags
+              .filter((tag) => tag.project_tag_id && tag.project_tag_id != null)
+              .map((tag) => (
+                <Pill
+                  key={`${tag.id}-${(tag?.project_tag_id as unknown as ProjectTag)?.text}`}
+                  size="sm"
+                  className="font-normal"
+                >
+                  {(tag?.project_tag_id as unknown as ProjectTag)?.text}
+                </Pill>
+              ))}
         </Group>
       </Stack>
     </NavigationButton>

@@ -101,10 +101,12 @@ export const ParticipantInitiateForm = ({ project }: { project: Project }) => {
               offset: 0,
               withinPortal: false,
             }}
-            data={project.tags.map((tag) => ({
-              value: tag.id,
-              label: tag.text,
-            }))}
+            data={project.tags
+              .filter((tag) => tag.project_tag_id && tag.project_tag_id != null)
+              .map((tag) => ({
+                value: tag.id,
+                label: tag.text,
+              }))}
             onChange={(value) => {
               setValue("tagIdList", value);
             }}

@@ -76,7 +76,6 @@ export const ProjectPortalSettingsRoute = () => {
         </Alert>
       )}
       {projectQuery.data && <ProjectPortalEditor project={projectQuery.data} />}
-      <Divider />
     </Stack>
   );
 };

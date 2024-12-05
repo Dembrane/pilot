@@ -22,12 +22,13 @@
 Standard page padding should be:
 - Left padding (pl): "2rem"
 - Right padding (pr): "2rem"
-- Top padding (pt): "4rem"
-- Bottom padding (pb): "4rem"
+- Top padding (pt): "4rem" (if not inside another container), if inside another container, use "2rem"
+- Bottom padding (pb): "4rem" (if not inside another container), if inside another container, use "2rem"
 
 ## Implementation Example
 ```tsx
 <Stack gap="3rem" className="relative" px="2rem" pt="4rem" pb="4rem">
+  {/* if inside a container, use <Stack gap="3rem" className="relative" px="2rem" pt="2rem" pb="2rem"> */}
   {/* Major Section */}
   <Stack gap="1.5rem">
     <Title order={2}>Section Title</Title>

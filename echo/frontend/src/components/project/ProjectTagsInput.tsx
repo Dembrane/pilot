@@ -35,6 +35,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { IconX } from "@tabler/icons-react";
+import { FormLabel } from "../form/FormLabel";
 
 export const ProjectTagPill = ({ tag }: { tag: ProjectTag }) => {
   const deleteTagMutation = useDeleteTagByIdMutation();
@@ -212,7 +213,12 @@ export const ProjectTagsInput = (props: { project: Project }) => {
         <Stack gap="sm">
           <Group align="end">
             <TextInput
-              label={t`Tags`}
+              label={
+                <FormLabel
+                  label={t`Tags`}
+                  isDirty={tagInput.trim().length > 0}
+                />
+              }
               description={t`Participants will be able to select tags when creating conversations`}
               value={tagInput}
               onKeyDown={(e) => {

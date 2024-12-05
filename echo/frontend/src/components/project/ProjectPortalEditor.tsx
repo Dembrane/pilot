@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Checkbox,
   Divider,
   Group,
-  InputDescription,
   NativeSelect,
   Stack,
   TextInput,
@@ -13,63 +12,82 @@ import {
   Pill,
   Text,
   Paper,
+  InputDescription,
 } from "@mantine/core";
 import { ProjectTagsInput } from "./ProjectTagsInput";
 import { MarkdownWYSIWYG } from "../common/MarkdownWYSIWYG/MarkdownWYSIWYG";
 import { Trans, t } from "@lingui/macro";
-import { Controller, useForm } from "react-hook-form";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
-import { IconX, IconEye, IconEyeOff, IconRefresh } from "@tabler/icons-react";
-import { UnsavedChanges } from "../form/UnsavedChanges";
-import { CloseableAlert } from "../common/ClosableAlert";
+import { IconEye, IconEyeOff, IconRefresh } from "@tabler/icons-react";
 import { useProjectSharingLink } from "./ProjectQRCode";
 import { Resizable } from "re-resizable";
+import { FormLabel } from "../form/FormLabel";
+import { useForm, Controller } from "react-hook-form";
+import { useAutoSave } from "@/lib/useAutoSave";
+import { SaveStatus } from "../form/SaveStatus";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type ProjectPortalFormValues = {
-  default_conversation_tutorial_slug: string;
-  default_conversation_ask_for_participant_name: boolean;
-  default_conversation_title: string;
-  default_conversation_description: string;
-  default_conversation_finish_text: string;
-  language: "en" | "nl" | "de" | "fr" | "es";
-  default_conversation_transcript_prompt: string;
-};
+const FormSchema = z.object({
+  language: z.enum(["en", "nl", "de", "fr", "es"]),
+  default_conversation_ask_for_participant_name: z.boolean(),
+  default_conversation_tutorial_slug: z.string(),
+  default_conversation_title: z.string(),
+  default_conversation_description: z.string(),
+  default_conversation_finish_text: z.string(),
+  default_conversation_transcript_prompt: z.string(),
+});
 
-export const ProperNounInput = ({
+type ProjectPortalFormValues = z.infer<typeof FormSchema>;
+
+const ProperNounInput = ({
   value,
-  setValue,
+  onChange,
+  isDirty,
 }: {
   value: string;
-  setValue: (value: string) => void;
+  onChange: (value: string) => void;
+  isDirty: boolean;
 }) => {
-  const splitValue = (value: string) => value.split(", ").filter(Boolean);
-
-  const [nouns, setNouns] = useState<string[]>(splitValue(value));
+  const [nouns, setNouns] = useState<string[]>([]);
+  const [nounInput, setNounInput] = useState("");
 
   useEffect(() => {
-    setNouns(splitValue(value));
+    setNouns(
+      value
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean),
+    );
   }, [value]);
-
-  const [nounInput, setNounInput] = useState("");
 
   const handleAddNoun = () => {
     if (nounInput.trim()) {
-      const updatedNouns = [...nouns, nounInput.trim()];
-      setNouns(updatedNouns);
-      setValue(updatedNouns.join(", "));
+      const newNouns = [
+        ...nouns,
+        ...nounInput
+          .split(",")
+          .map((noun) => noun.trim())
+          .filter(Boolean),
+      ];
+      const uniqueNouns = Array.from(new Set(newNouns));
+      setNouns(uniqueNouns);
+      onChange(uniqueNouns.join(", "));
+      setNounInput("");
     }
   };
 
   const handleRemoveNoun = (noun: string) => {
-    const updatedNouns = nouns.filter((n) => n !== noun);
-    setNouns(updatedNouns);
-    setValue(updatedNouns.join(", "));
+    const newNouns = nouns.filter((n) => n !== noun);
+    setNouns(newNouns);
+    onChange(newNouns.join(", "));
   };
 
   return (
     <Stack gap="md">
       <TextInput
-        label={<Trans>Specific Context</Trans>}
+        className={isDirty ? "border-blue-500" : ""}
+        label={<FormLabel label={t`Specific Context`} isDirty={isDirty} />}
         description={
           <Trans>
             Add key terms or proper nouns to improve transcript quality and
@@ -102,65 +120,75 @@ export const ProperNounInput = ({
 };
 
 export const ProjectPortalEditor = ({ project }: { project: Project }) => {
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const link = useProjectSharingLink(project);
-
   const [previewKey, setPreviewKey] = useState(0);
   const [previewWidth, setPreviewWidth] = useState(400);
   const [previewHeight, setPreviewHeight] = useState(300);
 
-  const defaultValues: ProjectPortalFormValues = {
-    default_conversation_tutorial_slug:
-      project.default_conversation_tutorial_slug ?? "none",
-    default_conversation_ask_for_participant_name:
-      project.default_conversation_ask_for_participant_name ?? false,
-    default_conversation_title: project.default_conversation_title ?? "",
-    default_conversation_description:
-      project.default_conversation_description ?? "",
-    default_conversation_finish_text:
-      project.default_conversation_finish_text ?? "",
-    language: (project.language as "en" | "nl" | "de" | "fr" | "es") ?? "en",
-    default_conversation_transcript_prompt:
-      project.default_conversation_transcript_prompt ?? "",
-  };
-
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitSuccessful, isDirty },
-    reset,
-    getValues,
-    control,
-    setValue,
-  } = useForm<ProjectPortalFormValues>({
-    defaultValues,
-  });
+  const { control, handleSubmit, watch, formState, reset } =
+    useForm<ProjectPortalFormValues>({
+      defaultValues: {
+        default_conversation_tutorial_slug:
+          project.default_conversation_tutorial_slug ?? "none",
+        default_conversation_ask_for_participant_name:
+          project.default_conversation_ask_for_participant_name ?? false,
+        default_conversation_title: project.default_conversation_title ?? "",
+        default_conversation_description:
+          project.default_conversation_description ?? "",
+        default_conversation_finish_text:
+          project.default_conversation_finish_text ?? "",
+        language:
+          (project.language as "en" | "nl" | "de" | "fr" | "es") ?? "en",
+        default_conversation_transcript_prompt:
+          project.default_conversation_transcript_prompt ?? "",
+      },
+      // for validation
+      resolver: zodResolver(FormSchema),
+      mode: "onChange",
+      reValidateMode: "onChange",
+    });
 
   const updateProjectMutation = useUpdateProjectByIdMutation();
 
-  const onSubmit = (data: ProjectPortalFormValues) => {
-    if (isDirty) {
-      updateProjectMutation.mutateAsync({
-        id: project.id,
-        payload: data,
-      });
-    }
+  const onSave = async (values: ProjectPortalFormValues) => {
+    console.log("[ProjectPortalEditor] Saving values:", values);
+    const data = await updateProjectMutation.mutateAsync({
+      id: project.id,
+      payload: values,
+    });
+    console.log("[ProjectPortalEditor] Save response:", data);
+
+    // Reset the form with the current values to clear the dirty state
+    reset(values, { keepDirty: false, keepValues: true });
   };
 
-  const cancelButtonRef = useRef<HTMLButtonElement>(null);
-
-  const handleFormBlur = (event: React.FocusEvent<HTMLFormElement>) => {
-    console.log("handleFormBlur", event.relatedTarget);
-    if (isDirty && event.relatedTarget !== cancelButtonRef.current) {
-      handleSubmit(onSubmit)(event);
-    }
-  };
+  const {
+    dispatchAutoSave,
+    triggerManualSave,
+    isPendingSave,
+    isSaving,
+    isError,
+    lastSavedAt,
+  } = useAutoSave({
+    onSave,
+    initialLastSavedAt: project.updated_at,
+  });
 
   useEffect(() => {
-    if (isSubmitSuccessful) {
-      reset(getValues());
-    }
-  }, [isSubmitSuccessful, getValues, reset]);
+    console.log("[ProjectPortalEditor] Setting up form watch");
+    const subscription = watch((values, { type }) => {
+      if (type === "change" && values) {
+        console.log("[ProjectPortalEditor] Form values changed:", values);
+        dispatchAutoSave(values as ProjectPortalFormValues);
+      }
+    });
+
+    return () => {
+      console.log("[ProjectPortalEditor] Cleaning up form watch");
+      subscription.unsubscribe();
+    };
+  }, [watch, dispatchAutoSave]);
 
   const refreshPreview = () => {
     setPreviewKey((prev) => prev + 1);
@@ -174,7 +202,13 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
             <Title order={2}>
               <Trans>Portal Editor</Trans>
             </Title>
-            <UnsavedChanges isDirty={isDirty} />
+            <SaveStatus
+              formErrors={formState.errors}
+              savedAt={lastSavedAt}
+              isPendingSave={isPendingSave}
+              isSaving={isSaving}
+              isError={isError}
+            />
           </Group>
           <Button
             variant="subtle"
@@ -185,71 +219,122 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
           >
             <Trans>{showPreview ? "Hide Preview" : "Show Preview"}</Trans>
           </Button>
-
-          <div className="w-full">
-            <CloseableAlert>
-              <Trans>
-                The Portal is the website that loads when participants scan the
-                QR code.
-              </Trans>
-            </CloseableAlert>
-          </div>
         </Group>
 
         <div className="relative flex h-auto flex-col gap-8 lg:flex-row lg:justify-start">
           <div className="max-w-[800px] flex-1">
-            <form onSubmit={handleSubmit(onSubmit)} onBlur={handleFormBlur}>
+            <form
+              onSubmit={handleSubmit(async (values) => {
+                console.log(
+                  "[ProjectPortalEditor] Manual save triggered:",
+                  values,
+                );
+                await triggerManualSave(values);
+              })}
+            >
               <Stack gap="3rem">
                 <Stack gap="1.5rem">
-                  <Title order={3}>Basic Settings</Title>
+                  <Title order={3}>
+                    <Trans>Basic Settings</Trans>
+                  </Title>
                   <Stack gap="2rem">
-                    <NativeSelect
-                      label={t`Language`}
-                      description={t`This language will be used for the Participant's Portal and transcription. To change the language of this application, please use the language picker through the settings in the header.`}
-                      {...register("language")}
-                      data={[
-                        { label: t`English`, value: "en" },
-                        { label: t`Dutch`, value: "nl" },
-                        { label: t`German`, value: "de" },
-                        { label: t`Spanish`, value: "es" },
-                        { label: t`French`, value: "fr" },
-                      ]}
-                    />
-                    <Checkbox
-                      label={<Trans>Ask for Name?</Trans>}
-                      description={
-                        <Trans>
-                          Ask participants to provide their name when they start
-                          a conversation
-                        </Trans>
-                      }
-                      {...register(
-                        "default_conversation_ask_for_participant_name",
+                    <Controller
+                      name="language"
+                      control={control}
+                      render={({ field }) => (
+                        <NativeSelect
+                          label={
+                            <FormLabel
+                              label={t`Language`}
+                              isDirty={formState.dirtyFields.language}
+                              error={formState.errors.language?.message}
+                            />
+                          }
+                          description={t`This language will be used for the Participant's Portal and transcription.`}
+                          data={[
+                            { label: t`English`, value: "en" },
+                            { label: t`Dutch`, value: "nl" },
+                            { label: t`German`, value: "de" },
+                            { label: t`Spanish`, value: "es" },
+                            { label: t`French`, value: "fr" },
+                          ]}
+                          {...field}
+                        />
                       )}
                     />
-                    <NativeSelect
-                      label={<Trans>Select tutorial</Trans>}
-                      description={
-                        <Trans>
-                          Select the instructions that will be shown to
-                          participants when they start a conversation
-                        </Trans>
-                      }
-                      data={[
-                        {
-                          label: t`No tutorial (only Privacy statements)`,
-                          value: "none",
-                        },
-                        {
-                          label: t`Basic (Essential tutorial slides)`,
-                          value: "basic",
-                        },
-                        {
-                          label: t`Advanced (Tips and tricks)`,
-                          value: "advanced",
-                        },
-                      ]}
-                      {...register("default_conversation_tutorial_slug")}
+                    <Controller
+                      name="default_conversation_ask_for_participant_name"
+                      control={control}
+                      render={({ field }) => (
+                        <Checkbox
+                          label={
+                            <FormLabel
+                              label={t`Ask for Name?`}
+                              isDirty={
+                                formState.dirtyFields
+                                  .default_conversation_ask_for_participant_name
+                              }
+                              error={
+                                formState.errors
+                                  .default_conversation_ask_for_participant_name
+                                  ?.message
+                              }
+                            />
+                          }
+                          description={
+                            <Trans>
+                              Ask participants to provide their name when they
+                              start a conversation
+                            </Trans>
+                          }
+                          checked={field.value}
+                          onChange={(e) =>
+                            field.onChange(e.currentTarget.checked)
+                          }
+                        />
+                      )}
+                    />
+                    <Controller
+                      name="default_conversation_tutorial_slug"
+                      control={control}
+                      render={({ field }) => (
+                        <NativeSelect
+                          label={
+                            <FormLabel
+                              label={t`Select tutorial`}
+                              isDirty={
+                                formState.dirtyFields
+                                  .default_conversation_tutorial_slug
+                              }
+                              error={
+                                formState.errors
+                                  .default_conversation_tutorial_slug?.message
+                              }
+                            />
+                          }
+                          description={
+                            <Trans>
+                              Select the instructions that will be shown to
+                              participants when they start a conversation
+                            </Trans>
+                          }
+                          data={[
+                            {
+                              label: t`No tutorial (only Privacy statements)`,
+                              value: "none",
+                            },
+                            {
+                              label: t`Basic (Essential tutorial slides)`,
+                              value: "basic",
+                            },
+                            {
+                              label: t`Advanced (Tips and tricks)`,
+                              value: "advanced",
+                            },
+                          ]}
+                          {...field}
+                        />
+                      )}
                     />
                     <ProjectTagsInput project={project} />
                   </Stack>
@@ -258,27 +343,49 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
                 <Divider />
 
                 <Stack gap="1.5rem">
-                  <Title order={3}>Portal Content</Title>
+                  <Title order={3}>
+                    <Trans>Portal Content</Trans>
+                  </Title>
                   <Stack gap="2rem">
-                    <TextInput
-                      label={
-                        <Text size="sm" fw={500}>
-                          Page Title
-                        </Text>
-                      }
-                      description={
-                        <Trans>
-                          This title is shown to participants when they start a
-                          conversation
-                        </Trans>
-                      }
-                      {...register("default_conversation_title")}
+                    <Controller
+                      name="default_conversation_title"
+                      control={control}
+                      render={({ field }) => (
+                        <TextInput
+                          label={
+                            <FormLabel
+                              label={t`Page Title`}
+                              isDirty={
+                                formState.dirtyFields.default_conversation_title
+                              }
+                              error={
+                                formState.errors.default_conversation_title
+                                  ?.message
+                              }
+                            />
+                          }
+                          description={
+                            <Trans>
+                              This title is shown to participants when they
+                              start a conversation
+                            </Trans>
+                          }
+                          {...field}
+                        />
+                      )}
                     />
 
                     <Stack gap="xs">
-                      <Text size="sm" fw={500}>
-                        Page Content
-                      </Text>
+                      <FormLabel
+                        label={t`Page Content`}
+                        isDirty={
+                          formState.dirtyFields.default_conversation_description
+                        }
+                        error={
+                          formState.errors.default_conversation_description
+                            ?.message
+                        }
+                      />
                       <InputDescription>
                         <Trans>
                           This page is shown to participants when they start a
@@ -286,33 +393,44 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
                           tutorial.
                         </Trans>
                       </InputDescription>
-                      <MarkdownWYSIWYG
-                        markdown={getValues("default_conversation_description")}
-                        onChange={(value) =>
-                          setValue("default_conversation_description", value, {
-                            shouldDirty: true,
-                          })
-                        }
+                      <Controller
+                        name="default_conversation_description"
+                        control={control}
+                        render={({ field }) => (
+                          <MarkdownWYSIWYG
+                            markdown={field.value}
+                            onChange={field.onChange}
+                          />
+                        )}
                       />
                     </Stack>
 
                     <Stack gap="xs">
-                      <Text size="sm" fw={500}>
-                        Thank You Page Content
-                      </Text>
+                      <FormLabel
+                        label={t`Thank You Page Content`}
+                        isDirty={
+                          formState.dirtyFields.default_conversation_finish_text
+                        }
+                        error={
+                          formState.errors.default_conversation_finish_text
+                            ?.message
+                        }
+                      />
                       <InputDescription>
                         <Trans>
                           This page is shown after the participant has completed
                           the conversation.
                         </Trans>
                       </InputDescription>
-                      <MarkdownWYSIWYG
-                        markdown={getValues("default_conversation_finish_text")}
-                        onChange={(value) =>
-                          setValue("default_conversation_finish_text", value, {
-                            shouldDirty: true,
-                          })
-                        }
+                      <Controller
+                        name="default_conversation_finish_text"
+                        control={control}
+                        render={({ field }) => (
+                          <MarkdownWYSIWYG
+                            markdown={field.value}
+                            onChange={field.onChange}
+                          />
+                        )}
                       />
                     </Stack>
                   </Stack>
@@ -321,34 +439,28 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
                 <Divider />
 
                 <Stack gap="1.5rem">
-                  <Title order={3}>Advanced Settings</Title>
+                  <Title order={3}>
+                    <Trans>Advanced Settings</Trans>
+                  </Title>
                   <Controller
-                    control={control}
                     name="default_conversation_transcript_prompt"
+                    control={control}
                     render={({ field }) => (
                       <ProperNounInput
+                        isDirty={
+                          formState.dirtyFields
+                            .default_conversation_transcript_prompt ?? false
+                        }
                         value={field.value}
-                        setValue={field.onChange}
+                        onChange={field.onChange}
                       />
                     )}
                   />
                 </Stack>
+
+                <Divider />
               </Stack>
             </form>
-
-            <Group>
-              {isDirty && (
-                <Button
-                  ref={cancelButtonRef}
-                  type="button"
-                  variant="outline"
-                  onClick={() => reset(defaultValues)}
-                  rightSection={<IconX />}
-                >
-                  <Trans>Cancel</Trans>
-                </Button>
-              )}
-            </Group>
           </div>
 
           {showPreview && link && (

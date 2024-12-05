@@ -18,10 +18,12 @@ export const Breadcrumbs = ({ items }: BreadcrumbsProps) => {
       {items.map((item, index) => {
         if (item.link) {
           return (
-            <I18nLink to={item.link} key={index}>
-              <Anchor className="text-2xl font-semibold" c="gray">
-                {item.label}
-              </Anchor>
+            <I18nLink
+              to={item.link}
+              key={index}
+              className="text-2xl font-semibold text-gray-500 no-underline hover:underline"
+            >
+              {item.label}
             </I18nLink>
           );
         }

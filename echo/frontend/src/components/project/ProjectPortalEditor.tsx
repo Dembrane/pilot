@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Checkbox,
@@ -19,12 +19,12 @@ import { MarkdownWYSIWYG } from "../common/MarkdownWYSIWYG/MarkdownWYSIWYG";
 import { Trans, t } from "@lingui/macro";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
 import { IconEye, IconEyeOff, IconRefresh } from "@tabler/icons-react";
-import { UnsavedChanges } from "../form/UnsavedChanges";
 import { useProjectSharingLink } from "./ProjectQRCode";
 import { Resizable } from "re-resizable";
-import debounce from "lodash/debounce";
 import { FormLabel } from "../form/FormLabel";
 import { useForm, Controller } from "react-hook-form";
+import { useAutoSave } from "@/lib/useAutoSave";
+import { SaveStatus } from "../form/SaveStatus";
 
 type ProjectPortalFormValues = {
   language: "en" | "nl" | "de" | "fr" | "es";
@@ -121,12 +121,15 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
   const [previewKey, setPreviewKey] = useState(0);
   const [previewWidth, setPreviewWidth] = useState(400);
   const [previewHeight, setPreviewHeight] = useState(300);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(
+    project.updated_at,
+  );
 
   const {
     control,
     handleSubmit,
     watch,
-    formState: { isDirty, dirtyFields },
+    formState: { dirtyFields },
     reset,
   } = useForm<ProjectPortalFormValues>({
     defaultValues: {
@@ -149,39 +152,43 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
 
   const updateProjectMutation = useUpdateProjectByIdMutation();
 
-  const onSubmit = useCallback(
-    async (values: ProjectPortalFormValues) => {
-      try {
-        await updateProjectMutation.mutateAsync({
-          id: project.id,
-          payload: values,
-        });
-        reset(values);
-      } catch (error) {
-        console.error("Failed to save project:", error);
-      }
-    },
-    [updateProjectMutation, reset, project.id],
-  );
+  const onSave = async (values: ProjectPortalFormValues) => {
+    console.log("[ProjectPortalEditor] Saving values:", values);
+    const data = await updateProjectMutation.mutateAsync({
+      id: project.id,
+      payload: values,
+    });
+    console.log("[ProjectPortalEditor] Save response:", data);
+    setLastSavedAt(data.updated_at);
 
-  const debouncedSubmitRef = useRef(
-    debounce((values: ProjectPortalFormValues) => {
-      onSubmit(values);
-    }, 1000),
-  );
+    // Reset the form with the current values to clear the dirty state
+    reset(values, { keepDirty: false, keepValues: true });
+  };
+
+  const {
+    dispatchAutoSave,
+    triggerManualSave,
+    isPendingSave,
+    isSaving,
+    isError,
+  } = useAutoSave({
+    onSave,
+  });
 
   useEffect(() => {
-    const { unsubscribe } = watch((values) => {
-      console.log("changes happened", values);
-      debouncedSubmitRef.current(values as ProjectPortalFormValues);
+    console.log("[ProjectPortalEditor] Setting up form watch");
+    const subscription = watch((values, { name, type }) => {
+      if (type === "change" && values) {
+        console.log("[ProjectPortalEditor] Form values changed:", values);
+        dispatchAutoSave(values as ProjectPortalFormValues);
+      }
     });
 
     return () => {
-      console.log("unsubscribing and cancelling debounce");
-      unsubscribe();
-      debouncedSubmitRef.current?.cancel();
+      console.log("[ProjectPortalEditor] Cleaning up form watch");
+      subscription.unsubscribe();
     };
-  }, [watch]);
+  }, [watch, dispatchAutoSave]);
 
   const refreshPreview = () => {
     setPreviewKey((prev) => prev + 1);
@@ -195,9 +202,11 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
             <Title order={2}>
               <Trans>Portal Editor</Trans>
             </Title>
-            <UnsavedChanges
-              isDirty={isDirty}
-              lastSavedAt={new Date(project.updated_at)}
+            <SaveStatus
+              savedAt={lastSavedAt}
+              isPendingSave={isPendingSave}
+              isSaving={isSaving}
+              isError={isError}
             />
           </Group>
           <Button
@@ -213,7 +222,15 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
 
         <div className="relative flex h-auto flex-col gap-8 lg:flex-row lg:justify-start">
           <div className="max-w-[800px] flex-1">
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form
+              onSubmit={handleSubmit(async (values) => {
+                console.log(
+                  "[ProjectPortalEditor] Manual save triggered:",
+                  values,
+                );
+                await triggerManualSave(values);
+              })}
+            >
               <Stack gap="3rem">
                 <Stack gap="1.5rem">
                   <Title order={3}>
@@ -409,6 +426,17 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
                     )}
                   />
                 </Stack>
+
+                <Divider />
+
+                <Text size="sm" c="dimmed">
+                  <SaveStatus
+                    savedAt={lastSavedAt}
+                    isPendingSave={isPendingSave}
+                    isSaving={isSaving}
+                    isError={isError}
+                  />
+                </Text>
               </Stack>
             </form>
           </div>

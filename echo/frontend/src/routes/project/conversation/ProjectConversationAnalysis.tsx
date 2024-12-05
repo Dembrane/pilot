@@ -134,15 +134,19 @@ export const ProjectConversationAnalysis = () => {
         onExpandedChange={(expanded) => setShowQuotes(expanded)}
       > */}
       {quotesQuery.data && quotesQuery.data.length === 0 && (
-        <Text>
-          <Trans>
-            No quotes available. Generate quotes for this conversation by
-            visiting
-            <I18nLink to={`/projects/${projectId}/library`}>
-              <Anchor> the project library.</Anchor>
-            </I18nLink>
-          </Trans>
-        </Text>
+        <Group>
+          <Text component="span">
+            <Trans>
+              No quotes available. Generate quotes for this conversation by
+              visiting
+            </Trans>
+          </Text>
+          <I18nLink to={`/projects/${projectId}/library`}>
+            <Anchor component="span">
+              <Trans>the project library.</Trans>
+            </Anchor>
+          </I18nLink>
+        </Group>
       )}
       <Stack gap="sm">
         {quotesQuery.data &&

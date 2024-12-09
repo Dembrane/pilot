@@ -1,5 +1,6 @@
 import { SUPPORTED_LANGUAGES } from "@/config";
 import { useLanguage } from "@/lib/useLanguage";
+import { t } from "@lingui/macro";
 import { NativeSelect } from "@mantine/core";
 import { ChangeEvent } from "react";
 import { useLocation } from "react-router-dom";
@@ -45,6 +46,17 @@ export const LanguagePicker = () => {
 
     // If the selected language is the same as the current language, do nothing
     if (selectedLanguage === currentLanguage) return;
+
+    // Check if we're in a chat context
+    const isInChat = pathname.includes("/chats/");
+    if (isInChat) {
+      const confirmed = window.confirm(
+        t`Changing language during an active chat may lead to unexpected results. It's recommended to start a new chat after changing the language. Are you sure you want to continue?`,
+      );
+      if (!confirmed) {
+        return;
+      }
+    }
 
     let newPathname = pathname;
 

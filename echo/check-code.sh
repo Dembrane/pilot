@@ -20,4 +20,5 @@ server_pid=$!
 wait $server_pid
 wait $frontend_pid
 
-echo "Done"
+echo "Before deploying check the following:"
+echo "1. Check if all translations are correct"

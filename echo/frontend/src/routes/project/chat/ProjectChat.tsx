@@ -46,6 +46,7 @@ import { cn } from "@/lib/utils";
 import { I18nLink } from "@/components/common/i18nLink";
 import { Trans, t } from "@lingui/macro";
 import { CloseableAlert } from "@/components/common/ClosableAlert";
+import { useLanguage } from "@/lib/useLanguage";
 
 const ConversationLinks = ({
   conversations,
@@ -236,6 +237,8 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
     };
   }, [chatContextQuery.data, chatHistoryQuery.data]);
 
+  const { iso639_1 } = useLanguage();
+
   const {
     setMessages,
     messages,
@@ -248,7 +251,7 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
     stop,
     reload,
   } = useChat({
-    api: `${API_BASE_URL}/chats/${chatId}`,
+    api: `${API_BASE_URL}/chats/${chatId}?language=${iso639_1 ?? "en"}`,
     credentials: "include",
     // @ts-expect-error chatHistoryQuery.data is not typed
     initialMessages: chatHistoryQuery.data ?? [],

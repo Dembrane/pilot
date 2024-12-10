@@ -230,6 +230,8 @@ resource "azurerm_container_group" "participant_frontend" {
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
 
+  dns_name_label = "dbr-${var.environment}-participant-frontend"
+
   container {
     name   = "participant-frontend"
     image  = "${data.azurerm_container_registry.acr.login_server}/participant-frontend:development-latest"
@@ -260,6 +262,8 @@ resource "azurerm_container_group" "worker" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
+
+  dns_name_label = "dbr-${var.environment}-worker"
 
   container {
     name   = "worker"
@@ -312,6 +316,8 @@ resource "azurerm_container_group" "api_server" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
+
+  dns_name_label = "dbr-${var.environment}-api-server"
 
   container {
     name   = "api-server"

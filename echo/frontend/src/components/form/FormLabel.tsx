@@ -1,5 +1,5 @@
+import { Trans } from "@lingui/react/macro";
 import { Group, Text, Tooltip } from "@mantine/core";
-import { Trans } from "@lingui/macro";
 import { cn } from "@/lib/utils";
 
 interface FormLabelProps {

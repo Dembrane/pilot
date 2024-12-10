@@ -1,7 +1,7 @@
+import { Trans } from "@lingui/react/macro";
 import { directus } from "@/lib/directus";
 import { useLatestProjectAnalysisRunByProjectId } from "@/lib/query";
 import { readItems } from "@directus/sdk";
-import { Trans } from "@lingui/macro";
 import { Alert, Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { CloseableAlert } from "../common/ClosableAlert";

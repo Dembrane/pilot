@@ -1,5 +1,5 @@
+import { Trans } from "@lingui/react/macro";
 import { PRIVACY_POLICY_URL } from "@/config";
-import { Trans } from "@lingui/macro";
 import { Anchor, Group, Stack, Text } from "@mantine/core";
 
 export const Footer = () => (

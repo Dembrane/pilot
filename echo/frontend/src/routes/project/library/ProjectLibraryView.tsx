@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { Markdown } from "@/components/common/Markdown";
 import { AspectCard } from "@/components/aspect/AspectCard";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
@@ -14,7 +15,6 @@ import {
   Title,
 } from "@mantine/core";
 import { useParams } from "react-router-dom";
-import { Trans } from "@lingui/macro";
 
 export const ProjectLibraryView = () => {
   const { projectId, viewId } = useParams();

@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { ProjectCard } from "@/components/project/ProjectCard";
 import { ProjectListItem } from "@/components/project/ProjectListItem";
 import { Icons } from "@/icons";
@@ -37,7 +39,6 @@ import {
 import { useState, useEffect } from "react";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { useI18nNavigate } from "@/lib/useI18nNavigate";
-import { Trans, t } from "@lingui/macro";
 import { useLanguage } from "@/lib/useLanguage";
 import { CloseableAlert } from "@/components/common/ClosableAlert";
 import { useInView } from "react-intersection-observer";

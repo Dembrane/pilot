@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import {
   useConversationQuotes,
   useInsightsByConversationId,
@@ -19,7 +21,6 @@ import { Quote } from "../../../components/quote/Quote";
 import { Insight } from "@/components/insight/Insight";
 import { useState } from "react";
 import { I18nLink } from "@/components/common/i18nLink";
-import { Trans, t } from "@lingui/macro";
 
 export const ProjectConversationAnalysis = () => {
   const { conversationId, projectId } = useParams();

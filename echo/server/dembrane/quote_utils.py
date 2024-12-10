@@ -7,6 +7,7 @@ from typing import List, Optional
 import numpy as np
 import pandas as pd
 import tiktoken
+from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from sklearn.cluster import KMeans  # type: ignore
@@ -382,16 +383,25 @@ def initialize_view(
 
     messages = [{"role": "user", "content": prompt}]
 
+    class AspectOutput(BaseModel):
+        name: str
+        description: str
+
+    class JSONOutputSchema(BaseModel):
+        aspect_list: List[AspectOutput]
+
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=messages,  # type: ignore
+        # See openai docs for structured outputs: https://platform.openai.com/docs/guides/structured-outputs
+        response_format=JSONOutputSchema,
     )
 
-    draft_aspects = response.choices[0].message.content.strip()  # type: ignore
-    logger.debug(f"Draft aspects: {draft_aspects}")
-
     try:
-        aspects_list = json.loads(draft_aspects)
+        response = response.choices[0].message.parsed
+        logger.debug(f"Draft aspects: {response}")
+
+        aspects_list = response.aspect_list
     except json.JSONDecodeError as e:
         raise ValueError("Failed to parse the response as JSON.") from e
 
@@ -797,14 +807,17 @@ def generate_view_extras(db: Session, view_id: str, language: str = "en") -> Vie
 
     formatted_aspects = "\n\n".join(
         [
-            f"Aspect: {aspect.name}\n"
-            f"Description: {aspect.description}\n"
-            f"Summary: {aspect.summary}"
+            f"""\
+<aspect>
+Aspect: {aspect.name}
+Description: {aspect.description}
+Summary: {aspect.long_summary}
+</aspect>"""
             for aspect in view.aspects
         ]
     )
 
-    messages = render_prompt(
+    prompt = render_prompt(
         "generate_view_extras",
         language,
         {
@@ -813,6 +826,8 @@ def generate_view_extras(db: Session, view_id: str, language: str = "en") -> Vie
             "formatted_aspects": formatted_aspects,
         },
     )
+
+    messages = [{"role": "user", "content": prompt}]
 
     response = client.chat.completions.create(
         model="gpt-4o",
@@ -837,13 +852,15 @@ def generate_insight_extras(db: Session, insight_id: str, language: str = "en") 
     quote_text_joined = "\n".join([f'"{quote.text}"' for quote in quotes])
 
     # Generate title
-    title_messages = render_prompt(
+    title_prompt = render_prompt(
         "generate_insight_title",
         language,
         {
             "quote_text_joined": quote_text_joined,
         },
     )
+
+    title_messages = [{"role": "user", "content": title_prompt}]
 
     title_response = client.chat.completions.create(
         model="gpt-4o",
@@ -857,7 +874,7 @@ def generate_insight_extras(db: Session, insight_id: str, language: str = "en") 
     title = title_response.choices[0].message.content
 
     # Generate summary
-    summary_messages = render_prompt(
+    summary_prompt = render_prompt(
         "generate_insight_summary",
         language,
         {
@@ -865,6 +882,8 @@ def generate_insight_extras(db: Session, insight_id: str, language: str = "en") 
             "title": title,
         },
     )
+
+    summary_messages = [{"role": "user", "content": summary_prompt}]
 
     summary_response = client.chat.completions.create(
         model="gpt-4o",
@@ -901,13 +920,15 @@ def generate_conversation_summary(db: Session, conversation_id: str, language: s
 
     quote_text_joined = "\n".join([f'"{quote.text}"' for quote in quotes])
 
-    messages = render_prompt(
+    prompt = render_prompt(
         "generate_conversation_summary",
         language,
         {
             "quote_text_joined": quote_text_joined,
         },
     )
+
+    messages = [{"role": "user", "content": prompt}]
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",

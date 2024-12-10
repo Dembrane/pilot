@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { Icons } from "@/icons";
 import {
   ActionIcon,
@@ -13,7 +14,6 @@ import { AspectCard } from "../aspect/AspectCard";
 import { Link, useParams } from "react-router-dom";
 import { Markdown } from "../common/Markdown";
 import { I18nLink } from "../common/i18nLink";
-import { Trans } from "@lingui/macro";
 
 export const ViewCard = ({ data }: { data: TView }) => {
   return (

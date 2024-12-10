@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { Icons } from "@/icons";
 import {
   Box,
@@ -14,7 +15,6 @@ import { Quote } from "../../../components/quote/Quote";
 import { Markdown } from "@/components/common/Markdown";
 import { useAspectById, useProjectById } from "@/lib/query";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
-import { Trans } from "@lingui/macro";
 
 const dedupeQuotes = (quotes: QuoteAspect[]): QuoteAspect[] => {
   const seen = new Set();

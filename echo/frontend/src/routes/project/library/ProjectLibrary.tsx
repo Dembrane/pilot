@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { CloseableAlert } from "@/components/common/ClosableAlert";
 import { Insight } from "@/components/insight/Insight";
@@ -15,7 +17,6 @@ import {
 } from "@/lib/query";
 import { useLanguage } from "@/lib/useLanguage";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Trans, t } from "@lingui/macro";
 import {
   ActionIcon,
   Alert,

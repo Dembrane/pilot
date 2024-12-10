@@ -293,6 +293,9 @@ def get_latest_project_analysis_run(
         .first()
     )
 
+class CreateLibraryRequestBodySchema(BaseModel):
+    language: Optional[str] = "en"
+
 
 @ProjectRouter.post(
     "/{project_id}/create-library",
@@ -302,6 +305,7 @@ async def post_create_project_library(
     db: DependencyInjectDatabase,
     auth: DependencyDirectusSession,
     project_id: str,
+    body: CreateLibraryRequestBodySchema,
 ) -> None:
     project = db.get(ProjectModel, project_id)
 
@@ -322,7 +326,7 @@ async def post_create_project_library(
             detail="Analysis is already in progress",
         )
 
-    result = task_create_project_library.si(project_id).apply_async()
+    result = task_create_project_library.si(project_id, body.language).apply_async()
 
     logger.info(f"Task {result.id} created for project {project.id}")
 

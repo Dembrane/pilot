@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { Icons } from "@/icons";
 import {
   useAddChatContextMutation,
@@ -6,7 +8,6 @@ import {
   useProjectChatContext,
 } from "@/lib/query";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Trans, t } from "@lingui/macro";
 import {
   Accordion,
   ActionIcon,

@@ -310,7 +310,7 @@ resource "azurerm_storage_account" "api-server-storage" {
 resource "azurerm_storage_share" "uploads" {
   name                 = "uploads"
   storage_account_name = azurerm_storage_account.api-server-storage.name
-  quota               = 5ß0  # GB
+  quota               = 500  # GB
 }
 
 resource "azurerm_storage_share" "trankit" {

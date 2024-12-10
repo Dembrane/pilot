@@ -290,8 +290,6 @@ resource "azurerm_container_group" "worker" {
   }
 
   ## add shared volume for     volumes:- ./server/uploads:/code/server/uploads and - ./server/trankit_cache:/code/server/trankit_cache
-
-
   
 
   image_registry_credential {
@@ -305,6 +303,55 @@ resource "azurerm_container_group" "worker" {
   }
 
 }
+
+
+# deploy api-server 
+
+resource "azurerm_container_group" "api_server" {
+  name                = "DBR-${var.environment}-Workers-ApiServer-ACI"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  os_type             = "Linux"
+
+  container {
+    name   = "api-server"
+    image  = "${data.azurerm_container_registry.acr.login_server}/api-server:development-latest"
+    cpu    = "1"
+    memory = "2"
+
+    ports {
+      port     = 8000
+      protocol = "TCP"
+    }
+
+    volume {
+      name       = "uploads-volume"
+      mount_path = "/code/server/uploads"
+      share_name = azurerm_storage_share.uploads.name
+      storage_account_name = azurerm_storage_account.api-server-storage.name
+      storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
+    }
+
+    volume {
+      name       = "trankit-cache-volume"
+      mount_path = "/code/server/trankit_cache"
+      share_name = azurerm_storage_share.trankit.name
+      storage_account_name = azurerm_storage_account.api-server-storage.name
+      storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
+    }
+  }
+
+  image_registry_credential {
+    server   = data.azurerm_container_registry.acr.login_server
+    username = var.acr_username
+    password = var.acr_password
+  }
+
+  lifecycle {
+    ignore_changes = [image_registry_credential]
+  }
+}
+
 
 resource "azurerm_storage_account" "api-server-storage" {
   name                     = "dbrdevbackendstorage"

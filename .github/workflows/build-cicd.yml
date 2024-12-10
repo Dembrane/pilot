@@ -133,5 +133,5 @@ jobs:
             --build-arg VITE_USE_PARTICIPANT_ROUTER=0 \
             -f ./echo/frontend/Dockerfile ./echo/frontend
           docker push ${{ env.ACR_REGISTRY_URL }}/dashboard-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }}
-          docker tag ${{ env.ACR_REGISTRY_URL }}/dashboard-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }} ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-latest
+          docker tag ${{ env.ACR_REGISTRY_URL }}/dashboard-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }} ${{ env.ACR_REGISTRY_URL }}/dashboard-frontend:${{ steps.gentag.outputs.tag }}-latest
           docker push ${{ env.ACR_REGISTRY_URL }}/dashboard-frontend:${{ steps.gentag.outputs.tag }}-latest

@@ -124,7 +124,7 @@ export const MoveConversationButton = ({
         color="blue"
         rightSection={<IconArrowsExchange size={16} />}
       >
-        <Trans>Move to Project</Trans>
+        <Trans>Move to Another Project</Trans>
       </Button>
 
       <Modal opened={opened} onClose={close} title={t`Move Conversation`}>

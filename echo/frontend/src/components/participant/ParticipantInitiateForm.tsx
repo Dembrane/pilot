@@ -103,7 +103,7 @@ export const ParticipantInitiateForm = ({ project }: { project: Project }) => {
               withinPortal: false,
             }}
             data={project.tags
-              .filter((tag) => tag.project_tag_id && tag.project_tag_id != null)
+              .filter((tag) => tag && tag.text != null && tag.id != null)
               .map((tag) => ({
                 value: tag.id,
                 label: tag.text,

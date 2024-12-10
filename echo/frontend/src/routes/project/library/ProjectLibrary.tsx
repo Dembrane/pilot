@@ -1,6 +1,7 @@
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { CloseableAlert } from "@/components/common/ClosableAlert";
 import { Insight } from "@/components/insight/Insight";
+import { languageOptionsByIso639_1 } from "@/components/language/LanguagePicker";
 import { ProjectAnalysisRunStatus } from "@/components/project/ProjectAnalysisRunStatus";
 import { ViewExpandedCard } from "@/components/view/View";
 import { Icons } from "@/icons";
@@ -12,19 +13,18 @@ import {
   useProjectInsights,
   useProjectViews,
 } from "@/lib/query";
+import { useLanguage } from "@/lib/useLanguage";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Trans, t } from "@lingui/macro";
 import {
   ActionIcon,
   Alert,
-  Box,
   Button,
   CloseButton,
   Collapse,
   Container,
   Divider,
   Group,
-  Input,
   LoadingOverlay,
   Paper,
   Pill,
@@ -36,6 +36,7 @@ import {
   Textarea,
   Title,
   Tooltip,
+  NativeSelect,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -48,7 +49,6 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
-import { StringValidation } from "zod";
 
 type SortBy = "relevance" | "default";
 
@@ -92,6 +92,7 @@ const DummyViews = () => {
 type CreateViewForm = {
   query: string;
   additionalContext: string;
+  language: string;
 };
 
 const CreateView = ({
@@ -103,13 +104,20 @@ const CreateView = ({
 }) => {
   const createViewMutation = useGenerateProjectViewMutation();
 
-  const { register, handleSubmit, reset } = useForm<CreateViewForm>();
+  const { iso639_1 } = useLanguage();
+
+  const { register, handleSubmit, reset } = useForm<CreateViewForm>({
+    defaultValues: {
+      language: iso639_1,
+    },
+  });
 
   const onSubmit = (data: CreateViewForm) => {
     createViewMutation.mutate({
       projectId,
       query: data.query,
       additionalContext: data.additionalContext,
+      language: data.language || iso639_1,
     });
   };
 
@@ -161,6 +169,11 @@ const CreateView = ({
               label={t`Add additional context (Optional)`}
               placeholder={t`Give me a list of 5-10 topics that are being discussed.`}
             />
+            <NativeSelect
+              {...register("language")}
+              label={t`Analysis Language`}
+              data={languageOptionsByIso639_1}
+            />
             <Group className="w-full" justify="flex-end">
               <Button
                 onClick={handleSubmit(onSubmit)}
@@ -179,6 +192,8 @@ const CreateView = ({
 
 export const ProjectLibraryRoute = () => {
   const { projectId } = useParams();
+
+  const { iso639_1 } = useLanguage();
 
   const viewsQuery = useProjectViews(projectId ?? "");
   const insightsQuery = useProjectInsights(projectId ?? "");
@@ -260,6 +275,7 @@ export const ProjectLibraryRoute = () => {
     ) {
       requestProjectLibraryMutation.mutate({
         projectId: projectId ?? "",
+        language: iso639_1,
       });
     }
   };

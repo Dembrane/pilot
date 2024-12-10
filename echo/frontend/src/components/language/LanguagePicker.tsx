@@ -7,35 +7,51 @@ import { useLocation } from "react-router-dom";
 
 const data: Array<{
   language: (typeof SUPPORTED_LANGUAGES)[number];
+  iso639_1: string;
   label: string;
   flag: string;
 }> = [
   {
     language: "nl-NL",
+    iso639_1: "nl",
     label: "Nederlands",
     flag: "🇳🇱",
   },
   {
     language: "en-US",
+    iso639_1: "en",
     label: "English",
     flag: "🇺🇸",
   },
   {
     language: "de-DE",
+    iso639_1: "de",
     label: "Deutsch",
     flag: "🇩🇪",
   },
   {
     language: "fr-FR",
+    iso639_1: "fr",
     label: "Français",
     flag: "🇫🇷",
   },
   {
     language: "es-ES",
+    iso639_1: "es",
     label: "Español",
     flag: "🇪🇸",
   },
 ];
+
+export const languageOptions = data.map((d) => ({
+  value: d.language,
+  label: `${d.label} ${d.flag}`,
+}));
+
+export const languageOptionsByIso639_1 = data.map((d) => ({
+  value: d.iso639_1,
+  label: `${d.label} ${d.flag}`,
+}));
 
 export const LanguagePicker = () => {
   const { language: currentLanguage } = useLanguage();
@@ -76,10 +92,7 @@ export const LanguagePicker = () => {
 
   return (
     <NativeSelect
-      data={data.map((d) => ({
-        value: d.language,
-        label: `${d.label} ${d.flag}`,
-      }))}
+      data={languageOptions}
       value={currentLanguage}
       onChange={handleChange}
     />

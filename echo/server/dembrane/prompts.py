@@ -39,12 +39,12 @@ for template_name in PROMPT_TEMPLATE_LIST:
     template_support[name].add(lang)
 
 # Log the template support matrix
-header = "Name                | de  | en  | es  | fr  | nl"
+header = "Name                           | de  | en  | es  | fr  | nl"
 separator = "-" * len(header)
 rows = []
 for name, languages in template_support.items():
     # Pad the name to 19 characters to align with header
-    padded_name = f"{name[:15]}{' ' * (19 - len(name[:15]))}"
+    padded_name = f"{name[:30]}{' ' * (30 - len(name[:30]))}"
     row = f"{padded_name}| " + " | ".join(
         " y " if lang in languages else " n " for lang in ["de", "en", "es", "fr", "nl"]
     )
@@ -58,7 +58,7 @@ def render_prompt(prompt_name: str, language: str, kwargs: dict[str, Any]) -> st
 
     Args:
         prompt_name: Name of the prompt template file (without .jinja extension)
-        language: Language of the prompt template file (example: "en", "nl", "fr", "es", "de". etc.)
+        language: ISO 639-1 language code of the prompt template file (example: "en", "nl", "fr", "es", "de". etc.)
         kwargs: Dictionary of arguments to pass to the template renderer
 
     Returns:

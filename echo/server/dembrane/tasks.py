@@ -414,10 +414,10 @@ def task_generate_insights(self, project_analysis_run_id: str):
     ignore_result=False,
     base=BaseTask,
 )
-def task_generate_aspect_extras(self, aspect_id: str):
+def task_generate_aspect_extras(self, aspect_id: str, language: str = "en"):
     with DatabaseSession() as db:
         try:
-            generate_aspect_extras(db, aspect_id)
+            generate_aspect_extras(db, aspect_id, language)
         except Exception as exc:
             logger.error(f"Error: {exc}")
             db.rollback()
@@ -459,10 +459,10 @@ def task_generate_view_extras(self, view_id: str):
     ignore_result=False,
     base=BaseTask,
 )
-def task_assign_aspect_centroid(self, aspect_id: str):
+def task_assign_aspect_centroid(self, aspect_id: str, language: str = "en"):
     with DatabaseSession() as db:
         try:
-            assign_aspect_centroid(db, aspect_id)
+            assign_aspect_centroid(db, aspect_id, language)
         except Exception as exc:
             logger.error(f"Error: {exc}")
             db.rollback()
@@ -493,7 +493,13 @@ def task_cluster_quotes_using_aspect_centroids(self, view_id: str):
     ignore_result=False,
     base=BaseTask,
 )
-def task_create_view(_self, project_analysis_run_id: str, user_query: str, user_query_context: str):
+def task_create_view(
+    _self,
+    project_analysis_run_id: str,
+    user_query: str,
+    user_query_context: str,
+    language: str = "en",
+):
     with DatabaseSession() as db:
         try:
             project_analysis_run = db.get(ProjectAnalysisRunModel, project_analysis_run_id)
@@ -504,19 +510,25 @@ def task_create_view(_self, project_analysis_run_id: str, user_query: str, user_
 
             # FIXME: update_progress(self, 1, 4, message="Creating view")
             # TODO: convert to task
-            view = initialize_view(db, project_analysis_run_id, user_query, user_query_context)
+            view = initialize_view(
+                db, project_analysis_run_id, user_query, user_query_context, language
+            )
             view.processing_message = "Clustering aspects"
             db.commit()
 
             # update_progress(self, 2, 4, message="Clustering quotes")
 
             aspect_ids = [aspect.id for aspect in view.aspects]
-            aspect_jobs = [task_assign_aspect_centroid.si(aspect_id) for aspect_id in aspect_ids]
+            aspect_jobs = [
+                task_assign_aspect_centroid.si(aspect_id, language) for aspect_id in aspect_ids
+            ]
 
             # update_progress(self, 3, 4, message="Clustering quotes")
 
             aspects = db.query(AspectModel).filter(AspectModel.view_id == view.id).all()
-            aspect_extra_jobs = [task_generate_aspect_extras.si(aspect.id) for aspect in aspects]
+            aspect_extra_jobs = [
+                task_generate_aspect_extras.si(aspect.id, language) for aspect in aspects
+            ]
 
             result = chord(
                 chord(group(*aspect_jobs), task_cluster_quotes_using_aspect_centroids.si(view.id)),
@@ -553,7 +565,7 @@ def task_finalize_project_library(_self, project_analysis_run_id: str):
 
 
 @celery_app.task(bind=True, retry_backoff=True, ignore_result=False, base=BaseTask)
-def task_create_project_library(_self, project_id: str):
+def task_create_project_library(_self, project_id: str, language: str = "en"):
     with DatabaseSession() as db:
         try:
             project_analysis_run = ProjectAnalysisRunModel(
@@ -594,12 +606,15 @@ def task_create_project_library(_self, project_id: str):
 
             insight_task = task_generate_insights.si(project_analysis_run.id)
 
-            sentiment_view = task_create_view.si(project_analysis_run.id, "Sentiment", "Use only 3")
+            sentiment_view = task_create_view.si(
+                project_analysis_run.id, "Sentiment", "Use only 3", language
+            )
 
             theme_view = task_create_view.si(
                 project_analysis_run.id,
                 "Recurring Themes",
                 "I will use these to make a detailed report. Give me around 15-18 aspects or more if really necessary. Ensure to merge similar aspects.",
+                language,
             )
 
             callback = chord(

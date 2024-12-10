@@ -332,6 +332,7 @@ async def post_create_project_library(
 class CreateViewRequestBodySchema(BaseModel):
     query: str
     additional_context: Optional[str] = ""
+    language: Optional[str] = "en"
 
 
 @ProjectRouter.post("/{project_id}/create-view", status_code=HTTPStatus.ACCEPTED)
@@ -355,7 +356,7 @@ async def post_create_view(
         raise HTTPException(status_code=403, detail="User does not have access to this project")
 
     result = task_create_view.si(
-        project_analysis_run.id, body.query, body.additional_context
+        project_analysis_run.id, body.query, body.additional_context, body.language
     ).apply_async()
 
     logger.info(f"Task {result.id} created for project {project_id}")

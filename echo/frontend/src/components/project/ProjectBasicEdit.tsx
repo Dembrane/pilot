@@ -134,15 +134,6 @@ export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
         </Stack>
       </form>
 
-      <Text size="sm" c="dimmed">
-        <SaveStatus
-          savedAt={lastSavedAt}
-          formErrors={formState.errors}
-          isPendingSave={isPendingSave}
-          isSaving={isSaving}
-          isError={isError}
-        />
-      </Text>
     </Stack>
   );
 };

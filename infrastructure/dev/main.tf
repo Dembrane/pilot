@@ -266,25 +266,28 @@ resource "azurerm_container_group" "worker" {
     image  = "${data.azurerm_container_registry.acr.login_server}/worker:development-latest"
     cpu    = "1"
     memory = "2"
+
+
+    volume {
+      name       = "uploads-volume"
+      mount_path = "/code/server/uploads"
+      share_name = azurerm_storage_share.uploads.name
+      storage_account_name = azurerm_storage_account.api-server-storage.name
+      storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
+    }
+
+    volume {
+      name       = "trankit-cache-volume"
+      mount_path = "/code/server/trankit_cache"
+      share_name = azurerm_storage_share.trankit.name
+      storage_account_name = azurerm_storage_account.api-server-storage.name
+      storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
+    }
   }
 
   ## add shared volume for     volumes:- ./server/uploads:/code/server/uploads and - ./server/trankit_cache:/code/server/trankit_cache
 
-  volume {
-    name       = "uploads-volume"
-    mount_path = "/code/server/uploads"
-    share_name = azurerm_storage_share.uploads.name
-    storage_account_name = azurerm_storage_account.api-server-storage.name
-    storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
-  }
 
-  volume {
-    name       = "trankit-cache-volume"
-    mount_path = "/code/server/trankit_cache"
-    share_name = azurerm_storage_share.trankit.name
-    storage_account_name = azurerm_storage_account.api-server-storage.name
-    storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
-  }
   
 
   image_registry_credential {

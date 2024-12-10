@@ -253,8 +253,71 @@ resource "azurerm_container_group" "participant_frontend" {
 
 }
 
+## Deploy Worker
 
+resource "azurerm_container_group" "worker" {
+  name                = "DBR-${var.environment}-Workers-Worker-ACI"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  os_type             = "Linux"
 
+  container {
+    name   = "worker"
+    image  = "${data.azurerm_container_registry.acr.login_server}/worker:development-latest"
+    cpu    = "1"
+    memory = "2"
+  }
+
+  ## add shared volume for     volumes:- ./server/uploads:/code/server/uploads and - ./server/trankit_cache:/code/server/trankit_cache
+
+  volume {
+    name       = "uploads-volume"
+    mount_path = "/code/server/uploads"
+    share_name = azurerm_storage_share.uploads.name
+    storage_account_name = azurerm_storage_account.api-server-storage.name
+    storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
+  }
+
+  volume {
+    name       = "trankit-cache-volume"
+    mount_path = "/code/server/trankit_cache"
+    share_name = azurerm_storage_share.trankit.name
+    storage_account_name = azurerm_storage_account.api-server-storage.name
+    storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
+  }
+  
+
+  image_registry_credential {
+    server   = data.azurerm_container_registry.acr.login_server
+    username = var.acr_username
+    password = var.acr_password
+  }
+
+  lifecycle {
+    ignore_changes = [image_registry_credential]
+  }
+
+}
+
+resource "azurerm_storage_account" "api-server-storage" {
+  name                     = "dbrdevbackendstorage"
+  resource_group_name      = azurerm_resource_group.rg.name
+  location                 = azurerm_resource_group.rg.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+}
+
+resource "azurerm_storage_share" "uploads" {
+  name                 = "uploads"
+  storage_account_name = azurerm_storage_account.api-server-storage.name
+  quota               = 5ß0  # GB
+}
+
+resource "azurerm_storage_share" "trankit" {
+  name                 = "trankit-cache"
+  storage_account_name = azurerm_storage_account.api-server-storage.name
+  quota               = 500  # GB
+}
 
 ### Data
 

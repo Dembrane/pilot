@@ -267,6 +267,10 @@ resource "azurerm_container_group" "worker" {
     cpu    = "1"
     memory = "2"
 
+    ports {
+      port     = 8000
+      protocol = "TCP"
+    }
 
     volume {
       name       = "uploads-volume"

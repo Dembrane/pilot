@@ -59,6 +59,7 @@ export const ProjectSidebar = () => {
               label: (
                 <I18nLink to={`/projects/${projectId}/portal-editor`}>
                   <Title
+                    component="span"
                     order={2}
                     size="lg"
                     className="whitespace-break-spaces hover:underline"

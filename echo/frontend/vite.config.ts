@@ -10,10 +10,7 @@ export default defineConfig({
   plugins: [
     react({
       babel: {
-        plugins: [
-          "@lingui/babel-plugin-lingui-macro",
-          ["babel-plugin-react-compiler"],
-        ],
+        plugins: ["macros", ["babel-plugin-react-compiler"]],
       },
     }),
     lingui(),

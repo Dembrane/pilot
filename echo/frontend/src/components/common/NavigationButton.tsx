@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import {
+  Box,
   Group,
   Paper,
   PolymorphicComponentProps,
@@ -57,7 +58,8 @@ export const NavigationButton = ({
         ) : (
           <UnstyledButton
             {...props}
-            disabled={disabled}
+            // @ts-expect-error not typed
+            disabled={disabled ?? false}
             className={cn(
               "h-full w-full px-4 py-2 text-left",
               disabled ? "cursor-not-allowed" : "cursor-pointer",

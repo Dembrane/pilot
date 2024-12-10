@@ -31,6 +31,7 @@ import { apiCommonConfig } from "@/lib/api";
 import { InformationTooltip } from "@/components/common/InformationTooltip";
 import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import { ConversationEdit } from "@/components/conversation/ConversationEdit";
+import { MoveConversationButton } from "@/components/conversation/MoveConversationButton";
 
 const ConversationDangerZone = ({
   conversation,
@@ -53,20 +54,24 @@ const ConversationDangerZone = ({
   };
 
   return (
-    <Stack>
-      <Title order={2}>
-        <Trans>Danger Zone</Trans>
-      </Title>
-      <Box>
-        <Button
-          onClick={handleDelete}
-          color="red"
-          variant="outline"
-          rightSection={<IconTrash />}
-        >
-          <Trans>Delete Conversation</Trans>
-        </Button>
-      </Box>
+    <Stack gap="3rem">
+      <Stack gap="1.5rem">
+        <Title order={2}>
+          <Trans>Danger Zone</Trans>
+        </Title>
+
+        <Stack gap="1rem">
+          <MoveConversationButton conversation={conversation} />
+          <Button
+            onClick={handleDelete}
+            color="red"
+            variant="outline"
+            rightSection={<IconTrash size={16} />}
+          >
+            <Trans>Delete Conversation</Trans>
+          </Button>
+        </Stack>
+      </Stack>
     </Stack>
   );
 };

@@ -210,6 +210,10 @@ resource "azurerm_container_group" "rabbitmq" {
     }
   }
 
+  dns_name_label = "dbr-${var.environment}-rabbitmq"
+  ip_address_type = "Private"
+  subnet_ids       = azurerm_subnet.private_subnet[*].id
+
   image_registry_credential {
     server   = data.azurerm_container_registry.acr.login_server
     username = var.acr_username
@@ -231,6 +235,8 @@ resource "azurerm_container_group" "participant_frontend" {
   os_type             = "Linux"
 
   dns_name_label = "dbr-${var.environment}-participant-frontend"
+  ip_address_type = "Private"
+  subnet_ids       = azurerm_subnet.private_subnet[*].id
 
   container {
     name   = "participant-frontend"
@@ -264,6 +270,8 @@ resource "azurerm_container_group" "worker" {
   os_type             = "Linux"
 
   dns_name_label = "dbr-${var.environment}-worker"
+  ip_address_type = "Private"
+  subnet_ids       = azurerm_subnet.private_subnet[*].id
 
   container {
     name   = "worker"
@@ -318,6 +326,8 @@ resource "azurerm_container_group" "api_server" {
   os_type             = "Linux"
 
   dns_name_label = "dbr-${var.environment}-api-server"
+  ip_address_type = "Private"
+  subnet_ids       = azurerm_subnet.private_subnet[*].id
 
   container {
     name   = "api-server"

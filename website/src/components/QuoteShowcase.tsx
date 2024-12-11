@@ -18,8 +18,8 @@ const QuoteShowcase: React.FC<QuoteShowcaseProps> = ({
 }) => {
   return (
     <SlideIn>
-      <div className="container flex min-h-[70vh] flex-col items-center justify-center px-4 py-8 text-center">
-        <div className="relative h-min w-full px-12">
+      <div className="container flex min-h-[70vh] flex-col items-center justify-center px-4 py-8 text-center ">
+        <div className="relative h-min w-full px-12 py-6 backdrop-blur-lg">
           <div className="mx-auto max-w-3xl">
             <span className="absolute left-0 top-0">
               <Quotes

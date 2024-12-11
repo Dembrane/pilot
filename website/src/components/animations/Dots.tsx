@@ -29,6 +29,8 @@ class Life {
   private c: any;
   private resistance: number;
   private p5JS: any;
+  private updateCounter: number;
+  private updateRate: number;
 
   constructor(parent: any, p5: any) {
     this.p5JS = p5;
@@ -42,6 +44,8 @@ class Life {
     p5.colorMode(p5.HSB, 1);
     this.c = p5.color(this.hue, mappedS, mappedL);
     this.resistance = 0;
+    this.updateCounter = 0;
+    this.updateRate = p5.floor(p5.map(1 - this.metabolism, 0, 1, 1, 10));
   }
 
   lifestats(h: any, m: any, a: any) {
@@ -53,15 +57,22 @@ class Life {
     let mappedL = this.p5JS.map(this.agression, 0, 1, 0.5, 1);
     this.p5JS.colorMode(this.p5JS.HSB, 1);
     this.c = this.p5JS.color(this.hue, mappedS, mappedL);
+    this.updateRate = this.p5JS.floor(this.p5JS.map(1 - m, 0, 1, 1, 10));
   }
 
   update() {
+    this.updateCounter++;
+    if (this.updateCounter < this.updateRate) {
+      return;
+    }
+    this.updateCounter = 0;
+
     this.cell.food = this.cell.food - this.metabolism * this.size;
     //food in cell goes down in proportion to metablism and createCanvas
     this.size *= this.cell.food / this.size;
     // size change is proportional to excess or surplus food
     this.size = this.p5JS.constrain(this.size, 0, 1);
-    if (this.size < 0.2) {
+    if (this.size < 0.1) {
       this.cell.killLife();
     }
     //console.log(metabolism, cell.food, createCanvas);
@@ -108,7 +119,7 @@ class Life {
     if (h > 1) {
       h -= 1;
     }
-    let a = this.agression * this.p5JS.random(0.95, 1.05);
+    let a = this.agression * this.p5JS.random(0.95, 1.01);
     if (a < 0) {
       a += 1;
     }
@@ -231,29 +242,52 @@ class Cell {
 
   displayLife() {
     if (this.life != null) {
-      this.p5JS.push(); // isolate translation
+      this.p5JS.push();
       this.p5JS.strokeWeight(0);
+
+      // Define the color palette
+      const palette = [
+        '#4169e1',  // Royal blue 
+        '#b7feb9', '#a8feff', '#feb1fe',
+        '#1BFF37', '#12FFFF', '#FF31FF'
+      ];
+
+      // Convert current HSB values to RGB to compare with palette
       this.p5JS.colorMode(this.p5JS.HSB, 1);
-      this.p5JS.fill(this.life.hue, this.life.metabolism, this.life.agression);
-      this.p5JS.fill(
+      const currentColor = this.p5JS.color(
         ((this.life.hue * 3) % 3) / 3,
         this.p5JS.map(1 - this.life.agression, 0, 1, 0.2, 0.8),
-        this.p5JS.map(this.life.metabolism, 0, 1, 0.7, 0.99),
+        this.p5JS.map(this.life.metabolism, 0, 1, 0.7, 0.99)
       );
-      //this.p5JS.fill(this.life.c)
 
-      this.p5JS.rectMode(this.p5JS.CENTER); // draw from centre
+      // Find the closest color in the palette
+      let closestColor = palette[0];
+      let minDistance = Infinity;
+      
+      for (const paletteColor of palette) {
+        const c1 = this.p5JS.color(paletteColor);
+        const distance = this.p5JS.dist(
+          this.p5JS.red(currentColor), this.p5JS.green(currentColor), this.p5JS.blue(currentColor),
+          this.p5JS.red(c1), this.p5JS.green(c1), this.p5JS.blue(c1)
+        );
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestColor = paletteColor;
+        }
+      }
+
+      this.p5JS.fill(closestColor);
+      this.p5JS.rectMode(this.p5JS.CENTER);
       this.p5JS.ellipseMode(this.p5JS.CENTER);
-      this.p5JS.translate(this.size / 2, this.size / 2); //translate by half the createCanvas
+      this.p5JS.translate(this.size / 2, this.size / 2);
       this.p5JS.translate(this.size * this.pos.x, this.size * this.pos.y);
       this.p5JS.ellipse(
         0,
         0,
-        this.size * this.life.size + 2,
-        this.size * this.life.size + 2,
+        this.size * this.life.size + 3,
+        this.size * this.life.size + 3
       );
-      //rect(0, 0, (createCanvas*life.createCanvas)+2, (createCanvas*life.createCanvas)+2); // draw the square
-      this.p5JS.pop(); // out
+      this.p5JS.pop();
     }
   }
 
@@ -365,9 +399,11 @@ function invert(c: any, p5: any) {
 export const DembraneSketch = ({
   pageWidth,
   paused,
+  theme
 }: {
   pageWidth: number;
   paused: boolean;
+  theme: string | undefined;
 }) => {
   //console.log(paused)
   const setup = (p5: any, canvasParentRef: any) => {
@@ -384,7 +420,7 @@ export const DembraneSketch = ({
 
     showfood = false;
     constGrowth = 8;
-    p5.background('#ffffff');
+    p5.background(theme === 'dark' ? '#000000' : '#ffffff');
     p5.frameRate(60);
     //fullScreen();
     for (let i = 0; i < cellsWide; i++) {
@@ -421,7 +457,7 @@ export const DembraneSketch = ({
           cells[i][j].next();
           let dist = toroidalDistance(i, j, x, y, p5);
           //console.log(dist);
-          cells[i][j].growthMod = 4 - dist / 5;
+          cells[i][j].growthMod = 4 - dist / 4;
           if (cells[i][j].life != null) {
             //number++;
           }
@@ -431,7 +467,7 @@ export const DembraneSketch = ({
       p5.push(); // isolate translation
       p5.noStroke();
       p5.strokeWeight(0);
-      const col = p5.color('#ffffff10');
+      const col = p5.color(theme === 'dark' ? '#00000010' : '#ffffff10');
       p5.fill(col);
       p5.rect(0, 0, p5.windowWidth, p5.windowHeight); // draw the square
       p5.pop(); // out

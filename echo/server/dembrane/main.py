@@ -18,6 +18,8 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware import Middleware
 from fastapi.openapi.utils import get_openapi
 from starlette.middleware.cors import CORSMiddleware
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.starlette import StarletteIntegration
 
 from dembrane.config import (
     BUILD_VERSION,
@@ -38,6 +40,16 @@ if not DISABLE_SENTRY:
         profiles_sample_rate=0.5,
         enable_tracing=True,
         release=BUILD_VERSION,
+        integrations=[
+            StarletteIntegration(
+                transaction_style="endpoint",
+                failed_request_status_codes={*range(400, 499), *range(500, 599)},
+            ),
+            FastApiIntegration(
+                transaction_style="endpoint",
+                failed_request_status_codes={*range(400, 499), *range(500, 599)},
+            ),
+        ],
     )
 else:
     logger.info("sentry is disabled by DISABLE_SENTRY")

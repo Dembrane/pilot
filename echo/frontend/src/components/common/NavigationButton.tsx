@@ -58,7 +58,6 @@ export const NavigationButton = ({
         ) : (
           <UnstyledButton
             {...props}
-            // @ts-expect-error not typed
             disabled={disabled ?? false}
             className={cn(
               "h-full w-full px-4 py-2 text-left",

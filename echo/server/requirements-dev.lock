@@ -34,6 +34,7 @@ billiard==4.2.0
     # via celery
 celery==5.4.0
     # via flower
+    # via sentry-sdk
 certifi==2024.2.2
     # via httpcore
     # via httpx
@@ -103,6 +104,7 @@ isort==5.13.2
 jinja2==3.1.4
 jiter==0.5.0
     # via anthropic
+    # via openai
 joblib==1.4.2
     # via scikit-learn
 jsonpatch==1.33
@@ -151,7 +153,7 @@ numpy==1.26.4
     # via pgvector
     # via scikit-learn
     # via scipy
-openai==1.30.1
+openai==1.57.2
     # via langchain-openai
 orjson==3.10.3
     # via langsmith
@@ -218,7 +220,7 @@ ruff==0.4.4
 scikit-learn==1.4.2
 scipy==1.13.0
     # via scikit-learn
-sentry-sdk==2.2.0
+sentry-sdk==2.19.2
 six==1.16.0
     # via ecdsa
     # via python-dateutil
@@ -231,6 +233,7 @@ sqlalchemy==2.0.30
     # via alembic
     # via langchain
     # via langchain-community
+    # via sentry-sdk
 starlette==0.36.3
     # via fastapi
 tenacity==8.3.0

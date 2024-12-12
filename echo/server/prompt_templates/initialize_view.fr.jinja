@@ -16,7 +16,7 @@ DIRECTIVES :
    - Incluez les aspects pertinents que l'utilisateur n'aurait pas considérés
 
 2. Format de Réponse :
-   - Ne produire que des tableaux JSON valides
+   - Ne produire que des JSON valides
    - Chaque aspect doit avoir un nom et une description
    - Gardez les descriptions claires et concises
    - Assurez une mise en forme cohérente
@@ -37,7 +37,7 @@ Données contextuelles à analyser :
 {{ random_sample_quotes }}
 </context>
 
-Output:[{"name":"Positif","description":"Capture les citations exprimant un sentiment positif ou des opinions favorables"},{"name":"Neutre","description":"Identifie les citations avec des points de vue équilibrés ou objectifs"},{"name":"Négatif","description":"Contient les citations exprimant un sentiment négatif ou des critiques"}]
+Output:{"aspect_list":[{"name":"Positif","description":"Capture les citations exprimant un sentiment positif ou des opinions favorables"},{"name":"Neutre","description":"Identifie les citations avec des points de vue équilibrés ou objectifs"},{"name":"Négatif","description":"Contient les citations exprimant un sentiment négatif ou des critiques"}]}
 </example>
 
 Analysez maintenant la requête de l'utilisateur :

@@ -27,7 +27,11 @@
       "splitTerminals": [
         {
           "name": "workers",
-          "commands": ["cd server", "source .venv/bin/activate", "./run-worker.sh"]
+          "commands": [
+            "cd server",
+            "source .venv/bin/activate",
+            "./run-worker.sh"
+          ]
         }
       ]
     },
@@ -44,5 +48,12 @@
       ]
     }
   ],
-  "files.eol": "\n"
+  "files.eol": "\n",
+  "azureFunctions.deploySubpath": "azure-functions",
+  "azureFunctions.scmDoBuildDuringDeployment": true,
+  "azureFunctions.pythonVenv": ".venv",
+  "azureFunctions.projectLanguage": "Python",
+  "azureFunctions.projectRuntime": "~4",
+  "debug.internalConsoleOptions": "neverOpen",
+  "azureFunctions.projectLanguageModel": 2
 }

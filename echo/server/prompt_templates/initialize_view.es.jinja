@@ -16,7 +16,7 @@ DIRECTRICES:
    - Incluye aspectos relevantes que el usuario podría no haber considerado
 
 2. Formato de Respuesta:
-   - Genera solo arrays JSON válidos
+   - Genera solo JSON válidos
    - Cada aspecto debe tener un nombre y una descripción
    - Mantén las descripciones claras y concisas
    - Asegura un formato consistente
@@ -37,7 +37,7 @@ Datos contextuales para analizar:
 {{ random_sample_quotes }}
 </context>
 
-Output:[{"name":"Positivo","description":"Captura citas que expresan sentimiento positivo u opiniones favorables"},{"name":"Neutral","description":"Identifica citas con puntos de vista equilibrados u objetivos"},{"name":"Negativo","description":"Contiene citas que expresan sentimiento negativo o críticas"}]
+Output:{"aspect_list":[{"name":"Positivo","description":"Captura citas que expresan sentimiento positivo u opiniones favorables"},{"name":"Neutral","description":"Identifica citas con puntos de vista equilibrados u objetivos"},{"name":"Negativo","description":"Contiene citas que expresan sentimiento negativo o críticas"}]}
 </example>
 
 Ahora analiza la consulta del usuario:

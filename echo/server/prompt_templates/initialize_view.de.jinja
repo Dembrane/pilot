@@ -16,7 +16,7 @@ RICHTLINIEN:
    - Berücksichtigen Sie relevante Aspekte, die der Benutzer möglicherweise übersehen hat
 
 2. Antwortformat:
-   - Nur gültige JSON-Arrays ausgeben
+   - Nur gültige JSON ausgeben
    - Jeder Aspekt muss einen Namen und eine Beschreibung haben
    - Beschreibungen klar und präzise halten
    - Konsistente Formatierung sicherstellen
@@ -37,7 +37,7 @@ Zu analysierende kontextuelle Daten:
 {{ random_sample_quotes }}
 </context>
 
-Output:[{"name":"Positiv","description":"Erfasst Zitate, die positive Stimmung oder günstige Meinungen ausdrücken"},{"name":"Neutral","description":"Identifiziert Zitate mit ausgewogenen oder objektiven Standpunkten"},{"name":"Negativ","description":"Enthält Zitate, die negative Stimmung oder Kritik ausdrücken"}]
+Output: {"aspect_list":[{"name":"Positiv","description":"Erfasst Zitate, die positive Stimmung oder günstige Meinungen ausdrücken"},{"name":"Neutral","description":"Identifiziert Zitate mit ausgewogenen oder objektiven Standpunkten"},{"name":"Negativ","description":"Enthält Zitate, die negative Stimmung oder Kritik ausdrücken"}]}
 </example>
 
 Analysieren Sie nun die Benutzeranfrage:

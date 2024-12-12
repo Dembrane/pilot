@@ -328,7 +328,9 @@ async def post_create_project_library(
 
     result = task_create_project_library.si(project_id, body.language).apply_async()
 
-    logger.info(f"Task {result.id} created for project {project.id}")
+    logger.info(
+        f"Generate Project Library task {result.id} created for project {project.id}. Language: {body.language}"
+    )
 
     return None
 

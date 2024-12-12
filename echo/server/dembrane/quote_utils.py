@@ -26,14 +26,11 @@ from dembrane.database import (
     ConversationModel,
     ProcessingStatusEnum,
     ConversationChunkModel,
-    ProjectAnalysisRunModel,
 )
 from dembrane.embedding import EMBEDDING_DIM, embed_text
 from dembrane.image_utils import brilliant_image_generator_3000
 
 logger = logging.getLogger("quote_utils")
-logger.setLevel(logging.DEBUG)
-
 
 np.random.seed(0)
 
@@ -73,6 +70,8 @@ def join_transcript_chunks(string_list: List[str]) -> str:
     return joined_string
 
 
+# def generate_contextual_quote_and_embedding(db: Session, conversation_id: str, text: str) -> Tuple[QuoteModel, List[float]]:
+
 def llm_split_text(text: str) -> List[str]:
     logger = logging.getLogger("llm_split_text")
     logger.debug(f"splitting text: {text}")
@@ -86,13 +85,8 @@ def llm_split_text(text: str) -> List[str]:
     ]
 
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4o-mini",
         messages=messages,  # type: ignore
-        temperature=0,
-        max_tokens=64,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0,
     )
     logger.debug(response)
 
@@ -117,6 +111,11 @@ def generate_quotes(
     """Generate quotes"""
     logger = logging.getLogger("generate_quotes")
 
+    count_chunks = db.query(ConversationChunkModel).filter(
+        ConversationChunkModel.conversation_id == conversation_id,
+        ConversationChunkModel.transcript.is_not(None),
+    ).count()
+
     chunks = (
         db.query(ConversationChunkModel)
         .filter(
@@ -127,7 +126,11 @@ def generate_quotes(
         .all()
     )
 
+    if len(chunks) < count_chunks:
+        logger.warning(f"POSSIBLE BAD QUERY: the number of chunks found ({len(chunks)}) is less than the number of chunks in the conversation ({count_chunks})")
+
     chunk_id_text = dict()
+
     for chunk in chunks:
         chunk_id_text[chunk.id] = chunk.transcript
 
@@ -388,32 +391,43 @@ def initialize_view(
         description: str
 
     class JSONOutputSchema(BaseModel):
-        aspect_list: List[AspectOutput]
+        aspect_list: list[AspectOutput]
 
-    response = client.chat.completions.create(
+    response = client.beta.chat.completions.parse(
         model="gpt-4o",
         messages=messages,  # type: ignore
-        # See openai docs for structured outputs: https://platform.openai.com/docs/guides/structured-outputs
         response_format=JSONOutputSchema,
     )
 
-    try:
-        response = response.choices[0].message.parsed
-        logger.debug(f"Draft aspects: {response}")
+    response_message = response.choices[0].message
 
-        aspects_list = response.aspect_list
-    except json.JSONDecodeError as e:
-        raise ValueError("Failed to parse the response as JSON.") from e
+    try:
+        if response_message.refusal is not None:
+            raise ValueError(response_message.refusal)
+
+        # Access the parsed response content
+        parsed_response = response.choices[0].message.parsed
+        logger.debug(f"Draft aspects: {parsed_response}")
+
+        if parsed_response is None:
+            raise ValueError("No response from GPT-4o")
+
+        aspects_list = parsed_response.aspect_list
+    except Exception as e:
+        logger.error(f"Error generating draft aspects: {e}")
+        raise e from e
 
     for aspect in aspects_list:
-        if "name" not in aspect or "description" not in aspect:
-            logger.debug(f"Aspect missing name or description: {aspect}")
+        if aspect.name is None or aspect.description is None:
+            logger.warning(f"Aspect missing name or description: {aspect}")
+            continue
+
         else:
             aspect = AspectModel(
                 id=generate_uuid(),
                 view_id=view.id,
-                name=aspect["name"],
-                description=aspect["description"],
+                name=aspect.name,
+                description=aspect.description,
             )
             db.add(aspect)
             db.commit()
@@ -471,7 +485,7 @@ def format_json_string_to_list(json_string: str) -> List[str]:
     return formatted_sample_quotes
 
 
-def assign_aspect_centroid(db: Session, aspect_id: str, language: str = "en") -> None:
+def assign_aspect_centroid(db: Session, aspect_id: str, language: str) -> None:
     aspect = db.get(AspectModel, aspect_id)
 
     if not aspect:
@@ -631,7 +645,7 @@ def cluster_quotes_using_aspect_centroids(db: Session, view_id: str) -> None:
             logger.debug(f"No closest aspect found for quote {quote.id}")
 
 
-def generate_aspect_summary(db: Session, aspect_id: str, language: str = "en") -> None:
+def generate_aspect_summary(db: Session, aspect_id: str, language: str) -> None:
     aspect = db.query(AspectModel).filter_by(id=aspect_id).first()
 
     if not aspect:
@@ -692,7 +706,7 @@ def generate_aspect_summary(db: Session, aspect_id: str, language: str = "en") -
     return
 
 
-def generate_aspect_image(db: Session, aspect_id: str, language: str = "en") -> AspectModel:
+def generate_aspect_image(db: Session, aspect_id: str) -> AspectModel:
     logger.debug(f"generating image for aspect: {aspect_id}")
     aspect = db.query(AspectModel).filter_by(id=aspect_id).first()
 
@@ -784,7 +798,7 @@ def generate_aspect_image(db: Session, aspect_id: str, language: str = "en") -> 
     return aspect
 
 
-def generate_aspect_extras(db: Session, aspect_id: str, language: str = "en") -> AspectModel | None:
+def generate_aspect_extras(db: Session, aspect_id: str, language: str) -> AspectModel | None:
     """aspect summary, aspect image"""
     aspect = db.query(AspectModel).filter_by(id=aspect_id).first()
 
@@ -793,12 +807,12 @@ def generate_aspect_extras(db: Session, aspect_id: str, language: str = "en") ->
         return None
 
     generate_aspect_summary(db, aspect.id, language)
-    generate_aspect_image(db, aspect.id, language)
+    generate_aspect_image(db, aspect.id)
 
     return aspect
 
 
-def generate_view_extras(db: Session, view_id: str, language: str = "en") -> ViewModel:
+def generate_view_extras(db: Session, view_id: str, language: str) -> ViewModel:
     """Generate view summary and aspect summaries."""
     view = db.query(ViewModel).filter_by(id=view_id).first()
 
@@ -822,7 +836,6 @@ Summary: {aspect.long_summary}
         language,
         {
             "view_name": view.name,
-            "view_description": view.description,
             "formatted_aspects": formatted_aspects,
         },
     )
@@ -840,7 +853,7 @@ Summary: {aspect.long_summary}
     return view
 
 
-def generate_insight_extras(db: Session, insight_id: str, language: str = "en") -> None:
+def generate_insight_extras(db: Session, insight_id: str, language: str) -> None:
     """Generate insight extras for a given cluster."""
     insight = db.query(InsightModel).filter_by(id=insight_id).first()
 
@@ -899,7 +912,7 @@ def generate_insight_extras(db: Session, insight_id: str, language: str = "en") 
     return
 
 
-def generate_conversation_summary(db: Session, conversation_id: str, language: str = "en") -> None:
+def generate_conversation_summary(db: Session, conversation_id: str, language: str) -> None:
     """Generate a summary for a conversation."""
     conversation = db.query(ConversationModel).filter_by(id=conversation_id).first()
 
@@ -999,27 +1012,27 @@ def initialize_insights(db: Session, project_analysis_run_id: str) -> List[str]:
     return insight_ids
 
 
-if __name__ == "__main__":
-    from dembrane.database import get_db
+# if __name__ == "__main__":
+    # from dembrane.database import get_db
 
-    db = next(get_db())
+    # db = next(get_db())
 
-    project_id = "f98d4ef2-1bc9-40f1-b360-3d784e2b22a0"
+    # project_id = "f98d4ef2-1bc9-40f1-b360-3d784e2b22a0"
 
     # analysis_id = "460ef51a-c698-4c0a-bd24-824785b2f982"
 
-    project_analysis_run = ProjectAnalysisRunModel(
-        id=generate_uuid(), project_id=project_id, processing_status="DONE"
-    )
+    # project_analysis_run = ProjectAnalysisRunModel(
+    # id=generate_uuid(), project_id=project_id, processing_status="DONE"
+    # )
 
-    db.add(project_analysis_run)
-    db.commit()
+    # db.add(project_analysis_run)
+    # db.commit()
 
-    logger.debug(f"project_analysis_run_id: {project_analysis_run.id}")
+    # logger.debug(f"project_analysis_run_id: {project_analysis_run.id}")
 
-    analysis_id = project_analysis_run.id
+    # analysis_id = project_analysis_run.id
 
-    generate_quotes(db, project_analysis_run.id, "a615ced7-fce1-4434-a88e-5041f30c2a15")
+    # generate_quotes(db, project_analysis_run.id, "a615ced7-fce1-4434-a88e-5041f30c2a15")
 
     # conversations = db.query(ConversationModel).filter(ConversationModel.project_id == project_id).all()
 
@@ -1049,3 +1062,43 @@ if __name__ == "__main__":
     # logger.debug(view.id)
 
     # generate_insights(db, id)
+
+    # prompt = render_prompt(
+    #     "initialize_view",
+    #     "en",
+    #     {
+    #         "user_input": "Make a plan to restructure the TUE Governance",
+    #         "random_sample_quotes": "Hello World.",
+    #     },
+    # )
+
+    # messages = [{"role": "user", "content": prompt}]
+
+    # class AspectOutput(BaseModel):
+    #     name: str
+    #     description: str
+
+    # class JSONOutputSchema(BaseModel):
+    #     aspect_list: list[AspectOutput]
+
+    # # use beta...parse lol, took me a while to debug
+    # response = client.beta.chat.completions.parse(  # type: ignore
+    #     model="gpt-4o",
+    #     messages=messages,  # type: ignore
+    #     response_format=JSONOutputSchema,
+    # )
+
+    # response_message = response.choices[0].message
+
+    # try:
+    #     if response_message.refusal is not None:
+    #         raise ValueError(response_message.refusal)
+
+    #     # Access the parsed response content
+    #     parsed_response = response.choices[0].message.parsed
+    #     print(f"Draft aspects: {parsed_response}")
+
+    #     aspects_list = parsed_response.aspect_list
+    # except Exception as e:
+    #     print(f"Error generating draft aspects: {e}")
+    #     raise e from e

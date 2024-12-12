@@ -16,7 +16,7 @@ GUIDELINES:
    - Include relevant aspects the user may not have considered
 
 2. Response Format:
-   - Output only valid JSON arrays
+   - Output only valid JSON
    - Each aspect must have a name and description
    - Keep descriptions clear and concise
    - Ensure consistent formatting
@@ -37,7 +37,7 @@ Contextual data to analyze:
 {{ random_sample_quotes }}
 </context>
 
-Output:[{"name":"Positive","description":"Captures quotes expressing positive sentiment or favorable opinions"},{"name":"Neutral","description":"Identifies quotes with balanced or objective viewpoints"},{"name":"Negative","description":"Contains quotes expressing negative sentiment or criticism"}]
+Output:{"aspect_list":[{"name":"Positive","description":"Captures quotes expressing positive sentiment or favorable opinions"},{"name":"Neutral","description":"Identifies quotes with balanced or objective viewpoints"},{"name":"Negative","description":"Contains quotes expressing negative sentiment or criticism"}]}
 </example>
 
 Now analyze the user's query:

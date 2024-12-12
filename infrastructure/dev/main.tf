@@ -186,6 +186,83 @@ data "azurerm_container_registry" "acr" {
   resource_group_name = "DBR-cicd-Infrastructure-Main-RG"
 }
 
+### deploy application gateway with no backend pool
+
+# Define the Application Gateway
+resource "azurerm_application_gateway" "main" {
+  name                = "DBR-${var.environment}-appgw"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+
+  # Basic SKU configuration
+  sku {
+    name     = "Standard_v2"
+    tier     = "Standard_v2"
+    capacity = 1
+  }
+
+  # Required gateway IP configuration
+  gateway_ip_configuration {
+    name      = "gateway-ip-config"
+    subnet_id = azurerm_subnet.public_subnet[0].id
+    }
+
+  # Required but minimal frontend IP configuration
+  frontend_ip_configuration {
+    name                 = "frontend-ip-config"
+    public_ip_address_id = azurerm_public_ip.appgw.id
+  }
+
+  # Required but minimal frontend port
+  frontend_port {
+    name = "frontend-port"
+    port = 80
+  }
+
+  # Required HTTP listener (minimal configuration)
+  http_listener {
+    name                           = "basic-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name            = "frontend-port"
+    protocol                      = "Http"
+  }
+
+  # Required but minimal backend address pool
+  backend_address_pool {
+    name = "empty-pool"
+  }
+
+  # Required backend HTTP settings
+  backend_http_settings {
+    name                  = "basic-settings"
+    cookie_based_affinity = "Disabled"
+    port                 = 80
+    protocol             = "Http"
+    request_timeout      = 60
+  }
+
+  # Required basic routing rule
+  request_routing_rule {
+    name                       = "basic-rule"
+    rule_type                 = "Basic"
+    priority                  = 100
+    http_listener_name        = "basic-listener"
+    backend_address_pool_name = "empty-pool"
+    backend_http_settings_name = "basic-settings"
+  }
+}
+
+# Required Public IP for the Application Gateway
+resource "azurerm_public_ip" "appgw" {
+  name                = "DBR-${var.environment}-appgw-pip"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  allocation_method   = "Static"
+  sku                = "Standard"  # Required for v2 Application Gateway
+}
+
+
+
 
 ## RabitMQ azure container instance based on rabbitmq:3.13
 
@@ -210,9 +287,8 @@ resource "azurerm_container_group" "rabbitmq" {
     }
   }
 
-  dns_name_label = "dbr-${var.environment}-rabbitmq"
   ip_address_type = "Private"
-  subnet_ids       = azurerm_subnet.private_subnet[*].id
+  subnet_ids       = [azurerm_subnet.private_subnet[0].id]
 
   image_registry_credential {
     server   = data.azurerm_container_registry.acr.login_server
@@ -234,9 +310,8 @@ resource "azurerm_container_group" "participant_frontend" {
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
 
-  dns_name_label = "dbr-${var.environment}-participant-frontend"
   ip_address_type = "Private"
-  subnet_ids       = azurerm_subnet.private_subnet[*].id
+  subnet_ids       = [azurerm_subnet.private_subnet[0].id]
 
   container {
     name   = "participant-frontend"
@@ -269,9 +344,8 @@ resource "azurerm_container_group" "worker" {
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
 
-  dns_name_label = "dbr-${var.environment}-worker"
   ip_address_type = "Private"
-  subnet_ids       = azurerm_subnet.private_subnet[*].id
+  subnet_ids       = [azurerm_subnet.private_subnet[0].id]
 
   container {
     name   = "worker"
@@ -325,9 +399,8 @@ resource "azurerm_container_group" "api_server" {
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
 
-  dns_name_label = "dbr-${var.environment}-api-server"
   ip_address_type = "Private"
-  subnet_ids       = azurerm_subnet.private_subnet[*].id
+  subnet_ids       = [azurerm_subnet.private_subnet[0].id]
 
   container {
     name   = "api-server"

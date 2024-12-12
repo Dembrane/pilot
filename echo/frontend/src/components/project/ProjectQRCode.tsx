@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import {
   Box,
   Button,
@@ -12,7 +14,6 @@ import {
 import { IconCheck, IconCopy, IconShare } from "@tabler/icons-react";
 import { QRCode } from "../common/QRCode";
 import { PARTICIPANT_BASE_URL } from "@/config";
-import { Trans, t } from "@lingui/macro";
 
 interface ProjectQRCodeProps {
   project?: Project;

@@ -1,5 +1,5 @@
+import { t } from "@lingui/core/macro";
 import { Icons } from "@/icons";
-import { t } from "@lingui/macro";
 import {
   Box,
   Group,

@@ -1,10 +1,11 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import {
   useCreateProjectTagMutation,
   useDeleteTagByIdMutation,
   useProjectById,
   useUpdateProjectTagByIdMutation,
 } from "@/lib/query";
-import { Trans, t } from "@lingui/macro";
 import {
   ActionIcon,
   Alert,

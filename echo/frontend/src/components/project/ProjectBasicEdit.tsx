@@ -1,6 +1,7 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import React, { useEffect } from "react";
 import { Group, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
-import { Trans, t } from "@lingui/macro";
 import { useForm, Controller } from "react-hook-form";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
 import { SaveStatus } from "../form/SaveStatus";
@@ -134,15 +135,6 @@ export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
         </Stack>
       </form>
 
-      <Text size="sm" c="dimmed">
-        <SaveStatus
-          savedAt={lastSavedAt}
-          formErrors={formState.errors}
-          isPendingSave={isPendingSave}
-          isSaving={isSaving}
-          isError={isError}
-        />
-      </Text>
     </Stack>
   );
 };

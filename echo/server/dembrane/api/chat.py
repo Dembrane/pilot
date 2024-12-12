@@ -266,7 +266,11 @@ class ChatBodySchema(BaseModel):
 
 @ChatRouter.post("/{chat_id}")
 async def post_chat(
-    chat_id: str, body: ChatBodySchema, db: DependencyInjectDatabase, protocol: str = Query("data")
+    chat_id: str,
+    body: ChatBodySchema,
+    db: DependencyInjectDatabase,
+    protocol: str = Query("data"),
+    language: str = Query("en"),
 ) -> StreamingResponse:
     chat = db.get(ProjectChatModel, chat_id)
 
@@ -297,7 +301,7 @@ async def post_chat(
     chat_context = await get_chat_context(chat_id, db)
     locked_conversation_id_list = chat_context.locked_conversation_id_list
 
-    system_messages = await create_system_messages(locked_conversation_id_list, db)
+    system_messages = await create_system_messages(locked_conversation_id_list, db, language)
 
     def stream_response() -> Generator[str, None, None]:
         with DatabaseSession() as db:

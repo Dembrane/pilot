@@ -293,6 +293,9 @@ def get_latest_project_analysis_run(
         .first()
     )
 
+class CreateLibraryRequestBodySchema(BaseModel):
+    language: Optional[str] = "en"
+
 
 @ProjectRouter.post(
     "/{project_id}/create-library",
@@ -302,6 +305,7 @@ async def post_create_project_library(
     db: DependencyInjectDatabase,
     auth: DependencyDirectusSession,
     project_id: str,
+    body: CreateLibraryRequestBodySchema,
 ) -> None:
     project = db.get(ProjectModel, project_id)
 
@@ -322,9 +326,11 @@ async def post_create_project_library(
             detail="Analysis is already in progress",
         )
 
-    result = task_create_project_library.si(project_id).apply_async()
+    result = task_create_project_library.si(project_id, body.language).apply_async()
 
-    logger.info(f"Task {result.id} created for project {project.id}")
+    logger.info(
+        f"Generate Project Library task {result.id} created for project {project.id}. Language: {body.language}"
+    )
 
     return None
 
@@ -332,6 +338,7 @@ async def post_create_project_library(
 class CreateViewRequestBodySchema(BaseModel):
     query: str
     additional_context: Optional[str] = ""
+    language: Optional[str] = "en"
 
 
 @ProjectRouter.post("/{project_id}/create-view", status_code=HTTPStatus.ACCEPTED)
@@ -355,7 +362,7 @@ async def post_create_view(
         raise HTTPException(status_code=403, detail="User does not have access to this project")
 
     result = task_create_view.si(
-        project_analysis_run.id, body.query, body.additional_context
+        project_analysis_run.id, body.query, body.additional_context, body.language
     ).apply_async()
 
     logger.info(f"Task {result.id} created for project {project_id}")

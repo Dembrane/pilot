@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import {
   Alert,
   Box,
@@ -12,7 +14,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useInitiateConversationMutation } from "@/lib/query";
 import { AxiosError } from "axios";
-import { Trans, t } from "@lingui/macro";
 import { useI18nNavigate } from "@/lib/useI18nNavigate";
 
 const FormSchema = z.object({
@@ -102,7 +103,7 @@ export const ParticipantInitiateForm = ({ project }: { project: Project }) => {
               withinPortal: false,
             }}
             data={project.tags
-              .filter((tag) => tag.project_tag_id && tag.project_tag_id != null)
+              .filter((tag) => tag && tag.text != null && tag.id != null)
               .map((tag) => ({
                 value: tag.id,
                 label: tag.text,

@@ -1,6 +1,6 @@
+import { Trans } from "@lingui/react/macro";
 import { ProjectTagsInput } from "@/components/project/ProjectTagsInput";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
-import { Trans } from "@lingui/macro";
 import {
   Anchor,
   Box,

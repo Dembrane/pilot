@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { BaseMessage } from "@/components/BaseMessage";
 import { InformationTooltip } from "@/components/common/InformationTooltip";
 import { getConversationChunkContentLink } from "@/lib/api";
@@ -6,7 +8,6 @@ import {
   useConversationTranscriptString,
   useInfiniteConversationChunks,
 } from "@/lib/query";
-import { Trans, t } from "@lingui/macro";
 import {
   ActionIcon,
   Group,

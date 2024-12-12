@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import {
   ActionIcon,
   Avatar,
@@ -13,7 +15,6 @@ import { useCurrentUser, useLogoutMutation } from "@/lib/query";
 import { useAuthenticated } from "@/lib/useAuthenticated";
 import { I18nLink } from "@/components/common/i18nLink";
 import { LanguagePicker } from "../language/LanguagePicker";
-import { Trans, t } from "@lingui/macro";
 import { useState, useEffect } from "react";
 import * as Sentry from "@sentry/react";
 

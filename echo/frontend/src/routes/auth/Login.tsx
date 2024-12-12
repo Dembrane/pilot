@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { DIRECTUS_PUBLIC_URL } from "@/config";
 import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import { directus } from "@/lib/directus";
@@ -28,7 +30,6 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { I18nLink } from "@/components/common/i18nLink";
-import { Trans, t } from "@lingui/macro";
 import { useLanguage } from "@/lib/useLanguage";
 
 const LoginWithProvider = ({

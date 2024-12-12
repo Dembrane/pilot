@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { I18nLink } from "@/components/common/i18nLink";
 import { Logo } from "@/components/common/Logo";
 import { Markdown } from "@/components/common/Markdown";
@@ -6,7 +7,6 @@ import { getParticipantProjectById } from "@/lib/api";
 import { useParticipantProjectById } from "@/lib/participantQuery";
 import { useProjectById } from "@/lib/query";
 import { useLanguage } from "@/lib/useLanguage";
-import { Trans } from "@lingui/macro";
 import {
   Box,
   Button,

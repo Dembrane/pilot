@@ -1,8 +1,8 @@
+import { t } from "@lingui/core/macro";
 import React, { useEffect, useState } from "react";
 import "./DembraneLoading.css";
 import dembraneLogoHQ from "../../../assets/dembrane-logo-hq.png";
 import { cn } from "@/lib/utils";
-import { t } from "@lingui/macro";
 
 interface DembraneLoadingSpinnerProps {
   isLoading: boolean;

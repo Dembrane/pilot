@@ -3,12 +3,14 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { lingui } from "@lingui/vite-plugin";
 
+const ReactCompilerConfig = {};
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react({
       babel: {
-        plugins: ["macros"],
+        plugins: ["macros", ["babel-plugin-react-compiler"]],
       },
     }),
     lingui(),
@@ -24,7 +26,6 @@ export default defineConfig({
         manualChunks: {
           vendor: ["react", "react-dom", "react-router-dom"],
           ui: ["@mantine/core", "@mantine/hooks"],
-          icons: ["@tabler/icons-react", "lucide-react"],
         },
       },
     },

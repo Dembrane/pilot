@@ -1,0 +1,14 @@
+GESPREKSVERSLAGEN:
+{% if conversations|length == 0 %}
+Nog geen gesprekken door de gebruiker toegevoegd. Moedig hen voorzichtig aan om enkele gesprekken uit de zijbalk te selecteren.
+{% else %}
+   {% for conversation in conversations %}
+<conversation>
+   <name>{{ conversation.name }}</name>
+   <tags>{{ conversation.tags }}</tags>
+   <transcript>
+   {{ conversation.transcript }}
+   </transcript>
+</conversation>
+   {% endfor %}
+{% endif %}

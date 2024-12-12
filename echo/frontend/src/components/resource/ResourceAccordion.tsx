@@ -1,6 +1,7 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { Icons } from "@/icons";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Trans, t } from "@lingui/macro";
 import { Accordion, Group, Text, Title, Tooltip } from "@mantine/core";
 import { UploadResourceDropzone } from "../dropzone/UploadResourceDropzone";
 

@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import WelcomeImage from "@/assets/participant-welcome-pattern.png";
 import { Logo } from "@/components/common/Logo";
 import { Markdown } from "@/components/common/Markdown";
@@ -11,7 +13,6 @@ import {
   ActionIcon,
   Box,
   Button,
-  Container,
   Divider,
   Group,
   LoadingOverlay,
@@ -38,17 +39,14 @@ import {
 } from "@tabler/icons-react";
 import {
   PropsWithChildren,
-  useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {useParams } from "react-router-dom";
 
-import { useLanguage } from "@/lib/useLanguage";
 import { useWakeLock } from "@/lib/useWakeLock";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Trans, t } from "@lingui/macro";
 import clsx from "clsx";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -106,11 +104,7 @@ interface UseAudioRecorderResult {
   isRecording: boolean;
   isPaused: boolean;
   recordingTime: number;
-  errored:
-    | boolean
-    | {
-        message: string;
-      };
+  errored: boolean;
   loading: boolean;
   permissionError: string | null;
 }
@@ -119,27 +113,16 @@ const useChunkedAudioRecorder = ({
   onChunk,
   mimeType = defaultMimeType,
   timeslice = 30000, // 30 sec
-  // timeslice = 300000, // 5 min
   debug = false,
 }: UseAudioRecorderOptions): UseAudioRecorderResult => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [userPaused, setUserPaused] = useState(false);
-
-  const isRecordingRef = useRef(isRecording);
-  const isPausedRef = useRef(isPaused);
-  const userPausedRef = useRef(userPaused);
-
   const [recordingTime, setRecordingTime] = useState(0);
-  const streamRef = useRef<MediaStream | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const startRecordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const audioProcessorRef = useRef<AudioWorkletNode | null>(null);
-
   const [permissionError, setPermissionError] = useState<string | null>(null);
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const log = (...args: any[]) => {
     if (debug) {
@@ -148,74 +131,15 @@ const useChunkedAudioRecorder = ({
   };
 
   useEffect(() => {
-    // for syncing
-    isRecordingRef.current = isRecording;
-    isPausedRef.current = isPaused;
-    userPausedRef.current = userPaused;
-  }, [isRecording, isPaused, userPaused]);
-
-  useEffect(() => {
+    // Cleanup function to stop recording when component unmounts
     return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
+      stopRecording();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const updateRecordingTime = useCallback(() => {
-    setRecordingTime((prev) => prev + 1);
-  }, []);
-
-  const chunkBufferRef = useRef<Blob[]>([]);
-
-  const startRecordingChunk = useCallback(() => {
-    log("startRecordingChunk", {
-      isRecording,
-      mediaRecorderRefState: mediaRecorderRef.current?.state,
-    });
-    if (!streamRef.current) {
-      log("startRecordingChunk: no stream found");
-      return;
-    }
-
-    // Ensure that any previous MediaRecorder instance is stopped before creating a new one
-    if (mediaRecorderRef.current) {
-      log("startRecordingChunk: stopping previous MediaRecorder instance");
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current = null;
-    }
-
-    log("startRecordingChunk: creating new MediaRecorder instance");
-    const recorder = new MediaRecorder(streamRef.current, {
-      mimeType: MediaRecorder.isTypeSupported(mimeType)
-        ? mimeType
-        : "audio/webm",
-    });
-    mediaRecorderRef.current = recorder;
-
-    recorder.ondataavailable = (event) => {
-      log("ondataavailable", event.data.size, "bytes");
-      if (event.data.size > 0) {
-        chunkBufferRef.current.push(event.data);
-      }
-    };
-
-    recorder.onstop = () => {
-      log("MediaRecorder stopped");
-      onChunk(new Blob(chunkBufferRef.current, { type: mimeType }));
-
-      startRecordingChunk();
-
-      // flush the buffer
-      chunkBufferRef.current = [];
-    };
-
-    // allow for some room to restart so all is just one chunk as per mediarec
-    recorder.start(timeslice * 2);
-  }, [isRecording]);
 
   const startRecording = async () => {
     try {
@@ -224,261 +148,67 @@ const useChunkedAudioRecorder = ({
       streamRef.current = stream;
       log("Access to microphone granted.", { stream });
 
-      log("Creating MediaRecorder instance");
+      const recorder = new MediaRecorder(stream, {
+        mimeType: MediaRecorder.isTypeSupported(mimeType)
+          ? mimeType
+          : "audio/webm",
+      });
+      mediaRecorderRef.current = recorder;
 
-      setIsRecording(true);
-      setIsPaused(false);
-      setUserPaused(false);
-      startRecordingChunk();
-
-      // allow to restart recording chunk
-      startRecordingIntervalRef.current = setInterval(() => {
-        log("Checking if MediaRecorder should be stopped");
-        if (mediaRecorderRef.current?.state === "recording") {
-          log("attempting to Stop recording chunk");
-          mediaRecorderRef.current.stop();
-
-          log("attempt to Restart recording chunk", {
-            isRecording,
-            mediaRecorderRefState: mediaRecorderRef.current?.state,
-          });
-
-          if (isRecording) {
-            log("Restarting recording chunk");
-            startRecordingChunk();
-          }
+      recorder.ondataavailable = (event) => {
+        log("ondataavailable", event.data.size, "bytes");
+        if (event.data.size > 0) {
+          onChunk(event.data);
         }
-      }, timeslice);
+      };
 
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      intervalRef.current = setInterval(updateRecordingTime, 1000);
-    } catch (error) {
-      console.error("Error accessing audio stream", error);
-      setPermissionError("Error accessing audio stream");
-      setIsRecording(false);
-    }
-  };
+      recorder.onstop = () => {
+        log("MediaRecorder stopped");
+      };
 
-  const stopRecording = () => {
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state === "recording"
-    ) {
-      mediaRecorderRef.current.stop();
-    }
-    setIsRecording(false);
-    setIsPaused(false);
-    setUserPaused(false);
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-    setRecordingTime(0);
-    if (startRecordingIntervalRef.current)
-      clearInterval(startRecordingIntervalRef.current);
-    // remove the worker
-    audioProcessorRef.current?.disconnect();
-    audioProcessorRef.current = null;
-    // close the audio context
-    audioContextRef.current?.close();
-    audioContextRef.current = null;
-    streamRef.current?.getTracks().forEach((track) => track.stop());
-    streamRef.current = null;
-  };
+      recorder.onerror = (event: any) => {
+        console.error("MediaRecorder error", event.error);
+        const errorMessage =
+          event.error.name || event.error.message || "Unknown recording error";
+        setPermissionError(errorMessage);
+        stopRecording();
+      };
 
-  const pauseRecording = () => {
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state === "recording"
-    ) {
-      mediaRecorderRef.current.pause();
-      setIsPaused(true);
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    }
-  };
+      recorder.start(timeslice); // Automatically triggers ondataavailable every timeslice ms
 
-  const userPauseRecording = () => {
-    pauseRecording();
-    setUserPaused(true);
-  };
-
-  const resumeRecording = () => {
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state === "paused"
-    ) {
-      mediaRecorderRef.current.resume();
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      intervalRef.current = setInterval(updateRecordingTime, 1000);
-      setIsPaused(false);
-      setUserPaused(false);
-    }
-  };
-
-  const userResumeRecording = () => {
-    resumeRecording();
-    setUserPaused(false);
-  };
-
-  return {
-    startRecording,
-    stopRecording,
-    pauseRecording: userPauseRecording,
-    resumeRecording: userResumeRecording,
-    isRecording,
-    isPaused,
-    recordingTime,
-    loading: false,
-    errored: false,
-    permissionError,
-  };
-};
-
-const useAudioRecorder = ({
-  onChunk,
-  mimeType = defaultMimeType,
-  // 30 sec
-  // timeslice = 300000, // 5 min
-  debug = false,
-}: UseAudioRecorderOptions): UseAudioRecorderResult => {
-  const [isRecording, setIsRecording] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [userPaused, setUserPaused] = useState(false);
-
-  const isRecordingRef = useRef(isRecording);
-  const isPausedRef = useRef(isPaused);
-  const userPausedRef = useRef(userPaused);
-
-  const [recordingTime, setRecordingTime] = useState(0);
-  const streamRef = useRef<MediaStream | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const audioContextRef = useRef<AudioContext | null>(null);
-
-  const [permissionError, setPermissionError] = useState<string | null>(null);
-
-  const log = (...args: any[]) => {
-    if (debug) {
-      console.log(...args);
-    }
-  };
-
-  useEffect(() => {
-    // for syncing
-    isRecordingRef.current = isRecording;
-    isPausedRef.current = isPaused;
-    userPausedRef.current = userPaused;
-  }, [isRecording, isPaused, userPaused]);
-
-  useEffect(() => {
-    return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
-    };
-  }, []);
-
-  const updateRecordingTime = useCallback(() => {
-    setRecordingTime((prev) => prev + 1);
-  }, []);
-
-  const chunkBufferRef = useRef<Blob[]>([]);
-
-  const startRecordingChunk = useCallback(() => {
-    log("startRecordingChunk", {
-      isRecording,
-      mediaRecorderRefState: mediaRecorderRef.current?.state,
-    });
-    if (!streamRef.current) {
-      log("startRecordingChunk: no stream found");
-      return;
-    }
-
-    // Ensure that any previous MediaRecorder instance is stopped before creating a new one
-    if (mediaRecorderRef.current) {
-      log("startRecordingChunk: stopping previous MediaRecorder instance");
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current = null;
-    }
-
-    log("startRecordingChunk: creating new MediaRecorder instance");
-    const recorder = new MediaRecorder(streamRef.current, {
-      mimeType: MediaRecorder.isTypeSupported(mimeType)
-        ? mimeType
-        : "audio/webm",
-    });
-    mediaRecorderRef.current = recorder;
-
-    recorder.ondataavailable = (event) => {
-      log("ondataavailable", event.data.size, "bytes");
-      if (event.data.size > 0) {
-        chunkBufferRef.current.push(event.data);
-      }
-    };
-
-    recorder.onstop = () => {
-      log("MediaRecorder stopped");
-      onChunk(new Blob(chunkBufferRef.current, { type: mimeType }));
-      // flush the buffer
-      chunkBufferRef.current = [];
-    };
-
-    recorder.start();
-  }, [isRecording]);
-
-  const startRecording = async () => {
-    try {
-      log("Requesting access to the microphone...");
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      log("Access to microphone granted.", { stream });
-
-      log("Creating MediaRecorder instance");
       setIsRecording(true);
       setIsPaused(false);
-      setUserPaused(false);
-      startRecordingChunk();
+      setRecordingTime(0);
 
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      intervalRef.current = setInterval(updateRecordingTime, 1000);
-    } catch (error) {
+      // Start recording time counter
+      intervalRef.current = setInterval(() => {
+        setRecordingTime((prevTime) => prevTime + 1);
+      }, 1000);
+    } catch (error: any) {
       console.error("Error accessing audio stream", error);
-      setPermissionError("Error accessing audio stream");
+      setPermissionError(error.message || "Error accessing audio stream");
       setIsRecording(false);
     }
   };
 
   const stopRecording = () => {
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state === "recording"
-    ) {
-      mediaRecorderRef.current.stop();
+    if (mediaRecorderRef.current) {
+      if (mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
+      }
+      mediaRecorderRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
     setIsRecording(false);
     setIsPaused(false);
-    setUserPaused(false);
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
     setRecordingTime(0);
-    // close the audio context
-    audioContextRef.current?.close();
-    audioContextRef.current = null;
-    streamRef.current?.getTracks().forEach((track) => track.stop());
-    streamRef.current = null;
   };
 
   const pauseRecording = () => {
@@ -490,13 +220,9 @@ const useAudioRecorder = ({
       setIsPaused(true);
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     }
-  };
-
-  const userPauseRecording = () => {
-    pauseRecording();
-    setUserPaused(true);
   };
 
   const resumeRecording = () => {
@@ -505,30 +231,23 @@ const useAudioRecorder = ({
       mediaRecorderRef.current.state === "paused"
     ) {
       mediaRecorderRef.current.resume();
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      intervalRef.current = setInterval(updateRecordingTime, 1000);
       setIsPaused(false);
-      setUserPaused(false);
+      intervalRef.current = setInterval(() => {
+        setRecordingTime((prevTime) => prevTime + 1);
+      }, 1000);
     }
-  };
-
-  const userResumeRecording = () => {
-    resumeRecording();
-    setUserPaused(false);
   };
 
   return {
     startRecording,
     stopRecording,
-    pauseRecording: userPauseRecording,
-    resumeRecording: userResumeRecording,
+    pauseRecording,
+    resumeRecording,
     isRecording,
     isPaused,
     recordingTime,
+    errored: !!permissionError,
     loading: false,
-    errored: false,
     permissionError,
   };
 };
@@ -786,232 +505,33 @@ const ParticipantBody = ({
   );
 };
 
-export const ParticipantConversationChunkedAudioRoute = () =>
-  //   {
-  //   fallback = false,
-  // }: {
-  //   fallback?: boolean;
-  // }
-  {
-    const { projectId, conversationId } = useParams();
-    const projectQuery = useParticipantProjectById(projectId ?? "");
-    const conversationQuery = useConversationQuery(projectId, conversationId);
-    const chunks = useConversationChunksQuery(projectId, conversationId);
-    const uploadChunkMutation = useUploadConversationChunk();
-
-    const onChunk = (chunk: Blob) => {
-      uploadChunkMutation.mutate({
-        conversationId: conversationId ?? "",
-        chunk,
-        timestamp: new Date(),
-      });
-    };
-
-    // const audioRecorder = useVADAudioRecorder({ onChunk });
-    const fallbackAudioRecorder = useChunkedAudioRecorder({ onChunk });
-
-    useWakeLock({ obtainWakeLockOnMount: true });
-
-    const {
-      startRecording,
-      stopRecording,
-      isRecording,
-      isPaused,
-      pauseRecording,
-      resumeRecording,
-      recordingTime,
-      errored,
-      loading,
-      permissionError,
-    } =
-      // fallback ?
-      fallbackAudioRecorder;
-    // : audioRecorder;
-
-    const [troubleShootingGuideOpened, setTroubleShootingGuideOpened] =
-      useState(false);
-
-    const navigate = useI18nNavigate();
-    const { language } = useLanguage();
-
-    const handleCheckMicrophoneAccess = async () => {
-      const permissionError = await checkPermissionError();
-      if (["granted", "prompt"].includes(permissionError ?? "")) {
-        window.location.reload();
-      } else {
-        alert(
-          t`Microphone access is still denied. Please check your settings and try again.`,
-        );
-      }
-    };
-
-    if (conversationQuery.isLoading || loading || projectQuery.isLoading) {
-      return <LoadingOverlay visible />;
-    }
-
-    const textModeUrl = `/${language}/${projectId}/conversation/${conversationId}/text`;
-    const finishUrl = `/${language}/${projectId}/conversation/${conversationId}/finish`;
-
-    const handleFinish = () => {
-      if (window.confirm(t`Are you sure you want to finish?`)) {
-        navigate(finishUrl);
-      }
-    };
-
-    return (
-      <div className="container mx-auto flex min-h-dvh max-w-2xl flex-col">
-        {/* modal for permissions error */}
-        <Modal
-          opened={!!permissionError}
-          onClose={() => true}
-          centered
-          fullScreen
-          radius={0}
-          transitionProps={{ transition: "fade", duration: 200 }}
-          withCloseButton={false}
-        >
-          <div className="h-full rounded-md bg-white py-4">
-            <ParticipantHeader />
-            <Stack className="container mx-auto mt-4 max-w-2xl px-2" gap="lg">
-              <div className="max-w-prose text-lg">
-                <Trans>
-                  Oops! It looks like microphone access was denied. No worries,
-                  though! We've got a handy troubleshooting guide for you. Feel
-                  free to check it out. Once you've resolved the issue, come
-                  back and visit this page again to check if your microphone is
-                  ready.
-                </Trans>
-              </div>
-
-              <Button
-                component="a"
-                href="https://dembrane.notion.site/Troubleshooting-Microphone-Permissions-All-Languages-bd340257647742cd9cd960f94c4223bb?pvs=74"
-                target="_blank"
-                size={troubleShootingGuideOpened ? "lg" : "xl"}
-                leftSection={<IconQuestionMark />}
-                variant={!troubleShootingGuideOpened ? "filled" : "light"}
-                onClick={() => setTroubleShootingGuideOpened(true)}
-              >
-                <Trans>Open troubleshooting guide</Trans>
-              </Button>
-              <Divider />
-              <Button
-                size={!troubleShootingGuideOpened ? "lg" : "xl"}
-                leftSection={<IconReload />}
-                variant={troubleShootingGuideOpened ? "filled" : "light"}
-                onClick={handleCheckMicrophoneAccess}
-              >
-                <Trans>Check microphone access</Trans>
-              </Button>
-            </Stack>
-          </div>
-        </Modal>
-
-        <ParticipantHeader />
-
-        <Box className={clsx("relative flex-grow px-4 py-4 transition-all")}>
-          {projectQuery.data && conversationQuery.data && (
-            <ParticipantBody
-              conversation={conversationQuery.data}
-              project={projectQuery.data}
-            />
-          )}
-        </Box>
-
-        {!errored && (
-          <Stack className="sticky bottom-0 z-10 w-full border-t border-slate-300 bg-white p-4 shadow-sm">
-            {/* Recording time indicator */}
-            {isRecording && (
-              <div className="w-full border-slate-300 bg-white pb-4 pt-2">
-                <Group justify="center" align="center">
-                  {isPaused ? (
-                    <IconPlayerPause />
-                  ) : (
-                    <div className="h-4 w-4 animate-pulse rounded-full bg-red-500"></div>
-                  )}
-                  <Text className="text-4xl">
-                    {Math.floor(recordingTime / 60)
-                      .toString()
-                      .padStart(2, "0")}
-                    :{(recordingTime % 60).toString().padStart(2, "0")}
-                  </Text>
-                </Group>
-              </div>
-            )}
-
-            <Group justify="center">
-              {!isRecording && (
-                <>
-                  <Group className="w-full">
-                    <Button
-                      size="xl"
-                      rightSection={<IconMicrophone />}
-                      onClick={startRecording}
-                      className="flex-grow"
-                    >
-                      <Trans>Start Recording</Trans>
-                    </Button>
-
-                    <I18nLink to={textModeUrl}>
-                      <ActionIcon component="a" size="60" variant="outline">
-                        <IconTextCaption />
-                      </ActionIcon>
-                    </I18nLink>
-
-                    {!isRecording && chunks?.data && chunks.data.length > 0 && (
-                      <Button
-                        size="xl"
-                        onClick={handleFinish}
-                        component="a"
-                        variant="light"
-                        rightSection={<IconCheck />}
-                      >
-                        Finish
-                      </Button>
-                    )}
-                  </Group>
-                </>
-              )}
-
-              {isRecording && (
-                <>
-                  {isPaused ? (
-                    <Button
-                      className="flex-1"
-                      size="xl"
-                      rightSection={<IconPlayerPlay size={16} />}
-                      onClick={resumeRecording}
-                    >
-                      <Trans>Resume</Trans>
-                    </Button>
-                  ) : (
-                    <Button
-                      className="flex-1"
-                      size="xl"
-                      rightSection={<IconPlayerPause size={16} />}
-                      onClick={pauseRecording}
-                    >
-                      <Trans>Pause</Trans>
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="xl"
-                    rightSection={<IconPlayerStop size={16} />}
-                    onClick={() => {
-                      stopRecording();
-                    }}
-                  >
-                    <Trans>Stop</Trans>
-                  </Button>
-                </>
-              )}
-            </Group>
-          </Stack>
-        )}
-      </div>
-    );
-  };
+const RecordingTimeIndicator = ({
+  recordingTime,
+  isPaused,
+}: {
+  recordingTime: number;
+  isPaused: boolean;
+}) => {
+  return (
+    <Group justify="center" align="center">
+      {isPaused ? (
+        <IconPlayerPause />
+      ) : (
+        <div className="h-4 w-4 animate-pulse rounded-full bg-red-500"></div>
+      )}
+      <Text className="text-4xl">
+        {Math.floor(recordingTime / 3600) > 0 &&
+          Math.floor(recordingTime / 3600)
+            .toString()
+            .padStart(2, "0") + ":"}
+        {Math.floor((recordingTime % 3600) / 60)
+          .toString()
+          .padStart(2, "0")}
+        :{(recordingTime % 60).toString().padStart(2, "0")}
+      </Text>
+    </Group>
+  );
+};
 
 export const ParticipantConversationAudioRoute = () => {
   const { projectId, conversationId } = useParams();
@@ -1162,32 +682,10 @@ export const ParticipantConversationAudioRoute = () => {
           {/* Recording time indicator */}
           {isRecording && (
             <div className="w-full border-slate-300 bg-white pb-4 pt-2">
-              <Group justify="center" align="center">
-                {isPaused ? (
-                  <IconPlayerPause />
-                ) : (
-                  <div className="h-4 w-4 animate-pulse rounded-full bg-red-500"></div>
-                )}
-                <Text className="text-4xl">
-                  {recordingTime >= 3600
-                    ? `${Math.floor(recordingTime / 3600)
-                        .toString()
-                        .padStart(2, "0")}:${Math.floor(
-                        (recordingTime % 3600) / 60,
-                      )
-                        .toString()
-                        .padStart(
-                          2,
-                          "0",
-                        )}:${(recordingTime % 60).toString().padStart(2, "0")}`
-                    : `${Math.floor(recordingTime / 60)
-                        .toString()
-                        .padStart(
-                          2,
-                          "0",
-                        )}:${(recordingTime % 60).toString().padStart(2, "0")}`}
-                </Text>
-              </Group>
+              <RecordingTimeIndicator
+                recordingTime={recordingTime}
+                isPaused={isPaused}
+              />
             </div>
           )}
 
@@ -1321,6 +819,7 @@ export const ParticipantConversationAudioRoute = () => {
     </div>
   );
 };
+
 
 export const ParticipantConversationTextRoute = () => {
   const { projectId, conversationId } = useParams();

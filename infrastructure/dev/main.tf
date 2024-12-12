@@ -288,7 +288,7 @@ resource "azurerm_container_group" "rabbitmq" {
   }
 
   ip_address_type = "Private"
-  subnet_ids       = azurerm_subnet.private_subnet[0].id
+  subnet_ids       = [azurerm_subnet.private_subnet[0].id]
 
   image_registry_credential {
     server   = data.azurerm_container_registry.acr.login_server
@@ -311,7 +311,7 @@ resource "azurerm_container_group" "participant_frontend" {
   os_type             = "Linux"
 
   ip_address_type = "Private"
-  subnet_ids       = azurerm_subnet.private_subnet[0].id
+  subnet_ids       = [azurerm_subnet.private_subnet[0].id]
 
   container {
     name   = "participant-frontend"
@@ -345,7 +345,7 @@ resource "azurerm_container_group" "worker" {
   os_type             = "Linux"
 
   ip_address_type = "Private"
-  subnet_ids       = azurerm_subnet.private_subnet[0].id
+  subnet_ids       = [azurerm_subnet.private_subnet[0].id]
 
   container {
     name   = "worker"
@@ -400,7 +400,7 @@ resource "azurerm_container_group" "api_server" {
   os_type             = "Linux"
 
   ip_address_type = "Private"
-  subnet_ids       = azurerm_subnet.private_subnet[0].id
+  subnet_ids       = [azurerm_subnet.private_subnet[0].id]
 
   container {
     name   = "api-server"

@@ -250,7 +250,7 @@ def count_tokens(text: str) -> int:
 
 
 def get_random_sample_quotes(
-    db: Session, project_analysis_run_id: str, context_limit: int = 100000, batch_size: int = 1000
+    db: Session, project_analysis_run_id: str, context_limit: int = 80000, batch_size: int = 1000
 ) -> List[QuoteModel]:
     """
     Generate a random sample of quotes for a given project and project analysis run, avoiding frequency bias.
@@ -504,7 +504,7 @@ def assign_aspect_centroid(db: Session, aspect_id: str, language: str) -> None:
         logger.error(f"Project analysis run ID not found for view {view.id}")
         return
 
-    sample_quotes = get_random_sample_quotes(db, project_analysis_run_id, context_limit=100000)
+    sample_quotes = get_random_sample_quotes(db, project_analysis_run_id)
     sample_quotes_texts = [quote.text for quote in sample_quotes]
     random_sample_quotes = "\n".join([f'"{quote}"' for quote in sample_quotes_texts])
 

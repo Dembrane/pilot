@@ -1,5 +1,3 @@
-import { t } from "@lingui/core/macro";
-import { Trans } from "@lingui/react/macro";
 import WelcomeImage from "@/assets/participant-welcome-pattern.png";
 import { Logo } from "@/components/common/Logo";
 import { Markdown } from "@/components/common/Markdown";
@@ -13,6 +11,7 @@ import {
   ActionIcon,
   Box,
   Button,
+  Container,
   Divider,
   Group,
   LoadingOverlay,
@@ -39,14 +38,17 @@ import {
 } from "@tabler/icons-react";
 import {
   PropsWithChildren,
+  useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
-import {useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
+import { useLanguage } from "@/lib/useLanguage";
 import { useWakeLock } from "@/lib/useWakeLock";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { Trans, t } from "@lingui/macro";
 import clsx from "clsx";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -104,7 +106,11 @@ interface UseAudioRecorderResult {
   isRecording: boolean;
   isPaused: boolean;
   recordingTime: number;
-  errored: boolean;
+  errored:
+    | boolean
+    | {
+        message: string;
+      };
   loading: boolean;
   permissionError: string | null;
 }
@@ -113,16 +119,27 @@ const useChunkedAudioRecorder = ({
   onChunk,
   mimeType = defaultMimeType,
   timeslice = 30000, // 30 sec
+  // timeslice = 300000, // 5 min
   debug = false,
 }: UseAudioRecorderOptions): UseAudioRecorderResult => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
-  const [permissionError, setPermissionError] = useState<string | null>(null);
+  const [userPaused, setUserPaused] = useState(false);
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const isRecordingRef = useRef(isRecording);
+  const isPausedRef = useRef(isPaused);
+  const userPausedRef = useRef(userPaused);
+
+  const [recordingTime, setRecordingTime] = useState(0);
   const streamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const startRecordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioProcessorRef = useRef<AudioWorkletNode | null>(null);
+
+  const [permissionError, setPermissionError] = useState<string | null>(null);
 
   const log = (...args: any[]) => {
     if (debug) {
@@ -131,15 +148,74 @@ const useChunkedAudioRecorder = ({
   };
 
   useEffect(() => {
-    // Cleanup function to stop recording when component unmounts
+    // for syncing
+    isRecordingRef.current = isRecording;
+    isPausedRef.current = isPaused;
+    userPausedRef.current = userPaused;
+  }, [isRecording, isPaused, userPaused]);
+
+  useEffect(() => {
     return () => {
-      stopRecording();
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const updateRecordingTime = useCallback(() => {
+    setRecordingTime((prev) => prev + 1);
+  }, []);
+
+  const chunkBufferRef = useRef<Blob[]>([]);
+
+  const startRecordingChunk = useCallback(() => {
+    log("startRecordingChunk", {
+      isRecording,
+      mediaRecorderRefState: mediaRecorderRef.current?.state,
+    });
+    if (!streamRef.current) {
+      log("startRecordingChunk: no stream found");
+      return;
+    }
+
+    // Ensure that any previous MediaRecorder instance is stopped before creating a new one
+    if (mediaRecorderRef.current) {
+      log("startRecordingChunk: stopping previous MediaRecorder instance");
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current = null;
+    }
+
+    log("startRecordingChunk: creating new MediaRecorder instance");
+    const recorder = new MediaRecorder(streamRef.current, {
+      mimeType: MediaRecorder.isTypeSupported(mimeType)
+        ? mimeType
+        : "audio/webm",
+    });
+    mediaRecorderRef.current = recorder;
+
+    recorder.ondataavailable = (event) => {
+      log("ondataavailable", event.data.size, "bytes");
+      if (event.data.size > 0) {
+        chunkBufferRef.current.push(event.data);
+      }
+    };
+
+    recorder.onstop = () => {
+      log("MediaRecorder stopped");
+      onChunk(new Blob(chunkBufferRef.current, { type: mimeType }));
+
+      startRecordingChunk();
+
+      // flush the buffer
+      chunkBufferRef.current = [];
+    };
+
+    // allow for some room to restart so all is just one chunk as per mediarec
+    recorder.start(timeslice * 2);
+  }, [isRecording]);
 
   const startRecording = async () => {
     try {
@@ -148,67 +224,67 @@ const useChunkedAudioRecorder = ({
       streamRef.current = stream;
       log("Access to microphone granted.", { stream });
 
-      const recorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported(mimeType)
-          ? mimeType
-          : "audio/webm",
-      });
-      mediaRecorderRef.current = recorder;
-
-      recorder.ondataavailable = (event) => {
-        log("ondataavailable", event.data.size, "bytes");
-        if (event.data.size > 0) {
-          onChunk(event.data);
-        }
-      };
-
-      recorder.onstop = () => {
-        log("MediaRecorder stopped");
-      };
-
-      recorder.onerror = (event: any) => {
-        console.error("MediaRecorder error", event.error);
-        const errorMessage =
-          event.error.name || event.error.message || "Unknown recording error";
-        setPermissionError(errorMessage);
-        stopRecording();
-      };
-
-      recorder.start(timeslice); // Automatically triggers ondataavailable every timeslice ms
+      log("Creating MediaRecorder instance");
 
       setIsRecording(true);
       setIsPaused(false);
-      setRecordingTime(0);
+      setUserPaused(false);
+      startRecordingChunk();
 
-      // Start recording time counter
-      intervalRef.current = setInterval(() => {
-        setRecordingTime((prevTime) => prevTime + 1);
-      }, 1000);
-    } catch (error: any) {
+      // allow to restart recording chunk
+      startRecordingIntervalRef.current = setInterval(() => {
+        log("Checking if MediaRecorder should be stopped");
+        if (mediaRecorderRef.current?.state === "recording") {
+          log("attempting to Stop recording chunk");
+          mediaRecorderRef.current.stop();
+
+          log("attempt to Restart recording chunk", {
+            isRecording,
+            mediaRecorderRefState: mediaRecorderRef.current?.state,
+          });
+
+          if (isRecording) {
+            log("Restarting recording chunk");
+            startRecordingChunk();
+          }
+        }
+      }, timeslice);
+
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      intervalRef.current = setInterval(updateRecordingTime, 1000);
+    } catch (error) {
       console.error("Error accessing audio stream", error);
-      setPermissionError(error.message || "Error accessing audio stream");
+      setPermissionError("Error accessing audio stream");
       setIsRecording(false);
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current) {
-      if (mediaRecorderRef.current.state !== "inactive") {
-        mediaRecorderRef.current.stop();
-      }
-      mediaRecorderRef.current = null;
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state === "recording"
+    ) {
+      mediaRecorderRef.current.stop();
     }
     setIsRecording(false);
     setIsPaused(false);
+    setUserPaused(false);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
     setRecordingTime(0);
+    if (startRecordingIntervalRef.current)
+      clearInterval(startRecordingIntervalRef.current);
+    // remove the worker
+    audioProcessorRef.current?.disconnect();
+    audioProcessorRef.current = null;
+    // close the audio context
+    audioContextRef.current?.close();
+    audioContextRef.current = null;
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
   };
 
   const pauseRecording = () => {
@@ -220,9 +296,13 @@ const useChunkedAudioRecorder = ({
       setIsPaused(true);
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
-        intervalRef.current = null;
       }
     }
+  };
+
+  const userPauseRecording = () => {
+    pauseRecording();
+    setUserPaused(true);
   };
 
   const resumeRecording = () => {
@@ -231,23 +311,30 @@ const useChunkedAudioRecorder = ({
       mediaRecorderRef.current.state === "paused"
     ) {
       mediaRecorderRef.current.resume();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      intervalRef.current = setInterval(updateRecordingTime, 1000);
       setIsPaused(false);
-      intervalRef.current = setInterval(() => {
-        setRecordingTime((prevTime) => prevTime + 1);
-      }, 1000);
+      setUserPaused(false);
     }
+  };
+
+  const userResumeRecording = () => {
+    resumeRecording();
+    setUserPaused(false);
   };
 
   return {
     startRecording,
     stopRecording,
-    pauseRecording,
-    resumeRecording,
+    pauseRecording: userPauseRecording,
+    resumeRecording: userResumeRecording,
     isRecording,
     isPaused,
     recordingTime,
-    errored: !!permissionError,
     loading: false,
+    errored: false,
     permissionError,
   };
 };
@@ -505,34 +592,6 @@ const ParticipantBody = ({
   );
 };
 
-const RecordingTimeIndicator = ({
-  recordingTime,
-  isPaused,
-}: {
-  recordingTime: number;
-  isPaused: boolean;
-}) => {
-  return (
-    <Group justify="center" align="center">
-      {isPaused ? (
-        <IconPlayerPause />
-      ) : (
-        <div className="h-4 w-4 animate-pulse rounded-full bg-red-500"></div>
-      )}
-      <Text className="text-4xl">
-        {Math.floor(recordingTime / 3600) > 0 &&
-          Math.floor(recordingTime / 3600)
-            .toString()
-            .padStart(2, "0") + ":"}
-        {Math.floor((recordingTime % 3600) / 60)
-          .toString()
-          .padStart(2, "0")}
-        :{(recordingTime % 60).toString().padStart(2, "0")}
-      </Text>
-    </Group>
-  );
-};
-
 export const ParticipantConversationAudioRoute = () => {
   const { projectId, conversationId } = useParams();
 
@@ -682,10 +741,32 @@ export const ParticipantConversationAudioRoute = () => {
           {/* Recording time indicator */}
           {isRecording && (
             <div className="w-full border-slate-300 bg-white pb-4 pt-2">
-              <RecordingTimeIndicator
-                recordingTime={recordingTime}
-                isPaused={isPaused}
-              />
+              <Group justify="center" align="center">
+                {isPaused ? (
+                  <IconPlayerPause />
+                ) : (
+                  <div className="h-4 w-4 animate-pulse rounded-full bg-red-500"></div>
+                )}
+                <Text className="text-4xl">
+                  {recordingTime >= 3600
+                    ? `${Math.floor(recordingTime / 3600)
+                        .toString()
+                        .padStart(2, "0")}:${Math.floor(
+                        (recordingTime % 3600) / 60,
+                      )
+                        .toString()
+                        .padStart(
+                          2,
+                          "0",
+                        )}:${(recordingTime % 60).toString().padStart(2, "0")}`
+                    : `${Math.floor(recordingTime / 60)
+                        .toString()
+                        .padStart(
+                          2,
+                          "0",
+                        )}:${(recordingTime % 60).toString().padStart(2, "0")}`}
+                </Text>
+              </Group>
             </div>
           )}
 
@@ -819,7 +900,6 @@ export const ParticipantConversationAudioRoute = () => {
     </div>
   );
 };
-
 
 export const ParticipantConversationTextRoute = () => {
   const { projectId, conversationId } = useParams();

@@ -51,7 +51,7 @@ msgstr "{0}"
 msgid "{0} Conversations • Edited {1}"
 msgstr "{0} Conversaciones • Editado {1}"
 
-#: src/routes/participant/ParticipantConversation.tsx:370
+#: src/routes/participant/ParticipantConversation.tsx:457
 msgid "*Transcription in progress.*"
 msgstr "*Transcripción en progreso.*"
 
@@ -141,7 +141,7 @@ msgstr "¿Estás seguro de que quieres eliminar esta conversación? Esta acción
 msgid "Are you sure you want to delete this project?"
 msgstr "¿Estás seguro de que quieres eliminar este proyecto?"
 
-#: src/routes/participant/ParticipantConversation.tsx:746
+#: src/routes/participant/ParticipantConversation.tsx:827
 msgid "Are you sure you want to delete this recording?"
 msgstr "¿Estás seguro de que quieres eliminar esta grabación?"
 
@@ -153,8 +153,8 @@ msgstr "¿Estás seguro de que quieres eliminar esta grabación?"
 msgid "Are you sure you want to delete this tag? This will remove the tag from existing conversations that contain it."
 msgstr "¿Estás seguro de que quieres eliminar esta etiqueta? Esto eliminará la etiqueta de las conversaciones existentes que la contienen."
 
-#: src/routes/participant/ParticipantConversation.tsx:618
-#: src/routes/participant/ParticipantConversation.tsx:853
+#: src/routes/participant/ParticipantConversation.tsx:677
+#: src/routes/participant/ParticipantConversation.tsx:933
 msgid "Are you sure you want to finish?"
 msgstr "¿Estás seguro de que quieres terminar?"
 
@@ -243,7 +243,7 @@ msgstr "Chat | Dembrane"
 msgid "Chats"
 msgstr "Chats"
 
-#: src/routes/participant/ParticipantConversation.tsx:665
+#: src/routes/participant/ParticipantConversation.tsx:724
 msgid "Check microphone access"
 msgstr "Verificar acceso al micrófono"
 
@@ -426,8 +426,8 @@ msgstr "Exportar"
 msgid "Filter"
 msgstr "Filtrar"
 
-#: src/routes/participant/ParticipantConversation.tsx:731
-#: src/routes/participant/ParticipantConversation.tsx:904
+#: src/routes/participant/ParticipantConversation.tsx:812
+#: src/routes/participant/ParticipantConversation.tsx:984
 msgid "Finish"
 msgstr "Finalizar"
 
@@ -488,23 +488,12 @@ msgstr "Inicio"
 #: src/components/project/ProjectBasicEdit.tsx:127
 msgid ""
 "How would you describe to a colleague what are you trying to accomplish with this project?\n"
-"\n"
 "* What is the north star goal or key metric\n"
 "* What does success look like"
-msgstr "¿Cómo describirías a un colega lo que estás tratando de lograr con este proyecto?\n"
-"\n"
+msgstr ""
+"¿Cómo le describirías a un colega lo que estás tratando de lograr con este proyecto?\n"
 "* ¿Cuál es el objetivo principal o métrica clave?\n"
 "* ¿Cómo se ve el éxito?"
-
-#: src/components/project/ProjectBasicEdit.tsx:126
-#~ msgid ""
-#~ "How would you describe to a colleague what are you trying to accomplish with this project?\n"
-#~ "* What is the north star goal or key metric\n"
-#~ "* What does success look like"
-#~ msgstr ""
-#~ "¿Cómo le describirías a un colega lo que estás tratando de lograr con este proyecto?\n"
-#~ "* ¿Cuál es el objetivo principal o métrica clave?\n"
-#~ "* ¿Cómo se ve el éxito?"
 
 #: src/routes/project/library/ProjectLibrary.tsx:389
 msgid "In order to better navigate through the quotes, create additional views. The quotes will then be clustered based on your view."
@@ -621,7 +610,7 @@ msgstr "Notas de Reunión"
 msgid "Messages from {0} - {1}%"
 msgstr "Mensajes de {0} - {1}%"
 
-#: src/routes/participant/ParticipantConversation.tsx:605
+#: src/routes/participant/ParticipantConversation.tsx:664
 msgid "Microphone access is still denied. Please check your settings and try again."
 msgstr "El acceso al micrófono sigue denegado. Por favor verifica tu configuración e intenta de nuevo."
 
@@ -756,7 +745,7 @@ msgstr "Más antiguos primero"
 msgid "Ongoing Conversations"
 msgstr "Conversaciones en Curso"
 
-#: src/routes/participant/ParticipantConversation.tsx:639
+#: src/routes/participant/ParticipantConversation.tsx:698
 msgid "Oops! It looks like microphone access was denied. No worries, though! We've got a handy troubleshooting guide for you. Feel free to check it out. Once you've resolved the issue, come back and visit this page again to check if your microphone is ready."
 msgstr "¡Ups! Parece que se denegó el acceso al micrófono. ¡No te preocupes! Tenemos una guía de solución de problemas para ti. Siéntete libre de consultarla. Una vez que hayas resuelto el problema, vuelve a visitar esta página para verificar si tu micrófono está listo."
 
@@ -769,7 +758,7 @@ msgstr "Abrir"
 msgid "Open for Participation?"
 msgstr "¿Abierto para Participación?"
 
-#: src/routes/participant/ParticipantConversation.tsx:656
+#: src/routes/participant/ParticipantConversation.tsx:715
 msgid "Open troubleshooting guide"
 msgstr "Abrir guía de solución de problemas"
 
@@ -810,7 +799,7 @@ msgstr "Contraseña"
 msgid "Passwords do not match"
 msgstr "Las contraseñas no coinciden"
 
-#: src/routes/participant/ParticipantConversation.tsx:801
+#: src/routes/participant/ParticipantConversation.tsx:882
 msgid "Pause"
 msgstr "Pausar"
 
@@ -818,7 +807,7 @@ msgstr "Pausar"
 msgid "Please check your inputs for errors."
 msgstr "Por favor, revisa tus entradas para errores."
 
-#: src/routes/participant/ParticipantConversation.tsx:694
+#: src/routes/participant/ParticipantConversation.tsx:775
 msgid "Please do not close your browser"
 msgstr "Por favor, no cierres su navegador"
 
@@ -834,7 +823,7 @@ msgstr "Por favor, inicia sesión para continuar."
 msgid "Please provide a concise summary of the following provided in the context."
 msgstr "Por favor, proporciona un resumen conciso de los siguientes elementos proporcionados en el contexto."
 
-#: src/routes/participant/ParticipantConversation.tsx:443
+#: src/routes/participant/ParticipantConversation.tsx:530
 msgid "Please record your response by clicking the \"Start Recording\" button below. You may also choose to respond in text by clicking the text icon."
 msgstr "Por favor, registra tu respuesta haciendo clic en el botón \"Iniciar Grabación\" de abajo. También puedes responder en texto haciendo clic en el icono de texto."
 
@@ -954,7 +943,7 @@ msgstr "Restablecer Contraseña | Dembrane"
 msgid "Resources"
 msgstr "Recursos"
 
-#: src/routes/participant/ParticipantConversation.tsx:792
+#: src/routes/participant/ParticipantConversation.tsx:873
 msgid "Resume"
 msgstr "Reanudar"
 
@@ -1048,7 +1037,7 @@ msgstr "Algo salió mal"
 msgid "Something went wrong while uploading the file: {0}"
 msgstr "Algo salió mal al subir el archivo: {0}"
 
-#: src/routes/participant/ParticipantConversation.tsx:761
+#: src/routes/participant/ParticipantConversation.tsx:842
 msgid "Something went wrong. Please try again."
 msgstr "Algo salió mal. Por favor, inténtalo de nuevo."
 
@@ -1068,17 +1057,17 @@ msgstr "Locutor"
 msgid "Specific Context"
 msgstr "Contexto Específico"
 
-#: src/routes/participant/ParticipantConversation.tsx:709
+#: src/routes/participant/ParticipantConversation.tsx:790
 msgid "Start Recording"
 msgstr "Iniciar Grabación"
 
 #: src/routes/project/chat/ProjectChat.tsx:447
-#: src/routes/participant/ParticipantConversation.tsx:812
+#: src/routes/participant/ParticipantConversation.tsx:893
 msgid "Stop"
 msgstr "Detener"
 
-#: src/routes/participant/ParticipantConversation.tsx:776
-#: src/routes/participant/ParticipantConversation.tsx:889
+#: src/routes/participant/ParticipantConversation.tsx:857
+#: src/routes/participant/ParticipantConversation.tsx:969
 #: src/routes/auth/RequestPasswordReset.tsx:49
 msgid "Submit"
 msgstr "Enviar"
@@ -1201,7 +1190,7 @@ msgstr "Transcripción"
 msgid "Type a message..."
 msgstr "Escribe un mensaje..."
 
-#: src/routes/participant/ParticipantConversation.tsx:877
+#: src/routes/participant/ParticipantConversation.tsx:957
 msgid "Type your response here"
 msgstr "Escribe tu respuesta aquí"
 
@@ -1210,7 +1199,7 @@ msgstr "Escribe tu respuesta aquí"
 msgid "Unsaved changes"
 msgstr "Cambios sin guardar"
 
-#: src/routes/participant/ParticipantConversation.tsx:693
+#: src/routes/participant/ParticipantConversation.tsx:774
 msgid "Upload in progress"
 msgstr "Cargando..."
 
@@ -1228,7 +1217,7 @@ msgstr "Usa Shift + Enter para agregar una nueva línea"
 msgid "View"
 msgstr "Vista"
 
-#: src/routes/participant/ParticipantConversation.tsx:467
+#: src/routes/participant/ParticipantConversation.tsx:554
 msgid "View your responses"
 msgstr "Ver tus respuestas"
 
@@ -1236,7 +1225,7 @@ msgstr "Ver tus respuestas"
 msgid "We have sent you an email with next steps. If you don't see it, check your spam folder."
 msgstr "Te hemos enviado un correo electrónico con los pasos siguientes. Si no lo ves, revisa tu carpeta de correo no deseado."
 
-#: src/routes/participant/ParticipantConversation.tsx:426
+#: src/routes/participant/ParticipantConversation.tsx:513
 msgid "Welcome"
 msgstr "Bienvenido"
 
@@ -1280,7 +1269,7 @@ msgstr "Tu biblioteca está vacía. Crea una biblioteca para ver tus primeros in
 msgid "Your response has been recorded. You may now close this tab."
 msgstr "Tu respuesta ha sido registrada. Puedes cerrar esta pestaña ahora."
 
-#: src/routes/participant/ParticipantConversation.tsx:476
+#: src/routes/participant/ParticipantConversation.tsx:563
 msgid "Your responses"
 msgstr "Tus respuestas"
 

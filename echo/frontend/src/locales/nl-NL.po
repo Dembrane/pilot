@@ -59,7 +59,7 @@ msgstr "{0} Gesprekken • Bewerkt {1}"
 #~ msgid "*Oh, we don't have a cookie statement because we don't use cookies! We eat them.*"
 #~ msgstr "*Oh, we hebben geen cookievermelding want we gebruiken geen cookies! We eten ze op.*"
 
-#: src/routes/participant/ParticipantConversation.tsx:370
+#: src/routes/participant/ParticipantConversation.tsx:457
 msgid "*Transcription in progress.*"
 msgstr "*Een moment a.u.b.*"
 
@@ -185,7 +185,7 @@ msgstr "Weet je zeker dat je dit gesprek wilt verwijderen? Dit kan niet ongedaan
 msgid "Are you sure you want to delete this project?"
 msgstr "Weet je zeker dat je dit project wilt verwijderen?"
 
-#: src/routes/participant/ParticipantConversation.tsx:746
+#: src/routes/participant/ParticipantConversation.tsx:827
 msgid "Are you sure you want to delete this recording?"
 msgstr "Weet je zeker dat je deze opname wilt verwijderen?"
 
@@ -197,8 +197,8 @@ msgstr "Weet je zeker dat je deze opname wilt verwijderen?"
 msgid "Are you sure you want to delete this tag? This will remove the tag from existing conversations that contain it."
 msgstr "Weet je zeker dat je dit trefwoord wilt verwijderen? Dit zal het trefwoord verwijderen uit bestaande gesprekken die het bevatten."
 
-#: src/routes/participant/ParticipantConversation.tsx:618
-#: src/routes/participant/ParticipantConversation.tsx:853
+#: src/routes/participant/ParticipantConversation.tsx:677
+#: src/routes/participant/ParticipantConversation.tsx:933
 msgid "Are you sure you want to finish?"
 msgstr "Weet je zeker dat je het wilt afmaken?"
 
@@ -319,7 +319,7 @@ msgstr "Chat | Dembrane"
 msgid "Chats"
 msgstr "Chats"
 
-#: src/routes/participant/ParticipantConversation.tsx:665
+#: src/routes/participant/ParticipantConversation.tsx:724
 msgid "Check microphone access"
 msgstr "Controleer microfoontoegang"
 
@@ -550,8 +550,8 @@ msgstr "Exporteer"
 msgid "Filter"
 msgstr "Filteren"
 
-#: src/routes/participant/ParticipantConversation.tsx:731
-#: src/routes/participant/ParticipantConversation.tsx:904
+#: src/routes/participant/ParticipantConversation.tsx:812
+#: src/routes/participant/ParticipantConversation.tsx:984
 msgid "Finish"
 msgstr "Voltooien"
 
@@ -633,20 +633,12 @@ msgstr "Home"
 #: src/components/project/ProjectBasicEdit.tsx:127
 msgid ""
 "How would you describe to a colleague what are you trying to accomplish with this project?\n"
-"\n"
 "* What is the north star goal or key metric\n"
 "* What does success look like"
-msgstr "Hoe zou je een collega uitleggen wat je probeert te bereiken met dit project?\n"
-
-#: src/components/project/ProjectBasicEdit.tsx:126
-#~ msgid ""
-#~ "How would you describe to a colleague what are you trying to accomplish with this project?\n"
-#~ "* What is the north star goal or key metric\n"
-#~ "* What does success look like"
-#~ msgstr ""
-#~ "Hoe zou je een collega uitleggen wat je probeert te bereiken met dit project?\n"
-#~ "* Wat is de noordsterdoel of belangrijkste maatstaf\n"
-#~ "* Wat ziet eruit als succes"
+msgstr ""
+"Hoe zou je een collega uitleggen wat je probeert te bereiken met dit project?\n"
+"* Wat is de noordsterdoel of belangrijkste maatstaf\n"
+"* Wat ziet eruit als succes"
 
 #: src/routes/project/library/ProjectLibrary.tsx:389
 msgid "In order to better navigate through the quotes, create additional views. The quotes will then be clustered based on your view."
@@ -779,7 +771,7 @@ msgstr "Vergaderingenotes"
 msgid "Messages from {0} - {1}%"
 msgstr "Berichten van {0} - {1}%"
 
-#: src/routes/participant/ParticipantConversation.tsx:605
+#: src/routes/participant/ParticipantConversation.tsx:664
 msgid "Microphone access is still denied. Please check your settings and try again."
 msgstr "Toegang tot de microfoon wordt nog steeds geweigerd. Controleer uw instellingen en probeer het opnieuw."
 
@@ -922,7 +914,7 @@ msgstr "Oudste eerst"
 msgid "Ongoing Conversations"
 msgstr "Actieve Gesprekken"
 
-#: src/routes/participant/ParticipantConversation.tsx:639
+#: src/routes/participant/ParticipantConversation.tsx:698
 msgid "Oops! It looks like microphone access was denied. No worries, though! We've got a handy troubleshooting guide for you. Feel free to check it out. Once you've resolved the issue, come back and visit this page again to check if your microphone is ready."
 msgstr "Oeps! Het lijkt erop dat toegang tot de microfoon geweigerd is. Geen zorgen, we hebben een handige probleemoplossingsgids voor je. Voel je vrij om deze te bekijken. Zodra je het probleem hebt opgelost, kom dan terug naar deze pagina om te controleren of je microfoon klaar is voor gebruik."
 
@@ -939,7 +931,7 @@ msgstr "Openen"
 msgid "Open for Participation?"
 msgstr "Open voor deelneming?"
 
-#: src/routes/participant/ParticipantConversation.tsx:656
+#: src/routes/participant/ParticipantConversation.tsx:715
 msgid "Open troubleshooting guide"
 msgstr "Open de probleemoplossingsgids"
 
@@ -993,7 +985,7 @@ msgstr "Wachtwoord"
 msgid "Passwords do not match"
 msgstr "Wachtwoorden komen niet overeen"
 
-#: src/routes/participant/ParticipantConversation.tsx:801
+#: src/routes/participant/ParticipantConversation.tsx:882
 msgid "Pause"
 msgstr "Pauze"
 
@@ -1001,7 +993,7 @@ msgstr "Pauze"
 msgid "Please check your inputs for errors."
 msgstr "Controleer uw invoer voor fouten."
 
-#: src/routes/participant/ParticipantConversation.tsx:694
+#: src/routes/participant/ParticipantConversation.tsx:775
 msgid "Please do not close your browser"
 msgstr "Sluit uw browser alstublieft niet"
 
@@ -1021,7 +1013,7 @@ msgstr "Log in om door te gaan."
 msgid "Please provide a concise summary of the following provided in the context."
 msgstr "Geef een korte samenvatting van het volgende dat in de context is verstrekt."
 
-#: src/routes/participant/ParticipantConversation.tsx:443
+#: src/routes/participant/ParticipantConversation.tsx:530
 msgid "Please record your response by clicking the \"Start Recording\" button below. You may also choose to respond in text by clicking the text icon."
 msgstr "Neem uw antwoord op door op de knop \"Opname starten\" hieronder te klikken. U kunt er ook voor kiezen om in tekst te reageren door op het teksticoon te klikken."
 
@@ -1157,7 +1149,7 @@ msgstr "Wachtwoord resetten | Dembrane"
 msgid "Resources"
 msgstr "Bronnen"
 
-#: src/routes/participant/ParticipantConversation.tsx:792
+#: src/routes/participant/ParticipantConversation.tsx:873
 msgid "Resume"
 msgstr "Hervatten"
 
@@ -1264,7 +1256,7 @@ msgstr "Er ging iets mis"
 msgid "Something went wrong while uploading the file: {0}"
 msgstr "Er ging iets mis tijdens het uploaden van het bestand: {0}"
 
-#: src/routes/participant/ParticipantConversation.tsx:761
+#: src/routes/participant/ParticipantConversation.tsx:842
 msgid "Something went wrong. Please try again."
 msgstr "Er is iets misgegaan. Probeer het alstublieft opnieuw."
 
@@ -1284,17 +1276,17 @@ msgstr "Spreker"
 msgid "Specific Context"
 msgstr "Specifieke context"
 
-#: src/routes/participant/ParticipantConversation.tsx:709
+#: src/routes/participant/ParticipantConversation.tsx:790
 msgid "Start Recording"
 msgstr "Opname starten"
 
 #: src/routes/project/chat/ProjectChat.tsx:447
-#: src/routes/participant/ParticipantConversation.tsx:812
+#: src/routes/participant/ParticipantConversation.tsx:893
 msgid "Stop"
 msgstr "Stop"
 
-#: src/routes/participant/ParticipantConversation.tsx:776
-#: src/routes/participant/ParticipantConversation.tsx:889
+#: src/routes/participant/ParticipantConversation.tsx:857
+#: src/routes/participant/ParticipantConversation.tsx:969
 #: src/routes/auth/RequestPasswordReset.tsx:49
 msgid "Submit"
 msgstr "Stuur in"
@@ -1458,7 +1450,7 @@ msgstr "Typ een bericht..."
 #~ msgid "Type context here..."
 #~ msgstr "Typ hier de context..."
 
-#: src/routes/participant/ParticipantConversation.tsx:877
+#: src/routes/participant/ParticipantConversation.tsx:957
 msgid "Type your response here"
 msgstr "Typ hier uw reactie"
 
@@ -1471,7 +1463,7 @@ msgstr "Niet-opgeslagen wijzigingen"
 #~ msgid "Upload documents"
 #~ msgstr "Upload documenten"
 
-#: src/routes/participant/ParticipantConversation.tsx:693
+#: src/routes/participant/ParticipantConversation.tsx:774
 msgid "Upload in progress"
 msgstr "Upload bezig"
 
@@ -1489,7 +1481,7 @@ msgstr "Gebruik Shift + Enter om een nieuwe regel toe te voegen"
 msgid "View"
 msgstr "View"
 
-#: src/routes/participant/ParticipantConversation.tsx:467
+#: src/routes/participant/ParticipantConversation.tsx:554
 msgid "View your responses"
 msgstr "Bekijk je reacties"
 
@@ -1497,7 +1489,7 @@ msgstr "Bekijk je reacties"
 msgid "We have sent you an email with next steps. If you don't see it, check your spam folder."
 msgstr "We hebben u een e-mail gestuurd met de volgende stappen. Als u het niet ziet, checkt u uw spammap."
 
-#: src/routes/participant/ParticipantConversation.tsx:426
+#: src/routes/participant/ParticipantConversation.tsx:513
 msgid "Welcome"
 msgstr "Welkom"
 
@@ -1561,7 +1553,7 @@ msgstr "Je bibliotheek is leeg. Maak een bibliotheek om je eerste inzichten te b
 msgid "Your response has been recorded. You may now close this tab."
 msgstr "Je reactie is opgenomen. Je kunt dit tabblad nu sluiten."
 
-#: src/routes/participant/ParticipantConversation.tsx:476
+#: src/routes/participant/ParticipantConversation.tsx:563
 msgid "Your responses"
 msgstr "Je reacties"
 

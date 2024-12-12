@@ -210,6 +210,10 @@ resource "azurerm_container_group" "rabbitmq" {
     }
   }
 
+  dns_name_label = "dbr-${var.environment}-rabbitmq"
+  ip_address_type = "Private"
+  subnet_ids       = azurerm_subnet.private_subnet[*].id
+
   image_registry_credential {
     server   = data.azurerm_container_registry.acr.login_server
     username = var.acr_username
@@ -229,6 +233,10 @@ resource "azurerm_container_group" "participant_frontend" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
+
+  dns_name_label = "dbr-${var.environment}-participant-frontend"
+  ip_address_type = "Private"
+  subnet_ids       = azurerm_subnet.private_subnet[*].id
 
   container {
     name   = "participant-frontend"
@@ -253,8 +261,133 @@ resource "azurerm_container_group" "participant_frontend" {
 
 }
 
+## Deploy Worker
+
+resource "azurerm_container_group" "worker" {
+  name                = "DBR-${var.environment}-Workers-Worker-ACI"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  os_type             = "Linux"
+
+  dns_name_label = "dbr-${var.environment}-worker"
+  ip_address_type = "Private"
+  subnet_ids       = azurerm_subnet.private_subnet[*].id
+
+  container {
+    name   = "worker"
+    image  = "${data.azurerm_container_registry.acr.login_server}/worker:development-latest"
+    cpu    = "1"
+    memory = "2"
+
+    ports {
+      port     = 8000
+      protocol = "TCP"
+    }
+
+    volume {
+      name       = "uploads-volume"
+      mount_path = "/code/server/uploads"
+      share_name = azurerm_storage_share.uploads.name
+      storage_account_name = azurerm_storage_account.api-server-storage.name
+      storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
+    }
+
+    volume {
+      name       = "trankit-cache-volume"
+      mount_path = "/code/server/trankit_cache"
+      share_name = azurerm_storage_share.trankit.name
+      storage_account_name = azurerm_storage_account.api-server-storage.name
+      storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
+    }
+  }
+
+  ## add shared volume for     volumes:- ./server/uploads:/code/server/uploads and - ./server/trankit_cache:/code/server/trankit_cache
+  
+
+  image_registry_credential {
+    server   = data.azurerm_container_registry.acr.login_server
+    username = var.acr_username
+    password = var.acr_password
+  }
+
+  lifecycle {
+    ignore_changes = [image_registry_credential]
+  }
+
+}
 
 
+# deploy api-server 
+
+resource "azurerm_container_group" "api_server" {
+  name                = "DBR-${var.environment}-Workers-ApiServer-ACI"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  os_type             = "Linux"
+
+  dns_name_label = "dbr-${var.environment}-api-server"
+  ip_address_type = "Private"
+  subnet_ids       = azurerm_subnet.private_subnet[*].id
+
+  container {
+    name   = "api-server"
+    image  = "${data.azurerm_container_registry.acr.login_server}/api-server:development-latest"
+    cpu    = "1"
+    memory = "2"
+
+    ports {
+      port     = 8000
+      protocol = "TCP"
+    }
+
+    volume {
+      name       = "uploads-volume"
+      mount_path = "/code/server/uploads"
+      share_name = azurerm_storage_share.uploads.name
+      storage_account_name = azurerm_storage_account.api-server-storage.name
+      storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
+    }
+
+    volume {
+      name       = "trankit-cache-volume"
+      mount_path = "/code/server/trankit_cache"
+      share_name = azurerm_storage_share.trankit.name
+      storage_account_name = azurerm_storage_account.api-server-storage.name
+      storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
+    }
+  }
+
+  image_registry_credential {
+    server   = data.azurerm_container_registry.acr.login_server
+    username = var.acr_username
+    password = var.acr_password
+  }
+
+  lifecycle {
+    ignore_changes = [image_registry_credential]
+  }
+}
+
+
+resource "azurerm_storage_account" "api-server-storage" {
+  name                     = "dbrdevbackendstorage"
+  resource_group_name      = azurerm_resource_group.rg.name
+  location                 = azurerm_resource_group.rg.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+}
+
+resource "azurerm_storage_share" "uploads" {
+  name                 = "uploads"
+  storage_account_name = azurerm_storage_account.api-server-storage.name
+  quota               = 500  # GB
+}
+
+resource "azurerm_storage_share" "trankit" {
+  name                 = "trankit-cache"
+  storage_account_name = azurerm_storage_account.api-server-storage.name
+  quota               = 500  # GB
+}
 
 ### Data
 
@@ -400,7 +533,7 @@ resource "azurerm_cognitive_deployment" "embedding" {
 data "azurerm_client_config" "current" {}
 
 # Azure Key Vault
-resource "azurerm_key_vault" "DBR-prod-Backend-RuntimeConfig-KeyVault" {
+resource "azurerm_key_vault" "DBR-dev-Backend-RuntimeConfig-KeyVault" {
   name                        = "DBR-${var.environment}-RuntimeConfig-KV"
   location                    = "westeurope"
   resource_group_name         = azurerm_resource_group.rg.name
@@ -410,115 +543,3 @@ resource "azurerm_key_vault" "DBR-prod-Backend-RuntimeConfig-KeyVault" {
   purge_protection_enabled = true
 }
 
-
-# Key Vault Secrets
-resource "azurerm_key_vault_secret" "postgres_password" {
-  name         = "POSTGRES-PASSWORD"
-  value        = ""
-  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-resource "azurerm_key_vault_secret" "rabbitmq_password" {
-  name         = "RABBITMQ-DEFAULT-PASS"
-  value        = ""
-  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-resource "azurerm_key_vault_secret" "directus_secret" {
-  name         = "DIRECTUS-SECRET"
-  value        = ""
-  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-resource "azurerm_key_vault_secret" "directus_admin_password" {
-  name         = "DIRECTUS-ADMIN-PASSWORD"
-  value        = ""
-  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-resource "azurerm_key_vault_secret" "smtp_password" {
-  name         = "SMTP-PASSWORD"
-  value        = ""
-  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-resource "azurerm_key_vault_secret" "auth_google_client_secret" {
-  name         = "AUTH-GOOGLE-CLIENT-SECRET"
-  value        = ""
-  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-# Additional Configuration Parameters
-resource "azurerm_key_vault_secret" "directus_session_cookie_name" {
-  name         = "DIRECTUS-SESSION-COOKIE-NAME"
-  value        = ""
-  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-resource "azurerm_key_vault_secret" "public_url" {
-  name         = "PUBLIC-URL"
-  value        = ""
-  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-resource "azurerm_key_vault_secret" "smtp_from" {
-  name         = "SMTP-FROM"
-  value        = ""
-  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-resource "azurerm_key_vault_secret" "smtp_host" {
-  name         = "SMTP-HOST"
-  value        = ""
-  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-resource "azurerm_key_vault_secret" "admin_base_url" {
-  name         = "ADMIN-BASE-URL"
-  value        = ""
-  key_vault_id = azurerm_key_vault.DBR-prod-Backend-RuntimeConfig-KeyVault.id
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}

@@ -125,7 +125,6 @@ export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
                 }
                 rows={4}
                 placeholder={t`How would you describe to a colleague what are you trying to accomplish with this project?
-
 * What is the north star goal or key metric
 * What does success look like`}
                 {...field}
@@ -134,7 +133,6 @@ export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
           />
         </Stack>
       </form>
-
     </Stack>
   );
 };

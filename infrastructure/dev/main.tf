@@ -204,8 +204,8 @@ resource "azurerm_application_gateway" "main" {
   # Required gateway IP configuration
   gateway_ip_configuration {
     name      = "gateway-ip-config"
-    subnet_id = azurerm_subnet.frontend.id  # Assuming you have a subnet defined for the gateway
-  }
+    subnet_id = azurerm_subnet.public_subnet[0].id
+    }
 
   # Required but minimal frontend IP configuration
   frontend_ip_configuration {

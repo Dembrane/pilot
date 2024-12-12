@@ -12,6 +12,8 @@ frontend_setup () {
   npm i -g pnpm
   pnpm config set store-dir /home/node/.local/share/pnpm/store
 
+  pnpm install -g azure-functions-core-tools@4
+
   cd frontend
   pnpm install
 }

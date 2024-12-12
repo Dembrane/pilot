@@ -1,9 +1,9 @@
+import { Trans } from "@lingui/react/macro";
 import {
   useDeleteResourceByIdMutation,
   useResourceById,
   useUpdateResourceByIdMutation,
 } from "@/lib/query";
-import { Trans } from "@lingui/macro";
 import {
   ActionIcon,
   Box,

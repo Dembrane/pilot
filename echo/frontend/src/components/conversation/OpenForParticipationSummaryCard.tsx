@@ -1,6 +1,6 @@
+import { t } from "@lingui/core/macro";
 import { Checkbox, Tooltip } from "@mantine/core";
 import { Icons } from "@/icons";
-import { t } from "@lingui/macro";
 import { SummaryCard } from "../common/SummaryCard";
 import { useProjectById, useUpdateProjectByIdMutation } from "@/lib/query";
 

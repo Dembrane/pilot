@@ -1,7 +1,4 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
@@ -12,25 +9,21 @@
       "cwd": "${workspaceFolder}/server"
     },
     {
-      "name": "image_utils",
+      "name": "Python Debugger: image_utils",
       "type": "debugpy",
       "request": "launch",
       "module": "dembrane.image_utils",
       "cwd": "${workspaceFolder}/server"
     },
     {
-      "name": "quote_utils",
+      "name": "Attach to Python Functions",
       "type": "debugpy",
-      "request": "launch",
-      "module": "dembrane.quote_utils",
-      "cwd": "${workspaceFolder}/server"
-    },
-    {
-      "name": "openai",
-      "type": "debugpy",
-      "request": "launch",
-      "module": "dembrane.openai",
-      "cwd": "${workspaceFolder}/server"
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 9091
+      },
+      "preLaunchTask": "func: host start"
     }
   ]
 }

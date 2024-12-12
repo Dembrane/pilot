@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useState, useEffect } from "react";
 import {
   Button,
@@ -16,7 +18,6 @@ import {
 } from "@mantine/core";
 import { ProjectTagsInput } from "./ProjectTagsInput";
 import { MarkdownWYSIWYG } from "../common/MarkdownWYSIWYG/MarkdownWYSIWYG";
-import { Trans, t } from "@lingui/macro";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
 import { IconEye, IconEyeOff, IconRefresh } from "@tabler/icons-react";
 import { useProjectSharingLink } from "./ProjectQRCode";

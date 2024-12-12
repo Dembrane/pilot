@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { Icons } from "@/icons";
 import { ActionIcon, Button, Group, Paper, Stack, Text } from "@mantine/core";
 import { IconExternalLink } from "@tabler/icons-react";
@@ -5,7 +7,6 @@ import { formatRelative } from "date-fns";
 import { PropsWithChildren } from "react";
 import { Link, useParams } from "react-router-dom";
 import { I18nLink } from "../common/i18nLink";
-import { Trans, t } from "@lingui/macro";
 
 export const ProjectCard = ({
   project,

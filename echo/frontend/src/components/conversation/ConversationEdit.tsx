@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import React, { useEffect } from "react";
 import {
   Box,
@@ -8,7 +10,6 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
-import { Trans, t } from "@lingui/macro";
 import { Controller, useForm } from "react-hook-form";
 import {
   useUpdateConversationByIdMutation,

@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { Icons } from "@/icons";
 import { useCreateChatMutation, useProjectById } from "@/lib/query";
 import {
@@ -15,7 +17,6 @@ import { NavigationButton } from "../common/NavigationButton";
 import { Breadcrumbs } from "../common/Breadcrumbs";
 import { ProjectQRCode } from "./ProjectQRCode";
 import { I18nLink } from "../common/i18nLink";
-import { Trans, t } from "@lingui/macro";
 
 export const ProjectSidebar = () => {
   const { projectId, conversationId } = useParams();
@@ -58,6 +59,7 @@ export const ProjectSidebar = () => {
               label: (
                 <I18nLink to={`/projects/${projectId}/portal-editor`}>
                   <Title
+                    component="span"
                     order={2}
                     size="lg"
                     className="whitespace-break-spaces hover:underline"

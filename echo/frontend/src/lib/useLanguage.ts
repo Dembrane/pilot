@@ -41,6 +41,7 @@ export const useLanguage = () => {
   return {
     i18n,
     language,
+    iso639_1: language.split("-")[0],
     loading,
   };
 };

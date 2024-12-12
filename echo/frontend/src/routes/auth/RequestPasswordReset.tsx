@@ -1,5 +1,6 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useRequestPasswordResetMutation } from "@/lib/query";
-import { Trans, t } from "@lingui/macro";
 import {
   Alert,
   Button,

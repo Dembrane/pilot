@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { Icons } from "@/icons";
 import {
   Box,
@@ -14,8 +15,7 @@ import { Quote } from "../../../components/quote/Quote";
 import { Markdown } from "@/components/common/Markdown";
 import { useAspectById, useProjectById } from "@/lib/query";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
-import { Trans } from "@lingui/macro";
-
+import { useMemo } from "react";
 const dedupeQuotes = (quotes: QuoteAspect[]): QuoteAspect[] => {
   const seen = new Set();
   return quotes.filter((quote) => {
@@ -41,6 +41,15 @@ export const ProjectLibraryAspect = () => {
       fields: ["image_generation_model"],
     },
   });
+
+  const quotes = useMemo(
+    () =>
+      dedupeQuotes([
+        ...(aspect?.representative_quotes ?? []),
+        ...(aspect?.quotes ?? []),
+      ]),
+    [aspect],
+  );
 
   return (
     <Stack className="relative px-4 py-6">
@@ -77,18 +86,16 @@ export const ProjectLibraryAspect = () => {
               content={aspect?.long_summary ?? ""}
               className="!max-w-full"
             />
-            <Title order={2}>
-              <Trans>Quotes</Trans>
-            </Title>
             {!isLoading ? (
               <>
-                {" "}
-                {dedupeQuotes([
-                  ...(aspect?.representative_quotes ?? []),
-                  ...(aspect?.quotes ?? []),
-                ]).map((quote: QuoteAspect) => (
+                {quotes.length > 0 && (
+                  <Title order={2}>
+                    <Trans>Quotes</Trans>
+                  </Title>
+                )}
+                {quotes.map((quote: QuoteAspect) => (
                   <Quote key={quote.id} data={quote.quote_id as Quote} />
-                ))}{" "}
+                ))}
               </>
             ) : (
               <Skeleton height={100} />

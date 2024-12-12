@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { useInsight, useProjectInsights } from "@/lib/query";
 import {
   ActionIcon,
@@ -21,7 +22,6 @@ import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { Icons } from "@/icons";
 import { I18nLink } from "@/components/common/i18nLink";
 import { useI18nNavigate } from "@/lib/useI18nNavigate";
-import { Trans } from "@lingui/macro";
 
 export const ProjectLibraryInsight = () => {
   const { projectId, insightId } = useParams();

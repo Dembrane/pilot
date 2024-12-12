@@ -1,9 +1,9 @@
+import { Trans } from "@lingui/react/macro";
 import ProjectBasicEdit from "@/components/project/ProjectBasicEdit";
 import { ProjectDangerZone } from "@/components/project/ProjectDangerZone";
 import { ProjectPortalEditor } from "@/components/project/ProjectPortalEditor";
 import { getProjectTranscriptsLink } from "@/lib/api";
 import { useProjectById } from "@/lib/query";
-import { Trans } from "@lingui/macro";
 import {
   Alert,
   Box,

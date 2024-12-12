@@ -24,10 +24,11 @@
         "ms-azuretools.vscode-docker",
         "jebbs.plantuml",
         "tamasfe.even-better-toml",
-        // twice, yes
         "ethansk.restore-terminals",
         "EthanSK.restore-terminals",
-        "dbaeumer.vscode-eslint"
+        "dbaeumer.vscode-eslint",
+        "Azurite.azurite",
+        "ms-azuretools.vscode-azurefunctions"
       ]
     }
   },

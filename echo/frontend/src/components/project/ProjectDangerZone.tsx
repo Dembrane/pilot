@@ -1,8 +1,9 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useDeleteProjectByIdMutation } from "@/lib/query";
 import { Box, Button, Stack, Title } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 import { useI18nNavigate } from "@/lib/useI18nNavigate";
-import { Trans, t } from "@lingui/macro";
 
 export const ProjectDangerZone = ({ project }: { project: Project }) => {
   const deleteProjectByIdMutation = useDeleteProjectByIdMutation();

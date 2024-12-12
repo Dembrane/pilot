@@ -1,10 +1,15 @@
+# This configuration file implements a robust environment-based configuration
+# system with built-in logging. It follows a "fail-fast" pattern by asserting
+# required environment variables and provides sensible defaults for optional ones.
+
 import os
 import logging
 
 import dotenv
 
+logging.basicConfig(level=logging.INFO, force=True)
+
 logger = logging.getLogger("config")
-logging.basicConfig(level=logging.INFO)
 
 BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 dotenv_path = os.path.join(BASE_DIR, ".env")
@@ -16,7 +21,9 @@ if os.path.exists(dotenv_path):
 DEBUG_MODE = os.environ.get("DEBUG_MODE", "false").lower() in ["true", "1"]
 logger.info(f"DEBUG_MODE: {DEBUG_MODE}")
 if DEBUG_MODE:
-    logging.basicConfig(level=logging.DEBUG)
+    # everything is debug if debug mode is enabled
+    logging.getLogger().setLevel(logging.DEBUG)
+    # set the current logger to debug
     logger.setLevel(logging.DEBUG)
 
 API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:8000")
@@ -66,6 +73,13 @@ logger.debug(f"TRANKIT_CACHE_DIR: {TRANKIT_CACHE_DIR}")
 DIRECTUS_SECRET = os.environ.get("DIRECTUS_SECRET")
 assert DIRECTUS_SECRET, "DIRECTUS_SECRET environment variable is not set"
 logger.debug("DIRECTUS_SECRET: set")
+
+DIRECTUS_TOKEN = os.environ.get("DIRECTUS_TOKEN")
+assert DIRECTUS_TOKEN, "DIRECTUS_TOKEN environment variable is not set"
+logger.debug("DIRECTUS_TOKEN: set")
+
+DIRECTUS_SESSION_COOKIE_NAME = os.environ.get("DIRECTUS_SESSION_COOKIE_NAME", "directus_session_token")
+logger.debug(f"DIRECTUS_SESSION_COOKIE_NAME: {DIRECTUS_SESSION_COOKIE_NAME}")
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 assert DATABASE_URL, "DATABASE_URL environment variable is not set"

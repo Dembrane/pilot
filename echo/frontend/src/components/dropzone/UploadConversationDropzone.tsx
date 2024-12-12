@@ -1,9 +1,9 @@
+import { t } from "@lingui/core/macro";
 import { useProjectById, useUploadConversation } from "@/lib/query";
 import { LoadingOverlay } from "@mantine/core";
 import { PropsWithChildren } from "react";
 import { toast } from "../common/Toaster";
 import { CommonDropzone } from "./Dropzone";
-import { t } from "@lingui/macro";
 
 export const UploadConversationDropzone = (
   props: PropsWithChildren<{

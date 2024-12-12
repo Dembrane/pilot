@@ -1,8 +1,8 @@
+import { t } from "@lingui/core/macro";
 import { useConversationById } from "@/lib/query";
 import { Stack, Title } from "@mantine/core";
 import { useParams } from "react-router-dom";
 import { TabsWithRouter } from "./TabsWithRouter";
-import { t } from "@lingui/macro";
 
 export const ProjectConversationLayout = () => {
   const { conversationId } = useParams();

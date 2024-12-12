@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { useProjectById } from "@/lib/query";
 import { Box, Divider, LoadingOverlay, Stack } from "@mantine/core";
 import { useParams } from "react-router-dom";
@@ -5,7 +6,6 @@ import { TabsWithRouter } from "./TabsWithRouter";
 import { useDocumentTitle } from "@mantine/hooks";
 import { ProjectQRCode } from "../project/ProjectQRCode";
 import { OngoingConversationsSummaryCard } from "../conversation/OngoingConversationsSummaryCard";
-import { t } from "@lingui/macro";
 import { OpenForParticipationSummaryCard } from "../conversation/OpenForParticipationSummaryCard";
 
 export const ProjectOverviewLayout = () => {

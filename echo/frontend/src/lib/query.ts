@@ -1179,8 +1179,6 @@ export const useCreateChatMutation = () => {
   });
 };
 
-
-
 export const useDeleteChatMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -1343,6 +1341,37 @@ export const useAddChatMessageMutation = () => {
       queryClient.invalidateQueries({
         queryKey: ["chats", "history", vars.project_chat_id],
       });
+    },
+  });
+};
+
+export const useMoveConversationMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      conversationId,
+      targetProjectId,
+    }: {
+      conversationId: string;
+      targetProjectId: string;
+    }) => {
+      try {
+        await directus.request(
+          updateItem("conversation", conversationId, {
+            project_id: targetProjectId,
+          }),
+        );
+      } catch (error) {
+        toast.error("Failed to move conversation.");
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      toast.success("Conversation moved successfully");
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to move conversation: " + error.message);
     },
   });
 };

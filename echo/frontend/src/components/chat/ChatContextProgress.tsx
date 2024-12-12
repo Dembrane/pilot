@@ -1,6 +1,6 @@
+import { t } from "@lingui/core/macro";
 import { useProjectChatContext } from "@/lib/query";
 import { capitalize } from "@/lib/utils";
-import { t } from "@lingui/macro";
 import { Box, Progress, Skeleton, Tooltip } from "@mantine/core";
 
 export const ChatContextProgress = ({ chatId }: { chatId: string }) => {

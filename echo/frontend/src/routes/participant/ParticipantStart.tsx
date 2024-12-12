@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   useParticipantProjectById,
   useParticipantTutorialCardBySlug,
@@ -7,7 +8,6 @@ import { useEffect } from "react";
 import useSessionStorageState from "use-session-storage-state";
 import DembraneLoadingSpinner from "@/components/common/DembraneLoadingSpinner";
 import { Alert } from "@mantine/core";
-import { t } from "@lingui/macro";
 import ParticipantOnboardingCards, {
   LanguageCards,
 } from "@/components/participant/ParticipantOnboardingCards";

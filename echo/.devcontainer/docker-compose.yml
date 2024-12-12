@@ -71,6 +71,7 @@ services:
       target: base
     environment:
       - DIRECTUS_SECRET=secret
+      - DIRECTUS_TOKEN=admin
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
       - REDIS_URL=redis://redis:6379

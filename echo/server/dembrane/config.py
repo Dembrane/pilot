@@ -78,6 +78,9 @@ DIRECTUS_TOKEN = os.environ.get("DIRECTUS_TOKEN")
 assert DIRECTUS_TOKEN, "DIRECTUS_TOKEN environment variable is not set"
 logger.debug("DIRECTUS_TOKEN: set")
 
+DIRECTUS_SESSION_COOKIE_NAME = os.environ.get("DIRECTUS_SESSION_COOKIE_NAME", "directus_session_token")
+logger.debug(f"DIRECTUS_SESSION_COOKIE_NAME: {DIRECTUS_SESSION_COOKIE_NAME}")
+
 DATABASE_URL = os.environ.get("DATABASE_URL")
 assert DATABASE_URL, "DATABASE_URL environment variable is not set"
 logger.debug("DATABASE_URL: set")

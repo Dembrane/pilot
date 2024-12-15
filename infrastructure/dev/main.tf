@@ -412,6 +412,72 @@ resource "azurerm_container_group" "participant_frontend" {
 
 }
 
+resource "azurerm_container_group" "dashboard_frontend" {
+  name                = "DBR-${var.environment}-Workers-DashboardFrontend-ACI"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  os_type             = "Linux"
+
+  ip_address_type = "Private"
+  subnet_ids       = [azurerm_subnet.private_subnet[0].id]
+
+  container {
+    name   = "dashboard-frontend"
+    image  = "${data.azurerm_container_registry.acr.login_server}/dashboard-frontend:development-latest"
+    cpu    = "1"
+    memory = "2"
+    ports {
+      port     = 5173
+      protocol = "TCP"
+    }
+  }
+
+  image_registry_credential {
+    server   = data.azurerm_container_registry.acr.login_server
+    username = var.acr_username
+    password = var.acr_password
+  }
+
+  lifecycle {
+    ignore_changes = [image_registry_credential]
+  }
+
+}
+
+## deploy directus on port 8055
+
+resource "azurerm_container_group" "directus" {
+  name                = "DBR-${var.environment}-Workers-Directus-ACI"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  os_type             = "Linux"
+
+  ip_address_type = "Private"
+  subnet_ids       = [azurerm_subnet.private_subnet[0].id]
+
+  container {
+    name   = "directus"
+    image  = "${data.azurerm_container_registry.acr.login_server}/directus:development-latest"
+    cpu    = "1"
+    memory = "2"
+    ports {
+      port     = 8055
+      protocol = "TCP"
+    }
+  }
+
+  image_registry_credential {
+    server   = data.azurerm_container_registry.acr.login_server
+    username = var.acr_username
+    password = var.acr_password
+  }
+
+  lifecycle {
+    ignore_changes = [image_registry_credential]
+  }
+
+}
+
 ## Deploy Worker
 
 resource "azurerm_container_group" "worker" {

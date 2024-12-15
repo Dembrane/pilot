@@ -1053,3 +1053,42 @@ resource "azurerm_role_assignment" "appgw_keyvault_certificates" {
   role_definition_name = "Key Vault Certificates Officer"
   principal_id         = azurerm_user_assigned_identity.appgw_identity.principal_id
 }
+
+#  DNS Zone
+resource "azurerm_dns_zone" "dev_zone" {
+  name                = "dbr-dev.azure.com"
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+#  A records pointing to Application Gateway IP
+resource "azurerm_dns_a_record" "admin" {
+  name                = "admin"
+  zone_name           = azurerm_dns_zone.dev_zone.name
+  resource_group_name = azurerm_resource_group.rg.name
+  ttl                 = 300
+  target_resource_id  = azurerm_public_ip.appgw.id
+}
+
+resource "azurerm_dns_a_record" "api" {
+  name                = "api"
+  zone_name           = azurerm_dns_zone.dev_zone.name
+  resource_group_name = azurerm_resource_group.rg.name
+  ttl                 = 300
+  target_resource_id  = azurerm_public_ip.appgw.id
+}
+
+resource "azurerm_dns_a_record" "app" {
+  name                = "app"
+  zone_name           = azurerm_dns_zone.dev_zone.name
+  resource_group_name = azurerm_resource_group.rg.name
+  ttl                 = 300
+  target_resource_id  = azurerm_public_ip.appgw.id
+}
+
+resource "azurerm_dns_a_record" "dashboard" {
+  name                = "dashboard"
+  zone_name           = azurerm_dns_zone.dev_zone.name
+  resource_group_name = azurerm_resource_group.rg.name
+  ttl                 = 300
+  target_resource_id  = azurerm_public_ip.appgw.id
+}

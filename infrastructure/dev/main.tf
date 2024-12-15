@@ -122,11 +122,13 @@ resource "azurerm_network_security_group" "private_nsg" {
 }
 
 # NSG for Public Subnets
+# NSG for Public Subnets (Updated for App Gateway)
 resource "azurerm_network_security_group" "public_nsg" {
   name                = "DBR-${var.environment}-Networks-public-NSG"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
+  # Original rule
   security_rule {
     name                       = "AllowFromPublicSubnet"
     priority                   = 100
@@ -136,6 +138,32 @@ resource "azurerm_network_security_group" "public_nsg" {
     source_port_range          = "*"
     destination_port_range     = "*"
     source_address_prefixes    = azurerm_subnet.public_subnet[*].address_prefixes[0]
+    destination_address_prefix = "*"
+  }
+
+  # Allow App Gateway v2 management ports
+  security_rule {
+    name                       = "AllowAppGatewayInbound"
+    priority                   = 110
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "65200-65535"
+    source_address_prefix      = "GatewayManager"
+    destination_address_prefix = "*"
+  }
+
+  # Allow internet inbound traffic
+  security_rule {
+    name                       = "AllowInternetInbound"
+    priority                   = 120
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_ranges    = ["80", "443"]
+    source_address_prefix      = "Internet"
     destination_address_prefix = "*"
   }
 }

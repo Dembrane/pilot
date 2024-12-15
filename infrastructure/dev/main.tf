@@ -1028,15 +1028,30 @@ resource "azurerm_key_vault_access_policy" "deployer" {
   ]
 }
 
-# Access policy for the Application Gateway's managed identity
+## Role assignment for the deployment principal (Terraform)
+resource "azurerm_role_assignment" "deployer_keyvault_admin" {
+  scope                = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  role_definition_name = "Key Vault Administrator"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
+# Role assignment for App Gateway managed identity
 resource "azurerm_user_assigned_identity" "appgw_identity" {
   name                = "DBR-${var.environment}-appgw-identity"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
 }
 
-resource "azurerm_role_assignment" "appgw_keyvault_role" {
+# App Gateway needs to read secrets
+resource "azurerm_role_assignment" "appgw_keyvault_secrets" {
   scope                = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
   role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.appgw_identity.principal_id
+}
+
+# App Gateway needs to read certificates
+resource "azurerm_role_assignment" "appgw_keyvault_certificates" {
+  scope                = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  role_definition_name = "Key Vault Certificates Officer"
   principal_id         = azurerm_user_assigned_identity.appgw_identity.principal_id
 }

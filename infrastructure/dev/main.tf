@@ -509,6 +509,17 @@ resource "azurerm_container_group" "rabbitmq" {
     ignore_changes = [image_registry_credential]
   }
 
+  diagnostics {
+    log_analytics {
+      log_type      = "ContainerInsights"
+      workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
+      metadata = {
+        "component" = "rabbitmq"
+      }
+    }
+  }
+
 }
 
 ## Deploy participant-frontend by tag "development-latest" from ACR
@@ -544,6 +555,18 @@ resource "azurerm_container_group" "participant_frontend" {
     ignore_changes = [image_registry_credential]
   }
 
+
+  diagnostics {
+    log_analytics {
+      log_type      = "ContainerInsights"
+      workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
+      metadata = {
+        "component" = "participant_frontend"
+      }
+    }
+  }
+
 }
 
 resource "azurerm_container_group" "dashboard_frontend" {
@@ -574,6 +597,17 @@ resource "azurerm_container_group" "dashboard_frontend" {
 
   lifecycle {
     ignore_changes = [image_registry_credential]
+  }
+
+  diagnostics {
+    log_analytics {
+      log_type      = "ContainerInsights"
+      workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
+      metadata = {
+        "component" = "dashboard_frontend"
+      }
+    }
   }
 
 }
@@ -608,6 +642,17 @@ resource "azurerm_container_group" "directus" {
 
   lifecycle {
     ignore_changes = [image_registry_credential]
+  }
+
+  diagnostics {
+    log_analytics {
+      log_type      = "ContainerInsights"
+      workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
+      metadata = {
+        "component" = "directus"
+      }
+    }
   }
 
 }
@@ -663,6 +708,18 @@ resource "azurerm_container_group" "worker" {
     ignore_changes = [image_registry_credential]
   }
 
+
+  diagnostics {
+    log_analytics {
+      log_type      = "ContainerInsights"
+      workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
+      metadata = {
+        "component" = "worker"
+      }
+    }
+  }
+
 }
 
 
@@ -714,6 +771,18 @@ resource "azurerm_container_group" "api_server" {
   lifecycle {
     ignore_changes = [image_registry_credential]
   }
+
+  diagnostics {
+    log_analytics {
+      log_type      = "ContainerInsights"
+      workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
+      metadata = {
+        "component" = "api_server"
+      }
+    }
+  }
+
 }
 
 # Log Analytics Workspace for centralized logging
@@ -726,178 +795,6 @@ resource "azurerm_log_analytics_workspace" "main" {
   retention_in_days   = 30
 }
 
-# Container App Log Analytics Solution
-resource "azurerm_log_analytics_solution" "container_insights" {
-  solution_name         = "ContainerInsights"
-  location             = azurerm_resource_group.rg.location
-  resource_group_name  = azurerm_resource_group.rg.name
-  workspace_resource_id = azurerm_log_analytics_workspace.main.id
-  workspace_name       = azurerm_log_analytics_workspace.main.name
-
-  plan {
-    publisher = "Microsoft"
-    product   = "OMSGallery/ContainerInsights"
-  }
-}
-
-# Update container groups to include log analytics integration
-resource "azurerm_monitor_diagnostic_setting" "rabbitmq" {
-  name                       = "container-logs"
-  target_resource_id        = azurerm_container_group.rabbitmq.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
-
-  log {
-    category = "ContainerInstanceLog"
-    enabled  = true
-
-    retention_policy {
-      enabled = true
-      days    = 30
-    }
-  }
-
-  metric {
-    category = "AllMetrics"
-    enabled  = true
-
-    retention_policy {
-      enabled = true
-      days    = 30
-    }
-  }
-}
-
-# Repeat for each container group
-resource "azurerm_monitor_diagnostic_setting" "participant_frontend" {
-  name                       = "container-logs"
-  target_resource_id        = azurerm_container_group.participant_frontend.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
-
-  log {
-    category = "ContainerInstanceLog"
-    enabled  = true
-
-    retention_policy {
-      enabled = true
-      days    = 30
-    }
-  }
-
-  metric {
-    category = "AllMetrics"
-    enabled  = true
-
-    retention_policy {
-      enabled = true
-      days    = 30
-    }
-  }
-}
-
-# Additional diagnostic settings for remaining container groups
-resource "azurerm_monitor_diagnostic_setting" "dashboard_frontend" {
-  name                       = "container-logs"
-  target_resource_id        = azurerm_container_group.dashboard_frontend.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
-
-  log {
-    category = "ContainerInstanceLog"
-    enabled  = true
-
-    retention_policy {
-      enabled = true
-      days    = 30
-    }
-  }
-
-  metric {
-    category = "AllMetrics"
-    enabled  = true
-
-    retention_policy {
-      enabled = true
-      days    = 30
-    }
-  }
-}
-
-resource "azurerm_monitor_diagnostic_setting" "directus" {
-  name                       = "container-logs"
-  target_resource_id        = azurerm_container_group.directus.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
-
-  log {
-    category = "ContainerInstanceLog"
-    enabled  = true
-
-    retention_policy {
-      enabled = true
-      days    = 30
-    }
-  }
-
-  metric {
-    category = "AllMetrics"
-    enabled  = true
-
-    retention_policy {
-      enabled = true
-      days    = 30
-    }
-  }
-}
-
-resource "azurerm_monitor_diagnostic_setting" "worker" {
-  name                       = "container-logs"
-  target_resource_id        = azurerm_container_group.worker.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
-
-  log {
-    category = "ContainerInstanceLog"
-    enabled  = true
-
-    retention_policy {
-      enabled = true
-      days    = 30
-    }
-  }
-
-  metric {
-    category = "AllMetrics"
-    enabled  = true
-
-    retention_policy {
-      enabled = true
-      days    = 30
-    }
-  }
-}
-
-resource "azurerm_monitor_diagnostic_setting" "api_server" {
-  name                       = "container-logs"
-  target_resource_id        = azurerm_container_group.api_server.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
-
-  log {
-    category = "ContainerInstanceLog"
-    enabled  = true
-
-    retention_policy {
-      enabled = true
-      days    = 30
-    }
-  }
-
-  metric {
-    category = "AllMetrics"
-    enabled  = true
-
-    retention_policy {
-      enabled = true
-      days    = 30
-    }
-  }
-}
 
 resource "azurerm_storage_account" "api-server-storage" {
   name                     = "dbrdevbackendstorage"

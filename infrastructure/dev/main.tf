@@ -229,107 +229,316 @@ data "azurerm_container_registry" "acr" {
 ### deploy application gateway with no backend pool
 
 # Define the Application Gateway
-/*
+# SSL Certificate for App Gateway
+resource "azurerm_key_vault_certificate" "appgw_cert" {
+  name         = "appgw-wildcard-cert"
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+
+  certificate_policy {
+    issuer_parameters {
+      name = "Self"
+    }
+
+    key_properties {
+      exportable = true
+      key_size   = 2048
+      key_type   = "RSA"
+      reuse_key  = true
+    }
+
+    lifetime_action {
+      action {
+        action_type = "AutoRenew"
+      }
+      trigger {
+        days_before_expiry = 30
+      }
+    }
+
+    secret_properties {
+      content_type = "application/x-pkcs12"
+    }
+
+    x509_certificate_properties {
+      extended_key_usage = ["1.3.6.1.5.5.7.3.1"] # Server Authentication
+      key_usage         = [
+        "digitalSignature",
+        "keyEncipherment"
+      ]
+      subject            = "CN=*.dbr-dev.azure.com"
+      validity_in_months = 12
+    }
+  }
+}
+
+# Updated Application Gateway Configuration
 resource "azurerm_application_gateway" "main" {
   name                = "DBR-${var.environment}-appgw"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
 
-  # Basic SKU configuration
   sku {
     name     = "Standard_v2"
     tier     = "Standard_v2"
     capacity = 1
   }
 
-  # Required gateway IP configuration
   gateway_ip_configuration {
     name      = "gateway-ip-config"
     subnet_id = azurerm_subnet.public_subnet[0].id
-    }
+  }
 
-  # Required but minimal frontend IP configuration
   frontend_ip_configuration {
     name                 = "frontend-ip-config"
     public_ip_address_id = azurerm_public_ip.appgw.id
   }
 
-  # Required but minimal frontend port
+  # Frontend ports for both HTTP and HTTPS
   frontend_port {
-    name = "frontend-port"
+    name = "http-80"
     port = 80
   }
 
-  # Required HTTP listener (minimal configuration)
-  http_listener {
-    name                           = "basic-listener"
-    frontend_ip_configuration_name = "frontend-ip-config"
-    frontend_port_name            = "frontend-port"
-    protocol                      = "Http"
+  frontend_port {
+    name = "https-443"
+    port = 443
   }
 
-  # Required but minimal backend address pool
+  # SSL Certificate configuration
+  ssl_certificate {
+    name                = "wildcard-cert"
+    key_vault_secret_id = azurerm_key_vault_certificate.appgw_cert.secret_id
+  }
+
+  # Backend address pools
   backend_address_pool {
-    name = "participant-frontend-pool"
+    name         = "directus-pool"
+    ip_addresses = [azurerm_container_group.directus.ip_address]
+  }
+
+  backend_address_pool {
+    name         = "api-server-pool"
+    ip_addresses = [azurerm_container_group.api_server.ip_address]
+  }
+
+  backend_address_pool {
+    name         = "participant-frontend-pool"
     ip_addresses = [azurerm_container_group.participant_frontend.ip_address]
   }
 
   backend_address_pool {
-    name = "api-server-pool"
-    ip_addresses = [azurerm_container_group.api_server.ip_address]
+    name         = "dashboard-frontend-pool"
+    ip_addresses = [azurerm_container_group.dashboard_frontend.ip_address]
   }
 
+  # Backend HTTP settings with health probes
   backend_http_settings {
-    name                  = "frontend-settings"
+    name                  = "directus-settings"
     cookie_based_affinity = "Disabled"
-    port                 = 5173
+    port                  = 8055
     protocol             = "Http"
     request_timeout      = 60
+    probe_name           = "directus-probe"
   }
 
   backend_http_settings {
     name                  = "api-settings"
     cookie_based_affinity = "Disabled"
-    port                 = 8000
+    port                  = 8000
     protocol             = "Http"
     request_timeout      = 60
+    probe_name           = "api-probe"
   }
 
+  backend_http_settings {
+    name                  = "frontend-settings"
+    cookie_based_affinity = "Disabled"
+    port                  = 5173
+    protocol             = "Http"
+    request_timeout      = 60
+    probe_name           = "frontend-probe"
+  }
+
+  # Health probes for each service
+  probe {
+    name                = "directus-probe"
+    protocol            = "Http"
+    path                = "/server/health"
+    interval            = 30
+    timeout             = 30
+    unhealthy_threshold = 3
+    pick_host_name_from_backend_http_settings = true
+  }
+
+  probe {
+    name                = "api-probe"
+    protocol            = "Http"
+    path                = "/health"
+    interval            = 30
+    timeout             = 30
+    unhealthy_threshold = 3
+    pick_host_name_from_backend_http_settings = true
+  }
+
+  probe {
+    name                = "frontend-probe"
+    protocol            = "Http"
+    path                = "/"
+    interval            = 30
+    timeout             = 30
+    unhealthy_threshold = 3
+    pick_host_name_from_backend_http_settings = true
+  }
+
+  # HTTPS listeners
   http_listener {
-    name                           = "frontend-listener"
+    name                           = "directus-listener"
     frontend_ip_configuration_name = "frontend-ip-config"
-    frontend_port_name            = "frontend-port"
-    protocol                      = "Http"
-    host_name                     = "app.dbr-dev.azure.com"  # Adjust domain as needed
+    frontend_port_name            = "https-443"
+    protocol                      = "Https"
+    ssl_certificate_name          = "wildcard-cert"
+    host_name                     = "admin.dbr-dev.azure.com"
   }
 
   http_listener {
     name                           = "api-listener"
     frontend_ip_configuration_name = "frontend-ip-config"
-    frontend_port_name            = "frontend-port"
+    frontend_port_name            = "https-443"
+    protocol                      = "Https"
+    ssl_certificate_name          = "wildcard-cert"
+    host_name                     = "api.dbr-dev.azure.com"
+  }
+
+  http_listener {
+    name                           = "participant-frontend-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name            = "https-443"
+    protocol                      = "Https"
+    ssl_certificate_name          = "wildcard-cert"
+    host_name                     = "app.dbr-dev.azure.com"
+  }
+
+  http_listener {
+    name                           = "dashboard-frontend-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name            = "https-443"
+    protocol                      = "Https"
+    ssl_certificate_name          = "wildcard-cert"
+    host_name                     = "dashboard.dbr-dev.azure.com"
+  }
+
+  # HTTP to HTTPS redirect listeners
+  http_listener {
+    name                           = "directus-http-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name            = "http-80"
     protocol                      = "Http"
-    host_name                     = "api.dbr-dev.azure.com"  # Adjust domain as needed
+    host_name                     = "admin.dbr-dev.azure.com"
+  }
+
+  http_listener {
+    name                           = "api-http-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name            = "http-80"
+    protocol                      = "Http"
+    host_name                     = "api.dbr-dev.azure.com"
+  }
+
+  http_listener {
+    name                           = "participant-frontend-http-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name            = "http-80"
+    protocol                      = "Http"
+    host_name                     = "app.dbr-dev.azure.com"
+  }
+
+  http_listener {
+    name                           = "dashboard-frontend-http-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name            = "http-80"
+    protocol                      = "Http"
+    host_name                     = "dashboard.dbr-dev.azure.com"
+  }
+
+  # Redirect configurations for HTTP to HTTPS
+  redirect_configuration {
+    name                 = "http-to-https"
+    redirect_type        = "Permanent"
+    target_listener_name = "directus-listener"
+    include_path         = true
+    include_query_string = true
+  }
+
+  # Routing rules
+  request_routing_rule {
+    name                       = "directus-rule"
+    priority                  = 10
+    rule_type                 = "Basic"
+    http_listener_name        = "directus-listener"
+    backend_address_pool_name = "directus-pool"
+    backend_http_settings_name = "directus-settings"
   }
 
   request_routing_rule {
-    name                       = "frontend-rule"
+    name                       = "api-rule"
+    priority                  = 20
     rule_type                 = "Basic"
-    priority                  = 10
-    http_listener_name        = "frontend-listener"
+    http_listener_name        = "api-listener"
+    backend_address_pool_name = "api-server-pool"
+    backend_http_settings_name = "api-settings"
+  }
+
+  request_routing_rule {
+    name                       = "participant-frontend-rule"
+    priority                  = 30
+    rule_type                 = "Basic"
+    http_listener_name        = "participant-frontend-listener"
     backend_address_pool_name = "participant-frontend-pool"
     backend_http_settings_name = "frontend-settings"
   }
 
   request_routing_rule {
-    name                       = "api-rule"
+    name                       = "dashboard-frontend-rule"
+    priority                  = 40
     rule_type                 = "Basic"
-    priority                  = 20
-    http_listener_name        = "api-listener"
-    backend_address_pool_name = "api-server-pool"
-    backend_http_settings_name = "api-settings"
+    http_listener_name        = "dashboard-frontend-listener"
+    backend_address_pool_name = "dashboard-frontend-pool"
+    backend_http_settings_name = "frontend-settings"
+  }
+
+  # HTTP to HTTPS redirect rules
+  request_routing_rule {
+    name                        = "directus-redirect"
+    priority                   = 50
+    rule_type                  = "Basic"
+    http_listener_name         = "directus-http-listener"
+    redirect_configuration_name = "http-to-https"
+  }
+
+  request_routing_rule {
+    name                        = "api-redirect"
+    priority                   = 60
+    rule_type                  = "Basic"
+    http_listener_name         = "api-http-listener"
+    redirect_configuration_name = "http-to-https"
+  }
+
+  request_routing_rule {
+    name                        = "participant-frontend-redirect"
+    priority                   = 70
+    rule_type                  = "Basic"
+    http_listener_name         = "participant-frontend-http-listener"
+    redirect_configuration_name = "http-to-https"
+  }
+
+  request_routing_rule {
+    name                        = "dashboard-frontend-redirect"
+    priority                   = 80
+    rule_type                  = "Basic"
+    http_listener_name         = "dashboard-frontend-http-listener"
+    redirect_configuration_name = "http-to-https"
   }
 }
-*/
 # Required Public IP for the Application Gateway
 resource "azurerm_public_ip" "appgw" {
   name                = "DBR-${var.environment}-appgw-pip"

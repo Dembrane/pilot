@@ -40,12 +40,49 @@ resource "azurerm_virtual_network" "vnet" {
 }
 
 # Private Subnets
+# Private Subnets with Container Instance Delegation
 resource "azurerm_subnet" "private_subnet" {
   count                = 2
   name                 = "DBR-${var.environment}-Networks-private-subnet-${count.index + 1}"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.${count.index + 1}.0/24"]
+
+  delegation {
+    name = "container-instance-delegation"
+    
+    service_delegation {
+      name    = "Microsoft.ContainerInstance/containerGroups"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/action",
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+        "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action",
+        "Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action"
+      ]
+    }
+  }
+}
+
+resource "azurerm_subnet" "private_internal_subnet" {
+  count                = 2
+  name                 = "DBR-${var.environment}-Networks-private-subnet-new-${count.index + 1}"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.${count.index + 3}.0/24"]  # New address space
+
+  delegation {
+    name = "container-instance-delegation"
+    
+    service_delegation {
+      name    = "Microsoft.ContainerInstance/containerGroups"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/action",
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+        "Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action",
+        "Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action"
+      ]
+    }
+  }
 }
 
 # Public Subnets (for Application Gateway)
@@ -104,6 +141,7 @@ resource "azurerm_network_security_group" "public_nsg" {
 }
 
 # Associate NSGs with Subnets
+
 resource "azurerm_subnet_network_security_group_association" "private_nsg_association" {
   count                     = 2
   subnet_id                 = azurerm_subnet.private_subnet[count.index].id
@@ -148,6 +186,7 @@ resource "azurerm_subnet_nat_gateway_association" "private_subnet_nat_associatio
 }
 
 # Route Tables
+
 resource "azurerm_route_table" "private_route_table" {
   name                = "DBR-${var.environment}-Networks-private-RT"
   location            = azurerm_resource_group.rg.location
@@ -167,6 +206,7 @@ resource "azurerm_route_table" "public_route_table" {
 }
 
 # Associate Route Tables with Subnets
+
 resource "azurerm_subnet_route_table_association" "private_route_association" {
   count          = 2
   subnet_id      = azurerm_subnet.private_subnet[count.index].id
@@ -189,6 +229,7 @@ data "azurerm_container_registry" "acr" {
 ### deploy application gateway with no backend pool
 
 # Define the Application Gateway
+/*
 resource "azurerm_application_gateway" "main" {
   name                = "DBR-${var.environment}-appgw"
   resource_group_name = azurerm_resource_group.rg.name
@@ -229,29 +270,66 @@ resource "azurerm_application_gateway" "main" {
 
   # Required but minimal backend address pool
   backend_address_pool {
-    name = "empty-pool"
+    name = "participant-frontend-pool"
+    ip_addresses = [azurerm_container_group.participant_frontend.ip_address]
   }
 
-  # Required backend HTTP settings
+  backend_address_pool {
+    name = "api-server-pool"
+    ip_addresses = [azurerm_container_group.api_server.ip_address]
+  }
+
   backend_http_settings {
-    name                  = "basic-settings"
+    name                  = "frontend-settings"
     cookie_based_affinity = "Disabled"
-    port                 = 80
+    port                 = 5173
     protocol             = "Http"
     request_timeout      = 60
   }
 
-  # Required basic routing rule
+  backend_http_settings {
+    name                  = "api-settings"
+    cookie_based_affinity = "Disabled"
+    port                 = 8000
+    protocol             = "Http"
+    request_timeout      = 60
+  }
+
+  http_listener {
+    name                           = "frontend-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name            = "frontend-port"
+    protocol                      = "Http"
+    host_name                     = "app.dbr-dev.azure.com"  # Adjust domain as needed
+  }
+
+  http_listener {
+    name                           = "api-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name            = "frontend-port"
+    protocol                      = "Http"
+    host_name                     = "api.dbr-dev.azure.com"  # Adjust domain as needed
+  }
+
   request_routing_rule {
-    name                       = "basic-rule"
+    name                       = "frontend-rule"
     rule_type                 = "Basic"
-    priority                  = 100
-    http_listener_name        = "basic-listener"
-    backend_address_pool_name = "empty-pool"
-    backend_http_settings_name = "basic-settings"
+    priority                  = 10
+    http_listener_name        = "frontend-listener"
+    backend_address_pool_name = "participant-frontend-pool"
+    backend_http_settings_name = "frontend-settings"
+  }
+
+  request_routing_rule {
+    name                       = "api-rule"
+    rule_type                 = "Basic"
+    priority                  = 20
+    http_listener_name        = "api-listener"
+    backend_address_pool_name = "api-server-pool"
+    backend_http_settings_name = "api-settings"
   }
 }
-
+*/
 # Required Public IP for the Application Gateway
 resource "azurerm_public_ip" "appgw" {
   name                = "DBR-${var.environment}-appgw-pip"
@@ -260,8 +338,6 @@ resource "azurerm_public_ip" "appgw" {
   allocation_method   = "Static"
   sku                = "Standard"  # Required for v2 Application Gateway
 }
-
-
 
 
 ## RabitMQ azure container instance based on rabbitmq:3.13

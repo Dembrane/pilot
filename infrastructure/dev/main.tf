@@ -515,7 +515,8 @@ resource "azurerm_container_group" "rabbitmq" {
       workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
       workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
       metadata = {
-        "component" = "rabbitmq"
+        "pod-uuid" = "rabbitmq-${var.environment}"
+        "node-name" = "rabbitmq-node"
       }
     }
   }
@@ -562,7 +563,8 @@ resource "azurerm_container_group" "participant_frontend" {
       workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
       workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
       metadata = {
-        "component" = "participant_frontend"
+        "pod-uuid" = "participant-frontend-${var.environment}"
+        "node-name" = "participant-frontend-node"
       }
     }
   }
@@ -605,7 +607,8 @@ resource "azurerm_container_group" "dashboard_frontend" {
       workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
       workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
       metadata = {
-        "component" = "dashboard_frontend"
+        "pod-uuid" = "dashboard-frontend-${var.environment}"
+        "node-name" = "dashboard-frontend-node"
       }
     }
   }
@@ -650,7 +653,8 @@ resource "azurerm_container_group" "directus" {
       workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
       workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
       metadata = {
-        "component" = "directus"
+        "pod-uuid" = "directus-${var.environment}"
+        "node-name" = "directus-node"
       }
     }
   }
@@ -715,7 +719,8 @@ resource "azurerm_container_group" "worker" {
       workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
       workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
       metadata = {
-        "component" = "worker"
+        "pod-uuid" = "worker-${var.environment}"
+        "node-name" = "worker-node"
       }
     }
   }
@@ -778,7 +783,8 @@ resource "azurerm_container_group" "api_server" {
       workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
       workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
       metadata = {
-        "component" = "api_server"
+        "pod-uuid" = "api-server-${var.environment}"
+        "node-name" = "api-server-node"
       }
     }
   }

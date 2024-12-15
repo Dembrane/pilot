@@ -964,7 +964,7 @@ data "azurerm_client_config" "current" {}
 # Azure Key Vault
 # Update Key Vault with proper access policies
 resource "azurerm_key_vault" "DBR-dev-Backend-RuntimeConfig-KeyVault" {
-  name                        = "DBR-${var.environment}-RuntimeConfig-KV"
+  name                        = "DBR-${var.environment}-RuntimeConfig-KeyVault"
   location                    = "westeurope"
   resource_group_name         = azurerm_resource_group.rg.name
   tenant_id                   = data.azurerm_client_config.current.tenant_id

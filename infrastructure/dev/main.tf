@@ -293,6 +293,11 @@ resource "azurerm_application_gateway" "main" {
     public_ip_address_id = azurerm_public_ip.appgw.id
   }
 
+  identity {
+    type = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.appgw_identity.id]
+  }
+
   # Frontend ports for both HTTP and HTTPS
   frontend_port {
     name = "http-80"
@@ -957,13 +962,81 @@ resource "azurerm_cognitive_deployment" "embedding" {
 data "azurerm_client_config" "current" {}
 
 # Azure Key Vault
+# Update Key Vault with proper access policies
 resource "azurerm_key_vault" "DBR-dev-Backend-RuntimeConfig-KeyVault" {
   name                        = "DBR-${var.environment}-RuntimeConfig-KV"
   location                    = "westeurope"
   resource_group_name         = azurerm_resource_group.rg.name
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   sku_name                    = "standard"
+  purge_protection_enabled    = true
+  
+  # Enable RBAC - this is important for App Gateway to access certificates
+  enable_rbac_authorization   = true
 
-  purge_protection_enabled = true
+  # Required for certificate management
+  soft_delete_retention_days  = 7
 }
 
+# Access policy for the deployment principal
+resource "azurerm_key_vault_access_policy" "deployer" {
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_client_config.current.object_id
+
+  certificate_permissions = [
+    "Backup",
+    "Create",
+    "Delete",
+    "DeleteIssuers",
+    "Get",
+    "GetIssuers",
+    "Import",
+    "List",
+    "ListIssuers",
+    "ManageContacts",
+    "ManageIssuers",
+    "Purge",
+    "Recover",
+    "Restore",
+    "SetIssuers",
+    "Update"
+  ]
+
+  secret_permissions = [
+    "Backup",
+    "Delete",
+    "Get",
+    "List",
+    "Purge",
+    "Recover",
+    "Restore",
+    "Set"
+  ]
+
+  key_permissions = [
+    "Backup",
+    "Create",
+    "Delete",
+    "Get",
+    "Import",
+    "List",
+    "Purge",
+    "Recover",
+    "Restore",
+    "Update"
+  ]
+}
+
+# Access policy for the Application Gateway's managed identity
+resource "azurerm_user_assigned_identity" "appgw_identity" {
+  name                = "DBR-${var.environment}-appgw-identity"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+}
+
+resource "azurerm_role_assignment" "appgw_keyvault_role" {
+  scope                = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.appgw_identity.principal_id
+}

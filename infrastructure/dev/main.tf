@@ -493,6 +493,17 @@ resource "azurerm_container_group" "rabbitmq" {
       port     = 15672
       protocol = "TCP"
     }
+    diagnostics {
+      log_analytics {
+        workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
+        workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
+
+        log_type      = "ContainerInsights"
+        metadata = {
+          "component" = "rabbitmq"
+        }
+      }
+    }
   }
 
   ip_address_type = "Private"
@@ -538,6 +549,18 @@ resource "azurerm_container_group" "participant_frontend" {
     password = var.acr_password
   }
 
+  diagnostics {
+    log_analytics {
+      workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
+
+      log_type      = "ContainerInsights"
+      metadata = {
+        "component" = "participant-frontend"
+      }
+    }
+  }
+
   lifecycle {
     ignore_changes = [image_registry_credential]
   }
@@ -568,6 +591,18 @@ resource "azurerm_container_group" "dashboard_frontend" {
     server   = data.azurerm_container_registry.acr.login_server
     username = var.acr_username
     password = var.acr_password
+  }
+
+  diagnostics {
+    log_analytics {
+      workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
+
+      log_type      = "ContainerInsights"
+      metadata = {
+        "component" = "dashboard-frontend"
+      }
+    }
   }
 
   lifecycle {
@@ -602,6 +637,18 @@ resource "azurerm_container_group" "directus" {
     server   = data.azurerm_container_registry.acr.login_server
     username = var.acr_username
     password = var.acr_password
+  }
+
+  diagnostics {
+    log_analytics {
+      workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
+
+      log_type      = "ContainerInsights"
+      metadata = {
+        "component" = "directus"
+      }
+    }
   }
 
   lifecycle {
@@ -650,7 +697,17 @@ resource "azurerm_container_group" "worker" {
   }
 
   ## add shared volume for     volumes:- ./server/uploads:/code/server/uploads and - ./server/trankit_cache:/code/server/trankit_cache
-  
+  diagnostics {
+    log_analytics {
+      workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
+
+      log_type      = "ContainerInsights"
+      metadata = {
+        "component" = "worker"
+      }
+    }
+  }
 
   image_registry_credential {
     server   = data.azurerm_container_registry.acr.login_server
@@ -703,6 +760,17 @@ resource "azurerm_container_group" "api_server" {
       storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
     }
   }
+  diagnostics {
+    log_analytics {
+      workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
+
+      log_type      = "ContainerInsights"
+      metadata = {
+        "component" = "api-server"
+      }
+    }
+  }
 
   image_registry_credential {
     server   = data.azurerm_container_registry.acr.login_server
@@ -714,6 +782,16 @@ resource "azurerm_container_group" "api_server" {
     ignore_changes = [image_registry_credential]
   }
 }
+
+# Log Analytics Workspace for centralized logging
+resource "azurerm_log_analytics_workspace" "main" {
+  name                = "DBR-${var.environment}-Monitoring-Main-LAW"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30  # Adjust based on your retention needs
+}
+
 
 
 resource "azurerm_storage_account" "api-server-storage" {
@@ -735,6 +813,8 @@ resource "azurerm_storage_share" "trankit" {
   storage_account_name = azurerm_storage_account.api-server-storage.name
   quota               = 500  # GB
 }
+
+
 
 ### Data
 

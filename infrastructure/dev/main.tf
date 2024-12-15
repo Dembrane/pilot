@@ -480,6 +480,11 @@ resource "azurerm_container_group" "rabbitmq" {
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
 
+  identity {
+    type = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.container_identity.id]
+  }
+
   container {
     name   = "rabbitmq"
     image  = "mcr.microsoft.com/azurelinux/base/rabbitmq-server:3.13"
@@ -493,7 +498,10 @@ resource "azurerm_container_group" "rabbitmq" {
       port     = 15672
       protocol = "TCP"
     }
-
+    secure_environment_variables = {
+      RABBITMQ_DEFAULT_USER = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.rabbitmq_user.versionless_id})"
+      RABBITMQ_DEFAULT_PASS = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.rabbitmq_password.versionless_id})"
+    }
   }
 
   ip_address_type = "Private"
@@ -739,11 +747,37 @@ resource "azurerm_container_group" "api_server" {
   ip_address_type = "Private"
   subnet_ids       = [azurerm_subnet.private_subnet[0].id]
 
+  identity {
+    type = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.api_server_identity.id]
+  }
+
   container {
     name   = "api-server"
     image  = "${data.azurerm_container_registry.acr.login_server}/api-server:development-latest"
     cpu    = "1"
     memory = "2"
+
+    secure_environment_variables = {
+      DIRECTUS_PUBLIC_URL           = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_public_url.versionless_id})"
+      DIRECTUS_TOKEN               = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
+      DIRECTUS_SECRET             = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_secret.versionless_id})"
+      ADMIN_BASE_URL              = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.admin_base_url.versionless_id})"
+      PARTICIPANT_BASE_URL        = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.participant_base_url.versionless_id})"
+      OPENAI_API_KEY             = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.openai_api_key.versionless_id})"
+      ANTHROPIC_API_KEY          = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.anthropic_api_key.versionless_id})"
+      DATABASE_URL               = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.database_url.versionless_id})"
+    }
+
+    environment_variables = {
+      DIRECTUS_SESSION_COOKIE_NAME = "directus_session_token"
+      BUILD_VERSION               = "development"
+      RABBITMQ_URL               = "amqp://dembrane:dembrane@rabbitmq:5672"
+      REDIS_URL                  = "redis://${azurerm_redis_cache.basic_redis.hostname}:${azurerm_redis_cache.basic_redis.ssl_port}"
+      DISABLE_REDACTION          = "1"
+      DISABLE_SENTRY             = "0"
+      SERVE_API_DOCS             = "0"
+    }
 
     ports {
       port     = 8000
@@ -1100,3 +1134,132 @@ resource "azurerm_dns_a_record" "dashboard" {
   ttl                 = 300
   target_resource_id  = azurerm_public_ip.appgw.id
 }
+
+
+
+### VARS
+
+# rabbitmq
+
+# Create secrets for RabbitMQ credentials
+resource "azurerm_key_vault_secret" "rabbitmq_user" {
+  name         = "rabbitmq-default-user"
+  value        = "dembrane"
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "rabbitmq_password" {
+  name         = "rabbitmq-default-password"
+  value        = "dembrane"  # Initial value, should be changed post-deployment
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_user_assigned_identity" "container_identity" {
+  name                = "DBR-${var.environment}-rabbitmq-identity"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+}
+
+# Grant the container identity access to Key Vault secrets
+resource "azurerm_role_assignment" "container_secret_access" {
+  scope                = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.container_identity.principal_id
+}
+
+# directus
+
+resource "azurerm_key_vault_secret" "directus_public_url" {
+  name         = "directus-public-url"
+  value        = "https://admin.dbr-dev.azure.com"  # Example value
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "directus_admin_token" {
+  name         = "directus-admin-token"
+  value        = "initial-token-value"  # Should be changed post-deployment
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "directus_secret" {
+  name         = "directus-secret"
+  value        = "initial-secret-value"  # Should be changed post-deployment
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "admin_base_url" {
+  name         = "admin-base-url"
+  value        = "https://admin.dbr-dev.azure.com"  # Example value
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "participant_base_url" {
+  name         = "participant-base-url"
+  value        = "https://app.dbr-dev.azure.com"  # Example value
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "openai_api_key" {
+  name         = "openai-api-key"
+  value        = "initial-openai-key"  # Should be changed post-deployment
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "anthropic_api_key" {
+  name         = "anthropic-api-key"
+  value        = "initial-anthropic-key"  # Should be changed post-deployment
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "database_url" {
+  name         = "database-url"
+  value        = "postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane"  # Initial value
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_user_assigned_identity" "api_server_identity" {
+  name                = "DBR-${var.environment}-api-server-identity"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+}
+
+resource "azurerm_role_assignment" "api_server_secret_access" {
+  scope                = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.api_server_identity.principal_id
+}
+
+# worker envs
+

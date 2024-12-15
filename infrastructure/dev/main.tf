@@ -298,6 +298,11 @@ resource "azurerm_application_gateway" "main" {
     identity_ids = [azurerm_user_assigned_identity.appgw_identity.id]
   }
 
+  ssl_certificate {
+    name = "wildcard-cert"
+    key_vault_secret_id = "https://${azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.name}.vault.azure.net/secrets/appgw-wildcard-cert"
+  }
+
   # Frontend ports for both HTTP and HTTPS
   frontend_port {
     name = "http-80"

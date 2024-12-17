@@ -1,0 +1,14 @@
+{
+  "index": "Overview",
+  "creating-project": "Creating a Project",
+  "portal-setup": "Portal Setup",
+  "collecting-data": "Collecting Data",
+  "analysis": "First Analysis",
+  "*": {
+    "theme": {
+      "toc": true,
+      "breadcrumb": true,
+      "pagination": true
+    }
+  }
+}

@@ -1,15 +1,30 @@
 {
   "index": "Introduction",
-  "another": "Another Page",
-  "advanced": "Advanced (A Folder)",
-  "about": {
-    "title": "About",
+  "getting-started": "Getting Started",
+  "core-concepts": {
+    "title": "Core Concepts",
     "type": "page"
   },
-  "contact": {
-    "title": "Contact ↗",
+  "features": {
+    "title": "Features",
+    "type": "page"
+  },
+  "advanced-use": {
+    "title": "Advanced Usage",
+    "type": "page"
+  },
+  "resources": {
+    "title": "Resources",
+    "type": "page"
+  },
+  "faq": {
+    "title": "FAQ",
+    "type": "page"
+  },
+  "support": {
+    "title": "Support ↗",
     "type": "page",
-    "href": "https://twitter.com/shuding_",
+    "href": "https://dembrane.com/support",
     "newWindow": true
   }
 }

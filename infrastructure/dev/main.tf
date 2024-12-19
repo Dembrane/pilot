@@ -293,7 +293,7 @@ resource "azurerm_key_vault_certificate" "appgw_cert" {
         "digitalSignature",
         "keyEncipherment"
       ]
-      subject            = "CN=*.dbr-dev.azure.com"
+      subject            = "CN=*.dembrane-dev.com"
       validity_in_months = 12
     }
   }
@@ -395,7 +395,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_port_name            = "https-443"
     protocol                      = "Https"
     ssl_certificate_name          = "wildcard-cert"
-    host_name                     = "admin.dbr-dev.azure.com"
+    host_name                     = "directus.dembrane-dev.com"
   }
 
   http_listener {
@@ -404,7 +404,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_port_name            = "https-443"
     protocol                      = "Https"
     ssl_certificate_name          = "wildcard-cert"
-    host_name                     = "api.dbr-dev.azure.com"
+    host_name                     = "api.dembrane-dev.com"
   }
 
   http_listener {
@@ -413,7 +413,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_port_name            = "https-443"
     protocol                      = "Https"
     ssl_certificate_name          = "wildcard-cert"
-    host_name                     = "app.dbr-dev.azure.com"
+    host_name                     = "app.dembrane-dev.com"
   }
 
   http_listener {
@@ -422,7 +422,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_port_name            = "https-443"
     protocol                      = "Https"
     ssl_certificate_name          = "wildcard-cert"
-    host_name                     = "dashboard.dbr-dev.azure.com"
+    host_name                     = "admin.dembrane-dev.com"
   }
 
   # Routing rules
@@ -705,6 +705,27 @@ resource "azurerm_container_group" "worker" {
       share_name = azurerm_storage_share.trankit.name
       storage_account_name = azurerm_storage_account.api-server-storage.name
       storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
+    }
+
+        secure_environment_variables = {
+      DIRECTUS_PUBLIC_URL           = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_public_url.versionless_id})"
+      DIRECTUS_TOKEN               = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
+      DIRECTUS_SECRET             = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_secret.versionless_id})"
+      ADMIN_BASE_URL              = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.admin_base_url.versionless_id})"
+      PARTICIPANT_BASE_URL        = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.participant_base_url.versionless_id})"
+      OPENAI_API_KEY             = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.openai_api_key.versionless_id})"
+      ANTHROPIC_API_KEY          = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.anthropic_api_key.versionless_id})"
+      DATABASE_URL               = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.database_url.versionless_id})"
+    }
+
+    environment_variables = {
+      DIRECTUS_SESSION_COOKIE_NAME = "directus_session_token"
+      BUILD_VERSION               = "development"
+      RABBITMQ_URL               = "amqp://dembrane:dembrane@rabbitmq:5672"
+      REDIS_URL                  = "redis://${azurerm_redis_cache.basic_redis.hostname}:${azurerm_redis_cache.basic_redis.ssl_port}"
+      DISABLE_REDACTION          = "1"
+      DISABLE_SENTRY             = "0"
+      SERVE_API_DOCS             = "0"
     }
   }
 
@@ -1098,13 +1119,13 @@ resource "azurerm_role_assignment" "appgw_keyvault_certificates" {
 
 #  DNS Zone
 resource "azurerm_dns_zone" "dev_zone" {
-  name                = "dbr-dev.azure.com"
+  name                = "dembrane-dev.com"
   resource_group_name = azurerm_resource_group.rg.name
 }
 
 #  A records pointing to Application Gateway IP
-resource "azurerm_dns_a_record" "admin" {
-  name                = "admin"
+resource "azurerm_dns_a_record" "directus" {
+  name                = "dashboard"
   zone_name           = azurerm_dns_zone.dev_zone.name
   resource_group_name = azurerm_resource_group.rg.name
   ttl                 = 300
@@ -1127,8 +1148,8 @@ resource "azurerm_dns_a_record" "app" {
   target_resource_id  = azurerm_public_ip.appgw.id
 }
 
-resource "azurerm_dns_a_record" "dashboard" {
-  name                = "dashboard"
+resource "azurerm_dns_a_record" "admin" {
+  name                = "admin"
   zone_name           = azurerm_dns_zone.dev_zone.name
   resource_group_name = azurerm_resource_group.rg.name
   ttl                 = 300
@@ -1179,11 +1200,9 @@ resource "azurerm_role_assignment" "container_secret_access" {
 
 resource "azurerm_key_vault_secret" "directus_public_url" {
   name         = "directus-public-url"
-  value        = "https://admin.dbr-dev.azure.com"  # Example value
+  value        = "https://directus.dbr-dev.azure.com"  # Example value
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-  lifecycle {
-    ignore_changes = [value]
-  }
+
 }
 
 resource "azurerm_key_vault_secret" "directus_admin_token" {
@@ -1206,20 +1225,16 @@ resource "azurerm_key_vault_secret" "directus_secret" {
 
 resource "azurerm_key_vault_secret" "admin_base_url" {
   name         = "admin-base-url"
-  value        = "https://admin.dbr-dev.azure.com"  # Example value
+  value        = "https://admin.dbr-dev.com"  # Example value
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-  lifecycle {
-    ignore_changes = [value]
-  }
+
 }
 
 resource "azurerm_key_vault_secret" "participant_base_url" {
   name         = "participant-base-url"
-  value        = "https://app.dbr-dev.azure.com"  # Example value
+  value        = "https://app.dbr-dev.com"  # Example value
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-  lifecycle {
-    ignore_changes = [value]
-  }
+
 }
 
 resource "azurerm_key_vault_secret" "openai_api_key" {

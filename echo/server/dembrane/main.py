@@ -3,11 +3,6 @@ from typing import Any, AsyncGenerator
 from logging import getLogger
 from contextlib import asynccontextmanager
 
-# from dembrane.vectorstore import vectorstore
-# from dembrane.process_resource import (
-#     seed_process_resource_queue,
-# )
-import sentry_sdk
 from fastapi import (
     FastAPI,
     Request,
@@ -18,48 +13,25 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware import Middleware
 from fastapi.openapi.utils import get_openapi
 from starlette.middleware.cors import CORSMiddleware
-from sentry_sdk.integrations.fastapi import FastApiIntegration
-from sentry_sdk.integrations.starlette import StarletteIntegration
 
 from dembrane.config import (
-    BUILD_VERSION,
     ADMIN_BASE_URL,
-    DISABLE_SENTRY,
     SERVE_API_DOCS,
     PARTICIPANT_BASE_URL,
 )
+from dembrane.sentry import init_sentry
 from dembrane.api.api import api
 
 logger = getLogger("server")
-
-if not DISABLE_SENTRY:
-    logger.info("initializing sentry")
-    sentry_sdk.init(
-        dsn="https://0037fa05e4f0e472dffaecbb7d25be3a@o4507107162652672.ingest.de.sentry.io/4507107472703568",
-        traces_sample_rate=0.5,
-        profiles_sample_rate=0.5,
-        enable_tracing=True,
-        release=BUILD_VERSION,
-        integrations=[
-            StarletteIntegration(
-                transaction_style="endpoint",
-                failed_request_status_codes={*range(400, 499), *range(500, 599)},
-            ),
-            FastApiIntegration(
-                transaction_style="endpoint",
-                failed_request_status_codes={*range(400, 499), *range(500, 599)},
-            ),
-        ],
-    )
-else:
-    logger.info("sentry is disabled by DISABLE_SENTRY")
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     # startup
     logger.info("starting server")
+    init_sentry()
     # seed_process_resource_queue()
+
     yield
     # shutdown
     logger.info("shutting down server")

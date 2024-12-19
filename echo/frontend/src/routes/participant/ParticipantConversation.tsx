@@ -339,7 +339,6 @@ const useChunkedAudioRecorder = ({
   };
 };
 
-// Common hooks
 const useConversationQuery = (
   projectId: string | undefined,
   conversationId: string | undefined,
@@ -594,46 +593,20 @@ const ParticipantBody = ({
 
 export const ParticipantConversationAudioRoute = () => {
   const { projectId, conversationId } = useParams();
-
   const projectQuery = useParticipantProjectById(projectId ?? "");
   const conversationQuery = useConversationQuery(projectId, conversationId);
   const chunks = useConversationChunksQuery(projectId, conversationId);
   const uploadChunkMutation = useUploadConversationChunk();
 
-  const [uploadInProgress, updatedUploadInProgress] = useState(false);
-
-  useEffect(() => {
-    if (uploadChunkMutation.isPending === true) {
-      updatedUploadInProgress(true);
-    }
-    if (uploadChunkMutation.isPending === false) {
-      const timer = setTimeout(() => {
-        updatedUploadInProgress(false);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [uploadChunkMutation.isPending]);
-
-  const [preview, setPreview] = useState<string | null>(null);
-  const blob = useRef<Blob | null>(null);
-
-  const showPreview = false;
-
   const onChunk = (chunk: Blob) => {
-    if (showPreview) {
-      blob.current = chunk;
-      const url = URL.createObjectURL(chunk);
-      setPreview(url);
-    } else {
-      uploadChunkMutation.mutate({
-        conversationId: conversationId ?? "",
-        chunk,
-        timestamp: new Date(),
-      });
-    }
+    uploadChunkMutation.mutate({
+      conversationId: conversationId ?? "",
+      chunk,
+      timestamp: new Date(),
+    });
   };
 
-  const liveAudioRecorder = useChunkedAudioRecorder({ onChunk });
+  const fallbackAudioRecorder = useChunkedAudioRecorder({ onChunk });
 
   useWakeLock({ obtainWakeLockOnMount: true });
 
@@ -648,12 +621,16 @@ export const ParticipantConversationAudioRoute = () => {
     errored,
     loading,
     permissionError,
-  } = liveAudioRecorder;
+  } =
+    // fallback ?
+    fallbackAudioRecorder;
+  // : audioRecorder;
 
   const [troubleShootingGuideOpened, setTroubleShootingGuideOpened] =
     useState(false);
 
   const navigate = useI18nNavigate();
+  const { language } = useLanguage();
 
   const handleCheckMicrophoneAccess = async () => {
     const permissionError = await checkPermissionError();
@@ -670,8 +647,8 @@ export const ParticipantConversationAudioRoute = () => {
     return <LoadingOverlay visible />;
   }
 
-  const textModeUrl = `/${projectId}/conversation/${conversationId}/text`;
-  const finishUrl = `/${projectId}/conversation/${conversationId}/finish`;
+  const textModeUrl = `/${language}/${projectId}/conversation/${conversationId}/text`;
+  const finishUrl = `/${language}/${projectId}/conversation/${conversationId}/finish`;
 
   const handleFinish = () => {
     if (window.confirm(t`Are you sure you want to finish?`)) {
@@ -680,7 +657,7 @@ export const ParticipantConversationAudioRoute = () => {
   };
 
   return (
-    <div className="container mx-auto flex h-full max-w-2xl flex-col">
+    <div className="container mx-auto flex min-h-dvh max-w-2xl flex-col">
       {/* modal for permissions error */}
       <Modal
         opened={!!permissionError}
@@ -727,6 +704,8 @@ export const ParticipantConversationAudioRoute = () => {
         </div>
       </Modal>
 
+      <ParticipantHeader />
+
       <Box className={clsx("relative flex-grow px-4 py-4 transition-all")}>
         {projectQuery.data && conversationQuery.data && (
           <ParticipantBody
@@ -748,116 +727,54 @@ export const ParticipantConversationAudioRoute = () => {
                   <div className="h-4 w-4 animate-pulse rounded-full bg-red-500"></div>
                 )}
                 <Text className="text-4xl">
-                  {recordingTime >= 3600
-                    ? `${Math.floor(recordingTime / 3600)
+                  {Math.floor(recordingTime / 3600) > 0 && (
+                    <>
+                      {Math.floor(recordingTime / 3600)
                         .toString()
-                        .padStart(2, "0")}:${Math.floor(
-                        (recordingTime % 3600) / 60,
-                      )
-                        .toString()
-                        .padStart(
-                          2,
-                          "0",
-                        )}:${(recordingTime % 60).toString().padStart(2, "0")}`
-                    : `${Math.floor(recordingTime / 60)
-                        .toString()
-                        .padStart(
-                          2,
-                          "0",
-                        )}:${(recordingTime % 60).toString().padStart(2, "0")}`}
+                        .padStart(2, "0")}
+                      :
+                    </>
+                  )}
+                  {Math.floor((recordingTime % 3600) / 60)
+                    .toString()
+                    .padStart(2, "0")}
+                  :{(recordingTime % 60).toString().padStart(2, "0")}
                 </Text>
               </Group>
             </div>
           )}
 
-          {uploadInProgress && (
-            <Notification title={t`Upload in progress`}>
-              <Trans>Please do not close your browser</Trans>
-            </Notification>
-          )}
-
           <Group justify="center">
             {!isRecording && (
               <>
-                {!preview || !blob ? (
-                  <Group className="w-full">
+                <Group className="w-full">
+                  <Button
+                    size="xl"
+                    rightSection={<IconMicrophone />}
+                    onClick={startRecording}
+                    className="flex-grow"
+                  >
+                    <Trans>Start Recording</Trans>
+                  </Button>
+
+                  <I18nLink to={textModeUrl}>
+                    <ActionIcon component="a" size="60" variant="outline">
+                      <IconTextCaption />
+                    </ActionIcon>
+                  </I18nLink>
+
+                  {!isRecording && chunks?.data && chunks.data.length > 0 && (
                     <Button
                       size="xl"
-                      rightSection={<IconMicrophone />}
-                      onClick={startRecording}
-                      className="flex-grow"
+                      onClick={handleFinish}
+                      component="a"
+                      variant="light"
+                      rightSection={<IconCheck />}
                     >
-                      <Trans>Start Recording</Trans>
+                      Finish
                     </Button>
-
-                    <I18nLink to={textModeUrl}>
-                      <ActionIcon component="a" size="60" variant="outline">
-                        <IconTextCaption />
-                      </ActionIcon>
-                    </I18nLink>
-
-                    {!isRecording &&
-                      !preview &&
-                      !blob.current &&
-                      chunks?.data &&
-                      chunks.data.length > 0 && (
-                        <Button
-                          size="xl"
-                          onClick={handleFinish}
-                          component="a"
-                          variant="light"
-                          rightSection={<IconCheck />}
-                          disabled={uploadInProgress}
-                        >
-                          <Trans>Finish</Trans>
-                        </Button>
-                      )}
-                  </Group>
-                ) : (
-                  <Stack className="w-full">
-                    <Group className="w-full">
-                      <audio controls src={preview} className="flex-grow" />
-
-                      <ActionIcon
-                        variant="outline"
-                        size="xl"
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              t`Are you sure you want to delete this recording?`,
-                            )
-                          ) {
-                            setPreview(null);
-                            blob.current = null;
-                          }
-                        }}
-                      >
-                        <IconTrash />
-                      </ActionIcon>
-                    </Group>
-                    <Button
-                      size="xl"
-                      onClick={() => {
-                        if (!blob.current) {
-                          alert(t`Something went wrong. Please try again.`);
-                          throw new Error("No blob found");
-                        }
-
-                        uploadChunkMutation.mutate({
-                          conversationId: conversationId ?? "",
-                          chunk: blob.current,
-                          timestamp: new Date(),
-                        });
-
-                        setPreview(null);
-                        blob.current = null;
-                      }}
-                      rightSection={<IconUpload />}
-                    >
-                      <Trans>Submit</Trans>
-                    </Button>
-                  </Stack>
-                )}
+                  )}
+                </Group>
               </>
             )}
 

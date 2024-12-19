@@ -36,6 +36,7 @@ def transcribe_audio_openai(
             transcription = client.audio.transcriptions.create(**options)  # type: ignore
         except Exception as exc:
             logger.error(f"Failed to transcribe audio: {exc}")
+            # TODO: handle audio too short
             raise TranscriptionError(f"Failed to transcribe audio: {exc}") from exc
 
         if transcription is None or transcription == "":

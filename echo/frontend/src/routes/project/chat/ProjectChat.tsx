@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { ChatContextProgress } from "@/components/chat/ChatContextProgress";
 import { ChatMessage } from "@/components/chat/ChatMessage";
 import {
@@ -44,8 +46,8 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { formatDate } from "date-fns";
 import { cn } from "@/lib/utils";
 import { I18nLink } from "@/components/common/i18nLink";
-import { Trans, t } from "@lingui/macro";
 import { CloseableAlert } from "@/components/common/ClosableAlert";
+import { useLanguage } from "@/lib/useLanguage";
 
 const ConversationLinks = ({
   conversations,
@@ -236,6 +238,8 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
     };
   }, [chatContextQuery.data, chatHistoryQuery.data]);
 
+  const { iso639_1 } = useLanguage();
+
   const {
     setMessages,
     messages,
@@ -248,7 +252,7 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
     stop,
     reload,
   } = useChat({
-    api: `${API_BASE_URL}/chats/${chatId}`,
+    api: `${API_BASE_URL}/chats/${chatId}?language=${iso639_1 ?? "en"}`,
     credentials: "include",
     // @ts-expect-error chatHistoryQuery.data is not typed
     initialMessages: chatHistoryQuery.data ?? [],
@@ -260,7 +264,9 @@ const useDembraneChat = ({ chatId }: { chatId: string }) => {
       console.log("onError", error);
     },
     onFinish: async (message) => {
+      // this uses the response stream from the backend and makes a chat message IN THE FRONTEND
       // do this for now because - i dont want to do the stream text processing again in the backend
+      // if someone navigates away before onFinish is completed, the message will be lost
       addChatMessageMutation.mutate({
         project_chat_id: {
           id: chatId,

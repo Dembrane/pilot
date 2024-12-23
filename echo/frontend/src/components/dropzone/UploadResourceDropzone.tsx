@@ -1,8 +1,8 @@
+import { t } from "@lingui/core/macro";
 import { useUploadResourceByProjectIdMutation } from "@/lib/query";
 import { PDF_MIME_TYPE } from "@mantine/dropzone";
 import { PropsWithChildren } from "react";
 import { CommonDropzone } from "./Dropzone";
-import { t } from "@lingui/macro";
 import { toast } from "../common/Toaster";
 
 export const UploadResourceDropzone = (

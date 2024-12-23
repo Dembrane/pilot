@@ -1,9 +1,9 @@
+import { Trans } from "@lingui/react/macro";
 import {
   useDeleteResourceByIdMutation,
   useResourceById,
   useUpdateResourceByIdMutation,
 } from "@/lib/query";
-import { Trans } from "@lingui/macro";
 import {
   ActionIcon,
   Box,
@@ -24,6 +24,7 @@ import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { apiCommonConfig } from "@/lib/api";
 import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import { UnsavedChanges } from "@/components/form/UnsavedChanges";
 
 const ResourceDangerZone = ({ resource }: { resource: TResource }) => {
   const deleteResourceByIdMutation = useDeleteResourceByIdMutation();
@@ -112,7 +113,7 @@ const ResourceEdit = ({ resource }: { resource: TResource }) => {
         <Title order={2}>
           <Trans>Edit Resource</Trans>
         </Title>
-        {isDirty && <Trans>Unsaved changes</Trans>}
+        <UnsavedChanges isDirty={isDirty} />
       </Group>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack>

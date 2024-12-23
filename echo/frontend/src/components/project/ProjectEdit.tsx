@@ -1,6 +1,6 @@
+import { Trans } from "@lingui/react/macro";
 import { ProjectTagsInput } from "@/components/project/ProjectTagsInput";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
-import { Trans } from "@lingui/macro";
 import {
   Anchor,
   Box,
@@ -16,6 +16,7 @@ import {
 } from "@mantine/core";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { UnsavedChanges } from "../form/UnsavedChanges";
 
 type ProjectEditFormValues = {
   name: string;
@@ -90,7 +91,7 @@ export const ProjectEdit = ({ project }: { project: Project }) => {
         <Title order={2}>
           <Trans>Edit Project</Trans>
         </Title>
-        {isDirty && <Trans>Unsaved changes</Trans>}
+        <UnsavedChanges isDirty={isDirty} />
       </Group>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack>

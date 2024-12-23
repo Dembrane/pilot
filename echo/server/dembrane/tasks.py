@@ -1,13 +1,14 @@
 # mypy: disable-error-code="no-untyped-def"
 from typing import List
 
-from celery import Celery, chain, chord, group  # type: ignore
+from celery import Celery, chain, chord, group, signals  # type: ignore
 from sentry_sdk import capture_exception
 from celery.utils.log import get_task_logger  # type: ignore
 
 import dembrane.tasks_config
 from dembrane.utils import generate_uuid, get_utc_timestamp
 from dembrane.config import REDIS_URL, RABBITMQ_URL
+from dembrane.sentry import init_sentry
 from dembrane.database import (
     ViewModel,
     QuoteModel,
@@ -40,6 +41,12 @@ assert REDIS_URL, "REDIS_URL environment variable is not set"
 celery_app = Celery("tasks", broker=RABBITMQ_URL, result_backend=REDIS_URL + "/0")
 
 celery_app.config_from_object(dembrane.tasks_config)
+
+
+@signals.celeryd_init.connect
+def init_sentry_celery(**_kwargs):
+    logger.info("initializing sentry for celery")
+    init_sentry()
 
 
 class BaseTask(celery_app.Task):  # type: ignore
@@ -294,10 +301,10 @@ def task_generate_quotes(
     ignore_result=False,
     base=BaseTask,
 )
-def task_generate_conversation_summary(self, conversation_id: str):
+def task_generate_conversation_summary(self, conversation_id: str, language: str):
     with DatabaseSession() as db:
         try:
-            generate_conversation_summary(db, conversation_id)
+            generate_conversation_summary(db, conversation_id, language)
         except Exception as exc:
             logger.error(f"Error: {exc}")
             db.rollback()
@@ -311,10 +318,10 @@ def task_generate_conversation_summary(self, conversation_id: str):
     ignore_result=False,
     base=BaseTask,
 )
-def task_generate_insight_extras(self, insight_id: str):
+def task_generate_insight_extras(self, insight_id: str, language: str):
     with DatabaseSession() as db:
         try:
-            generate_insight_extras(db, insight_id)
+            generate_insight_extras(db, insight_id, language)
         except Exception as exc:
             logger.error(f"Error: {exc}")
             db.rollback()
@@ -328,11 +335,11 @@ def task_generate_insight_extras(self, insight_id: str):
     ignore_result=True,
     base=BaseTask,
 )
-def task_generate_insight_extras_multiple(self, insight_ids: List[str]):
+def task_generate_insight_extras_multiple(self, insight_ids: List[str], language: str):
     with DatabaseSession() as db:
         try:
             task_signatures = [
-                task_generate_insight_extras.si(insight_id).on_error(log_error.s())
+                task_generate_insight_extras.si(insight_id, language).on_error(log_error.s())
                 for insight_id in insight_ids
             ]
 
@@ -343,10 +350,6 @@ def task_generate_insight_extras_multiple(self, insight_ids: List[str]):
             logger.error(f"Error: {exc}")
             db.rollback()
             raise self.retry(exc=exc) from exc
-
-
-# task_initialize_insights
-
 
 @celery_app.task(
     bind=True,
@@ -372,12 +375,12 @@ def task_initialize_insights(self, project_analysis_run_id: str) -> List[str]:
     ignore_result=False,
     base=BaseTask,
 )
-def task_generate_insights(self, project_analysis_run_id: str):
+def task_generate_insights(self, project_analysis_run_id: str, language: str):
     with DatabaseSession() as db:
         try:
             job = chain(
                 task_initialize_insights.si(project_analysis_run_id),
-                task_generate_insight_extras_multiple.s(),
+                task_generate_insight_extras_multiple.s(language=language),
             )
 
             result = job.apply_async()
@@ -414,10 +417,10 @@ def task_generate_insights(self, project_analysis_run_id: str):
     ignore_result=False,
     base=BaseTask,
 )
-def task_generate_aspect_extras(self, aspect_id: str):
+def task_generate_aspect_extras(self, aspect_id: str, language: str = "en"):
     with DatabaseSession() as db:
         try:
-            generate_aspect_extras(db, aspect_id)
+            generate_aspect_extras(db, aspect_id, language)
         except Exception as exc:
             logger.error(f"Error: {exc}")
             db.rollback()
@@ -431,7 +434,7 @@ def task_generate_aspect_extras(self, aspect_id: str):
     ignore_result=False,
     base=BaseTask,
 )
-def task_generate_view_extras(self, view_id: str):
+def task_generate_view_extras(self, view_id: str, language: str):
     with DatabaseSession() as db:
         try:
             view = db.get(ViewModel, view_id)
@@ -442,7 +445,7 @@ def task_generate_view_extras(self, view_id: str):
 
             view.processing_message = "Analysing aspects"
             db.commit()
-            generate_view_extras(db, view_id)
+            generate_view_extras(db, view_id, language)
             view.processing_status = ProcessingStatusEnum.DONE
             view.processing_completed_at = get_utc_timestamp()
             db.commit()
@@ -459,10 +462,10 @@ def task_generate_view_extras(self, view_id: str):
     ignore_result=False,
     base=BaseTask,
 )
-def task_assign_aspect_centroid(self, aspect_id: str):
+def task_assign_aspect_centroid(self, aspect_id: str, language: str = "en"):
     with DatabaseSession() as db:
         try:
-            assign_aspect_centroid(db, aspect_id)
+            assign_aspect_centroid(db, aspect_id, language)
         except Exception as exc:
             logger.error(f"Error: {exc}")
             db.rollback()
@@ -493,7 +496,13 @@ def task_cluster_quotes_using_aspect_centroids(self, view_id: str):
     ignore_result=False,
     base=BaseTask,
 )
-def task_create_view(_self, project_analysis_run_id: str, user_query: str, user_query_context: str):
+def task_create_view(
+    _self,
+    project_analysis_run_id: str,
+    user_query: str,
+    user_query_context: str,
+    language: str,
+):
     with DatabaseSession() as db:
         try:
             project_analysis_run = db.get(ProjectAnalysisRunModel, project_analysis_run_id)
@@ -504,23 +513,29 @@ def task_create_view(_self, project_analysis_run_id: str, user_query: str, user_
 
             # FIXME: update_progress(self, 1, 4, message="Creating view")
             # TODO: convert to task
-            view = initialize_view(db, project_analysis_run_id, user_query, user_query_context)
+            view = initialize_view(
+                db, project_analysis_run_id, user_query, user_query_context, language
+            )
             view.processing_message = "Clustering aspects"
             db.commit()
 
             # update_progress(self, 2, 4, message="Clustering quotes")
 
             aspect_ids = [aspect.id for aspect in view.aspects]
-            aspect_jobs = [task_assign_aspect_centroid.si(aspect_id) for aspect_id in aspect_ids]
+            aspect_jobs = [
+                task_assign_aspect_centroid.si(aspect_id, language) for aspect_id in aspect_ids
+            ]
 
             # update_progress(self, 3, 4, message="Clustering quotes")
 
             aspects = db.query(AspectModel).filter(AspectModel.view_id == view.id).all()
-            aspect_extra_jobs = [task_generate_aspect_extras.si(aspect.id) for aspect in aspects]
+            aspect_extra_jobs = [
+                task_generate_aspect_extras.si(aspect.id, language) for aspect in aspects
+            ]
 
             result = chord(
                 chord(group(*aspect_jobs), task_cluster_quotes_using_aspect_centroids.si(view.id)),
-                chord(group(*aspect_extra_jobs), task_generate_view_extras.si(view.id)),
+                chord(group(*aspect_extra_jobs), task_generate_view_extras.si(view.id, language)),
             ).apply_async()
 
             logger.debug(result)
@@ -551,9 +566,59 @@ def task_finalize_project_library(_self, project_analysis_run_id: str):
 
         return
 
+intial_views_lang_dict = {
+    "recurring_themes": {
+        "en": {
+            "title": "Recurring Themes",
+            "description": "I will use these to make a detailed report. Give me around 15-18 aspects or more if really necessary. Ensure to merge similar aspects.",
+        },
+        "nl": {
+            "title": "Herhalende Thema's",
+            "description": "Ik gebruik deze om een uitgebreide rapport te maken. Geef me ongeveer 15-18 aspecten of meer als het nodig is. Zorg ervoor dat vergelijkbare aspecten worden samengevoegd.",
+        },
+        "fr": {
+            "title": "Thèmes récurrents",
+            "description": "Je vais les utiliser pour faire un rapport détaillé. Donnez-moi environ 15-18 aspects ou plus si nécessaire. Assurez-vous de fusionner les aspects similaires.",
+        },
+        "es": {
+            "title": "Temas recurrentes",
+            "description": "Los usaré para hacer un informe detallado. Dame alrededor de 15-18 aspectos o más si es necesario. Asegúrate de fusionar aspectos similares.",
+        },
+        "de": {
+            "title": "Wiederkehrende Themen",
+            "description": "Ich verwende diese, um ein detailliertes Bericht zu erstellen. Gib mir ungefähr 15-18 Themen oder mehr, falls notwendig. Stellen Sie sicher, dass ähnliche Themen zusammengefasst werden.",
+        },
+    },
+    "sentiment": {
+        "en": {
+            "title": "Sentiment",
+            "description": "Use only 3 aspects",
+        },
+        "nl": {
+            "title": "Sentiment",
+            "description": "Gebruik alleen 3 aspecten",
+        },
+        "fr": {
+            "title": "Sentiment",
+            "description": "Utilisez uniquement 3 aspects",
+        },
+        "es": {
+            "title": "Sentiment",
+            "description": "Utilice solo 3 aspectos",
+        },
+        "de": {
+            "title": "Sentiment",
+            "description": "Verwenden Sie nur 3 Themen",
+        },
+    },
+}
+
 
 @celery_app.task(bind=True, retry_backoff=True, ignore_result=False, base=BaseTask)
-def task_create_project_library(_self, project_id: str):
+def task_create_project_library(_self, project_id: str, language: str):
+    if language not in intial_views_lang_dict["sentiment"]:
+        raise ValueError(f"Language {language} not supported")
+
     with DatabaseSession() as db:
         try:
             project_analysis_run = ProjectAnalysisRunModel(
@@ -582,7 +647,7 @@ def task_create_project_library(_self, project_id: str):
                 quote_s_list.append(
                     chord(
                         task_generate_quotes.si(project_analysis_run.id, conversation.id),
-                        task_generate_conversation_summary.si(conversation.id),
+                        task_generate_conversation_summary.si(conversation.id, language),
                     )
                 )
 
@@ -592,14 +657,20 @@ def task_create_project_library(_self, project_id: str):
                 logger.info(f"No conversations to process for project: {project_id}")
                 return
 
-            insight_task = task_generate_insights.si(project_analysis_run.id)
+            insight_task = task_generate_insights.si(project_analysis_run.id, language)
 
-            sentiment_view = task_create_view.si(project_analysis_run.id, "Sentiment", "Use only 3")
+            sentiment_view_query = intial_views_lang_dict["sentiment"][language]["title"]
+            sentiment_view_description = intial_views_lang_dict["sentiment"][language]["description"]
+
+            sentiment_view = task_create_view.si(
+                project_analysis_run.id, sentiment_view_query, sentiment_view_description, language
+            )
+
+            theme_view_query = intial_views_lang_dict["recurring_themes"][language]["title"]
+            theme_view_description = intial_views_lang_dict["recurring_themes"][language]["description"]
 
             theme_view = task_create_view.si(
-                project_analysis_run.id,
-                "Recurring Themes",
-                "I will use these to make a detailed report. Give me around 15-18 aspects or more if really necessary. Ensure to merge similar aspects.",
+                project_analysis_run.id, theme_view_query, theme_view_description, language
             )
 
             callback = chord(

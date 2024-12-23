@@ -11,7 +11,7 @@ from dembrane.prompts import render_prompt
 from dembrane.database import ConversationModel, ProjectChatMessageModel
 from dembrane.api.conversation import get_conversation_transcript
 
-MAX_CHAT_CONTEXT_LENGTH = 120000
+MAX_CHAT_CONTEXT_LENGTH = 128000
 
 logger = logging.getLogger("chat_utils")
 
@@ -69,7 +69,7 @@ def get_project_chat_history(chat_id: str, db: Session) -> List[Dict[str, Any]]:
     return messages
 
 async def create_system_messages(
-    locked_conversation_id_list: List[str], db: Session
+    locked_conversation_id_list: List[str], db: Session, language: str
 ) -> List[Dict[str, Any]]:
     conversations = (
         db.query(ConversationModel)
@@ -87,14 +87,16 @@ async def create_system_messages(
             }
         )
 
-    prompt_message = {
-        "type": "text",
-        "text": render_prompt("system_chat.jinja", {})
-    }
+    prompt_message = {"type": "text", "text": render_prompt("system_chat", language, {})}
+
+    logger.info(f"using system prompt in language: {language}")
+    logger.info(f"prompt: {prompt_message['text'][:20]}...{prompt_message['text'][-20:]}")
 
     context_message = {
         "type": "text",
-        "text": render_prompt("context_conversations.jinja", {"conversations": conversation_data_list}),
+        "text": render_prompt(
+            "context_conversations", language, {"conversations": conversation_data_list}
+        ),
         # Anthropic/Claude Prompt Caching
         "cache_control": {"type": "ephemeral"},
     }

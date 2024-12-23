@@ -437,18 +437,23 @@ export const getConversationChunkContentLink = (
 
 export const generateProjectLibrary = async (payload: {
   projectId: string;
+  language: string;
 }) => {
-  return api.post<unknown>(`/projects/${payload.projectId}/create-library`);
+  return api.post<unknown>(`/projects/${payload.projectId}/create-library`, {
+    language: payload.language,
+  });
 };
 
 export const generateProjectView = async (payload: {
   projectId: string;
   query: string;
+  language: string;
   additionalContext?: string;
 }) => {
   return api.post<unknown>(`/projects/${payload.projectId}/create-view`, {
     query: payload.query,
     additional_context: payload.additionalContext,
+    language: payload.language,
   });
 };
 

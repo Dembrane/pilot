@@ -1,12 +1,15 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { Icons } from "@/icons";
 import {
   useAddChatContextMutation,
   useConversationsByProjectId,
   useDeleteChatContextMutation,
   useProjectChatContext,
+  useMoveConversationMutation,
+  useInfiniteProjects,
 } from "@/lib/query";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Trans, t } from "@lingui/macro";
 import {
   Accordion,
   ActionIcon,
@@ -24,17 +27,31 @@ import {
   TextInput,
   Title,
   Tooltip,
+  Modal,
+  Button,
+  ScrollArea,
+  Center,
 } from "@mantine/core";
-import React, { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { UploadConversationDropzone } from "../dropzone/UploadConversationDropzone";
 import { useDebouncedValue } from "@mantine/hooks";
-import { IconFilter, IconSearch, IconX } from "@tabler/icons-react";
+import {
+  IconFilter,
+  IconSearch,
+  IconX,
+  IconArrowsExchange,
+} from "@tabler/icons-react";
 import { formatRelative } from "date-fns";
 import { NavigationButton } from "../common/NavigationButton";
 import { cn } from "@/lib/utils";
 import { I18nLink } from "@/components/common/i18nLink";
 import { useSessionStorage } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
+
+import { useIntersection } from "@mantine/hooks";
+import { useForm, Controller } from "react-hook-form";
+import { FormLabel } from "@/components/form/FormLabel";
 
 type SortOption = {
   label: string;
@@ -106,6 +123,178 @@ const ConversationAccordionLabelChatSelection = ({
   );
 };
 
+type MoveConversationFormData = {
+  search: string;
+  targetProjectId: string;
+};
+
+export const MoveConversationButton = ({
+  conversation,
+}: {
+  conversation: Conversation;
+}) => {
+  const [opened, { open, close }] = useDisclosure(false);
+  const lastItemRef = useRef<HTMLDivElement>(null);
+  const { ref, entry } = useIntersection({
+    root: lastItemRef.current,
+    threshold: 1,
+  });
+
+  const form = useForm<MoveConversationFormData>({
+    defaultValues: {
+      search: "",
+      targetProjectId: "",
+    },
+  });
+
+  const { watch } = form;
+  const search = watch("search");
+
+  const projectsQuery = useInfiniteProjects({
+    query: {
+      sort: ["-updated_at"],
+      filter: {
+        // @ts-expect-error not tyed
+        _and: [{ id: { _neq: conversation.project_id } }],
+      },
+      search: search,
+    },
+    enabled: opened,
+  });
+
+  const moveConversationMutation = useMoveConversationMutation();
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!opened) {
+      form.reset();
+    }
+  }, [opened]);
+
+  const handleMove = (data: MoveConversationFormData) => {
+    if (!data.targetProjectId) return;
+    moveConversationMutation.mutate(
+      {
+        conversationId: conversation.id,
+        targetProjectId: data.targetProjectId,
+      },
+      {
+        onSuccess: () => {
+          close();
+        },
+      },
+    );
+  };
+
+  useEffect(() => {
+    if (entry?.isIntersecting && projectsQuery.hasNextPage) {
+      projectsQuery.fetchNextPage();
+    }
+  }, [entry?.isIntersecting]);
+
+  const allProjects =
+    projectsQuery.data?.pages.flatMap((page) => page.projects) ?? [];
+
+  return (
+    <>
+      <Button
+        onClick={open}
+        variant="outline"
+        color="blue"
+        rightSection={<IconArrowsExchange size={16} />}
+      >
+        <Trans>Move to Project</Trans>
+      </Button>
+
+      <Modal opened={opened} onClose={close} title={t`Move Conversation`}>
+        <form onSubmit={form.handleSubmit(handleMove)}>
+          <Stack>
+            <Controller
+              name="search"
+              control={form.control}
+              render={({ field }) => (
+                <TextInput
+                  label={
+                    <FormLabel
+                      label={t`Search Projects`}
+                      isDirty={form.formState.dirtyFields.search}
+                    />
+                  }
+                  placeholder={t`Search projects...`}
+                  leftSection={<IconSearch size={16} />}
+                  {...field}
+                />
+              )}
+            />
+
+            <ScrollArea h={300}>
+              {projectsQuery.isLoading ? (
+                <Center h={200}>
+                  <Loader />
+                </Center>
+              ) : (
+                <Controller
+                  name="targetProjectId"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Radio.Group
+                      label={
+                        <FormLabel
+                          label={t`Select Project`}
+                          isDirty={form.formState.dirtyFields.targetProjectId}
+                        />
+                      }
+                      {...field}
+                    >
+                      <Stack>
+                        {allProjects.map((project, index) => (
+                          <div
+                            key={project.id}
+                            ref={
+                              index === allProjects.length - 1 ? ref : undefined
+                            }
+                          >
+                            <Radio value={project.id} label={project.name} />
+                          </div>
+                        ))}
+                        {projectsQuery.isFetchingNextPage && (
+                          <Center>
+                            <Loader size="sm" />
+                          </Center>
+                        )}
+                      </Stack>
+                    </Radio.Group>
+                  )}
+                />
+              )}
+            </ScrollArea>
+
+            <Group justify="flex-end" mt="md">
+              <Button
+                variant="subtle"
+                onClick={close}
+                disabled={moveConversationMutation.isPending}
+              >
+                {t`Cancel`}
+              </Button>
+              <Button
+                type="submit"
+                loading={moveConversationMutation.isPending}
+                disabled={
+                  !form.watch("targetProjectId") ||
+                  moveConversationMutation.isPending
+                }
+              >
+                {t`Move`}
+              </Button>
+            </Group>
+          </Stack>
+        </form>
+      </Modal>
+    </>
+  );
+};
+
 const ConversationAccordionItem = ({
   conversation,
   highlight = false,
@@ -122,10 +311,6 @@ const ConversationAccordionItem = ({
   if (inChatMode && chatContextQuery.isLoading) {
     return <Skeleton height={60} />;
   }
-
-  // const isSelected = !!chatContextQuery.data?.conversations?.find(
-  //   (c) => c.conversation_id === conversation.id,
-  // );
 
   const isLocked = chatContextQuery.data?.conversations?.find(
     (c) => c.conversation_id === conversation.id && c.locked,
@@ -147,24 +332,29 @@ const ConversationAccordionItem = ({
       }
     >
       <Stack gap="4" className="pb-[3px]">
-        <Text className="pl-[4px] text-sm font-normal">
-          {conversation.participant_email ?? conversation.participant_name}
-        </Text>
-        <Text size="xs" c="gray.6" className="pl-[4px]">
-          {formatRelative(new Date(conversation.created_at), new Date())}
-        </Text>
+        <div>
+          <Text className="pl-[4px] text-sm font-normal">
+            {conversation.participant_email ?? conversation.participant_name}
+          </Text>
+        </div>
+        <div>
+          <Text size="xs" c="gray.6" className="pl-[4px]">
+            {formatRelative(new Date(conversation.created_at), new Date())}
+          </Text>
+        </div>
         <Group gap="4" pr="sm" wrap="wrap">
           {conversation.tags &&
-            conversation.tags.length > 0 &&
-            conversation.tags.map((tag) => (
-              <React.Fragment key={tag.id}>
-                {tag.project_tag_id && (
-                  <Pill size="sm" className="font-normal">
-                    {(tag?.project_tag_id as unknown as ProjectTag)?.text}
-                  </Pill>
-                )}
-              </React.Fragment>
-            ))}
+            conversation.tags
+              .filter((tag) => tag.project_tag_id && tag.project_tag_id != null)
+              .map((tag) => (
+                <Pill
+                  key={`${tag.id}-${(tag?.project_tag_id as unknown as ProjectTag)?.text}`}
+                  size="sm"
+                  className="font-normal"
+                >
+                  {(tag?.project_tag_id as unknown as ProjectTag)?.text}
+                </Pill>
+              ))}
         </Group>
       </Stack>
     </NavigationButton>

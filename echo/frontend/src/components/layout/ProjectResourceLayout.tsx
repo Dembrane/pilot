@@ -1,5 +1,5 @@
+import { Trans } from "@lingui/react/macro";
 import { useResourceById } from "@/lib/query";
-import { Trans } from "@lingui/macro";
 import { LoadingOverlay, Stack, Tabs, Title } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { Outlet, useLocation, useParams } from "react-router-dom";

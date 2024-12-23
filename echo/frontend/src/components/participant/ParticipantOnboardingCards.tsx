@@ -1,12 +1,12 @@
+import { Trans } from "@lingui/react/macro";
 // Start of Selection
 import React, { useEffect, useMemo, useState } from "react";
-import "./ParticipantOnboardingCards.css";
 
+import "./ParticipantOnboardingCards.css";
 import { useLanguage } from "@/lib/useLanguage";
 import { Button } from "@mantine/core";
 import { PARTICIPANT_BASE_URL } from "@/config";
 import { cn } from "@/lib/utils";
-import { Trans } from "@lingui/macro";
 import { Play } from "lucide-react";
 import { ParticipantInitiateForm } from "./ParticipantInitiateForm";
 

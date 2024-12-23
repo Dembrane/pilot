@@ -1,22 +1,21 @@
-import React, { useEffect, useRef } from "react";
-import {
-  Button,
-  Group,
-  Stack,
-  TextInput,
-  Textarea,
-  Title,
-} from "@mantine/core";
-import { Trans, t } from "@lingui/macro";
-import { useForm } from "react-hook-form";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import React, { useEffect } from "react";
+import { Group, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
+import { useForm, Controller } from "react-hook-form";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
-import { IconX } from "@tabler/icons-react";
-import { UnsavedChanges } from "../form/UnsavedChanges";
+import { SaveStatus } from "../form/SaveStatus";
+import { FormLabel } from "../form/FormLabel";
+import { useAutoSave } from "@/lib/useAutoSave";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type ProjectEditFormValues = {
-  name: string;
-  context: string;
-};
+const FormSchema = z.object({
+  name: z.string().min(4, t`Project name must be at least 4 characters long`),
+  context: z.string().optional(),
+});
+
+type TFormSchema = z.infer<typeof FormSchema>;
 
 type ProjectBasicEditProps = {
   project: Project;
@@ -25,81 +24,115 @@ type ProjectBasicEditProps = {
 export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
   project,
 }) => {
-  const defaultValues: ProjectEditFormValues = {
-    name: project.name ?? "",
-    context: project.context ?? "",
-  };
-
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitSuccessful, isDirty, dirtyFields },
-    reset,
-    getValues,
-  } = useForm<ProjectEditFormValues>({
-    defaultValues,
-  });
+  const { control, handleSubmit, watch, trigger, formState, getValues, reset } =
+    useForm<TFormSchema>({
+      defaultValues: {
+        name: project.name ?? "",
+        context: project.context ?? "",
+      },
+      resolver: zodResolver(FormSchema),
+      mode: "onChange",
+      reValidateMode: "onChange",
+    });
 
   const updateProjectMutation = useUpdateProjectByIdMutation();
 
-  const onSubmit = (data: ProjectEditFormValues) => {
-    if (isDirty) {
-      updateProjectMutation.mutateAsync({
-        id: project.id,
-        payload: data,
-      });
-    }
+  const onSave = async (values: TFormSchema) => {
+    await updateProjectMutation.mutateAsync({
+      id: project.id,
+      payload: values,
+    });
+    reset(values, { keepDirty: false, keepValues: true });
   };
 
-  const cancelButtonRef = useRef<HTMLButtonElement>(null);
-
-  const handleFormBlur = (event: React.FocusEvent<HTMLFormElement>) => {
-    if (isDirty && event.relatedTarget !== cancelButtonRef.current) {
-      handleSubmit(onSubmit)(event);
-    }
-  };
+  const {
+    dispatchAutoSave,
+    triggerManualSave,
+    isPendingSave,
+    isSaving,
+    isError,
+    lastSavedAt,
+  } = useAutoSave({
+    onSave,
+    initialLastSavedAt: project.updated_at,
+  });
 
   useEffect(() => {
-    if (isSubmitSuccessful) {
-      reset(getValues());
-    }
-  }, [isSubmitSuccessful, getValues, reset]);
+    const subscription = watch((values, { type }) => {
+      if (type === "change" && values) {
+        trigger().then((isValid) => {
+          if (isValid) {
+            dispatchAutoSave(values as TFormSchema);
+          }
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, dispatchAutoSave, trigger]);
 
   return (
-    <Stack>
+    <Stack gap="3rem">
       <Group>
         <Title order={2}>
           <Trans>Edit Project</Trans>
         </Title>
-        {isDirty && <UnsavedChanges />}
+        <SaveStatus
+          savedAt={lastSavedAt}
+          formErrors={formState.errors}
+          isPendingSave={isPendingSave}
+          isSaving={isSaving}
+          isError={isError}
+        />
       </Group>
-      <form onSubmit={handleSubmit(onSubmit)} onBlur={handleFormBlur}>
-        <Stack className="relative">
-          <TextInput label={t`Name`} {...register("name")} />
-          <Textarea
-            label={t`Context`}
-            rows={4}
-            {...register("context")}
-            placeholder={t`How would you describe to a colleague what are you trying to accomplish with this project?
 
+      <form
+        onSubmit={handleSubmit(async (values) => {
+          await triggerManualSave(values);
+        })}
+      >
+        <Stack gap="2rem">
+          <Controller
+            name="name"
+            control={control}
+            render={({ field }) => (
+              <TextInput
+                error={formState.errors.name?.message}
+                label={
+                  <FormLabel
+                    label={t`Name`}
+                    isDirty={formState.dirtyFields.name}
+                    error={formState.errors.name?.message}
+                  />
+                }
+                {...field}
+              />
+            )}
+          />
+
+          <Controller
+            name="context"
+            control={control}
+            render={({ field }) => (
+              <Textarea
+                error={formState.errors.context?.message}
+                label={
+                  <FormLabel
+                    label={t`Context`}
+                    isDirty={formState.dirtyFields.context}
+                    error={formState.errors.context?.message}
+                  />
+                }
+                rows={4}
+                placeholder={t`How would you describe to a colleague what are you trying to accomplish with this project?
 * What is the north star goal or key metric
 * What does success look like`}
+                {...field}
+              />
+            )}
           />
         </Stack>
       </form>
-      <Group>
-        {isDirty && (
-          <Button
-            ref={cancelButtonRef}
-            type="button"
-            variant="outline"
-            onClick={() => reset(defaultValues)}
-            rightSection={<IconX />}
-          >
-            <Trans>Cancel</Trans>
-          </Button>
-        )}
-      </Group>
     </Stack>
   );
 };

@@ -71,13 +71,14 @@ services:
       target: base
     environment:
       - DIRECTUS_SECRET=secret
+      - DIRECTUS_TOKEN=admin
       - DATABASE_URL=postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane
       - RABBITMQ_URL=amqp://dembrane:dembrane@rabbitmq:5672
       - REDIS_URL=redis://redis:6379
       - API_BASE_URL=http://localhost:8000
       - ADMIN_BASE_URL=http://localhost:5173
       - PARTICIPANT_BASE_URL=http://localhost:5174
-      - DIRECTUS_BASE_URL=http://localhost:8055
+      - DIRECTUS_BASE_URL=http://directus:8055
       - DEBUG_MODE=1
       - DISABLE_SENTRY=1
       - SERVE_API_DOCS=1

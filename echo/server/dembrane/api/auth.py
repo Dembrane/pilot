@@ -4,12 +4,10 @@ from logging import getLogger
 from jose import jwt
 from fastapi import Depends, Request
 
-from dembrane.config import DIRECTUS_SECRET
+from dembrane.config import DIRECTUS_SECRET, DIRECTUS_SESSION_COOKIE_NAME
 from dembrane.api.exceptions import SessionInvalidException
 
 logger = getLogger("api.session")
-
-DIRECTUS_COOKIE_KEY = "directus_session_token"
 
 
 class DirectusSession:
@@ -28,7 +26,7 @@ async def require_directus_session(request: Request) -> DirectusSession:
     """
     Returns user id if user is authenticated, otherwise raises an exception
     """
-    directus_cookie = request.cookies.get(DIRECTUS_COOKIE_KEY)
+    directus_cookie = request.cookies.get(DIRECTUS_SESSION_COOKIE_NAME)
 
     if not directus_cookie:
         raise SessionInvalidException

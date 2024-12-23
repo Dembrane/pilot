@@ -1,10 +1,15 @@
+# This configuration file implements a robust environment-based configuration
+# system with built-in logging. It follows a "fail-fast" pattern by asserting
+# required environment variables and provides sensible defaults for optional ones.
+
 import os
 import logging
 
 import dotenv
 
+logging.basicConfig(level=logging.INFO, force=True)
+
 logger = logging.getLogger("config")
-logging.basicConfig(level=logging.INFO)
 
 BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 dotenv_path = os.path.join(BASE_DIR, ".env")
@@ -16,7 +21,9 @@ if os.path.exists(dotenv_path):
 DEBUG_MODE = os.environ.get("DEBUG_MODE", "false").lower() in ["true", "1"]
 logger.info(f"DEBUG_MODE: {DEBUG_MODE}")
 if DEBUG_MODE:
-    logging.basicConfig(level=logging.DEBUG)
+    # everything is debug if debug mode is enabled
+    logging.getLogger().setLevel(logging.DEBUG)
+    # set the current logger to debug
     logger.setLevel(logging.DEBUG)
 
 API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:8000")
@@ -28,7 +35,9 @@ logger.debug(f"ADMIN_BASE_URL: {ADMIN_BASE_URL}")
 PARTICIPANT_BASE_URL = os.environ.get("PARTICIPANT_BASE_URL", "http://localhost:3001")
 logger.debug(f"PARTICIPANT_BASE_URL: {PARTICIPANT_BASE_URL}")
 
-DIRECTUS_BASE_URL = os.environ.get("DIRECTUS_BASE_URL", "http://localhost:8055")
+# DIRECTUS_BASE_URL = os.environ.get("DIRECTUS_BASE_URL", "http://directus:8055")
+DIRECTUS_BASE_URL = "http://directus:8055"
+logger.warning("DIRECTUS_BASE_URL is hardcoded to http://directus:8055")
 logger.debug(f"DIRECTUS_BASE_URL: {DIRECTUS_BASE_URL}")
 
 DISABLE_REDACTION = os.environ.get("DISABLE_REDACTION", "false").lower() in ["true", "1"]
@@ -67,6 +76,13 @@ DIRECTUS_SECRET = os.environ.get("DIRECTUS_SECRET")
 assert DIRECTUS_SECRET, "DIRECTUS_SECRET environment variable is not set"
 logger.debug("DIRECTUS_SECRET: set")
 
+DIRECTUS_TOKEN = os.environ.get("DIRECTUS_TOKEN")
+assert DIRECTUS_TOKEN, "DIRECTUS_TOKEN environment variable is not set"
+logger.debug("DIRECTUS_TOKEN: set")
+
+DIRECTUS_SESSION_COOKIE_NAME = os.environ.get("DIRECTUS_SESSION_COOKIE_NAME", "directus_session_token")
+logger.debug(f"DIRECTUS_SESSION_COOKIE_NAME: {DIRECTUS_SESSION_COOKIE_NAME}")
+
 DATABASE_URL = os.environ.get("DATABASE_URL")
 assert DATABASE_URL, "DATABASE_URL environment variable is not set"
 logger.debug("DATABASE_URL: set")
@@ -90,6 +106,10 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 assert ANTHROPIC_API_KEY, "ANTHROPIC_API_KEY environment variable is not set"
 logger.debug("ANTHROPIC_API_KEY: set")
 
+# GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+# assert GEMINI_API_KEY, "GEMINI_API_KEY environment variable is not set"
+# logger.debug(f"GEMINI_API_KEY: {'set' if GEMINI_API_KEY else 'not set'}")
+
 SERVE_API_DOCS = os.environ.get("SERVE_API_DOCS", "false").lower() in ["true", "1"]
 logger.debug(f"SERVE_API_DOCS: {SERVE_API_DOCS}")
 
@@ -98,3 +118,9 @@ logger.debug(f"DISABLE_SENTRY: {DISABLE_SENTRY}")
 
 BUILD_VERSION = os.environ.get("BUILD_VERSION", "dev")
 logger.debug(f"BUILD_VERSION: {BUILD_VERSION}")
+
+ENVIRONMENT = "development"
+if BUILD_VERSION != "dev":
+    ENVIRONMENT = "production"
+
+logger.debug(f"ENVIRONMENT: {ENVIRONMENT}")

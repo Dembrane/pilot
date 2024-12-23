@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import {
   useConversationQuotes,
   useInsightsByConversationId,
@@ -14,18 +16,16 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Quote } from "../../../components/quote/Quote";
 import { Insight } from "@/components/insight/Insight";
 import { useState } from "react";
 import { I18nLink } from "@/components/common/i18nLink";
-import { Trans, t } from "@lingui/macro";
 
 export const ProjectConversationAnalysis = () => {
   const { conversationId, projectId } = useParams();
 
   const quotesQuery = useConversationQuotes(conversationId ?? "");
-  const [showQuotes, setShowQuotes] = useState(false);
 
   const insightsQuery = useInsightsByConversationId(conversationId ?? "");
   const [showInsights, setShowInsights] = useState(false);
@@ -35,7 +35,7 @@ export const ProjectConversationAnalysis = () => {
       <Group gap="sm">
         {insightsQuery.data && insightsQuery.data.length > 0 && (
           <Text c="gray" size="xl">
-            {insightsQuery.data.length}
+            {insightsQuery.data.length > 99 ? "99+" : insightsQuery.data.length}
           </Text>
         )}
         <Title order={2}>
@@ -98,20 +98,12 @@ export const ProjectConversationAnalysis = () => {
       <Group gap="sm">
         {quotesQuery.data && quotesQuery.data.length > 0 && (
           <Text c="gray" size="xl">
-            {quotesQuery.data.length}
+            {quotesQuery.data.length > 99 ? "99+" : quotesQuery.data.length}
           </Text>
         )}
         <Title order={2}>
           <Trans>Quotes</Trans>
         </Title>
-        {/* {quotesQuery.data && quotesQuery.data.length > 0 && (
-          <Button
-            variant="transparent"
-            onClick={() => setShowQuotes(!showQuotes)}
-          >
-            <Text>{showQuotes ? "Hide all" : "Show all"} quotes</Text>
-          </Button>
-        )} */}
       </Group>
       {quotesQuery.error && (
         <Text className="text-red-500">
@@ -125,24 +117,21 @@ export const ProjectConversationAnalysis = () => {
           <Skeleton height={150} />
         </>
       )}
-      {/* <Spoiler
-        maxHeight={250}
-        hideLabel="Hide all quotes"
-        showLabel={null}
-        pb="md"
-        expanded={showQuotes}
-        onExpandedChange={(expanded) => setShowQuotes(expanded)}
-      > */}
+
       {quotesQuery.data && quotesQuery.data.length === 0 && (
-        <Text>
-          <Trans>
-            No quotes available. Generate quotes for this conversation by
-            visiting
-            <I18nLink to={`/projects/${projectId}/library`}>
-              <Anchor> the project library.</Anchor>
-            </I18nLink>
-          </Trans>
-        </Text>
+        <Group>
+          <Text component="span">
+            <Trans>
+              No quotes available. Generate quotes for this conversation by
+              visiting
+            </Trans>
+          </Text>
+          <I18nLink to={`/projects/${projectId}/library`}>
+            <Anchor component="span">
+              <Trans>the project library.</Trans>
+            </Anchor>
+          </I18nLink>
+        </Group>
       )}
       <Stack gap="sm">
         {quotesQuery.data &&

@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { ProjectCard } from "@/components/project/ProjectCard";
 import { ProjectListItem } from "@/components/project/ProjectListItem";
 import { Icons } from "@/icons";
@@ -5,7 +7,7 @@ import { getDirectusErrorString } from "@/lib/directus";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import {
   useCreateProjectMutation,
-  useProjects,
+  useInfiniteProjects,
   useUpdateProjectByIdMutation,
 } from "@/lib/query";
 import {
@@ -34,12 +36,12 @@ import {
   IconSearch,
   IconX,
 } from "@tabler/icons-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { useI18nNavigate } from "@/lib/useI18nNavigate";
-import { Trans, t } from "@lingui/macro";
 import { useLanguage } from "@/lib/useLanguage";
 import { CloseableAlert } from "@/components/common/ClosableAlert";
+import { useInView } from "react-intersection-observer";
 
 export const ProjectsHomeRoute = () => {
   useDocumentTitle(t`Projects | Dembrane`);
@@ -51,13 +53,29 @@ export const ProjectsHomeRoute = () => {
 
   const [debouncedSearchValue] = useDebouncedValue(search, 200);
 
-  const projectsQuery = useProjects({
+  const { ref: loadMoreRef, inView } = useInView();
+
+  const {
+    data: projectsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    status,
+    isError,
+    error,
+  } = useInfiniteProjects({
     query: {
       fields: ["count(conversations)", "*"],
       sort: "-updated_at",
       search: debouncedSearchValue,
     },
   });
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const [view, setView] = useSessionStorage<"grid" | "list">({
     key: "projects-home-view",
@@ -87,6 +105,19 @@ export const ProjectsHomeRoute = () => {
     });
     navigate(`/projects/${project.id}/overview`);
   };
+
+  if (status === "pending") {
+    return (
+      <Stack>
+        {[0, 1, 2].map((i) => (
+          <Skeleton key={i} height={80} radius="md" />
+        ))}
+      </Stack>
+    );
+  }
+
+  const allProjects =
+    projectsData?.pages.flatMap((page) => page.projects) ?? [];
 
   return (
     <Container>
@@ -125,11 +156,7 @@ export const ProjectsHomeRoute = () => {
 
           <Group gap="xs">
             <ActionIcon
-              disabled={
-                projectsQuery.data &&
-                projectsQuery.data.length === 0 &&
-                debouncedSearchValue === ""
-              }
+              disabled={allProjects.length === 0 && debouncedSearchValue === ""}
               variant="transparent"
               onClick={() => setView("list")}
               title="List view"
@@ -140,11 +167,7 @@ export const ProjectsHomeRoute = () => {
 
             <Divider orientation="vertical" />
             <ActionIcon
-              disabled={
-                projectsQuery.data &&
-                projectsQuery.data.length === 0 &&
-                debouncedSearchValue === ""
-              }
+              disabled={allProjects.length === 0 && debouncedSearchValue === ""}
               variant="transparent"
               onClick={() => setView("grid")}
               title={t`Grid view`}
@@ -155,29 +178,23 @@ export const ProjectsHomeRoute = () => {
           </Group>
         </Group>
 
-        {projectsQuery.data &&
-          projectsQuery.data.length === 0 &&
-          debouncedSearchValue === "" && (
-            <CloseableAlert icon={<IconInfoCircle />}>
-              <Trans>
-                Welcome to Your Home! Here you can see all your projects and get
-                access to tutorial resources. Currently, you have no projects.
-                Click "Create" to configure to get started!
-              </Trans>
-            </CloseableAlert>
-          )}
+        {allProjects.length === 0 && debouncedSearchValue === "" && (
+          <CloseableAlert icon={<IconInfoCircle />}>
+            <Trans>
+              Welcome to Your Home! Here you can see all your projects and get
+              access to tutorial resources. Currently, you have no projects.
+              Click "Create" to configure to get started!
+            </Trans>
+          </CloseableAlert>
+        )}
 
-        {!(
-          projectsQuery.data &&
-          projectsQuery.data.length === 0 &&
-          debouncedSearchValue === ""
-        ) && (
+        {!(allProjects.length === 0 && debouncedSearchValue === "") && (
           <TextInput
             leftSection={<IconSearch />}
             rightSection={
               !!search && (
                 <ActionIcon
-                  disabled={projectsQuery.isLoading}
+                  disabled={isFetchingNextPage}
                   variant="transparent"
                   onClick={() => {
                     setSearch("");
@@ -195,18 +212,16 @@ export const ProjectsHomeRoute = () => {
           />
         )}
 
-        {projectsQuery.data &&
-          projectsQuery.data.length === 0 &&
-          debouncedSearchValue !== "" && (
-            <Text>
-              <Trans>No projects found for search term</Trans>{" "}
-              <i>{debouncedSearchValue}</i>
-            </Text>
-          )}
+        {allProjects.length === 0 && debouncedSearchValue !== "" && (
+          <Text>
+            <Trans>No projects found for search term</Trans>{" "}
+            <i>{debouncedSearchValue}</i>
+          </Text>
+        )}
 
-        {projectsQuery.isError && (
+        {isError && (
           <Alert color="red" title="Error">
-            {getDirectusErrorString(projectsQuery.error)}
+            {getDirectusErrorString(error)}
           </Alert>
         )}
 
@@ -216,20 +231,23 @@ export const ProjectsHomeRoute = () => {
               ref={gridParent}
               className="grid grid-cols-12 place-content-stretch gap-4"
             >
-              {projectsQuery.isLoading &&
+              {allProjects.map((project) => (
+                <Box
+                  key={project.id}
+                  className="col-span-full h-full md:col-span-4"
+                  ref={
+                    allProjects[allProjects.length - 1].id === project.id
+                      ? loadMoreRef
+                      : undefined
+                  }
+                >
+                  <ProjectCard project={project as Project} />
+                </Box>
+              ))}
+              {isFetchingNextPage &&
                 Array.from({ length: 3 }).map((_, i) => (
                   <Box key={i} className="col-span-full h-full md:col-span-4">
                     <Skeleton height={80} radius="md" />
-                  </Box>
-                ))}
-              {projectsQuery.data &&
-                projectsQuery.data.length > 0 &&
-                projectsQuery.data.map((project) => (
-                  <Box
-                    key={project.id}
-                    className="col-span-full h-full md:col-span-4"
-                  >
-                    <ProjectCard project={project as Project} />
                   </Box>
                 ))}
             </Box>
@@ -237,20 +255,25 @@ export const ProjectsHomeRoute = () => {
 
           {view === "list" && (
             <Stack ref={listParent} gap="sm">
-              {projectsQuery.isLoading && (
+              {allProjects.map((project) => (
+                <Box
+                  key={project.id}
+                  ref={
+                    allProjects[allProjects.length - 1].id === project.id
+                      ? loadMoreRef
+                      : undefined
+                  }
+                >
+                  <ProjectListItem project={project as Project} />
+                </Box>
+              ))}
+              {isFetchingNextPage && (
                 <>
                   <Skeleton height={60} radius="md" />
                   <Skeleton height={60} radius="md" />
                   <Skeleton height={60} radius="md" />
                 </>
               )}
-              {projectsQuery.data &&
-                projectsQuery.data.length > 0 &&
-                projectsQuery.data.map((project) => (
-                  <Box key={project.id}>
-                    <ProjectListItem project={project as Project} />
-                  </Box>
-                ))}
             </Stack>
           )}
         </Box>

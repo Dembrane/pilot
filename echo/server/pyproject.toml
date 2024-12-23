@@ -16,7 +16,7 @@ dependencies = [
     "langchain-openai==0.0.*",
     "pypdf==4.0.*",
     # SDKs for Models
-    "openai==1.30.*",
+    "openai==1.57.*",
     "anthropic==0.37.*",
     # Data
     "pandas==2.2.*",
@@ -36,7 +36,7 @@ dependencies = [
     # Other
     "backoff==2.2.*",
     "aiofiles==23.2.*",
-    "sentry-sdk[fastapi]",
+    "sentry-sdk[sqlalchemy,fastapi,celery]",
     "python-jose[cryptography]>=3.3.0",
     # Types
     "types-aiofiles==23.2.*",

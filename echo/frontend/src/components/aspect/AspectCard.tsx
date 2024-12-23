@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { cn } from "@/lib/utils";
 import {
   Box,
@@ -13,7 +14,6 @@ import {
 import { IconArrowsDiagonal } from "@tabler/icons-react";
 import { Link, useParams } from "react-router-dom";
 import { I18nLink } from "@/components/common/i18nLink";
-import { Trans } from "@lingui/macro";
 import { useProjectById } from "@/lib/query";
 
 export const AspectCard = ({

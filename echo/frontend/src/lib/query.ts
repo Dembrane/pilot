@@ -45,7 +45,6 @@ import {
   registerUserVerify,
   updateItem,
 } from "@directus/sdk";
-import { useLocation, useNavigate } from "react-router-dom";
 import { ADMIN_BASE_URL } from "@/config";
 import { AxiosError } from "axios";
 
@@ -97,6 +96,41 @@ export const useProjects = ({
           ...query,
         }),
       ),
+  });
+};
+
+export const useInfiniteProjects = ({
+  query,
+  options = {
+    initialLimit: 15,
+  },
+}: {
+  query: Partial<Query<CustomDirectusTypes, Project>>;
+  options?: {
+    initialLimit?: number;
+  };
+}) => {
+  const { initialLimit = 15 } = options;
+
+  return useInfiniteQuery({
+    queryKey: ["projects", query],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await directus.request(
+        readItems("project", {
+          ...query,
+          limit: initialLimit,
+          offset: pageParam * initialLimit,
+        }),
+      );
+
+      return {
+        projects: response,
+        nextOffset:
+          response.length === initialLimit ? pageParam + 1 : undefined,
+      };
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => lastPage.nextOffset,
   });
 };
 
@@ -1145,8 +1179,6 @@ export const useCreateChatMutation = () => {
   });
 };
 
-
-
 export const useDeleteChatMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -1309,6 +1341,37 @@ export const useAddChatMessageMutation = () => {
       queryClient.invalidateQueries({
         queryKey: ["chats", "history", vars.project_chat_id],
       });
+    },
+  });
+};
+
+export const useMoveConversationMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      conversationId,
+      targetProjectId,
+    }: {
+      conversationId: string;
+      targetProjectId: string;
+    }) => {
+      try {
+        await directus.request(
+          updateItem("conversation", conversationId, {
+            project_id: targetProjectId,
+          }),
+        );
+      } catch (error) {
+        toast.error("Failed to move conversation.");
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      toast.success("Conversation moved successfully");
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to move conversation: " + error.message);
     },
   });
 };

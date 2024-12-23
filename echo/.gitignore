@@ -13,3 +13,6 @@ directus/.env
 *.sql
 node_modules
 .next
+
+__blobstorage__
+__queuestorage__

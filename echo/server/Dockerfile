@@ -20,12 +20,9 @@ RUN \
     zip
 
 COPY requirements.lock /code/server/requirements.lock
-
-FROM base
+RUN pip install --no-cache-dir -r requirements.lock
 
 COPY ./ /code/server
-
-RUN pip install --no-cache-dir -r requirements.lock
 
 EXPOSE 8000
 

@@ -43,29 +43,39 @@ console.log(message, warning);
 Run the following command to extract messages from your code:
 
 ```bash
-yarn messages:extract
+pnpm messages:extract
 ```
 
-This will update the `locales/nl.po` file with any new or modified messages.
+This will update all `.po` files in the `frontend/src/locales` directory with any new or modified messages.
 
-### Step 2: Add Dutch Translations
+### Step 2: Update Empty Translations
 
-Open the `locales/nl.po` file and add the Dutch translations for the extracted messages. For example:
+After extraction, you may find empty translations in the `.po` files. These appear as:
 
 ```po
-msgid "Upload in progress"
-msgstr "Upload bezig"
-
-msgid "Please do not close your browser"
-msgstr "Sluit uw browser alstublieft niet"
+msgid "Some text"
+msgstr ""
 ```
+
+For the English (en-US) file, the `msgstr` should be the same as the `msgid`. This is the default behavior of Lingui as English is our source language.
+
+```po
+msgid "Some text"
+msgstr "Some text"
+```
+
+For other language files (de-DE, es-ES, fr-FR, nl-NL), you should either:
+1. Leave the `msgstr` empty for proper translation later by language experts
+2. Or provide appropriate translations in the target language
+
+Note: The first empty `msgstr` in each `.po` file is the header and should remain empty.
 
 ### Step 3: Compile Messages
 
-Run the following command to compile the messages and add the Dutch version to `locales/nl.ts`:
+Run the following command to compile the messages:
 
 ```bash
-yarn messages:compile
+pnpm messages:compile
 ```
 
 ### Step 4: Verify Translations
@@ -74,7 +84,7 @@ After adding the translations, you can verify them by running your React applica
 
 ## Commands Summary
 
-- Extract messages: `yarn messages:extract`
-- Compile messages: `yarn messages:compile`
+- Extract messages: `pnpm messages:extract`
+- Compile messages: `pnpm messages:compile`
 
 By following these steps, you can ensure that your application is properly localized and supports multiple languages.

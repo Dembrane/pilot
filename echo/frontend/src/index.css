@@ -1,9 +1,28 @@
+/* Import the Space Grotesk variable font */
+@import '@fontsource-variable/space-grotesk';
+
 @layer tailwind {
   @tailwind base;
 }
 @tailwind components;
 @tailwind utilities;
 
+
+
 .space-grotesk {
+  font-family: "Space Grotesk", sans-serif !important;
+}
+
+/* Override Tailwind's prose with a more specific selector */
+.prose.space-grotesk {
+  font-family: "Space Grotesk", sans-serif !important;
+}
+
+/* Ensure all elements within also use the font */
+.prose.space-grotesk * {
+  font-family: "Space Grotesk", sans-serif !important;
+}
+
+[aria-label="editable markdown"] {
   font-family: "Space Grotesk", sans-serif !important;
 }

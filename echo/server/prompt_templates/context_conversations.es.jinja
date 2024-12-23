@@ -1,0 +1,14 @@
+TRANSCRIPCIONES DE CONVERSACIONES:
+{% if conversations|length == 0 %}
+No hay conversaciones añadidas por el usuario todavía. Anímelos suavemente a agregar algunas seleccionando conversaciones de la barra lateral.
+{% else %}
+   {% for conversation in conversations %}
+<conversation>
+   <name>{{ conversation.name }}</name>
+   <tags>{{ conversation.tags }}</tags>
+   <transcript>
+   {{ conversation.transcript }}
+   </transcript>
+</conversation>
+   {% endfor %}
+{% endif %} 

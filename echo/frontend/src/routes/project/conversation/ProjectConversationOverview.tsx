@@ -1,4 +1,5 @@
-import { Trans, t } from "@lingui/macro";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import {
   ActionIcon,
   Anchor,
@@ -30,6 +31,7 @@ import { apiCommonConfig } from "@/lib/api";
 import { InformationTooltip } from "@/components/common/InformationTooltip";
 import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import { ConversationEdit } from "@/components/conversation/ConversationEdit";
+import { MoveConversationButton } from "@/components/conversation/MoveConversationButton";
 
 const ConversationDangerZone = ({
   conversation,
@@ -52,20 +54,24 @@ const ConversationDangerZone = ({
   };
 
   return (
-    <Stack>
-      <Title order={2}>
-        <Trans>Danger Zone</Trans>
-      </Title>
-      <Box>
-        <Button
-          onClick={handleDelete}
-          color="red"
-          variant="outline"
-          rightSection={<IconTrash />}
-        >
-          <Trans>Delete Conversation</Trans>
-        </Button>
-      </Box>
+    <Stack gap="3rem">
+      <Stack gap="1.5rem">
+        <Title order={2}>
+          <Trans>Danger Zone</Trans>
+        </Title>
+
+        <Stack gap="1rem">
+          <MoveConversationButton conversation={conversation} />
+          <Button
+            onClick={handleDelete}
+            color="red"
+            variant="outline"
+            rightSection={<IconTrash size={16} />}
+          >
+            <Trans>Delete Conversation</Trans>
+          </Button>
+        </Stack>
+      </Stack>
     </Stack>
   );
 };
@@ -79,11 +85,11 @@ export const ProjectConversationOverviewRoute = () => {
   const projectQuery = useProjectById({ projectId: projectId ?? "" });
 
   return (
-    <Stack className="relative">
+    <Stack gap="3rem" className="relative" px="2rem" pt="2rem" pb="2rem">
       <LoadingOverlay visible={conversationQuery.isLoading} />
       {conversationChunksQuery.data &&
         conversationChunksQuery.data?.length > 0 && (
-          <Stack>
+          <Stack gap="1.5rem">
             {conversationQuery.data?.summary && (
               <>
                 <Group>
@@ -106,93 +112,24 @@ export const ProjectConversationOverviewRoute = () => {
                 <Divider />
               </>
             )}
-
-            {/* <Group align="center">
-              <Title order={2}>
-                <Trans>Audio Recording</Trans>
-              </Title>
-              <Tooltip label={t`Download audio`}>
-                <a
-                  href={
-                    apiCommonConfig.baseURL +
-                    "/conversations/" +
-                    conversationId +
-                    "/content"
-                  }
-                  download={
-                    conversationQuery.data?.title ?? "Conversation" + ".webm"
-                  }
-                >
-                  <ActionIcon size="md" variant="subtle" color="gray">
-                    <IconDownload size={48} />
-                  </ActionIcon>
-                </a>
-              </Tooltip>
-            </Group>
-            <audio
-              className="w-full"
-              src={
-                apiCommonConfig.baseURL +
-                "/conversations/" +
-                conversationId +
-                "/content"
-              }
-              controls
-              crossOrigin="anonymous"
-            /> */}
           </Stack>
         )}
-      {/* <Divider /> */}
-
-      {/* <Box>
-        <Text size="md">
-          <Trans>Name</Trans>
-        </Text>
-        <Text size="sm">{conversationQuery.data?.participant_name}</Text>
-      </Box> */}
-
-      {/* {conversationQuery.data?.participant_email && (
-        <Box>
-          <Text size="md">
-            <Trans>Email</Trans>
-          </Text>
-          <Text size="sm">{conversationQuery.data?.participant_email}</Text>
-        </Box>
-      )} */}
-
-      {/* {conversationQuery.data?.tags &&
-        conversationQuery.data.tags.filter(
-          (t) => !!(t.project_tag_id as ProjectTag)?.text,
-        ).length > 0 && (
-          <Box>
-            <Text size="md">
-              <Trans>Tags</Trans>
-            </Text>
-            <Group gap="sm" pr="sm">
-              {conversationQuery.data?.tags &&
-                conversationQuery.data?.tags.length > 0 &&
-                conversationQuery.data?.tags.map((tag) =>
-                  (tag.project_tag_id as ProjectTag)?.text ? (
-                    <Pill key={tag.id} size="sm">
-                      {(tag.project_tag_id as ProjectTag)?.text}
-                    </Pill>
-                  ) : null,
-                )}
-            </Group>
-          </Box>
-        )} */}
-
-      {/* <Divider /> */}
 
       {conversationQuery.data && projectQuery.data && (
         <>
-          <ConversationEdit
-            key={conversationQuery.data.id}
-            conversation={conversationQuery.data}
-            projectTags={projectQuery.data.tags}
-          />
+          <Stack gap="1.5rem">
+            <ConversationEdit
+              key={conversationQuery.data.id}
+              conversation={conversationQuery.data}
+              projectTags={projectQuery.data.tags}
+            />
+          </Stack>
+
           <Divider />
-          <ConversationDangerZone conversation={conversationQuery.data} />
+
+          <Stack gap="1.5rem">
+            <ConversationDangerZone conversation={conversationQuery.data} />
+          </Stack>
         </>
       )}
     </Stack>

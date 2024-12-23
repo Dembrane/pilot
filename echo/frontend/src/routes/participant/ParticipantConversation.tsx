@@ -657,7 +657,7 @@ export const ParticipantConversationAudioRoute = () => {
   };
 
   return (
-    <div className="container mx-auto flex min-h-dvh max-w-2xl flex-col">
+    <div className="container mx-auto flex h-full max-w-2xl grow flex-col">
       {/* modal for permissions error */}
       <Modal
         opened={!!permissionError}
@@ -669,7 +669,6 @@ export const ParticipantConversationAudioRoute = () => {
         withCloseButton={false}
       >
         <div className="h-full rounded-md bg-white py-4">
-          <ParticipantHeader />
           <Stack className="container mx-auto mt-4 max-w-2xl px-2" gap="lg">
             <div className="max-w-prose text-lg">
               <Trans>
@@ -703,8 +702,6 @@ export const ParticipantConversationAudioRoute = () => {
           </Stack>
         </div>
       </Modal>
-
-      <ParticipantHeader />
 
       <Box className={clsx("relative flex-grow px-4 py-4 transition-all")}>
         {projectQuery.data && conversationQuery.data && (

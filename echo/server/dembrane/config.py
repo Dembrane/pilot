@@ -35,7 +35,9 @@ logger.debug(f"ADMIN_BASE_URL: {ADMIN_BASE_URL}")
 PARTICIPANT_BASE_URL = os.environ.get("PARTICIPANT_BASE_URL", "http://localhost:3001")
 logger.debug(f"PARTICIPANT_BASE_URL: {PARTICIPANT_BASE_URL}")
 
-DIRECTUS_BASE_URL = os.environ.get("DIRECTUS_BASE_URL", "http://localhost:8055")
+# DIRECTUS_BASE_URL = os.environ.get("DIRECTUS_BASE_URL", "http://directus:8055")
+DIRECTUS_BASE_URL = "http://directus:8055"
+logger.warning("DIRECTUS_BASE_URL is hardcoded to http://directus:8055")
 logger.debug(f"DIRECTUS_BASE_URL: {DIRECTUS_BASE_URL}")
 
 DISABLE_REDACTION = os.environ.get("DISABLE_REDACTION", "false").lower() in ["true", "1"]
@@ -104,6 +106,10 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 assert ANTHROPIC_API_KEY, "ANTHROPIC_API_KEY environment variable is not set"
 logger.debug("ANTHROPIC_API_KEY: set")
 
+# GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+# assert GEMINI_API_KEY, "GEMINI_API_KEY environment variable is not set"
+# logger.debug(f"GEMINI_API_KEY: {'set' if GEMINI_API_KEY else 'not set'}")
+
 SERVE_API_DOCS = os.environ.get("SERVE_API_DOCS", "false").lower() in ["true", "1"]
 logger.debug(f"SERVE_API_DOCS: {SERVE_API_DOCS}")
 
@@ -112,3 +118,9 @@ logger.debug(f"DISABLE_SENTRY: {DISABLE_SENTRY}")
 
 BUILD_VERSION = os.environ.get("BUILD_VERSION", "dev")
 logger.debug(f"BUILD_VERSION: {BUILD_VERSION}")
+
+ENVIRONMENT = "development"
+if BUILD_VERSION != "dev":
+    ENVIRONMENT = "production"
+
+logger.debug(f"ENVIRONMENT: {ENVIRONMENT}")

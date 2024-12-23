@@ -34,7 +34,7 @@ PROMPT_TEMPLATE_LIST = [f.name for f in os.scandir(PROMPT_TEMPLATES_DIR) if f.is
 
 # Create a dictionary to map template names to their supported languages
 template_support = defaultdict(set)
-for template_name in PROMPT_TEMPLATE_LIST:
+for template_name in sorted(PROMPT_TEMPLATE_LIST):
     name, lang, _ = template_name.rsplit(".", 2)
     template_support[name].add(lang)
 

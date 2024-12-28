@@ -293,7 +293,7 @@ resource "azurerm_key_vault_certificate" "appgw_cert" {
         "digitalSignature",
         "keyEncipherment"
       ]
-      subject            = "CN=*.dembrane-dev.com"
+      subject            = "CN=*.dev.dembrane.com"
       validity_in_months = 12
     }
   }
@@ -395,7 +395,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_port_name            = "https-443"
     protocol                      = "Https"
     ssl_certificate_name          = "wildcard-cert"
-    host_name                     = "directus.dembrane-dev.com"
+    host_name                     = "directus.dev.dembrane.com"
   }
 
   http_listener {
@@ -404,7 +404,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_port_name            = "https-443"
     protocol                      = "Https"
     ssl_certificate_name          = "wildcard-cert"
-    host_name                     = "api.dembrane-dev.com"
+    host_name                     = "api.dev.dembrane.com"
   }
 
   http_listener {
@@ -413,7 +413,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_port_name            = "https-443"
     protocol                      = "Https"
     ssl_certificate_name          = "wildcard-cert"
-    host_name                     = "app.dembrane-dev.com"
+    host_name                     = "app.dev.dembrane.com"
   }
 
   http_listener {
@@ -422,7 +422,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_port_name            = "https-443"
     protocol                      = "Https"
     ssl_certificate_name          = "wildcard-cert"
-    host_name                     = "admin.dembrane-dev.com"
+    host_name                     = "admin.dev.dembrane.com"
   }
 
   # Routing rules
@@ -1119,13 +1119,13 @@ resource "azurerm_role_assignment" "appgw_keyvault_certificates" {
 
 #  DNS Zone
 resource "azurerm_dns_zone" "dev_zone" {
-  name                = "dembrane-dev.com"
+  name                = "dev.dembrane.com"
   resource_group_name = azurerm_resource_group.rg.name
 }
 
 #  A records pointing to Application Gateway IP
 resource "azurerm_dns_a_record" "directus" {
-  name                = "dashboard"
+  name                = "directus"
   zone_name           = azurerm_dns_zone.dev_zone.name
   resource_group_name = azurerm_resource_group.rg.name
   ttl                 = 300
@@ -1200,7 +1200,7 @@ resource "azurerm_role_assignment" "container_secret_access" {
 
 resource "azurerm_key_vault_secret" "directus_public_url" {
   name         = "directus-public-url"
-  value        = "https://directus.dbr-dev.azure.com"  # Example value
+  value        = "https://directus.dev.dembrane.com"  # Example value
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 
 }
@@ -1225,14 +1225,14 @@ resource "azurerm_key_vault_secret" "directus_secret" {
 
 resource "azurerm_key_vault_secret" "admin_base_url" {
   name         = "admin-base-url"
-  value        = "https://admin.dbr-dev.com"  # Example value
+  value        = "https://admin.dev.dembrane.com"  # Example value
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 
 }
 
 resource "azurerm_key_vault_secret" "participant_base_url" {
   name         = "participant-base-url"
-  value        = "https://app.dbr-dev.com"  # Example value
+  value        = "https://app.dev.dembrane.com"  # Example value
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 
 }
@@ -1277,4 +1277,3 @@ resource "azurerm_role_assignment" "api_server_secret_access" {
 }
 
 # worker envs
-

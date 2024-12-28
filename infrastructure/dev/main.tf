@@ -257,46 +257,10 @@ data "azurerm_container_registry" "acr" {
 ### deploy application gateway with no backend pool
 
 # Define the Application Gateway
-# SSL Certificate for App Gateway
-resource "azurerm_key_vault_certificate" "appgw_cert" {
+# Import existing certificate from Key Vault
+data "azurerm_key_vault_certificate" "appgw_cert" {
   name         = "appgw-wildcard-cert"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-
-  certificate_policy {
-    issuer_parameters {
-      name = "Self"
-    }
-
-    key_properties {
-      exportable = true
-      key_size   = 2048
-      key_type   = "RSA"
-      reuse_key  = true
-    }
-
-    lifetime_action {
-      action {
-        action_type = "AutoRenew"
-      }
-      trigger {
-        days_before_expiry = 30
-      }
-    }
-
-    secret_properties {
-      content_type = "application/x-pkcs12"
-    }
-
-    x509_certificate_properties {
-      extended_key_usage = ["1.3.6.1.5.5.7.3.1"] # Server Authentication
-      key_usage         = [
-        "digitalSignature",
-        "keyEncipherment"
-      ]
-      subject            = "CN=*.dev.dembrane.com"
-      validity_in_months = 12
-    }
-  }
 }
 
 # Updated Application Gateway Configuration

@@ -950,8 +950,6 @@ resource "azurerm_container_group" "worker" {
     cpu    = "1"
     memory = "2"
 
-    command = ["/bin/sh", "/code/server/prod-worker.sh"]
-
     volume {
       name       = "uploads-volume"
       mount_path = "/code/server/uploads"

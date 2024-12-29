@@ -1648,7 +1648,7 @@ resource "azurerm_key_vault_secret" "anthropic_api_key" {
 
 resource "azurerm_key_vault_secret" "database_url" {
   name         = "database-url"
-  value        = "postgresql+psycopg://dembrane:dembrane@postgres:5432/dembrane"  # Initial value
+  value        = "postgresql+psycopg://dembrane:dembrane@${azurerm_cosmosdb_postgresql_cluster.cosmo.name}:5432/dembrane"  # Initial value
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
   lifecycle {
     ignore_changes = [value]

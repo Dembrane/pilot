@@ -386,14 +386,37 @@ resource "azurerm_application_gateway" "main" {
     request_timeout      = 60
   }
 
-  # HTTP to HTTPS redirect configuration
+  # HTTP to HTTPS redirect configurations - one for each domain
   redirect_configuration {
-    name                 = "http-to-https"
+    name                 = "directus-http-to-https"
     redirect_type        = "Permanent"
     include_path         = true
     include_query_string = true
-    target_listener_name = null
-    target_url          = "https://{host_name}/{request_uri}"
+    target_listener_name = "directus-listener"
+  }
+
+  redirect_configuration {
+    name                 = "api-http-to-https"
+    redirect_type        = "Permanent"
+    include_path         = true
+    include_query_string = true
+    target_listener_name = "api-listener"
+  }
+
+  redirect_configuration {
+    name                 = "app-http-to-https"
+    redirect_type        = "Permanent"
+    include_path         = true
+    include_query_string = true
+    target_listener_name = "participant-frontend-listener"
+  }
+
+  redirect_configuration {
+    name                 = "admin-http-to-https"
+    redirect_type        = "Permanent"
+    include_path         = true
+    include_query_string = true
+    target_listener_name = "dashboard-frontend-listener"
   }
 
   # HTTP listeners for each domain
@@ -429,13 +452,13 @@ resource "azurerm_application_gateway" "main" {
     host_name                     = "admin.dev.dembrane.com"
   }
 
-  # HTTP to HTTPS redirect rules
+  # HTTP to HTTPS redirect rules - each rule uses its corresponding redirect configuration
   request_routing_rule {
     name                        = "directus-http-to-https-rule"
     priority                   = 1
     rule_type                  = "Basic"
     http_listener_name         = "directus-http-listener"
-    redirect_configuration_name = "http-to-https"
+    redirect_configuration_name = "directus-http-to-https"
   }
 
   request_routing_rule {
@@ -443,7 +466,7 @@ resource "azurerm_application_gateway" "main" {
     priority                   = 2
     rule_type                  = "Basic"
     http_listener_name         = "api-http-listener"
-    redirect_configuration_name = "http-to-https"
+    redirect_configuration_name = "api-http-to-https"
   }
 
   request_routing_rule {
@@ -451,7 +474,7 @@ resource "azurerm_application_gateway" "main" {
     priority                   = 3
     rule_type                  = "Basic"
     http_listener_name         = "app-http-listener"
-    redirect_configuration_name = "http-to-https"
+    redirect_configuration_name = "app-http-to-https"
   }
 
   request_routing_rule {
@@ -459,7 +482,7 @@ resource "azurerm_application_gateway" "main" {
     priority                   = 4
     rule_type                  = "Basic"
     http_listener_name         = "admin-http-listener"
-    redirect_configuration_name = "http-to-https"
+    redirect_configuration_name = "admin-http-to-https"
   }
 
   # HTTPS listeners

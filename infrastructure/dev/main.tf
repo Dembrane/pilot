@@ -393,7 +393,7 @@ resource "azurerm_application_gateway" "main" {
     include_path         = true
     include_query_string = true
     target_listener_name = null
-    target_url          = "https://{host_name}:{port}/{path_string}{query_string}"
+    target_url          = "https://{host_name}/{request_uri}"
   }
 
   # HTTP listeners for each domain

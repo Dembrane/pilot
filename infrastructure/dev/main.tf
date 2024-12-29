@@ -128,7 +128,7 @@ resource "azurerm_network_security_group" "private_nsg" {
     protocol                   = "*"
     source_port_range          = "*"
     destination_port_ranges    = ["8000", "8055", "5173"]
-    source_address_prefixes    = ["GatewayManager", "10.0.10.0/24"]
+    source_address_prefixes    = ["AzureLoadBalancer", "10.0.10.0/24"]
     destination_address_prefix = "*"
   }
 }
@@ -162,7 +162,7 @@ resource "azurerm_network_security_group" "public_nsg" {
     protocol                   = "*"
     source_port_range          = "*"
     destination_port_range     = "65200-65535"
-    source_address_prefix      = "GatewayManager"
+    source_address_prefix      = "AzureLoadBalancer"
     destination_address_prefix = "*"
   }
 
@@ -433,7 +433,8 @@ resource "azurerm_application_gateway" "main" {
     interval            = 30
     timeout             = 30
     unhealthy_threshold = 3
-    pick_host_name_from_backend_http_settings = true
+    pick_host_name_from_backend_http_settings = false
+    host                = "app.dev.dembrane.com"
   }
 
   # HTTP to HTTPS redirect configurations - one for each domain

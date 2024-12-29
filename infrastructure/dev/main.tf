@@ -1672,9 +1672,6 @@ resource "azurerm_user_assigned_identity" "directus_identity" {
 }
 
 resource "azurerm_role_assignment" "directus_secret_access" {
-}
-
-resource "azurerm_role_assignment" "directus_secret_access" {
   scope                = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_user_assigned_identity.directus_identity.principal_id

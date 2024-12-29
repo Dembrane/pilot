@@ -727,7 +727,7 @@ resource "azurerm_container_group" "participant_frontend" {
       VITE_USE_PARTICIPANT_ROUTER = "1"
       VITE_API_BASE_URL = "https://api.dev.dembrane.com/api"
       VITE_PARTICIPANT_BASE_URL = "https://app.dev.dembrane.com"
-      VITE_BUILD_VERSION = "development"
+      VITE_BUILD_VERSION = "dev"
       VITE_DIRECTUS_PUBLIC_URL = "https://directus.dev.dembrane.com"
     }
   }
@@ -781,7 +781,7 @@ resource "azurerm_container_group" "dashboard_frontend" {
       VITE_USE_PARTICIPANT_ROUTER = "0"
       VITE_API_BASE_URL = "https://api.dev.dembrane.com/api"
       VITE_ADMIN_BASE_URL = "https://admin.dev.dembrane.com"
-      VITE_BUILD_VERSION = "development"
+      VITE_BUILD_VERSION = "dev"
       VITE_DIRECTUS_PUBLIC_URL = "https://directus.dev.dembrane.com"
     }
   }
@@ -950,10 +950,7 @@ resource "azurerm_container_group" "worker" {
     cpu    = "1"
     memory = "2"
 
-    ports {
-      port     = 8000
-      protocol = "TCP"
-    }
+    command = ["/bin/sh", "/code/server/prod-worker.sh"]
 
     volume {
       name       = "uploads-volume"
@@ -971,25 +968,25 @@ resource "azurerm_container_group" "worker" {
       storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
     }
 
-        secure_environment_variables = {
-      DIRECTUS_PUBLIC_URL           = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_public_url.versionless_id})"
-      DIRECTUS_TOKEN               = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
-      DIRECTUS_SECRET             = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_secret.versionless_id})"
-      ADMIN_BASE_URL              = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.admin_base_url.versionless_id})"
-      PARTICIPANT_BASE_URL        = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.participant_base_url.versionless_id})"
-      OPENAI_API_KEY             = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.openai_api_key.versionless_id})"
-      ANTHROPIC_API_KEY          = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.anthropic_api_key.versionless_id})"
-      DATABASE_URL               = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.database_url.versionless_id})"
+    secure_environment_variables = {
+      DIRECTUS_PUBLIC_URL     = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_public_url.versionless_id})"
+      DIRECTUS_TOKEN          = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
+      DIRECTUS_SECRET         = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_secret.versionless_id})"
+      ADMIN_BASE_URL          = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.admin_base_url.versionless_id})"
+      PARTICIPANT_BASE_URL    = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.participant_base_url.versionless_id})"
+      OPENAI_API_KEY          = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.openai_api_key.versionless_id})"
+      ANTHROPIC_API_KEY       = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.anthropic_api_key.versionless_id})"
+      DATABASE_URL            = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.database_url.versionless_id})"
     }
 
     environment_variables = {
       DIRECTUS_SESSION_COOKIE_NAME = "directus_session_token"
-      BUILD_VERSION               = "development"
-      RABBITMQ_URL               = "amqp://${azurerm_key_vault_secret.rabbitmq_user.value}:${azurerm_key_vault_secret.rabbitmq_password.value}@rabbitmq.dembrane.internal:5672"
-      REDIS_URL                  = "redis://${azurerm_redis_cache.basic_redis.hostname}:${azurerm_redis_cache.basic_redis.ssl_port}"
-      DISABLE_REDACTION          = "1"
-      DISABLE_SENTRY             = "0"
-      SERVE_API_DOCS             = "0"
+      BUILD_VERSION               = "dev"
+      RABBITMQ_URL                = "amqp://${azurerm_key_vault_secret.rabbitmq_user.value}:${azurerm_key_vault_secret.rabbitmq_password.value}@rabbitmq.dembrane.internal:5672"
+      REDIS_URL                   = "redis://${azurerm_redis_cache.basic_redis.hostname}:${azurerm_redis_cache.basic_redis.ssl_port}"
+      DISABLE_REDACTION           = "1"
+      DISABLE_SENTRY              = "0"
+      SERVE_API_DOCS              = "0"
     }
   }
 
@@ -1056,7 +1053,7 @@ resource "azurerm_container_group" "api_server" {
 
     environment_variables = {
       DIRECTUS_SESSION_COOKIE_NAME = "directus_session_token"
-      BUILD_VERSION               = "development"
+      BUILD_VERSION               = "dev"
       RABBITMQ_URL               = "amqp://${azurerm_key_vault_secret.rabbitmq_user.value}:${azurerm_key_vault_secret.rabbitmq_password.value}@rabbitmq.dembrane.internal:5672"
       REDIS_URL                  = "redis://${azurerm_redis_cache.basic_redis.hostname}:${azurerm_redis_cache.basic_redis.ssl_port}"
       DISABLE_REDACTION          = "1"
@@ -1672,6 +1669,9 @@ resource "azurerm_user_assigned_identity" "directus_identity" {
   name                = "DBR-${var.environment}-directus-identity"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
+}
+
+resource "azurerm_role_assignment" "directus_secret_access" {
 }
 
 resource "azurerm_role_assignment" "directus_secret_access" {

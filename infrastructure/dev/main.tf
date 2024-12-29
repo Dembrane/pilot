@@ -257,6 +257,29 @@ resource "azurerm_route_table" "public_route_table" {
   }
 }
 
+# Private DNS Zone for internal services
+resource "azurerm_private_dns_zone" "internal" {
+  name                = "dembrane.internal"
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "internal" {
+  name                  = "internal-dns-link"
+  resource_group_name   = azurerm_resource_group.rg.name
+  private_dns_zone_name = azurerm_private_dns_zone.internal.name
+  virtual_network_id    = azurerm_virtual_network.vnet.id
+  registration_enabled  = true
+}
+
+# DNS A record for RabbitMQ
+resource "azurerm_private_dns_a_record" "rabbitmq" {
+  name                = "rabbitmq"
+  zone_name           = azurerm_private_dns_zone.internal.name
+  resource_group_name = azurerm_resource_group.rg.name
+  ttl                 = 300
+  records             = [azurerm_container_group.rabbitmq.ip_address]
+}
+
 # Associate Route Tables with Subnets
 
 resource "azurerm_subnet_route_table_association" "private_route_association" {
@@ -894,11 +917,29 @@ resource "azurerm_container_group" "directus" {
 
 ## Deploy Worker
 
+# Worker managed identity
+resource "azurerm_user_assigned_identity" "worker_identity" {
+  name                = "DBR-${var.environment}-worker-identity"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+}
+
+resource "azurerm_role_assignment" "worker_secret_access" {
+  scope                = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.worker_identity.principal_id
+}
+
 resource "azurerm_container_group" "worker" {
   name                = "DBR-${var.environment}-Workers-Worker-ACI"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
+
+  identity {
+    type = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.worker_identity.id]
+  }
 
   ip_address_type = "Private"
   subnet_ids       = [azurerm_subnet.private_subnet[0].id]
@@ -944,7 +985,7 @@ resource "azurerm_container_group" "worker" {
     environment_variables = {
       DIRECTUS_SESSION_COOKIE_NAME = "directus_session_token"
       BUILD_VERSION               = "development"
-      RABBITMQ_URL               = "amqp://dembrane:dembrane@rabbitmq:5672"
+      RABBITMQ_URL               = "amqp://${azurerm_key_vault_secret.rabbitmq_user.value}:${azurerm_key_vault_secret.rabbitmq_password.value}@rabbitmq.dembrane.internal:5672"
       REDIS_URL                  = "redis://${azurerm_redis_cache.basic_redis.hostname}:${azurerm_redis_cache.basic_redis.ssl_port}"
       DISABLE_REDACTION          = "1"
       DISABLE_SENTRY             = "0"
@@ -1016,7 +1057,7 @@ resource "azurerm_container_group" "api_server" {
     environment_variables = {
       DIRECTUS_SESSION_COOKIE_NAME = "directus_session_token"
       BUILD_VERSION               = "development"
-      RABBITMQ_URL               = "amqp://dembrane:dembrane@rabbitmq:5672"
+      RABBITMQ_URL               = "amqp://${azurerm_key_vault_secret.rabbitmq_user.value}:${azurerm_key_vault_secret.rabbitmq_password.value}@rabbitmq.dembrane.internal:5672"
       REDIS_URL                  = "redis://${azurerm_redis_cache.basic_redis.hostname}:${azurerm_redis_cache.basic_redis.ssl_port}"
       DISABLE_REDACTION          = "1"
       DISABLE_SENTRY             = "0"

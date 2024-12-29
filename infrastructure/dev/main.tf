@@ -128,7 +128,7 @@ resource "azurerm_network_security_group" "private_nsg" {
     protocol                   = "*"
     source_port_range          = "*"
     destination_port_ranges    = ["8000", "8055", "5173"]
-    source_address_prefixes    = ["AzureLoadBalancer", "10.0.10.0/24"]
+    source_address_prefixes    = ["10.0.10.0/24"]
     destination_address_prefix = "*"
   }
 }
@@ -162,7 +162,7 @@ resource "azurerm_network_security_group" "public_nsg" {
     protocol                   = "*"
     source_port_range          = "*"
     destination_port_range     = "65200-65535"
-    source_address_prefix      = "AzureLoadBalancer"
+    source_address_prefix      = "Internet"
     destination_address_prefix = "*"
   }
 

@@ -119,6 +119,18 @@ resource "azurerm_network_security_group" "private_nsg" {
     source_address_prefixes    = azurerm_subnet.public_subnet[*].address_prefixes[0]
     destination_address_prefix = "*"
   }
+
+  security_rule {
+    name                       = "AllowAppGatewayHealthProbes"
+    priority                   = 110
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_ranges    = ["8000", "8055", "5173"]
+    source_address_prefixes    = ["GatewayManager", "10.0.10.0/24"]
+    destination_address_prefix = "*"
+  }
 }
 
 # NSG for Public Subnets
@@ -219,6 +231,18 @@ resource "azurerm_route_table" "private_route_table" {
   name                = "DBR-${var.environment}-Networks-private-RT"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
+
+  route {
+    name                   = "to-appgw"
+    address_prefix         = "10.0.10.0/24"  # App Gateway subnet
+    next_hop_type         = "VnetLocal"
+  }
+
+  route {
+    name                   = "to-internet"
+    address_prefix         = "0.0.0.0/0"
+    next_hop_type         = "Internet"
+  }
 }
 
 resource "azurerm_route_table" "public_route_table" {
@@ -358,6 +382,7 @@ resource "azurerm_application_gateway" "main" {
     port                  = 8055
     protocol             = "Http"
     request_timeout      = 60
+    probe_name           = "directus-probe"
   }
 
   backend_http_settings {
@@ -366,6 +391,7 @@ resource "azurerm_application_gateway" "main" {
     port                  = 8000
     protocol             = "Http"
     request_timeout      = 60
+    probe_name           = "api-probe"
   }
 
   backend_http_settings {
@@ -374,6 +400,40 @@ resource "azurerm_application_gateway" "main" {
     port                  = 5173
     protocol             = "Http"
     request_timeout      = 60
+    probe_name           = "frontend-probe"
+  }
+
+  # Health probes
+  probe {
+    name                = "directus-probe"
+    protocol            = "Http"
+    path                = "/"
+    interval            = 30
+    timeout             = 30
+    unhealthy_threshold = 3
+    host                = "directus.dev.dembrane.com"
+    pick_host_name_from_backend_http_settings = false
+  }
+
+  probe {
+    name                = "api-probe"
+    protocol            = "Http"
+    path                = "/api/health"
+    interval            = 30
+    timeout             = 30
+    unhealthy_threshold = 3
+    host                = "api.dev.dembrane.com"
+    pick_host_name_from_backend_http_settings = false
+  }
+
+  probe {
+    name                = "frontend-probe"
+    protocol            = "Http"
+    path                = "/"
+    interval            = 30
+    timeout             = 30
+    unhealthy_threshold = 3
+    pick_host_name_from_backend_http_settings = true
   }
 
   # HTTP to HTTPS redirect configurations - one for each domain
@@ -737,6 +797,11 @@ resource "azurerm_container_group" "directus" {
   ip_address_type = "Private"
   subnet_ids       = [azurerm_subnet.private_subnet[0].id]
 
+  identity {
+    type = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.directus_identity.id]
+  }
+
   container {
     name   = "directus"
     image  = "${data.azurerm_container_registry.acr.login_server}/directus:development-latest"
@@ -745,6 +810,60 @@ resource "azurerm_container_group" "directus" {
     ports {
       port     = 8055
       protocol = "TCP"
+    }
+
+    environment_variables = {
+      SESSION_COOKIE_NAME = "directus_session_token"
+      PORT = "8055"
+      TELEMETRY = "false"
+      CORS_ENABLED = "true"
+      CORS_ORIGIN = "*"
+      CORS_CREDENTIALS = "true"
+      SESSION_COOKIE_DOMAIN = "dev.dembrane.com"
+      SESSION_COOKIE_SAME_SITE = "lax"
+      SESSION_COOKIE_SECURE = "true"
+      WEBSOCKETS_ENABLED = "true"
+      EMAIL_TRANSPORT = "smtp"
+      AUTH_PROVIDERS = "google"
+      AUTH_GOOGLE_DRIVER = "openid"
+      AUTH_GOOGLE_ISSUER_URL = "https://accounts.google.com"
+      AUTH_GOOGLE_IDENTIFIER_KEY = "email"
+      AUTH_GOOGLE_FIRST_NAME_KEY = "given_name"
+      AUTH_GOOGLE_LAST_NAME_KEY = "family_name"
+      AUTH_GOOGLE_ICON = "google"
+      AUTH_GOOGLE_LABEL = "Google"
+      AUTH_GOOGLE_ALLOW_PUBLIC_REGISTRATION = "true"
+      AUTH_GOOGLE_DEFAULT_ROLE_ID = "2446660a-ab6c-4801-ad69-5711030cba83"
+      AUTH_GOOGLE_REDIRECT_ALLOW_LIST = "${azurerm_key_vault_secret.admin_base_url.value}/en-US/projects,${azurerm_key_vault_secret.admin_base_url.value}/nl-NL/projects"
+      USER_REGISTER_URL_ALLOW_LIST = "${azurerm_key_vault_secret.admin_base_url.value}/verify-email"
+      PASSWORD_RESET_URL_ALLOW_LIST = "${azurerm_key_vault_secret.admin_base_url.value}/password-reset"
+      USER_INVITE_URL_ALLOW_LIST = "${azurerm_key_vault_secret.admin_base_url.value}/invite"
+      ADMIN_EMAIL = "admin@dembrane.com"
+    }
+
+    secure_environment_variables = {
+      PUBLIC_URL = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_public_url.versionless_id})"
+      SECRET = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_secret.versionless_id})"
+      ADMIN_TOKEN = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
+      DB_CLIENT = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_client.versionless_id})"
+      DB_HOST = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_host.versionless_id})"
+      DB_PORT = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_port.versionless_id})"
+      DB_USER = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_user.versionless_id})"
+      DB_PASSWORD = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_password.versionless_id})"
+      DB_DATABASE = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_database.versionless_id})"
+      REDIS_ENABLED = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_redis_enabled.versionless_id})"
+      REDIS = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_redis_url.versionless_id})"
+      # SMTP settings
+      EMAIL_FROM = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_smtp_from.versionless_id})"
+      EMAIL_SMTP_HOST = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_smtp_host.versionless_id})"
+      EMAIL_SMTP_PORT = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_smtp_port.versionless_id})"
+      EMAIL_SMTP_USER = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_smtp_user.versionless_id})"
+      EMAIL_SMTP_PASSWORD = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_smtp_password.versionless_id})"
+      # Admin credentials
+      ADMIN_PASSWORD = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_admin_password.versionless_id})"
+      # Auth settings
+      AUTH_GOOGLE_CLIENT_ID = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_auth_google_client_id.versionless_id})"
+      AUTH_GOOGLE_CLIENT_SECRET = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_auth_google_client_secret.versionless_id})"
     }
   }
 
@@ -1305,9 +1424,8 @@ resource "azurerm_role_assignment" "container_secret_access" {
 
 resource "azurerm_key_vault_secret" "directus_public_url" {
   name         = "directus-public-url"
-  value        = "https://directus.dev.dembrane.com"  # Example value
+  value        = "https://directus.dev.dembrane.com"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-
 }
 
 resource "azurerm_key_vault_secret" "directus_admin_token" {
@@ -1322,6 +1440,132 @@ resource "azurerm_key_vault_secret" "directus_admin_token" {
 resource "azurerm_key_vault_secret" "directus_secret" {
   name         = "directus-secret"
   value        = "initial-secret-value"  # Should be changed post-deployment
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "directus_db_client" {
+  name         = "directus-db-client"
+  value        = "postgres"
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_secret" "directus_db_host" {
+  name         = "directus-db-host"
+  value        = azurerm_cosmosdb_postgresql_cluster.cosmo.name
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_secret" "directus_db_port" {
+  name         = "directus-db-port"
+  value        = "5432"
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_secret" "directus_db_user" {
+  name         = "directus-db-user"
+  value        = "dembrane"
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_secret" "directus_db_password" {
+  name         = "directus-db-password"
+  value        = "1n1t14l_p@ssw0rd"  # Should be changed post-deployment
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "directus_db_database" {
+  name         = "directus-db-database"
+  value        = "dembrane"
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_secret" "directus_redis_enabled" {
+  name         = "directus-redis-enabled"
+  value        = "true"
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_secret" "directus_redis_url" {
+  name         = "directus-redis-url"
+  value        = "redis://${azurerm_redis_cache.basic_redis.hostname}:${azurerm_redis_cache.basic_redis.ssl_port}"
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+}
+
+# Email settings
+resource "azurerm_key_vault_secret" "directus_smtp_from" {
+  name         = "directus-smtp-from"
+  value        = ""  # Will be set post-deployment
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "directus_smtp_host" {
+  name         = "directus-smtp-host"
+  value        = ""  # Will be set post-deployment
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "directus_smtp_port" {
+  name         = "directus-smtp-port"
+  value        = ""  # Will be set post-deployment
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "directus_smtp_user" {
+  name         = "directus-smtp-user"
+  value        = ""  # Will be set post-deployment
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "directus_smtp_password" {
+  name         = "directus-smtp-password"
+  value        = ""  # Will be set post-deployment
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+# Admin credentials
+resource "azurerm_key_vault_secret" "directus_admin_password" {
+  name         = "directus-admin-password"
+  value        = ""  # Will be set post-deployment
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+# Auth settings
+resource "azurerm_key_vault_secret" "directus_auth_google_client_id" {
+  name         = "directus-auth-google-client-id"
+  value        = "initial-google-client-id"  # Should be changed post-deployment
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "azurerm_key_vault_secret" "directus_auth_google_client_secret" {
+  name         = "directus-auth-google-client-secret"
+  value        = "initial-google-client-secret"  # Should be changed post-deployment
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
   lifecycle {
     ignore_changes = [value]
@@ -1379,6 +1623,19 @@ resource "azurerm_role_assignment" "api_server_secret_access" {
   scope                = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_user_assigned_identity.api_server_identity.principal_id
+}
+
+# Directus managed identity
+resource "azurerm_user_assigned_identity" "directus_identity" {
+  name                = "DBR-${var.environment}-directus-identity"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+}
+
+resource "azurerm_role_assignment" "directus_secret_access" {
+  scope                = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.directus_identity.principal_id
 }
 
 # worker envs

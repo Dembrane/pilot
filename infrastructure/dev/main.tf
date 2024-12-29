@@ -328,16 +328,6 @@ resource "azurerm_application_gateway" "main" {
     key_vault_secret_id = "${azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.vault_uri}secrets/wildcard-dev-dembrane-com"
   }
 
-  waf_configuration {
-    enabled                  = true
-    firewall_mode           = "Prevention"
-    rule_set_type           = "OWASP"
-    rule_set_version        = "3.2"
-    file_upload_limit_mb    = 100
-    request_body_check      = true
-    max_request_body_size_kb = 128
-  }
-
   firewall_policy_id = azurerm_web_application_firewall_policy.main.id
 
   # Backend address pools

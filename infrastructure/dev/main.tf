@@ -348,8 +348,8 @@ resource "azurerm_application_gateway" "main" {
 
   # Reference the certificate that will be imported manually to Key Vault
   ssl_certificate {
-    name                = "wildcard-cert"
-    key_vault_secret_id = "${azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.vault_uri}secrets/wildcard-dev-dembrane-com"
+    name                = "wildcard-cert-v2"
+    key_vault_secret_id = "https://dbr-dev-runtimecfg-kv.vault.azure.net/secrets/wildcard-dev-dembrane-com-v2"
   }
 
   firewall_policy_id = azurerm_web_application_firewall_policy.main.id
@@ -542,7 +542,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_ip_configuration_name = "frontend-ip-config"
     frontend_port_name            = "https-443"
     protocol                      = "Https"
-    ssl_certificate_name          = "wildcard-cert"
+    ssl_certificate_name          = "wildcard-cert-v2"
     host_name                     = "directus.dev.dembrane.com"
   }
 
@@ -551,7 +551,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_ip_configuration_name = "frontend-ip-config"
     frontend_port_name            = "https-443"
     protocol                      = "Https"
-    ssl_certificate_name          = "wildcard-cert"
+    ssl_certificate_name          = "wildcard-cert-v2"
     host_name                     = "api.dev.dembrane.com"
   }
 
@@ -560,7 +560,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_ip_configuration_name = "frontend-ip-config"
     frontend_port_name            = "https-443"
     protocol                      = "Https"
-    ssl_certificate_name          = "wildcard-cert"
+    ssl_certificate_name          = "wildcard-cert-v2"
     host_name                     = "app.dev.dembrane.com"
   }
 

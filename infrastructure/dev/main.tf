@@ -257,11 +257,32 @@ data "azurerm_container_registry" "acr" {
 ### deploy application gateway with no backend pool
 
 # Define the Application Gateway
-# Import existing certificate from Key Vault
-data "azurerm_key_vault_certificate" "appgw_cert" {
-  name         = "appgw-wildcard-cert"
-  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+# Certificate will be imported manually to Key Vault
+# The Application Gateway will use the imported certificate
+
+# WAF Policy for App Gateway
+resource "azurerm_web_application_firewall_policy" "main" {
+  name                = "DBR-${var.environment}-waf-policy"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+
+  policy_settings {
+    enabled                     = true
+    mode                       = "Prevention"
+    request_body_check         = true
+    file_upload_limit_in_mb    = 100
+    max_request_body_size_in_kb = 128
+  }
+
+  managed_rules {
+    managed_rule_set {
+      type    = "OWASP"
+      version = "3.2"
+    }
+  }
 }
+
+# App Gateway will use its built-in certificate management
 
 # Updated Application Gateway Configuration
 resource "azurerm_application_gateway" "main" {
@@ -275,8 +296,8 @@ resource "azurerm_application_gateway" "main" {
   }
 
   sku {
-    name     = "Standard_v2"
-    tier     = "Standard_v2"
+    name     = "WAF_v2"
+    tier     = "WAF_v2"
     capacity = 1
   }
 
@@ -301,10 +322,23 @@ resource "azurerm_application_gateway" "main" {
     port = 443
   }
 
+  # Reference the certificate that will be imported manually to Key Vault
   ssl_certificate {
     name                = "wildcard-cert"
-    key_vault_secret_id = "https://dbr-dev-runtimecfg-kv.vault.azure.net/secrets/appgw-wildcard-cert"
+    key_vault_secret_id = "${azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.vault_uri}secrets/wildcard-dev-dembrane-com"
   }
+
+  waf_configuration {
+    enabled                  = true
+    firewall_mode           = "Prevention"
+    rule_set_type           = "OWASP"
+    rule_set_version        = "3.2"
+    file_upload_limit_mb    = 100
+    request_body_check      = true
+    max_request_body_size_kb = 128
+  }
+
+  firewall_policy_id = azurerm_web_application_firewall_policy.main.id
 
   # Backend address pools
   backend_address_pool {
@@ -350,6 +384,82 @@ resource "azurerm_application_gateway" "main" {
     port                  = 5173
     protocol             = "Http"
     request_timeout      = 60
+  }
+
+  # HTTP to HTTPS redirect configuration
+  redirect_configuration {
+    name                 = "http-to-https"
+    redirect_type        = "Permanent"
+    include_path         = true
+    include_query_string = true
+    target_listener_name = null
+    target_url          = "https://{host_name}:{port}/{path_string}{query_string}"
+  }
+
+  # HTTP listeners for each domain
+  http_listener {
+    name                           = "directus-http-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name            = "http-80"
+    protocol                      = "Http"
+    host_name                     = "directus.dev.dembrane.com"
+  }
+
+  http_listener {
+    name                           = "api-http-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name            = "http-80"
+    protocol                      = "Http"
+    host_name                     = "api.dev.dembrane.com"
+  }
+
+  http_listener {
+    name                           = "app-http-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name            = "http-80"
+    protocol                      = "Http"
+    host_name                     = "app.dev.dembrane.com"
+  }
+
+  http_listener {
+    name                           = "admin-http-listener"
+    frontend_ip_configuration_name = "frontend-ip-config"
+    frontend_port_name            = "http-80"
+    protocol                      = "Http"
+    host_name                     = "admin.dev.dembrane.com"
+  }
+
+  # HTTP to HTTPS redirect rules
+  request_routing_rule {
+    name                        = "directus-http-to-https-rule"
+    priority                   = 1
+    rule_type                  = "Basic"
+    http_listener_name         = "directus-http-listener"
+    redirect_configuration_name = "http-to-https"
+  }
+
+  request_routing_rule {
+    name                        = "api-http-to-https-rule"
+    priority                   = 2
+    rule_type                  = "Basic"
+    http_listener_name         = "api-http-listener"
+    redirect_configuration_name = "http-to-https"
+  }
+
+  request_routing_rule {
+    name                        = "app-http-to-https-rule"
+    priority                   = 3
+    rule_type                  = "Basic"
+    http_listener_name         = "app-http-listener"
+    redirect_configuration_name = "http-to-https"
+  }
+
+  request_routing_rule {
+    name                        = "admin-http-to-https-rule"
+    priority                   = 4
+    rule_type                  = "Basic"
+    http_listener_name         = "admin-http-listener"
+    redirect_configuration_name = "http-to-https"
   }
 
   # HTTPS listeners
@@ -515,6 +625,14 @@ resource "azurerm_container_group" "participant_frontend" {
       port     = 5173
       protocol = "TCP"
     }
+
+    environment_variables = {
+      VITE_USE_PARTICIPANT_ROUTER = "1"
+      VITE_API_BASE_URL = "https://api.dev.dembrane.com/api"
+      VITE_PARTICIPANT_BASE_URL = "https://app.dev.dembrane.com"
+      VITE_BUILD_VERSION = "development"
+      VITE_DIRECTUS_PUBLIC_URL = "https://directus.dev.dembrane.com"
+    }
   }
 
   image_registry_credential {
@@ -560,6 +678,14 @@ resource "azurerm_container_group" "dashboard_frontend" {
     ports {
       port     = 5173
       protocol = "TCP"
+    }
+
+    environment_variables = {
+      VITE_USE_PARTICIPANT_ROUTER = "0"
+      VITE_API_BASE_URL = "https://api.dev.dembrane.com/api"
+      VITE_ADMIN_BASE_URL = "https://admin.dev.dembrane.com"
+      VITE_BUILD_VERSION = "development"
+      VITE_DIRECTUS_PUBLIC_URL = "https://directus.dev.dembrane.com"
     }
   }
 
@@ -1081,7 +1207,13 @@ resource "azurerm_role_assignment" "appgw_keyvault_certificates" {
   principal_id         = azurerm_user_assigned_identity.appgw_identity.principal_id
 }
 
-#  DNS Zone
+# DNS Zone
+# TODO: Ops team needs to add the following NS records in the parent domain (dembrane.com) to delegate the dev subdomain:
+# dev.dembrane.com NS ns1-09.azure-dns.com
+# dev.dembrane.com NS ns2-09.azure-dns.net
+# dev.dembrane.com NS ns3-09.azure-dns.org
+# dev.dembrane.com NS ns4-09.azure-dns.info
+# This delegation is required for Let's Encrypt DNS validation to work properly.
 resource "azurerm_dns_zone" "dev_zone" {
   name                = "dev.dembrane.com"
   resource_group_name = azurerm_resource_group.rg.name
@@ -1131,10 +1263,6 @@ resource "azurerm_key_vault_secret" "rabbitmq_user" {
   name         = "rabbitmq-default-user"
   value        = "dembrane"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-
-  lifecycle {
-    ignore_changes = [value]
-  }
 }
 
 resource "azurerm_key_vault_secret" "rabbitmq_password" {

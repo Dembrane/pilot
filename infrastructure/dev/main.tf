@@ -569,7 +569,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_ip_configuration_name = "frontend-ip-config"
     frontend_port_name            = "https-443"
     protocol                      = "Https"
-    ssl_certificate_name          = "wildcard-cert"
+    ssl_certificate_name          = "wildcard-cert-v2"
     host_name                     = "admin.dev.dembrane.com"
   }
 

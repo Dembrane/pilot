@@ -1046,7 +1046,6 @@ resource "azurerm_container_group" "api_server" {
       PARTICIPANT_BASE_URL        = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.participant_base_url.versionless_id})"
       OPENAI_API_KEY             = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.openai_api_key.versionless_id})"
       ANTHROPIC_API_KEY          = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.anthropic_api_key.versionless_id})"
-      DATABASE_URL               = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.database_url.versionless_id})"
     }
 
     environment_variables = {
@@ -1057,6 +1056,7 @@ resource "azurerm_container_group" "api_server" {
       DISABLE_REDACTION          = "1"
       DISABLE_SENTRY             = "0"
       SERVE_API_DOCS             = "0"
+      DATABASE_URL               = "postgresql+psycopg://dembrane:dembrane@${azurerm_cosmosdb_postgresql_cluster.cosmo.name}:5432/dembrane"
     }
 
     ports {
@@ -1643,11 +1643,8 @@ resource "azurerm_key_vault_secret" "anthropic_api_key" {
 
 resource "azurerm_key_vault_secret" "database_url" {
   name         = "database-url"
-  value        = "postgresql+psycopg://dembrane:dembrane@${azurerm_cosmosdb_postgresql_cluster.cosmo.name}:5432/dembrane"  # Initial value
+  value        = "postgresql+psycopg://dembrane:dembrane@${azurerm_cosmosdb_postgresql_cluster.cosmo.name}.postgres.cosmos.azure.com:5432/dembrane?sslmode=require"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-  lifecycle {
-    ignore_changes = [value]
-  }
 }
 
 resource "azurerm_user_assigned_identity" "api_server_identity" {

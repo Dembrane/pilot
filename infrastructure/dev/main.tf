@@ -1134,12 +1134,14 @@ resource "azurerm_log_analytics_solution" "container_insights" {
   }
 }
 
-# Create an Azure Dashboard for container monitoring
-resource "azurerm_dashboard" "container_dashboard" {
+# Create an Azure Portal Dashboard for container monitoring
+resource "azurerm_portal_dashboard" "container_dashboard" {
   name                = "DBR-${var.environment}-ContainerMonitoring-Dashboard"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-
+  tags = {
+    source = "terraform"
+  }
   dashboard_properties = <<DASHBOARD
 {
   "lenses": {
@@ -1156,85 +1158,25 @@ resource "azurerm_dashboard" "container_dashboard" {
           "metadata": {
             "inputs": [
               {
-                "name": "resourceTypeMode",
-                "isOptional": true
+                "name": "query",
+                "value": "ContainerLog\n| where TimeGenerated > ago(1h)\n| project TimeGenerated, ContainerID, LogEntry\n| order by TimeGenerated desc\n| take 100"
               },
               {
-                "name": "ComponentId",
-                "isOptional": true
+                "name": "timespan",
+                "value": "P1D"
               },
               {
-                "name": "Scope",
-                "value": {
-                  "resourceIds": [
-                    "${azurerm_log_analytics_workspace.main.id}"
-                  ]
-                },
-                "isOptional": true
-              },
-              {
-                "name": "PartId",
-                "value": "exclusive-part-id",
-                "isOptional": true
-              },
-              {
-                "name": "Version",
-                "value": "2.0",
-                "isOptional": true
-              },
-              {
-                "name": "TimeRange",
-                "value": "P1D",
-                "isOptional": true
-              },
-              {
-                "name": "DashboardId",
-                "isOptional": true
-              },
-              {
-                "name": "DraftRequestParameters",
-                "isOptional": true
-              },
-              {
-                "name": "Query",
-                "value": "ContainerLog\n| where TimeGenerated > ago(1h)\n| project TimeGenerated, ContainerID, LogEntry\n| order by TimeGenerated desc\n| take 100",
-                "isOptional": true
-              },
-              {
-                "name": "ControlType",
-                "value": "AnalyticsGrid",
-                "isOptional": true
-              },
-              {
-                "name": "SpecificChart",
-                "isOptional": true
-              },
-              {
-                "name": "PartTitle",
-                "value": "Container Logs (Last 100)",
-                "isOptional": true
-              },
-              {
-                "name": "PartSubTitle",
-                "value": "Log Analytics",
-                "isOptional": true
-              },
-              {
-                "name": "Dimensions",
-                "isOptional": true
-              },
-              {
-                "name": "LegendOptions",
-                "isOptional": true
-              },
-              {
-                "name": "IsQueryContainTimeRange",
-                "value": false,
-                "isOptional": true
+                "name": "chartType",
+                "value": "table"
               }
             ],
             "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
-            "settings": {}
+            "settings": {
+              "content": {
+                "PartTitle": "Container Logs (Last 100)",
+                "PartSubTitle": "Log Analytics"
+              }
+            }
           }
         },
         "1": {
@@ -1247,86 +1189,25 @@ resource "azurerm_dashboard" "container_dashboard" {
           "metadata": {
             "inputs": [
               {
-                "name": "resourceTypeMode",
-                "isOptional": true
+                "name": "query",
+                "value": "Perf\n| where ObjectName == 'Container'\n| where CounterName == 'cpuUsageNanoCores'\n| summarize AvgCPU = avg(CounterValue) by bin(TimeGenerated, 5m), ContainerID\n| render timechart"
               },
               {
-                "name": "ComponentId",
-                "isOptional": true
+                "name": "timespan",
+                "value": "P1D"
               },
               {
-                "name": "Scope",
-                "value": {
-                  "resourceIds": [
-                    "${azurerm_log_analytics_workspace.main.id}"
-                  ]
-                },
-                "isOptional": true
-              },
-              {
-                "name": "PartId",
-                "value": "exclusive-part-id2",
-                "isOptional": true
-              },
-              {
-                "name": "Version",
-                "value": "2.0",
-                "isOptional": true
-              },
-              {
-                "name": "TimeRange",
-                "value": "P1D",
-                "isOptional": true
-              },
-              {
-                "name": "DashboardId",
-                "isOptional": true
-              },
-              {
-                "name": "DraftRequestParameters",
-                "isOptional": true
-              },
-              {
-                "name": "Query",
-                "value": "Perf\n| where ObjectName == 'Container'\n| where CounterName == 'cpuUsageNanoCores'\n| summarize AvgCPU = avg(CounterValue) by bin(TimeGenerated, 5m), ContainerID\n| render timechart",
-                "isOptional": true
-              },
-              {
-                "name": "ControlType",
-                "value": "FrameControlChart",
-                "isOptional": true
-              },
-              {
-                "name": "SpecificChart",
-                "value": "Line",
-                "isOptional": true
-              },
-              {
-                "name": "PartTitle",
-                "value": "CPU Usage by Container",
-                "isOptional": true
-              },
-              {
-                "name": "PartSubTitle",
-                "value": "Log Analytics",
-                "isOptional": true
-              },
-              {
-                "name": "Dimensions",
-                "isOptional": true
-              },
-              {
-                "name": "LegendOptions",
-                "isOptional": true
-              },
-              {
-                "name": "IsQueryContainTimeRange",
-                "value": false,
-                "isOptional": true
+                "name": "chartType",
+                "value": "lineChart"
               }
             ],
             "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
-            "settings": {}
+            "settings": {
+              "content": {
+                "PartTitle": "CPU Usage by Container",
+                "PartSubTitle": "Log Analytics"
+              }
+            }
           }
         },
         "2": {
@@ -1339,86 +1220,25 @@ resource "azurerm_dashboard" "container_dashboard" {
           "metadata": {
             "inputs": [
               {
-                "name": "resourceTypeMode",
-                "isOptional": true
+                "name": "query",
+                "value": "Perf\n| where ObjectName == 'Container'\n| where CounterName == 'memoryUsageBytes'\n| summarize AvgMemory = avg(CounterValue) by bin(TimeGenerated, 5m), ContainerID\n| render timechart"
               },
               {
-                "name": "ComponentId",
-                "isOptional": true
+                "name": "timespan",
+                "value": "P1D"
               },
               {
-                "name": "Scope",
-                "value": {
-                  "resourceIds": [
-                    "${azurerm_log_analytics_workspace.main.id}"
-                  ]
-                },
-                "isOptional": true
-              },
-              {
-                "name": "PartId",
-                "value": "exclusive-part-id3",
-                "isOptional": true
-              },
-              {
-                "name": "Version",
-                "value": "2.0",
-                "isOptional": true
-              },
-              {
-                "name": "TimeRange",
-                "value": "P1D",
-                "isOptional": true
-              },
-              {
-                "name": "DashboardId",
-                "isOptional": true
-              },
-              {
-                "name": "DraftRequestParameters",
-                "isOptional": true
-              },
-              {
-                "name": "Query",
-                "value": "Perf\n| where ObjectName == 'Container'\n| where CounterName == 'memoryUsageBytes'\n| summarize AvgMemory = avg(CounterValue) by bin(TimeGenerated, 5m), ContainerID\n| render timechart",
-                "isOptional": true
-              },
-              {
-                "name": "ControlType",
-                "value": "FrameControlChart",
-                "isOptional": true
-              },
-              {
-                "name": "SpecificChart",
-                "value": "Line",
-                "isOptional": true
-              },
-              {
-                "name": "PartTitle",
-                "value": "Memory Usage by Container",
-                "isOptional": true
-              },
-              {
-                "name": "PartSubTitle",
-                "value": "Log Analytics",
-                "isOptional": true
-              },
-              {
-                "name": "Dimensions",
-                "isOptional": true
-              },
-              {
-                "name": "LegendOptions",
-                "isOptional": true
-              },
-              {
-                "name": "IsQueryContainTimeRange",
-                "value": false,
-                "isOptional": true
+                "name": "chartType",
+                "value": "lineChart"
               }
             ],
             "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
-            "settings": {}
+            "settings": {
+              "content": {
+                "PartTitle": "Memory Usage by Container",
+                "PartSubTitle": "Log Analytics"
+              }
+            }
           }
         }
       }
@@ -1434,29 +1254,6 @@ resource "azurerm_dashboard" "container_dashboard" {
           }
         },
         "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
-      },
-      "filterLocale": {
-        "value": "en-us"
-      },
-      "filters": {
-        "value": {
-          "MsPortalFx_TimeRange": {
-            "model": {
-              "format": "utc",
-              "granularity": "auto",
-              "relative": "24h"
-            },
-            "displayCache": {
-              "name": "UTC Time",
-              "value": "Past 24 hours"
-            },
-            "filteredPartIds": [
-              "StartboardPart-LogsDashboardPart-1",
-              "StartboardPart-LogsDashboardPart-2",
-              "StartboardPart-LogsDashboardPart-3"
-            ]
-          }
-        }
       }
     }
   }

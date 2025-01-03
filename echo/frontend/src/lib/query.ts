@@ -14,14 +14,17 @@ import {
   generateProjectLibrary as generateProjectLibrary,
   generateProjectView,
   getChatHistory,
+  getConversationReply,
   getConversationTranscriptString,
   getLatestProjectAnalysisRunByProjectId,
   getProjectChatContext,
   getProjectInsights,
   getProjectViews,
   getQuotesByConversationId,
+  getRelatedObjects,
   getResourceById,
   getResourcesByProjectId,
+  getSpikeMessages,
   initiateAndUploadConversationChunk,
   initiateConversation,
   lockConversations,
@@ -1373,5 +1376,34 @@ export const useMoveConversationMutation = () => {
     onError: (error: Error) => {
       toast.error("Failed to move conversation: " + error.message);
     },
+  });
+};
+
+export const useGetConversationReplyMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (conversationId: string) =>
+      getConversationReply(conversationId),
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({
+        queryKey: ["spike_messages", vars],
+      });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+export const useSpikeMessages = (conversationId: string) => {
+  return useQuery({
+    queryKey: ["spike_messages", conversationId],
+    queryFn: () => getSpikeMessages(conversationId),
+  });
+};
+
+export const useGetRelatedObjectsMutation = () => {
+  return useMutation({
+    mutationFn: (objectId: string) => getRelatedObjects(objectId),
   });
 };

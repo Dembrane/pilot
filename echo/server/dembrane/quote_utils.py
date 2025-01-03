@@ -2,15 +2,17 @@ import re
 import json
 import random
 import logging
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
 import tiktoken
 from pydantic import BaseModel
-from sqlalchemy import func, select
 from sqlalchemy.orm import Session
-from sklearn.cluster import KMeans  # type: ignore
+from sklearn.cluster import (  # type: ignore
+    DBSCAN,  # type: ignore
+    KMeans,  # type: ignore
+)
 from langchain_openai import OpenAIEmbeddings
 from langchain_experimental.text_splitter import SemanticChunker
 
@@ -27,7 +29,7 @@ from dembrane.database import (
     ProcessingStatusEnum,
     ConversationChunkModel,
 )
-from dembrane.embedding import EMBEDDING_DIM, embed_text
+from dembrane.embedding import embed_text
 from dembrane.image_utils import brilliant_image_generator_3000
 
 logger = logging.getLogger("quote_utils")
@@ -250,91 +252,212 @@ def count_tokens(text: str) -> int:
 
 
 def get_random_sample_quotes(
-    db: Session, project_analysis_run_id: str, context_limit: int = 80000, batch_size: int = 1000
+    db: Session,
+    project_analysis_run_id: str,
+    context_limit: int = 80000,
 ) -> List[QuoteModel]:
     """
-    Generate a random sample of quotes for a given project and project analysis run, avoiding frequency bias.
+    Generate a representative sample of quotes using a hybrid approach with dynamic clustering.
+
+    The function ensures:
+    - Democratic representation: Selects at least one quote from each conversation.
+    - Thematic diversity: Selects quotes from dynamically determined clusters based on embedding similarity.
+    - Frequency bias reduction: Prevents the same kind of quotes from disproportionately influencing the sample.
+    - Context filling: Adds additional quotes to fill the context window in a thematically diverse manner.
 
     Args:
-    - session: SQLAlchemy session for database access.
+    - db: SQLAlchemy session for database access.
     - project_analysis_run_id: The ID of the project analysis run.
-    - context_limit: The token limit for the context (default is 120000).
-    - batch_size: The size of batches to fetch quotes in (default is 1000).
+    - context_limit: The token limit for the context.
 
     Returns:
-    - A list of randomly selected QuoteModel objects.
+    - A list of selected QuoteModel objects.
     """
+    logger = logging.getLogger("get_random_sample_quotes")
+    logger.debug(f"get_random_sample_quotes: {project_analysis_run_id} with context_limit: {context_limit}")
 
-    # Step 1: Select quotes ensuring at least one quote per conversation
-    conversation_ids = db.scalars(
-        select(QuoteModel.conversation_id)
-        .filter_by(project_analysis_run_id=project_analysis_run_id)
-        .distinct()
-    ).all()
+    # Fetch all quotes for the given project analysis run
+    all_quotes = db.query(QuoteModel).filter(
+        QuoteModel.project_analysis_run_id == project_analysis_run_id
+    ).order_by(QuoteModel.conversation_id, QuoteModel.timestamp).all()
 
-    selected_quotes = []
-    for conv_id in conversation_ids:
-        conv_quote = db.scalars(
-            select(QuoteModel)
-            .filter_by(conversation_id=conv_id, project_analysis_run_id=project_analysis_run_id)
-            .order_by(func.random())
-            .limit(1)
-        ).first()
-        if conv_quote:
-            selected_quotes.append(conv_quote)
+    if not all_quotes:
+        logger.error(f"No quotes found for project_analysis_run_id: {project_analysis_run_id}")
+        return []
 
-    # Step 2: Fetch quotes in batches to avoid loading all quotes into memory
-    offset = 0
-    all_quotes: List[QuoteModel] = []
-    while True:
-        batch_quotes = db.scalars(
-            select(QuoteModel)
-            .filter_by(project_analysis_run_id=project_analysis_run_id)
-            .offset(offset)
-            .limit(batch_size)
-        ).all()
-        if not batch_quotes:
-            break
-        all_quotes.extend(batch_quotes)
-        offset += batch_size
+    # Organize quotes by conversation
+    quotes_by_conversation: Dict[str, List[QuoteModel]] = {}
+    for quote in all_quotes:
+        quotes_by_conversation.setdefault(quote.conversation_id, []).append(quote)
 
-    # Step 3: Calculate the number of random vectors needed
-    avg_quote_length_tokens = 60  # Average length of a quote in tokens
-    num_random_vectors = context_limit // avg_quote_length_tokens
-    num_random_vectors = min(
-        num_random_vectors, len(all_quotes)
-    )  # Ensure we don't exceed the number of available quotes
-    random_vectors = np.random.randn(num_random_vectors, EMBEDDING_DIM)
+    # Filter out quotes without embeddings
+    valid_quotes = [quote for quote in all_quotes if quote.embedding is not None]
+    if not valid_quotes:
+        logger.error("No quotes with embeddings found.")
+        return []
 
-    for vector in random_vectors:
-        closest_quote = db.scalars(
-            select(QuoteModel)
-            .filter(QuoteModel.project_analysis_run_id == project_analysis_run_id)
-            .order_by(QuoteModel.embedding.l2_distance(vector))
-            .limit(1)
-        ).first()
-        if closest_quote and closest_quote not in selected_quotes:
-            selected_quotes.append(closest_quote)
+    embeddings = np.array([quote.embedding for quote in valid_quotes])
 
-    # Step 4: Ensure the context limit is not exceeded
+    # Perform DBSCAN clustering on embeddings
+    dbscan = DBSCAN(eps=0.5, min_samples=5)  # Consider tuning these parameters
+    labels = dbscan.fit_predict(embeddings)
 
-    # Shuffle the list to ensure randomness
-    random.shuffle(all_quotes)
+    # Organize quotes by cluster
+    quotes_by_cluster: Dict[int, List[QuoteModel]] = {}
+    for quote, label in zip(valid_quotes, labels, strict=False):
+        quotes_by_cluster.setdefault(label, []).append(quote)
 
     # Initialize variables
     selected_quotes = []
     current_context_length = 0
 
-    # Iterate over the shuffled quotes
-    for quote in all_quotes:
-        additional_length = count_tokens(quote.text)
-        if current_context_length + additional_length <= context_limit:
-            selected_quotes.append(quote)
-            current_context_length += additional_length
-        if current_context_length >= context_limit:
+    # Estimate average tokens per quote
+    avg_tokens_per_quote = np.mean([count_tokens(quote.text) for quote in valid_quotes])
+
+    # First Pass: Ensure at least one quote from each conversation
+    for conv_id, conv_quotes in quotes_by_conversation.items():
+        # Select a random quote from the conversation
+        random_quote = random.choice(conv_quotes)
+        quote_tokens = count_tokens(random_quote.text)
+
+        if current_context_length + quote_tokens > context_limit:
+            logger.debug("Context limit reached during conversation-based selection.")
             break
 
-    return selected_quotes
+        selected_quotes.append(random_quote)
+        current_context_length += quote_tokens
+
+        logger.debug(
+            f"Selected quote {random_quote.id} from conversation {conv_id}, "
+            f"tokens: {quote_tokens}, current total tokens: {current_context_length}"
+        )
+
+    # Second Pass: Ensure at least one quote from each cluster (excluding noise cluster -1)
+    for cluster_id, cluster_quotes in quotes_by_cluster.items():
+        if cluster_id == -1:
+            continue  # Skip noise cluster
+
+        # Select a random quote from the cluster
+        random_quote = random.choice(cluster_quotes)
+        quote_tokens = count_tokens(random_quote.text)
+
+        if current_context_length + quote_tokens > context_limit:
+            logger.debug("Context limit reached during cluster-based selection.")
+            break
+
+        # Check if the quote is already selected
+        if random_quote.id not in {quote.id for quote in selected_quotes}:
+            selected_quotes.append(random_quote)
+            current_context_length += quote_tokens
+
+            logger.debug(
+                f"Selected quote {random_quote.id} from cluster {cluster_id}, "
+                f"tokens: {quote_tokens}, current total tokens: {current_context_length}"
+            )
+
+    # Third Pass: Fill remaining context using quotes from clusters, prioritizing smaller clusters
+    remaining_tokens = context_limit - current_context_length
+    if remaining_tokens > avg_tokens_per_quote:
+        logger.debug("Filling remaining context using quotes from clusters.")
+        # Sort clusters by size (smallest first)
+        sorted_clusters = sorted(quotes_by_cluster.items(), key=lambda x: len(x[1]))
+
+        for cluster_id, cluster_quotes in sorted_clusters:
+            if cluster_id == -1:
+                continue  # Skip noise cluster
+
+            # Shuffle quotes within the cluster
+            random.shuffle(cluster_quotes)
+
+            for quote in cluster_quotes:
+                quote_tokens = count_tokens(quote.text)
+                if current_context_length + quote_tokens > context_limit:
+                    logger.debug("Context limit reached during cluster-based selection.")
+                    break
+
+                if quote.id not in {q.id for q in selected_quotes}:
+                    selected_quotes.append(quote)
+                    current_context_length += quote_tokens
+                    logger.debug(
+                        f"Added quote {quote.id} from cluster {cluster_id}, "
+                        f"tokens: {quote_tokens}, current total tokens: {current_context_length}"
+                    )
+
+            if current_context_length >= context_limit:
+                break
+
+    # Fourth Pass: Fill remaining context in a democratic way, one quote from each conversation
+    remaining_tokens = context_limit - current_context_length
+    if remaining_tokens > avg_tokens_per_quote:
+        logger.debug("Filling remaining context democratically, one quote from each conversation.")
+        
+        # Create a list of conversations from which we haven't yet selected a second quote
+        remaining_conversations = [
+            conv_id for conv_id in quotes_by_conversation
+            if sum(1 for q in selected_quotes if q.conversation_id == conv_id) < 2
+        ]
+        
+        # Shuffle the remaining conversations to introduce randomness
+        random.shuffle(remaining_conversations)
+
+        for conv_id in remaining_conversations:
+            conv_quotes = quotes_by_conversation[conv_id]
+            
+            # Shuffle quotes within the conversation
+            random.shuffle(conv_quotes)
+
+            for quote in conv_quotes:
+                quote_tokens = count_tokens(quote.text)
+                if current_context_length + quote_tokens > context_limit:
+                    logger.debug(f"Context limit reached during democratic selection for conversation {conv_id}.")
+                    break
+
+                if quote.id not in {q.id for q in selected_quotes}:
+                    selected_quotes.append(quote)
+                    current_context_length += quote_tokens
+                    logger.debug(
+                        f"Added quote {quote.id} from conversation {conv_id}, "
+                        f"tokens: {quote_tokens}, current total tokens: {current_context_length}"
+                    )
+                    break  # Select only one quote per conversation in this pass
+
+            if current_context_length >= context_limit:
+                break
+
+    # Fifth Pass: Fill remaining context using quotes from clusters, without prioritizing smaller clusters
+    remaining_tokens = context_limit - current_context_length
+    if remaining_tokens > avg_tokens_per_quote:
+        logger.debug(f"Filling remaining context({remaining_tokens}) using quotes from clusters without prioritizing smaller clusters.")
+
+        # Flatten the list of quotes from all clusters (excluding noise cluster -1)
+        all_cluster_quotes = [
+            quote for cluster_id, cluster_quotes in quotes_by_cluster.items()
+            if cluster_id != -1
+            for quote in cluster_quotes
+        ]
+
+        # Shuffle all quotes
+        random.shuffle(all_cluster_quotes)
+
+        for quote in all_cluster_quotes:
+            quote_tokens = count_tokens(quote.text)
+            if current_context_length + quote_tokens > context_limit:
+                logger.debug("Context limit reached during cluster-based selection.")
+                break
+
+            if quote.id not in {q.id for q in selected_quotes}:
+                selected_quotes.append(quote)
+                current_context_length += quote_tokens
+                logger.debug(
+                    f"Added quote {quote.id}, "
+                    f"tokens: {quote_tokens}, current total tokens: {current_context_length}"
+                )
+
+    logger.debug(
+        f"Total selected quotes: {len(selected_quotes)}, total tokens: {current_context_length}"
+    )
+
+    return list(set(selected_quotes))
 
 
 def initialize_view(
@@ -1012,10 +1135,21 @@ def initialize_insights(db: Session, project_analysis_run_id: str) -> List[str]:
     return insight_ids
 
 
-# if __name__ == "__main__":
-    # from dembrane.database import get_db
+if __name__ == "__main__":
+    from dembrane.database import get_db
+    db = next(get_db())
 
-    # db = next(get_db())
+    q = get_random_sample_quotes(db, "4496aa5a-a22c-4ace-a883-2c6e1d8826a6")
+
+
+
+
+    print(len(q))
+
+
+    for quote in q:
+        print(quote.conversation_id,quote.text)
+
 
     # project_id = "f98d4ef2-1bc9-40f1-b360-3d784e2b22a0"
 

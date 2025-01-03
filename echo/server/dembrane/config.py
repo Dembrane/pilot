@@ -106,9 +106,9 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 assert ANTHROPIC_API_KEY, "ANTHROPIC_API_KEY environment variable is not set"
 logger.debug("ANTHROPIC_API_KEY: set")
 
-# GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 # assert GEMINI_API_KEY, "GEMINI_API_KEY environment variable is not set"
-# logger.debug(f"GEMINI_API_KEY: {'set' if GEMINI_API_KEY else 'not set'}")
+logger.debug(f"GEMINI_API_KEY: {'set' if GEMINI_API_KEY else 'not set'}")
 
 SERVE_API_DOCS = os.environ.get("SERVE_API_DOCS", "false").lower() in ["true", "1"]
 logger.debug(f"SERVE_API_DOCS: {SERVE_API_DOCS}")

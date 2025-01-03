@@ -528,3 +528,58 @@ export const getChatHistory = async (chatId: string): Promise<ChatHistory> => {
     _original: message,
   }));
 };
+
+export const getConversationReply = async (conversationId: string) => {
+  return api.post<unknown, unknown>(
+    `/conversations/${conversationId}/get-reply`,
+  );
+};
+
+export const getSpikeMessages = async (conversationId: string) => {
+  const spikeChats = await directus.request<SpikeChat[]>(
+    readItems("spike_chat", {
+      fields: ["id"],
+      filter: {
+        conversation_id: conversationId,
+      },
+      sort: "date_created",
+      limit: 1,
+    }),
+  );
+
+  if (!spikeChats || spikeChats.length === 0) {
+    return [];
+  }
+
+  const spikeChat = spikeChats[0];
+
+  const spikeChatMessages = await directus.request<SpikeChatMessage[]>(
+    readItems("spike_chat_message", {
+      fields: ["*"],
+      filter: {
+        spike_chat_id: spikeChat.id,
+      },
+      sort: "date_created",
+    }),
+  );
+
+  return spikeChatMessages;
+};
+
+export const getRelatedObjects = async (objectId: string) => {
+  const listOfObjectIds = await api.post<unknown, string[]>(
+    `/conversations/${objectId}/get-relevant-objects`,
+  );
+
+  const objects = await directus.request<SpikeObject[]>(
+    readItems("spike_object", {
+      filter: {
+        id: {
+          _in: listOfObjectIds.map((id) => Number(id)),
+        },
+      },
+    }),
+  );
+
+  return objects;
+};

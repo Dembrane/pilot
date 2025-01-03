@@ -15,7 +15,7 @@ import {
   ParticipantConversationTextRoute,
 } from "./routes/participant/ParticipantConversation";
 
-// import { SpikeParticipantConversationAudioRoute } from "./routes/participant/SpikeParticipantConversation";
+import { SpikeParticipantConversationAudioRoute } from "./routes/participant/SpikeParticipantConversation";
 
 import { ProjectConversationLayout } from "./components/layout/ProjectConversationLayout";
 import { ProjectConversationOverviewRoute } from "./routes/project/conversation/ProjectConversationOverview";
@@ -220,10 +220,10 @@ export const participantRouter = createBrowserRouter([
         path: "start",
         element: <ParticipantStartRoute />,
       },
-      // {
-      //   path: "spike/conversation/:conversationId",
-      //   element: <SpikeParticipantConversationAudioRoute />,
-      // },
+      {
+        path: "spike/conversation/:conversationId",
+        element: <SpikeParticipantConversationAudioRoute />,
+      },
       {
         path: "conversation/:conversationId",
         element: <ParticipantConversationAudioRoute />,

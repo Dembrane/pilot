@@ -52,7 +52,7 @@ export const ParticipantInitiateForm = ({ project }: { project: Project }) => {
     if (isSuccess) {
       if (initiateConversationMutation.data?.id) {
         navigate(
-          `/${project.id}/conversation/${initiateConversationMutation.data?.id}`,
+          `/${project.id}/spike/conversation/${initiateConversationMutation.data?.id}`,
         );
       } else {
         reset();

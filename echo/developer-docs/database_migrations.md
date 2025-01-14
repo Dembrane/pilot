@@ -1,6 +1,6 @@
 # Use directus sync extension. https://github.com/tractr/directus-sync
 
-Usage:
+Usage: npx directus-sync -u http://localhost:8055 -e admin@dembrane.com -p the-password diff -d -f
 
 Basic Commands
 

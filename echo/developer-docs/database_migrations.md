@@ -1,4 +1,18 @@
-# Database migrations
+# Use directus sync extension. https://github.com/tractr/directus-sync
+
+Usage:
+
+Basic Commands
+
+- `npx directus-sync pull`: Retrieve configurations from a Directus instance
+- `npx directus-sync diff`: Compare local configurations with a Directus instance
+- `npx directus-sync push`: Apply local configurations to a Directus instance
+
+---
+
+## ARCHIVED:
+
+Database migrations
 
 Use Directus schema migrations to manage the database schema.
 
@@ -12,9 +26,7 @@ Use Directus schema migrations to manage the database schema.
 npx directus schema apply ./snapshot.yaml
 ```
 
----
-
-Outdated (using alembic for migrations)
+(using alembic for migrations)
 
 1. Generate migrations (run this when you make changes to the models)
 

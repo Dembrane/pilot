@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useInitiateConversationMutation } from "@/lib/query";
 import { AxiosError } from "axios";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import { useI18nNavigate } from "@/hooks/useI18nNavigate";
 
 const FormSchema = z.object({
   name: z.string().optional(),

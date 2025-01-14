@@ -10,13 +10,21 @@ import {
   Text,
 } from "@mantine/core";
 import { Logo } from "../common/Logo";
-import { IconBug, IconLogout, IconSettings } from "@tabler/icons-react";
+import {
+  IconBug,
+  IconExternalLink,
+  IconLogout,
+  IconNotes,
+  IconSettings,
+} from "@tabler/icons-react";
 import { useCurrentUser, useLogoutMutation } from "@/lib/query";
-import { useAuthenticated } from "@/lib/useAuthenticated";
+import { useAuthenticated } from "@/hooks/useAuthenticated";
 import { I18nLink } from "@/components/common/i18nLink";
 import { LanguagePicker } from "../language/LanguagePicker";
 import { useState, useEffect } from "react";
 import * as Sentry from "@sentry/react";
+import { useLanguage } from "@/hooks/useLanguage";
+import { useParams } from "react-router-dom";
 
 const User = ({
   image,
@@ -73,9 +81,24 @@ function CreateFeedbackButton() {
 }
 
 export const Header = () => {
+  const { language } = useParams();
+
   const logoutMutation = useLogoutMutation();
   const { loading, isAuthenticated } = useAuthenticated();
-  const { data: user } = useCurrentUser(); // Assuming this hook provides user data
+  const { data: user } = useCurrentUser();
+
+  // maybe useEffect(params) / useState is better here?
+  // but when we change language, we reload the page (check LanguagePicker.tsx)
+  let docUrl: string;
+  switch (language) {
+    case "nl-NL":
+      docUrl = `https://docs.dembrane.com/nl-NL`;
+      break;
+    case "en-US":
+    default:
+      docUrl = `https://docs.dembrane.com/en-US`;
+      break;
+  }
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync({
@@ -110,7 +133,7 @@ export const Header = () => {
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown className="py-4">
-              <Stack gap="xs" className="px-2">
+              <Stack gap="md" className="px-2">
                 <User
                   image={typeof user.avatar === "string" ? user.avatar : ""}
                   name={t`Hi, ${user.first_name}`}
@@ -118,9 +141,17 @@ export const Header = () => {
                 />
 
                 <Menu.Item
-                  leftSection={<IconLogout color="gray" />}
-                  onClick={handleLogout}
+                  rightSection={<IconNotes />}
+                  component="a"
+                  href={docUrl}
+                  target="_blank"
                 >
+                  <Group>
+                    <Trans>Open Documentation</Trans>
+                  </Group>
+                </Menu.Item>
+
+                <Menu.Item rightSection={<IconLogout />} onClick={handleLogout}>
                   <Trans>Logout</Trans>
                 </Menu.Item>
 

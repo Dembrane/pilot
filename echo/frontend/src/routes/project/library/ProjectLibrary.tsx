@@ -3,41 +3,31 @@ import { Trans } from "@lingui/react/macro";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { CloseableAlert } from "@/components/common/ClosableAlert";
 import { Insight } from "@/components/insight/Insight";
-import { languageOptionsByIso639_1 } from "@/components/language/LanguagePicker";
 import { ProjectAnalysisRunStatus } from "@/components/project/ProjectAnalysisRunStatus";
 import { ViewExpandedCard } from "@/components/view/View";
 import { Icons } from "@/icons";
 import {
   useConversationsByProjectId,
   useGenerateProjectLibraryMutation,
-  useGenerateProjectViewMutation,
   useLatestProjectAnalysisRunByProjectId,
   useProjectInsights,
   useProjectViews,
 } from "@/lib/query";
-import { useLanguage } from "@/lib/useLanguage";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import {
-  ActionIcon,
   Alert,
   Button,
-  CloseButton,
   Collapse,
   Container,
   Divider,
   Group,
   LoadingOverlay,
-  Paper,
-  Pill,
-  SimpleGrid,
   Skeleton,
   Stack,
   Text,
-  TextInput,
-  Textarea,
   Title,
   Tooltip,
-  NativeSelect,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -47,149 +37,12 @@ import {
   IconRefresh,
   IconSortAscending,
 } from "@tabler/icons-react";
-import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
+import { CreateView } from "@/components/view/CreateViewForm";
+import { DummyViews } from "../../../components/view/DummyViews";
 
 type SortBy = "relevance" | "default";
-
-const DummyViews = () => {
-  return (
-    <Stack>
-      <Text c="gray">
-        <Trans>
-          These are your default view templates. Once you create your library
-          these will be your first two views.
-        </Trans>
-      </Text>
-      <Paper p="md">
-        <SimpleGrid cols={3}>
-          <Paper bg="white" p="md">
-            <Text className="font-xl pb-2 font-semibold">
-              <Trans>Topics</Trans>
-            </Text>
-            <Group>
-              <Pill>
-                <Trans>0 Aspects</Trans>
-              </Pill>
-            </Group>
-          </Paper>
-          <Paper bg="white" p="md">
-            <Text className="font-xl pb-2 font-semibold">
-              <Trans>Sentiment</Trans>
-            </Text>
-            <Group>
-              <Pill>
-                <Trans>0 Aspects</Trans>
-              </Pill>
-            </Group>
-          </Paper>
-        </SimpleGrid>
-      </Paper>
-    </Stack>
-  );
-};
-
-type CreateViewForm = {
-  query: string;
-  additionalContext: string;
-  language: string;
-};
-
-const CreateView = ({
-  projectId,
-  onClose,
-}: {
-  projectId: string;
-  onClose: () => void;
-}) => {
-  const createViewMutation = useGenerateProjectViewMutation();
-
-  const { iso639_1 } = useLanguage();
-
-  const { register, handleSubmit, reset } = useForm<CreateViewForm>({
-    defaultValues: {
-      language: iso639_1,
-    },
-  });
-
-  const onSubmit = (data: CreateViewForm) => {
-    createViewMutation.mutate({
-      projectId,
-      query: data.query,
-      additionalContext: data.additionalContext,
-      language: data.language || iso639_1,
-    });
-  };
-
-  useEffect(() => {
-    if (createViewMutation.isSuccess) {
-      reset();
-    }
-  }, [createViewMutation.isSuccess, reset]);
-
-  return (
-    <Paper className="max-w-[800px]" p="md">
-      <Stack>
-        <Group gap="md">
-          <ActionIcon variant="transparent" onClick={onClose}>
-            <CloseButton />
-          </ActionIcon>
-          <Icons.View />
-          <Text>
-            <Trans>Create new view</Trans>
-          </Text>
-        </Group>
-
-        <form>
-          <Stack gap="sm">
-            {createViewMutation.isError && (
-              <Alert variant="filled" color="red">
-                {createViewMutation.error?.message}
-              </Alert>
-            )}
-            {createViewMutation.isSuccess && (
-              <CloseableAlert variant="light" icon={<IconInfoCircle />}>
-                <Text>
-                  <Trans>
-                    Your view has been created. Please wait as we process and
-                    analyse the data.
-                  </Trans>
-                </Text>
-              </CloseableAlert>
-            )}
-            <TextInput
-              {...register("query")}
-              label={t`Enter your query`}
-              required
-              placeholder={t`Topics`}
-            />
-            <Textarea
-              rows={5}
-              {...register("additionalContext")}
-              label={t`Add additional context (Optional)`}
-              placeholder={t`Give me a list of 5-10 topics that are being discussed.`}
-            />
-            <NativeSelect
-              {...register("language")}
-              label={t`Analysis Language`}
-              data={languageOptionsByIso639_1}
-            />
-            <Group className="w-full" justify="flex-end">
-              <Button
-                onClick={handleSubmit(onSubmit)}
-                loading={createViewMutation.isPending}
-                disabled={createViewMutation.isPending}
-              >
-                <Trans>Create View</Trans>
-              </Button>
-            </Group>
-          </Stack>
-        </form>
-      </Stack>
-    </Paper>
-  );
-};
 
 export const ProjectLibraryRoute = () => {
   const { projectId } = useParams();

@@ -21,7 +21,12 @@ export const ProjectSettingsRoute = () => {
   const projectQuery = useProjectById({ projectId: projectId ?? "" });
 
   return (
-    <Stack gap="3rem" className="relative" px="2rem" py="4rem">
+    <Stack
+      gap="3rem"
+      className="relative"
+      px={{ base: "1rem", md: "2rem" }}
+      py={{ base: "2rem", md: "4rem" }}
+    >
       {projectQuery.isLoading && <LoadingOverlay visible />}
       {projectQuery.isError && (
         <Alert variant="outline" color="red">
@@ -68,7 +73,12 @@ export const ProjectPortalSettingsRoute = () => {
   const projectQuery = useProjectById({ projectId: projectId ?? "" });
 
   return (
-    <Stack className="relative">
+    <Stack
+      className="relative"
+      gap="3rem"
+      px={{ base: "1rem", md: "2rem" }}
+      py={{ base: "2rem", md: "4rem" }}
+    >
       {projectQuery.isLoading && <LoadingOverlay visible />}
       {projectQuery.isError && (
         <Alert variant="outline" color="red">

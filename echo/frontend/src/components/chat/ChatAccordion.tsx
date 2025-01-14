@@ -19,7 +19,7 @@ import { useParams } from "react-router-dom";
 import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react";
 import { formatRelative } from "date-fns";
 import { NavigationButton } from "../common/NavigationButton";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import { useI18nNavigate } from "@/hooks/useI18nNavigate";
 
 const ChatAccordionItemMenu = ({ chat }: { chat: Partial<ProjectChat> }) => {
   const deleteChatMutation = useDeleteChatMutation();

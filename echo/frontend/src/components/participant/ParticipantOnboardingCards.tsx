@@ -3,7 +3,7 @@ import { Trans } from "@lingui/react/macro";
 import React, { useEffect, useMemo, useState } from "react";
 
 import "./ParticipantOnboardingCards.css";
-import { useLanguage } from "@/lib/useLanguage";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@mantine/core";
 import { PARTICIPANT_BASE_URL } from "@/config";
 import { cn } from "@/lib/utils";

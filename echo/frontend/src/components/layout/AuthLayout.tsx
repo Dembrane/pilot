@@ -4,8 +4,8 @@ import { Header } from "./Header";
 import { Outlet, useNavigate, useSearchParams } from "react-router-dom";
 import { PropsWithChildren, useEffect } from "react";
 import { Toaster } from "../common/Toaster";
-import { useAuthenticated } from "@/lib/useAuthenticated";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import { useAuthenticated } from "@/hooks/useAuthenticated";
+import { useI18nNavigate } from "@/hooks/useI18nNavigate";
 
 export const AuthLayout = (props: PropsWithChildren) => {
   const [query] = useSearchParams();

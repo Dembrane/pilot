@@ -6,12 +6,14 @@ import { cn } from "@/lib/utils";
 
 interface DembraneLoadingSpinnerProps {
   isLoading: boolean;
+  showMessage?: boolean;
   className?: string;
 }
 
 const DembraneLoadingSpinner: React.FC<DembraneLoadingSpinnerProps> = ({
   isLoading,
   className,
+  showMessage = true,
 }) => {
   const [messageIndex, setMessageIndex] = useState(0);
   const [visible, setVisible] = useState(true);
@@ -62,7 +64,7 @@ const DembraneLoadingSpinner: React.FC<DembraneLoadingSpinnerProps> = ({
         alt="Spinning Dembrane Logo to indicate loading"
         className={cn("loading-image h-12 w-12 animate-spin", className)}
       />
-      <p className="mt-4 text-lg">{messages[messageIndex]}</p>
+      {showMessage && <p className="mt-4 text-lg">{messages[messageIndex]}</p>}
     </div>
   );
 };

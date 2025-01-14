@@ -3,7 +3,7 @@ import { useResourceById } from "@/lib/query";
 import { LoadingOverlay, Stack, Tabs, Title } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { Outlet, useLocation, useParams } from "react-router-dom";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import { useI18nNavigate } from "@/hooks/useI18nNavigate";
 
 export const ProjectResourceLayout = () => {
   const navigate = useI18nNavigate();

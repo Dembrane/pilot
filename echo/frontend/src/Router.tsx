@@ -36,7 +36,7 @@ import { CheckYourEmailRoute } from "./routes/auth/CheckYourEmail";
 import { VerifyEmailRoute } from "./routes/auth/VerifyEmail";
 import { PasswordResetRoute } from "./routes/auth/PasswordReset";
 import { RequestPasswordResetRoute } from "./routes/auth/RequestPasswordReset";
-import { ProjectChatRoute } from "./routes/project/chat/ProjectChat";
+import { ProjectChatRoute } from "./routes/project/chat/ProjectChatRoute";
 import { ProjectOverviewLayout } from "./components/layout/ProjectOverviewLayout";
 import { ParticipantLayout } from "./components/layout/ParticipantLayout";
 import { ParticipantStartRoute } from "./routes/participant/ParticipantStart";

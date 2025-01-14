@@ -1,6 +1,6 @@
 import { Trans } from "@lingui/react/macro";
 import { Button, Center, Stack, Title } from "@mantine/core";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import { useI18nNavigate } from "@/hooks/useI18nNavigate";
 
 export const NotFoundRoute = () => {
   const navigate = useI18nNavigate();

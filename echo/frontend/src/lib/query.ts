@@ -5,7 +5,7 @@ import {
   useQueryClient,
   useInfiniteQuery,
 } from "@tanstack/react-query";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import { useI18nNavigate } from "@/hooks/useI18nNavigate";
 import {
   addChatContext,
   api,

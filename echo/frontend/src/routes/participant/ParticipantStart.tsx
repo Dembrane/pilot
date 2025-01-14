@@ -16,6 +16,7 @@ import {
   EchoPortalTutorialCard,
   EchoPortalTutorialCardTranslations,
 } from "@/lib/typesDirectusContent";
+import { DynamicLucideIcon } from "@/components/common/DynamicLucideIcon";
 
 // FIXME: use a subset of lucide icons for onboarding cards instead
 import * as LucideIcons from "lucide-react";

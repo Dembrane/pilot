@@ -17,7 +17,6 @@ import {
 import { useDocumentTitle } from "@mantine/hooks";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
 
 export const RegisterRoute = () => {
   useDocumentTitle(t`Register | Dembrane`);

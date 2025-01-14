@@ -1,7 +1,7 @@
 import { Stack, Tabs } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { Outlet, useLocation, useParams } from "react-router-dom";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import { useI18nNavigate } from "@/hooks/useI18nNavigate";
 
 export const TabsWithRouter = ({
   basePath,

@@ -1,6 +1,6 @@
 import useSessionStorageState from "use-session-storage-state";
 
-export const useSidebarCollapsed = () => {
+export const useSidebar = () => {
   const [sidebarWidth, setSidebarWidth] = useSessionStorageState(
     "project-sidebar-width",
     {

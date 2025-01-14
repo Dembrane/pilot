@@ -1,24 +1,17 @@
 import { Trans } from "@lingui/react/macro";
 import { I18nLink } from "@/components/common/i18nLink";
-import { Logo } from "@/components/common/Logo";
 import { Markdown } from "@/components/common/Markdown";
-import { PARTICIPANT_BASE_URL } from "@/config";
-import { getParticipantProjectById } from "@/lib/api";
 import { useParticipantProjectById } from "@/lib/participantQuery";
-import { useProjectById } from "@/lib/query";
-import { useLanguage } from "@/lib/useLanguage";
 import {
   Box,
   Button,
   Divider,
-  Group,
   LoadingOverlay,
   Stack,
   Text,
   Title,
 } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 export const ParticipantPostConversation = () => {
   const { projectId, conversationId } = useParams();

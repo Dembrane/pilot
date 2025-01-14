@@ -57,8 +57,9 @@ export const NavigationButton = ({
           </I18nLink>
         ) : (
           <UnstyledButton
-            {...props}
+            // @ts-ignore
             disabled={disabled ?? false}
+            {...props}
             className={cn(
               "h-full w-full px-4 py-2 text-left",
               disabled ? "cursor-not-allowed" : "cursor-pointer",

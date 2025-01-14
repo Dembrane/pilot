@@ -2,14 +2,14 @@ import { ActionIcon, Box } from "@mantine/core";
 import { Outlet } from "react-router-dom";
 import { ProjectSidebar } from "../project/ProjectSidebar";
 import { Resizable } from "re-resizable";
-import { useSidebarCollapsed } from "@/lib/useSidebarCollapsed";
+import { useSidebar } from "@/hooks/useSidebar";
 import { Icons } from "@/icons";
 import { useMediaQuery } from "@mantine/hooks";
 
 // can be rendered inside BaseLayout
 export const ProjectLayout = () => {
   const { isCollapsed, sidebarWidth, setSidebarWidth, toggleSidebar } =
-    useSidebarCollapsed();
+    useSidebar();
 
   const isMobile = useMediaQuery("(max-width: 768px)");
 

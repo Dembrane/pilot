@@ -10,8 +10,7 @@ import {
   Stack,
   TextInput,
   Divider,
-  Text,
-  Box,
+  Badge,
 } from "@mantine/core";
 import { useDisclosure, useDebouncedValue } from "@mantine/hooks";
 import { useForm, Controller } from "react-hook-form";
@@ -21,7 +20,7 @@ import { IconArrowsExchange, IconSearch } from "@tabler/icons-react";
 import { FormLabel } from "@/components/form/FormLabel";
 import { useInfiniteProjects, useMoveConversationMutation } from "@/lib/query";
 import { Trans } from "@lingui/react/macro";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import { useI18nNavigate } from "@/hooks/useI18nNavigate";
 import { useParams } from "react-router-dom";
 
 export const MoveConversationButton = ({
@@ -124,7 +123,10 @@ export const MoveConversationButton = ({
         color="blue"
         rightSection={<IconArrowsExchange size={16} />}
       >
-        <Trans>Move to Another Project</Trans>
+        <Group>
+          <Badge>Experimental</Badge>
+          <Trans>Move to Another Project</Trans>
+        </Group>
       </Button>
 
       <Modal opened={opened} onClose={close} title={t`Move Conversation`}>

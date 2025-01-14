@@ -1,5 +1,5 @@
 import { Trans } from "@lingui/react/macro";
-import { useInsight, useProjectInsights } from "@/lib/query";
+import { useInsight } from "@/lib/query";
 import {
   ActionIcon,
   Container,
@@ -10,23 +10,20 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import {
-  IconArrowBack,
-  IconChevronLeft,
-  IconHome,
-  IconStackBack,
-} from "@tabler/icons-react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { IconArrowBack } from "@tabler/icons-react";
+import { useParams } from "react-router-dom";
 import { Quote } from "../../../components/quote/Quote";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
-import { Icons } from "@/icons";
 import { I18nLink } from "@/components/common/i18nLink";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import useCopyToRichText from "@/hooks/useCopyToRichText";
+import { useCopyInsight } from "@/hooks/useCopyInsight";
+import { CopyIconButton } from "@/components/common/CopyIconButton";
 
 export const ProjectLibraryInsight = () => {
   const { projectId, insightId } = useParams();
 
   const insightQuery = useInsight(insightId ?? "");
+  const { copied, copyInsight } = useCopyInsight();
 
   if (!insightQuery.isLoading && !insightQuery.data) {
     return (
@@ -77,7 +74,16 @@ export const ProjectLibraryInsight = () => {
               link: `/projects/${projectId}/library#insights`,
             },
             {
-              label: <Title order={2}>{insight.title}</Title>,
+              label: (
+                <Group>
+                  <Title order={2}>{insight.title}</Title>
+                  <CopyIconButton
+                    size={24}
+                    onCopy={() => copyInsight(insight.id)}
+                    copied={copied}
+                  />
+                </Group>
+              ),
             },
           ]}
         />

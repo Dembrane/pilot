@@ -1,13 +1,9 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { DIRECTUS_PUBLIC_URL } from "@/config";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import { useI18nNavigate } from "@/hooks/useI18nNavigate";
 import { directus } from "@/lib/directus";
-import {
-  useCreateProjectMutation,
-  // useCreateSessionMutation,
-  useLoginMutation,
-} from "@/lib/query";
+import { useCreateProjectMutation, useLoginMutation } from "@/lib/query";
 import { readItems, readProviders } from "@directus/sdk";
 import {
   Alert,
@@ -27,10 +23,10 @@ import { IconBrandGoogle } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { I18nLink } from "@/components/common/i18nLink";
-import { useLanguage } from "@/lib/useLanguage";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const LoginWithProvider = ({
   provider,

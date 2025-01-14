@@ -1,80 +1,21 @@
-import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import {
-  ActionIcon,
-  Anchor,
-  Box,
-  Button,
   Divider,
   Group,
   LoadingOverlay,
-  Pill,
   Stack,
   Text,
-  TextInput,
-  Textarea,
   Title,
-  Tooltip,
 } from "@mantine/core";
-import { useNavigate, useParams } from "react-router-dom";
-import { IconDownload, IconTrash } from "@tabler/icons-react";
-import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useParams } from "react-router-dom";
 import {
   useConversationById,
   useConversationChunks,
-  useDeleteConversationByIdMutation,
   useProjectById,
-  useUpdateConversationByIdMutation,
 } from "@/lib/query";
-import { apiCommonConfig } from "@/lib/api";
 import { InformationTooltip } from "@/components/common/InformationTooltip";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
 import { ConversationEdit } from "@/components/conversation/ConversationEdit";
-import { MoveConversationButton } from "@/components/conversation/MoveConversationButton";
-
-const ConversationDangerZone = ({
-  conversation,
-}: {
-  conversation: Conversation;
-}) => {
-  const deleteConversationByIdMutation = useDeleteConversationByIdMutation();
-  const navigate = useI18nNavigate();
-  const { projectId } = useParams();
-
-  const handleDelete = () => {
-    if (
-      window.confirm(
-        t`Are you sure you want to delete this conversation? This action cannot be undone.`,
-      )
-    ) {
-      deleteConversationByIdMutation.mutate(conversation.id);
-      navigate(`/projects/` + projectId + "/overview");
-    }
-  };
-
-  return (
-    <Stack gap="3rem">
-      <Stack gap="1.5rem">
-        <Title order={2}>
-          <Trans>Danger Zone</Trans>
-        </Title>
-
-        <Stack gap="1rem">
-          <MoveConversationButton conversation={conversation} />
-          <Button
-            onClick={handleDelete}
-            color="red"
-            variant="outline"
-            rightSection={<IconTrash size={16} />}
-          >
-            <Trans>Delete Conversation</Trans>
-          </Button>
-        </Stack>
-      </Stack>
-    </Stack>
-  );
-};
+import { ConversationDangerZone } from "@/components/conversation/ConversationDangerZone";
 
 export const ProjectConversationOverviewRoute = () => {
   const { conversationId, projectId } = useParams();

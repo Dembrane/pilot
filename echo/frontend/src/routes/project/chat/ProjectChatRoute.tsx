@@ -10,212 +10,34 @@ import {
   useProjectChatContext,
 } from "@/lib/query";
 import {
-  ActionIcon,
   Alert,
-  Anchor,
   Box,
   Button,
-  CopyButton,
   Divider,
   Group,
   LoadingOverlay,
-  Menu,
-  SimpleGrid,
   Stack,
   Text,
   Textarea,
   Title,
-  Tooltip,
 } from "@mantine/core";
-import { useDisclosure, useDocumentTitle } from "@mantine/hooks";
+import { useDocumentTitle } from "@mantine/hooks";
 import {
   IconAlertCircle,
-  IconCalculator,
-  IconCheck,
-  IconCopy,
-  IconNotes,
   IconRefresh,
   IconSend,
   IconSquare,
 } from "@tabler/icons-react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useChat } from "ai/react";
 import { API_BASE_URL } from "@/config";
-import { Markdown } from "@/components/common/Markdown";
-import React, { useEffect, useMemo, useRef } from "react";
-import { formatDate } from "date-fns";
-import { cn } from "@/lib/utils";
-import { I18nLink } from "@/components/common/i18nLink";
-import { CloseableAlert } from "@/components/common/ClosableAlert";
-import { useLanguage } from "@/lib/useLanguage";
-
-const ConversationLinks = ({
-  conversations,
-}: {
-  conversations: Conversation[];
-}) => {
-  const { projectId } = useParams();
-
-  return (
-    <Group gap="xs" align="center">
-      {conversations?.map((conversation) => (
-        <I18nLink
-          key={conversation.id}
-          to={`/projects/${projectId}/conversation/${conversation.id}/overview`}
-        >
-          <Anchor size="xs">{conversation.participant_name}</Anchor>
-        </I18nLink>
-      )) ?? null}
-    </Group>
-  );
-};
-
-const ChatHistoryMessage = ({
-  message,
-  section,
-}: {
-  message: ChatHistory[number];
-  section?: React.ReactNode;
-}) => {
-  if (message.role === "system") {
-    return null;
-  }
-
-  if (["user", "assistant"].includes(message.role)) {
-    return (
-      <ChatMessage
-        key={message.id}
-        role={message.role}
-        section={
-          <Group w="100%" gap="xs">
-            <Text className={cn("italic")} size="xs" c="gray.7">
-              {formatDate(
-                // @ts-expect-error message is not typed
-                new Date(message.createdAt ?? new Date()),
-                "MMM d, h:mm a",
-              )}
-            </Text>
-            <CopyButton value={message.content}>
-              {({ copied, copy }) => (
-                <Tooltip label={copied ? "Copied" : "Copy"} position="bottom">
-                  <ActionIcon
-                    size="xs"
-                    color={copied ? "teal" : "gray"}
-                    variant="subtle"
-                    onClick={copy}
-                  >
-                    {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-                  </ActionIcon>
-                </Tooltip>
-              )}
-            </CopyButton>
-          </Group>
-        }
-      >
-        <Markdown className="prose-sm" content={message.content} />
-      </ChatMessage>
-    );
-  }
-
-  if (message._original.added_conversations?.length > 0) {
-    return (
-      <ChatMessage key={message.id} role="dembrane" section={section}>
-        <Group gap="xs" align="baseline">
-          <Text size="xs">
-            <Trans>Context added:</Trans>
-          </Text>
-          <ConversationLinks
-            conversations={message._original.added_conversations.map(
-              (ac) => ac.conversation_id,
-            )}
-          />
-        </Group>
-      </ChatMessage>
-    );
-  }
-
-  return null;
-};
-
-// New component for the Templates menu
-const TemplatesMenu = ({
-  input,
-  setInput,
-}: {
-  input: string;
-  setInput: (input: string) => void;
-}) => {
-  const templates = [
-    {
-      title: t`Summarize`,
-      icon: IconNotes,
-      content: t`Please provide a concise summary of the following provided in the context.`,
-    },
-    {
-      title: t`Compare & Contrast`,
-      icon: IconCalculator,
-      content: t`Compare and contrast the following items provided in the context.`,
-    },
-    {
-      title: t`Meeting Notes`,
-      icon: IconNotes,
-      content: t`Generate structured meeting notes based on the following discussion points provided in the context.`,
-    },
-  ];
-
-  const handleTemplateClick = (content: string) => {
-    if (
-      input.trim() !== "" &&
-      !window.confirm(t`This will clear your current input. Are you sure?`)
-    ) {
-      return;
-    }
-    setInput(content);
-  };
-
-  const [open, setOpen] = useDisclosure(false);
-
-  return (
-    <Menu
-      position="top"
-      withArrow
-      opened={open}
-      onOpen={setOpen.open}
-      onClose={setOpen.close}
-    >
-      <Menu.Target>
-        <Button variant="subtle" color="gray">
-          <Trans>Templates</Trans>
-        </Button>
-      </Menu.Target>
-      <Menu.Dropdown>
-        <Stack p="md" gap="sm">
-          <CloseableAlert variant="info" title={t`Templates`}>
-            <Trans>
-              These are some helpful preset templates to get you started.
-            </Trans>
-          </CloseableAlert>
-          <SimpleGrid cols={2}>
-            {templates.map((template) => (
-              <Button
-                key={template.title}
-                variant="outline"
-                color="gray"
-                onClick={() => {
-                  handleTemplateClick(template.content);
-                  setOpen.close();
-                }}
-                leftSection={<template.icon />}
-              >
-                <Text size="sm">{template.title}</Text>
-              </Button>
-            ))}
-          </SimpleGrid>
-        </Stack>
-      </Menu.Dropdown>
-    </Menu>
-  );
-};
+import { useEffect, useMemo, useRef } from "react";
+import { useLanguage } from "@/hooks/useLanguage";
+import { CopyRichTextIconButton } from "@/components/common/CopyRichTextIconButton";
+import { ConversationLinks } from "@/components/conversation/ConversationLinks";
+import { ChatHistoryMessage } from "@/components/chat/ChatHistoryMessage";
+import { ChatTemplatesMenu } from "@/components/chat/ChatTemplatesMenu";
+import { formatMessage } from "@/components/chat/chatUtils";
 
 const useDembraneChat = ({ chatId }: { chatId: string }) => {
   const chatHistoryQuery = useChatHistory(chatId);
@@ -379,6 +201,15 @@ export const ProjectChatRoute = () => {
     reload,
   } = useDembraneChat({ chatId: chatId ?? "" });
 
+  const computedChatForCopy = useMemo(() => {
+    const messagesList = messages.map((message) =>
+      // @ts-expect-error chatHistoryQuery.data is not typed
+      formatMessage(message, "User", "Dembrane"),
+    );
+
+    return messagesList.join("\n\n\n\n");
+  }, [messages]);
+
   if (isInitializing || chatQuery.isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -391,7 +222,16 @@ export const ProjectChatRoute = () => {
     <Stack className="relative flex min-h-full flex-col px-2 pr-4">
       {/* Header */}
       <Stack className="top-0 w-full bg-white pt-6">
-        <Title order={1}>{chatQuery.data?.name ?? t`Chat`}</Title>
+        <Group justify="space-between">
+          <Title order={1}>{chatQuery.data?.name ?? t`Chat`}</Title>
+          <Group>
+            <CopyRichTextIconButton
+              markdown={
+                `# ${chatQuery.data?.name ?? t`Chat`}\n\n` + computedChatForCopy
+              }
+            />
+          </Group>
+        </Group>
         <Divider />
       </Stack>
       {/* Body */}
@@ -546,7 +386,7 @@ export const ProjectChatRoute = () => {
                   </Button>
                 </Box>
 
-                <TemplatesMenu input={input} setInput={setInput} />
+                <ChatTemplatesMenu input={input} setInput={setInput} />
               </Stack>
             </Group>
 

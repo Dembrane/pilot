@@ -1,8 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { BaseMessage } from "@/components/BaseMessage";
 import { InformationTooltip } from "@/components/common/InformationTooltip";
-import { getConversationChunkContentLink } from "@/lib/api";
 import {
   useConversationById,
   useConversationTranscriptString,
@@ -11,12 +9,10 @@ import {
 import {
   ActionIcon,
   Group,
-  Text,
   Stack,
   Tooltip,
   Skeleton,
   Title,
-  Divider,
   Modal,
   Button,
   TextInput,
@@ -36,53 +32,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useSessionStorageState from "use-session-storage-state";
 import { useInView } from "react-intersection-observer";
-
-const Chunk = ({
-  chunk,
-  showAudioPlayer = true,
-}: {
-  chunk: ConversationChunk;
-  showAudioPlayer?: boolean;
-}) => {
-  const src = getConversationChunkContentLink(
-    chunk.conversation_id as string,
-    chunk.id,
-  );
-  return (
-    <BaseMessage
-      title={t`Speaker`}
-      rightSection={
-        <span className="text-sm">
-          {new Date(chunk.timestamp).toLocaleTimeString()}
-        </span>
-      }
-      bottomSection={
-        showAudioPlayer ? (
-          <>
-            <Divider />
-            <audio
-              src={src}
-              className="h-6 w-full p-0"
-              crossOrigin="anonymous"
-              preload="metadata"
-              controls
-            />
-          </>
-        ) : (
-          <> </>
-        )
-      }
-    >
-      {/* {chunk.processing_error ? (
-        <p className="text-red-500">Transcription error</p>
-      ) : chunk.processing_status === "PROCESSING" ? (
-        <LoadingOverlay visible />
-      ) : ( */}
-      <Text>{chunk.transcript ?? ""}</Text>
-      {/* )} */}
-    </BaseMessage>
-  );
-};
+import { ConversationChunkAudioTranscript } from "@/components/conversation/ConversationChunkAudioTranscript";
 
 export const ProjectConversationTranscript = () => {
   const { conversationId } = useParams();
@@ -279,7 +229,10 @@ export const ProjectConversationTranscript = () => {
                     key={chunk.id}
                     ref={isLastChunk ? loadMoreRef : undefined}
                   >
-                    <Chunk chunk={chunk} showAudioPlayer={showAudioPlayer} />
+                    <ConversationChunkAudioTranscript
+                      chunk={chunk}
+                      showAudioPlayer={showAudioPlayer}
+                    />
                   </div>
                 );
               })

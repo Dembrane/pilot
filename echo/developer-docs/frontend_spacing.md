@@ -1,15 +1,19 @@
 # Page Layout Style Guide
 
 ## Stack & Spacing Hierarchy
+
 1. Major Sections (between components/sections):
+
    - gap="3rem"
    - Typically separated by Dividers
 
 2. Section Header to Content:
+
    - gap="1.5rem"
    - Used between a Title and its related content
 
 3. Form Inputs/Elements:
+
    - gap="2rem"
    - Used between individual form fields/inputs
 
@@ -18,17 +22,30 @@
    - Used for label-description pairs
    - Used for closely related content
 
-## Page Padding
-Standard page padding should be:
-- Left padding (pl): "2rem"
-- Right padding (pr): "2rem"
-- Top padding (pt): "4rem" (if not inside another container), if inside another container, use "2rem"
-- Bottom padding (pb): "4rem" (if not inside another container), if inside another container, use "2rem"
+## Page Padding (Responsive)
+
+Standard page padding should be responsive:
+
+### Desktop (md and above):
+
+- Left/Right padding (px): "2rem"
+- Top/Bottom padding (py): "4rem" (if not inside container)
+- Top/Bottom padding (py): "2rem" (if inside container)
+
+### Mobile (below md):
+
+- Left/Right padding (px): "1rem"
+- Top/Bottom padding (py): "2rem" (if not inside container)
+- Top/Bottom padding (py): "1.5rem" (if inside container)
 
 ## Implementation Example
+
 ```tsx
-<Stack gap="3rem" className="relative" px="2rem" pt="4rem" pb="4rem">
-  {/* if inside a container, use <Stack gap="3rem" className="relative" px="2rem" pt="2rem" pb="2rem"> */}
+<Stack
+  gap="3rem"
+  px={{ base: '1rem', md: '2rem' }}
+  py={{ base: '2rem', md: '4rem' }}
+>
   {/* Major Section */}
   <Stack gap="1.5rem">
     <Title order={2}>Section Title</Title>
@@ -36,7 +53,7 @@ Standard page padding should be:
       {/* Form inputs or content */}
       <TextInput {...props} />
       <Select {...props} />
-      
+
       {/* Tightly coupled content */}
       <Stack gap="xs">
         <Text>Label</Text>
@@ -50,22 +67,27 @@ Standard page padding should be:
   {/* Next Major Section */}
   <Stack gap="1.5rem">
     <Title order={2}>Next Section</Title>
-    <Stack gap="2rem">
-      {/* Content */}
-    </Stack>
+    <Stack gap="2rem">{/* Content */}</Stack>
   </Stack>
 </Stack>
 ```
 
 ## Common Patterns
+
 1. Page Structure:
+
    ```tsx
-   <Stack gap="3rem" px="2rem" pt="4rem" pb="4rem">
+   <Stack
+     gap="3rem"
+     px={{ base: '1rem', md: '2rem' }}
+     py={{ base: '2rem', md: '4rem' }}
+   >
      <PageContent />
    </Stack>
    ```
 
 2. Section Structure:
+
    ```tsx
    <Stack gap="1.5rem">
      <Title order={2}>Section Title</Title>
@@ -74,6 +96,7 @@ Standard page padding should be:
    ```
 
 3. Form Structure:
+
    ```tsx
    <Stack gap="2rem">
      <Input1 />
@@ -91,9 +114,13 @@ Standard page padding should be:
    ```
 
 ## Notes
-- Use Divider components between major sections
-- Maintain consistent Title hierarchy (example: order={2} for section titles, order={3} for subsections)
-- Keep padding consistent across all main page containers using `px="2rem" pt="4rem" pb="4rem"`
-- Use Mantine Stack components to maintain consistent spacing
-- Also, importantly check if there is any parent container with padding/margin that could affect the spacing and remove it if needed to maintain consistency
-- Add `pb="4rem"` to the outermost Stack component to maintain consistent bottom spacing at the end of page content
+
+- Use fixed gap values as they don't support responsive parameters
+- Use responsive padding with Mantine's breakpoint syntax: `{ base: "mobile-value", md: "desktop-value" }`
+- The `md` breakpoint is set to 768px as defined in the theme configuration
+- Maintain consistent Title hierarchy across breakpoints
+- Keep padding responsive using the breakpoint syntax
+- Use Mantine Stack components for consistent spacing
+- Check for any parent container padding/margin that could affect spacing
+- Add responsive bottom padding to the outermost Stack component
+- For very tight layouts on mobile, consider using the `xs` breakpoint (320px) for additional adjustments

@@ -1,6 +1,5 @@
-import { Anchor, Breadcrumbs as MantineBreadcrumbs, Text } from "@mantine/core";
+import { Breadcrumbs as MantineBreadcrumbs, Text } from "@mantine/core";
 import React from "react";
-import { Link } from "react-router-dom";
 import { I18nLink } from "@/components/common/i18nLink";
 
 interface BreadcrumbItem {

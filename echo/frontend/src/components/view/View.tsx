@@ -2,6 +2,8 @@ import { Trans } from "@lingui/react/macro";
 import { Icons } from "@/icons";
 import {
   ActionIcon,
+  Button,
+  CopyButton,
   Group,
   Paper,
   Pill,
@@ -9,11 +11,13 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import { IconArrowsDiagonal } from "@tabler/icons-react";
+import { IconArrowsDiagonal, IconCopy } from "@tabler/icons-react";
 import { AspectCard } from "../aspect/AspectCard";
 import { Link, useParams } from "react-router-dom";
 import { Markdown } from "../common/Markdown";
 import { I18nLink } from "../common/i18nLink";
+import { useCopyView } from "../../hooks/useCopyView";
+import { CopyIconButton } from "../common/CopyIconButton";
 
 export const ViewCard = ({ data }: { data: TView }) => {
   return (
@@ -36,6 +40,7 @@ export const ViewCard = ({ data }: { data: TView }) => {
 
 export const ViewExpandedCard = ({ data }: { data: View }) => {
   const { projectId } = useParams();
+  const { copyView, copied } = useCopyView();
 
   return (
     <Paper p="md">
@@ -48,11 +53,19 @@ export const ViewExpandedCard = ({ data }: { data: View }) => {
             </Text>
           </Group>
 
-          <I18nLink to={`/projects/${projectId}/library/views/${data.id}`}>
-            <ActionIcon component="a" variant="transparent" c="gray">
-              <IconArrowsDiagonal />
-            </ActionIcon>
-          </I18nLink>
+          <Group>
+            <CopyIconButton
+              size={24}
+              onCopy={() => copyView(data.id)}
+              copied={copied}
+            />
+
+            <I18nLink to={`/projects/${projectId}/library/views/${data.id}`}>
+              <ActionIcon component="a" variant="transparent" c="gray">
+                <IconArrowsDiagonal />
+              </ActionIcon>
+            </I18nLink>
+          </Group>
         </Group>
 
         {data.processing_status !== "DONE" && (

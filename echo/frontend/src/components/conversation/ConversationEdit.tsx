@@ -1,6 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import {
   Box,
   Group,
@@ -16,7 +16,7 @@ import {
   useUpdateConversationTagsMutation,
 } from "@/lib/query";
 import { CloseableAlert } from "../common/ClosableAlert";
-import { useAutoSave } from "@/lib/useAutoSave";
+import { useAutoSave } from "@/hooks/useAutoSave";
 import { FormLabel } from "../form/FormLabel";
 import { SaveStatus } from "../form/SaveStatus";
 

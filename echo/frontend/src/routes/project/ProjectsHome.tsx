@@ -38,8 +38,8 @@ import {
 } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
-import { useLanguage } from "@/lib/useLanguage";
+import { useI18nNavigate } from "@/hooks/useI18nNavigate";
+import { useLanguage } from "@/hooks/useLanguage";
 import { CloseableAlert } from "@/components/common/ClosableAlert";
 import { useInView } from "react-intersection-observer";
 
@@ -105,16 +105,6 @@ export const ProjectsHomeRoute = () => {
     });
     navigate(`/projects/${project.id}/overview`);
   };
-
-  if (status === "pending") {
-    return (
-      <Stack>
-        {[0, 1, 2].map((i) => (
-          <Skeleton key={i} height={80} radius="md" />
-        ))}
-      </Stack>
-    );
-  }
 
   const allProjects =
     projectsData?.pages.flatMap((page) => page.projects) ?? [];

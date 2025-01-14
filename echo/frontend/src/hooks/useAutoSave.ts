@@ -9,7 +9,6 @@ export const useAutoSave = <T>({
   onSave: (data: T) => Promise<void>;
   initialLastSavedAt?: string | Date | undefined;
 }) => {
-  console.log("[useAutoSave] Initializing hook");
   const [lastSavedAt, setLastSavedAt] = useState<Date>(
     initialLastSavedAt ? new Date(initialLastSavedAt) : new Date(),
   );
@@ -21,13 +20,11 @@ export const useAutoSave = <T>({
   const [isError, setIsError] = useState(false);
 
   const triggerSave = async (formData: T) => {
-    console.log("[useAutoSave] Triggering save:", formData);
     setIsError(false);
     setIsSaving(true);
 
     try {
       await onSave(formData);
-      console.log("[useAutoSave] Save successful");
       setLastSavedAt(new Date());
       setIsPendingSave(false);
     } catch (e) {
@@ -39,10 +36,6 @@ export const useAutoSave = <T>({
   };
 
   const dispatchAutoSave = (formData: T) => {
-    console.log(
-      "[useAutoSave] Dispatching autosave, debounce:",
-      AUTOSAVE_DEBOUNCE_TIME,
-    );
     clearTimeout(autoSaveTimer || undefined);
     setIsPendingSave(true);
 
@@ -54,7 +47,6 @@ export const useAutoSave = <T>({
   };
 
   const triggerManualSave = async (formData: T) => {
-    console.log("[useAutoSave] Manual save triggered");
     clearTimeout(autoSaveTimer || undefined);
     setIsPendingSave(true);
     await triggerSave(formData);

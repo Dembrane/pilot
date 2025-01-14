@@ -1,14 +1,14 @@
 # mypy: disable-error-code="no-untyped-def"
 from typing import List
 
-import sentry_sdk
 from celery import Celery, chain, chord, group, signals  # type: ignore
 from sentry_sdk import capture_exception
 from celery.utils.log import get_task_logger  # type: ignore
 
 import dembrane.tasks_config
 from dembrane.utils import generate_uuid, get_utc_timestamp
-from dembrane.config import REDIS_URL, RABBITMQ_URL, DISABLE_SENTRY
+from dembrane.config import REDIS_URL, RABBITMQ_URL
+from dembrane.sentry import init_sentry
 from dembrane.database import (
     ViewModel,
     QuoteModel,
@@ -43,12 +43,10 @@ celery_app = Celery("tasks", broker=RABBITMQ_URL, result_backend=REDIS_URL + "/0
 celery_app.config_from_object(dembrane.tasks_config)
 
 
-if not DISABLE_SENTRY:
-    @signals.celeryd_init.connect
-    def init_sentry(**_kwargs):
-        sentry_sdk.init(
-            dsn="https://0037fa05e4f0e472dffaecbb7d25be3a@o4507107162652672.ingest.de.sentry.io/4507107472703568",
-        )
+@signals.celeryd_init.connect
+def init_sentry_celery(**_kwargs):
+    logger.info("initializing sentry for celery")
+    init_sentry()
 
 
 class BaseTask(celery_app.Task):  # type: ignore
@@ -568,9 +566,59 @@ def task_finalize_project_library(_self, project_analysis_run_id: str):
 
         return
 
+intial_views_lang_dict = {
+    "recurring_themes": {
+        "en": {
+            "title": "Recurring Themes",
+            "description": "I will use these to make a detailed report. Give me around 15-18 aspects or more if really necessary. Ensure to merge similar aspects.",
+        },
+        "nl": {
+            "title": "Herhalende Thema's",
+            "description": "Ik gebruik deze om een uitgebreide rapport te maken. Geef me ongeveer 15-18 aspecten of meer als het nodig is. Zorg ervoor dat vergelijkbare aspecten worden samengevoegd.",
+        },
+        "fr": {
+            "title": "Thèmes récurrents",
+            "description": "Je vais les utiliser pour faire un rapport détaillé. Donnez-moi environ 15-18 aspects ou plus si nécessaire. Assurez-vous de fusionner les aspects similaires.",
+        },
+        "es": {
+            "title": "Temas recurrentes",
+            "description": "Los usaré para hacer un informe detallado. Dame alrededor de 15-18 aspectos o más si es necesario. Asegúrate de fusionar aspectos similares.",
+        },
+        "de": {
+            "title": "Wiederkehrende Themen",
+            "description": "Ich verwende diese, um ein detailliertes Bericht zu erstellen. Gib mir ungefähr 15-18 Themen oder mehr, falls notwendig. Stellen Sie sicher, dass ähnliche Themen zusammengefasst werden.",
+        },
+    },
+    "sentiment": {
+        "en": {
+            "title": "Sentiment",
+            "description": "Use only 3 aspects",
+        },
+        "nl": {
+            "title": "Sentiment",
+            "description": "Gebruik alleen 3 aspecten",
+        },
+        "fr": {
+            "title": "Sentiment",
+            "description": "Utilisez uniquement 3 aspects",
+        },
+        "es": {
+            "title": "Sentiment",
+            "description": "Utilice solo 3 aspectos",
+        },
+        "de": {
+            "title": "Sentiment",
+            "description": "Verwenden Sie nur 3 Themen",
+        },
+    },
+}
+
 
 @celery_app.task(bind=True, retry_backoff=True, ignore_result=False, base=BaseTask)
 def task_create_project_library(_self, project_id: str, language: str):
+    if language not in intial_views_lang_dict["sentiment"]:
+        raise ValueError(f"Language {language} not supported")
+
     with DatabaseSession() as db:
         try:
             project_analysis_run = ProjectAnalysisRunModel(
@@ -611,15 +659,18 @@ def task_create_project_library(_self, project_id: str, language: str):
 
             insight_task = task_generate_insights.si(project_analysis_run.id, language)
 
+            sentiment_view_query = intial_views_lang_dict["sentiment"][language]["title"]
+            sentiment_view_description = intial_views_lang_dict["sentiment"][language]["description"]
+
             sentiment_view = task_create_view.si(
-                project_analysis_run.id, "Sentiment", "Use only 3", language
+                project_analysis_run.id, sentiment_view_query, sentiment_view_description, language
             )
 
+            theme_view_query = intial_views_lang_dict["recurring_themes"][language]["title"]
+            theme_view_description = intial_views_lang_dict["recurring_themes"][language]["description"]
+
             theme_view = task_create_view.si(
-                project_analysis_run.id,
-                "Recurring Themes",
-                "I will use these to make a detailed report. Give me around 15-18 aspects or more if really necessary. Ensure to merge similar aspects.",
-                language,
+                project_analysis_run.id, theme_view_query, theme_view_description, language
             )
 
             callback = chord(

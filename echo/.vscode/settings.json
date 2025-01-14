@@ -8,10 +8,13 @@
     "editor.useTabStops": true,
     "editor.tabSize": 2
   },
+  "[python]": {
+    "editor.tabSize": 4
+  },
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.useTabStops": true,
-    "editor.tabSize": 2
+    "editor.tabSize": 4
   },
   "restoreTerminals.runOnStartup": false,
   "restoreTerminals.terminals": [

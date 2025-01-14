@@ -106,6 +106,10 @@ jobs:
         run: |
           docker build -t ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }} \
             --build-arg VITE_USE_PARTICIPANT_ROUTER=1 \
+            --build-arg VITE_API_BASE_URL=https://api.dev.dembrane.com/api \
+            --build-arg VITE_PARTICIPANT_BASE_URL=https://app.dev.dembrane.com \
+            --build-arg VITE_BUILD_VERSION=development \
+            --build-arg VITE_DIRECTUS_PUBLIC_URL=https://directus.dev.dembrane.com \
             -f ./echo/frontend/Dockerfile ./echo/frontend
           docker push ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }}
           docker tag ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }} ${{ env.ACR_REGISTRY_URL }}/participant-frontend:${{ steps.gentag.outputs.tag }}-latest
@@ -131,6 +135,10 @@ jobs:
         run: |
           docker build -t ${{ env.ACR_REGISTRY_URL }}/dashboard-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }}  \
             --build-arg VITE_USE_PARTICIPANT_ROUTER=0 \
+            --build-arg VITE_API_BASE_URL=https://api.dev.dembrane.com/api \
+            --build-arg VITE_ADMIN_BASE_URL=https://admin.dev.dembrane.com \
+            --build-arg VITE_BUILD_VERSION=development \
+            --build-arg VITE_DIRECTUS_PUBLIC_URL=https://directus.dev.dembrane.com \
             -f ./echo/frontend/Dockerfile ./echo/frontend
           docker push ${{ env.ACR_REGISTRY_URL }}/dashboard-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }}
           docker tag ${{ env.ACR_REGISTRY_URL }}/dashboard-frontend:${{ steps.gentag.outputs.tag }}-${{ github.sha }} ${{ env.ACR_REGISTRY_URL }}/dashboard-frontend:${{ steps.gentag.outputs.tag }}-latest

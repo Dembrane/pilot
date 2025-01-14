@@ -9,10 +9,10 @@
       "cwd": "${workspaceFolder}/server"
     },
     {
-      "name": "Python Debugger: image_utils",
+      "name": "Python Debugger: quote_utils",
       "type": "debugpy",
       "request": "launch",
-      "module": "dembrane.image_utils",
+      "module": "dembrane.quote_utils",
       "cwd": "${workspaceFolder}/server"
     },
     {

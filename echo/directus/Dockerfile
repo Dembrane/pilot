@@ -13,7 +13,7 @@ RUN mkdir -p ./directus
 RUN cd node_modules && find . -maxdepth 1 -type d -name "directus-extension-*" -exec mv {} ../directus \;
 
 
-FROM directus/directus:11.2.2
+FROM directus/directus:11.3.5
 
 # for extensions installed via npm
 

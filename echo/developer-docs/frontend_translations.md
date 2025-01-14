@@ -7,7 +7,7 @@ We use **Lingui** with **React JS** for handling translations. This document out
 To add translations within JSX, use the `<Trans>` component from Lingui. For example:
 
 ```jsx
-import { Trans } from "@lingui/macro";
+import { Trans } from '@lingui/macro';
 
 function MyComponent() {
   return (
@@ -28,7 +28,7 @@ function MyComponent() {
 For free text translations, use the `t` function. For example:
 
 ```jsx
-import { t } from "@lingui/macro";
+import { t } from '@lingui/macro';
 
 const message = t`Upload in progress`;
 const warning = t`Please do not close your browser`;
@@ -65,6 +65,7 @@ msgstr "Some text"
 ```
 
 For other language files (de-DE, es-ES, fr-FR, nl-NL), you should either:
+
 1. Leave the `msgstr` empty for proper translation later by language experts
 2. Or provide appropriate translations in the target language
 
@@ -84,7 +85,9 @@ After adding the translations, you can verify them by running your React applica
 
 ## Commands Summary
 
+- `cd frontend && pnpm i`
 - Extract messages: `pnpm messages:extract`
+- Update translations by going to the frontend/src/locales/ folder and editing the .po files
 - Compile messages: `pnpm messages:compile`
 
 By following these steps, you can ensure that your application is properly localized and supports multiple languages.

@@ -16,8 +16,10 @@ import { Markdown } from "@/components/common/Markdown";
 import { useAspectById, useProjectById } from "@/lib/query";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { useMemo } from "react";
+
 const dedupeQuotes = (quotes: QuoteAspect[]): QuoteAspect[] => {
   const seen = new Set();
+
   return quotes.filter((quote) => {
     if (seen.has((quote.quote_id as Quote).id)) {
       return false;
@@ -94,7 +96,18 @@ export const ProjectLibraryAspect = () => {
                   </Title>
                 )}
                 {quotes.map((quote: QuoteAspect) => (
-                  <Quote key={quote.id} data={quote.quote_id as Quote} />
+                  <Quote
+                    key={quote.id}
+                    data={quote.quote_id as Quote}
+                    className={
+                      aspect?.representative_quotes &&
+                      aspect?.representative_quotes.find(
+                        (q) => q.id === quote.id,
+                      )
+                        ? "border-gray-400"
+                        : ""
+                    }
+                  />
                 ))}
               </>
             ) : (

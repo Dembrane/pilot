@@ -214,7 +214,7 @@ export const getProjectViews = async (projectId: string) => {
       ],
       deep: {
         aspects: {
-          _sort: "name",
+          _sort: "-count(representative_quotes)",
         } as any,
       },
       filter: {

@@ -1,0 +1,47 @@
+{
+  "collection": "spike_object",
+  "field": "origin_spike_chat_id",
+  "type": "integer",
+  "meta": {
+    "collection": "spike_object",
+    "conditions": null,
+    "display": null,
+    "display_options": null,
+    "field": "origin_spike_chat_id",
+    "group": null,
+    "hidden": false,
+    "interface": "select-dropdown-m2o",
+    "note": null,
+    "options": {
+      "template": "{{id}}"
+    },
+    "readonly": false,
+    "required": false,
+    "sort": 4,
+    "special": [
+      "m2o"
+    ],
+    "translations": null,
+    "validation": null,
+    "validation_message": null,
+    "width": "full"
+  },
+  "schema": {
+    "name": "origin_spike_chat_id",
+    "table": "spike_object",
+    "data_type": "integer",
+    "default_value": null,
+    "max_length": null,
+    "numeric_precision": 32,
+    "numeric_scale": 0,
+    "is_nullable": true,
+    "is_unique": false,
+    "is_indexed": false,
+    "is_primary_key": false,
+    "is_generated": false,
+    "generation_expression": null,
+    "has_auto_increment": false,
+    "foreign_key_table": "spike_chat",
+    "foreign_key_column": "id"
+  }
+}

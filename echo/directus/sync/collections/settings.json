@@ -42,6 +42,11 @@
         "type": "module",
         "id": "schema-management-module",
         "enabled": true
+      },
+      {
+        "type": "module",
+        "id": "generate-types",
+        "enabled": true
       }
     ],
     "project_descriptor": null,

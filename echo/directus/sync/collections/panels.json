@@ -1,5 +1,25 @@
 [
   {
+    "dashboard": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4",
+    "name": "Number of Views generated",
+    "icon": null,
+    "color": null,
+    "show_header": true,
+    "note": null,
+    "type": "metric",
+    "position_x": 27,
+    "position_y": 44,
+    "width": 15,
+    "height": 9,
+    "options": {
+      "collection": "view",
+      "field": "id",
+      "function": "count",
+      "sortField": null
+    },
+    "_syncId": "0388d3ed-f8ff-42c2-8d90-d9163be976b9"
+  },
+  {
     "dashboard": "79cde56d-c5cd-4a4c-9903-d99d3b4b796b",
     "name": "Insight generation over the past week",
     "icon": null,
@@ -19,6 +39,73 @@
       "filter": null
     },
     "_syncId": "10d105b0-55c3-4011-9e20-773f6a21ba80"
+  },
+  {
+    "dashboard": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4",
+    "name": "Total Chats",
+    "icon": null,
+    "color": null,
+    "show_header": true,
+    "note": null,
+    "type": "metric",
+    "position_x": 27,
+    "position_y": 33,
+    "width": 15,
+    "height": 9,
+    "options": {
+      "collection": "project_chat",
+      "field": "id",
+      "function": "count"
+    },
+    "_syncId": "175e0de0-8e93-4262-9074-c04d1d3cf48c"
+  },
+  {
+    "dashboard": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4",
+    "name": "Total Chats",
+    "icon": null,
+    "color": null,
+    "show_header": true,
+    "note": null,
+    "type": "metric",
+    "position_x": 27,
+    "position_y": 76,
+    "width": 15,
+    "height": 9,
+    "options": {
+      "collection": "project_chat",
+      "field": "id",
+      "function": "count",
+      "filter": {
+        "_and": [
+          {
+            "date_created": {
+              "_between": [
+                "$NOW(-7)",
+                "$NOW"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "_syncId": "189bbd7c-211b-4135-866d-e574142eceb4"
+  },
+  {
+    "dashboard": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4",
+    "name": null,
+    "icon": null,
+    "color": null,
+    "show_header": false,
+    "note": null,
+    "type": "label",
+    "position_x": 2,
+    "position_y": 60,
+    "width": 23,
+    "height": 3,
+    "options": {
+      "text": "Measures Weekly\n"
+    },
+    "_syncId": "22114599-c842-4233-8a76-556091470602"
   },
   {
     "dashboard": "79cde56d-c5cd-4a4c-9903-d99d3b4b796b",
@@ -166,6 +253,29 @@
     "_syncId": "85da5c87-97f7-47ba-b9a5-15c982996889"
   },
   {
+    "dashboard": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4",
+    "name": "Insight generation over the past 3 months",
+    "icon": null,
+    "color": null,
+    "show_header": true,
+    "note": null,
+    "type": "time-series",
+    "position_x": 2,
+    "position_y": 33,
+    "width": 23,
+    "height": 9,
+    "options": {
+      "collection": "insight",
+      "function": "count",
+      "dateField": "created_at",
+      "range": "3 months",
+      "valueField": "id",
+      "filter": null,
+      "precision": "day"
+    },
+    "_syncId": "9097f221-7cf6-414e-a34d-b78eb7708d14"
+  },
+  {
     "dashboard": "79cde56d-c5cd-4a4c-9903-d99d3b4b796b",
     "name": "Number of insights",
     "icon": null,
@@ -188,6 +298,25 @@
       "sortField": "id"
     },
     "_syncId": "97cd07c5-27be-419c-8e4e-701deec03ac8"
+  },
+  {
+    "dashboard": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4",
+    "name": "Number of projects",
+    "icon": null,
+    "color": null,
+    "show_header": true,
+    "note": null,
+    "type": "metric",
+    "position_x": 27,
+    "position_y": 11,
+    "width": 15,
+    "height": 9,
+    "options": {
+      "collection": "project",
+      "field": "id",
+      "function": "count"
+    },
+    "_syncId": "a0698774-e38a-4a53-9c57-f9fe21b994f2"
   },
   {
     "dashboard": "79cde56d-c5cd-4a4c-9903-d99d3b4b796b",
@@ -221,6 +350,107 @@
     "_syncId": "a3492153-f6b8-45ee-9796-c21a3019bfcc"
   },
   {
+    "dashboard": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4",
+    "name": "Number of conversations past 3 months",
+    "icon": null,
+    "color": null,
+    "show_header": true,
+    "note": null,
+    "type": "time-series",
+    "position_x": 2,
+    "position_y": 11,
+    "width": 23,
+    "height": 20,
+    "options": {
+      "collection": "conversation",
+      "function": "count",
+      "dateField": "created_at",
+      "color": null,
+      "precision": "day",
+      "range": "3 months",
+      "valueField": "id"
+    },
+    "_syncId": "a5d9b795-6386-4859-b02f-661da87580f4"
+  },
+  {
+    "dashboard": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4",
+    "name": null,
+    "icon": null,
+    "color": null,
+    "show_header": false,
+    "note": null,
+    "type": "label",
+    "position_x": 2,
+    "position_y": 6,
+    "width": 23,
+    "height": 3,
+    "options": {
+      "text": "Measures Total"
+    },
+    "_syncId": "a6e04c40-2639-4a50-9a68-d28933332d4d"
+  },
+  {
+    "dashboard": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4",
+    "name": "Number of projects",
+    "icon": null,
+    "color": null,
+    "show_header": true,
+    "note": null,
+    "type": "metric",
+    "position_x": 27,
+    "position_y": 65,
+    "width": 15,
+    "height": 9,
+    "options": {
+      "collection": "project",
+      "field": "id",
+      "function": "count",
+      "filter": {
+        "_and": [
+          {
+            "_and": [
+              {
+                "created_at": {
+                  "_between": [
+                    "$NOW(-7)",
+                    "$NOW"
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "sortField": "id"
+    },
+    "_syncId": "ad2dd840-2df7-4754-9668-04f0e825d983"
+  },
+  {
+    "dashboard": "2a617714-a47e-4ae1-a4ea-8a3fb75c0491",
+    "name": "Live Chunks",
+    "icon": null,
+    "color": null,
+    "show_header": true,
+    "note": null,
+    "type": "time-series",
+    "position_x": 1,
+    "position_y": 8,
+    "width": 49,
+    "height": 18,
+    "options": {
+      "collection": "conversation_chunk",
+      "grouping": "conversation_id",
+      "aggregation": "count",
+      "xAxis": "timestamp",
+      "showLegend": true,
+      "function": "count",
+      "dateField": "timestamp",
+      "valueField": "id",
+      "filter": null
+    },
+    "_syncId": "b0672d62-873b-4c62-a0fd-34fb286450ca"
+  },
+  {
     "dashboard": "79cde56d-c5cd-4a4c-9903-d99d3b4b796b",
     "name": "Number of conversations past week",
     "icon": null,
@@ -240,6 +470,27 @@
       "valueField": "id"
     },
     "_syncId": "bb95bf10-c43b-401b-adb3-97ea6898f160"
+  },
+  {
+    "dashboard": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4",
+    "name": "Number of conversations past week",
+    "icon": null,
+    "color": null,
+    "show_header": true,
+    "note": null,
+    "type": "time-series",
+    "position_x": 2,
+    "position_y": 65,
+    "width": 23,
+    "height": 20,
+    "options": {
+      "collection": "conversation",
+      "function": "count",
+      "dateField": "created_at",
+      "color": null,
+      "valueField": "id"
+    },
+    "_syncId": "c1a26cd9-c122-44b4-ac16-90268d71b28d"
   },
   {
     "dashboard": "79cde56d-c5cd-4a4c-9903-d99d3b4b796b",
@@ -296,6 +547,81 @@
     "_syncId": "cee00ae2-95b9-49c6-b4fb-cc5666b401b2"
   },
   {
+    "dashboard": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4",
+    "name": "Total Conversations",
+    "icon": null,
+    "color": null,
+    "show_header": true,
+    "note": null,
+    "type": "metric",
+    "position_x": 27,
+    "position_y": 22,
+    "width": 15,
+    "height": 9,
+    "options": {
+      "collection": "conversation",
+      "field": "id",
+      "function": "count"
+    },
+    "_syncId": "dbaba698-f0db-4fd0-9f49-f2706bcfd473"
+  },
+  {
+    "dashboard": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4",
+    "name": "Number of Views generated",
+    "icon": null,
+    "color": null,
+    "show_header": true,
+    "note": null,
+    "type": "metric",
+    "position_x": 27,
+    "position_y": 87,
+    "width": 15,
+    "height": 9,
+    "options": {
+      "collection": "view",
+      "field": "id",
+      "function": "count",
+      "sortField": null,
+      "filter": {
+        "_and": [
+          {
+            "created_at": {
+              "_between": [
+                "$NOW(-7)",
+                "$NOW"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "_syncId": "e2ca21e8-b1cd-42ec-ab7a-6fdfda987859"
+  },
+  {
+    "dashboard": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4",
+    "name": "Number of insights",
+    "icon": null,
+    "color": null,
+    "show_header": true,
+    "note": null,
+    "type": "metric",
+    "position_x": 2,
+    "position_y": 44,
+    "width": 23,
+    "height": 9,
+    "options": {
+      "collection": "insight",
+      "field": "id",
+      "function": "count",
+      "filter": null,
+      "conditionalFormatting": null,
+      "suffix": "Insights",
+      "numberStyle": "unit",
+      "sortField": "id"
+    },
+    "_syncId": "e48373de-e86f-43a5-b27b-4b50dc26c523"
+  },
+  {
     "dashboard": "79cde56d-c5cd-4a4c-9903-d99d3b4b796b",
     "name": null,
     "icon": null,
@@ -311,6 +637,27 @@
       "text": "Measures Total"
     },
     "_syncId": "eaf1ce6b-879c-4fd6-8e37-5b8ed1bc1f6a"
+  },
+  {
+    "dashboard": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4",
+    "name": "Insight generation over the past week",
+    "icon": null,
+    "color": null,
+    "show_header": true,
+    "note": null,
+    "type": "time-series",
+    "position_x": 2,
+    "position_y": 87,
+    "width": 23,
+    "height": 9,
+    "options": {
+      "collection": "insight",
+      "function": "count",
+      "dateField": "created_at",
+      "valueField": "id",
+      "filter": null
+    },
+    "_syncId": "f269f741-bebd-4645-8d2b-c787f7790815"
   },
   {
     "dashboard": "79cde56d-c5cd-4a4c-9903-d99d3b4b796b",

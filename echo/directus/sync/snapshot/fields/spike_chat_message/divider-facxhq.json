@@ -1,0 +1,30 @@
+{
+  "collection": "spike_chat_message",
+  "field": "divider-facxhq",
+  "type": "alias",
+  "meta": {
+    "collection": "spike_chat_message",
+    "conditions": null,
+    "display": null,
+    "display_options": null,
+    "field": "divider-facxhq",
+    "group": null,
+    "hidden": false,
+    "interface": "presentation-divider",
+    "note": null,
+    "options": {
+      "title": "object"
+    },
+    "readonly": false,
+    "required": false,
+    "sort": 9,
+    "special": [
+      "alias",
+      "no-data"
+    ],
+    "translations": null,
+    "validation": null,
+    "validation_message": null,
+    "width": "full"
+  }
+}

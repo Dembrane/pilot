@@ -1,0 +1,30 @@
+{
+  "collection": "spike_chat_message",
+  "field": "divider-c-h3uy",
+  "type": "alias",
+  "meta": {
+    "collection": "spike_chat_message",
+    "conditions": null,
+    "display": null,
+    "display_options": null,
+    "field": "divider-c-h3uy",
+    "group": null,
+    "hidden": false,
+    "interface": "presentation-divider",
+    "note": null,
+    "options": {
+      "title": "user_audio"
+    },
+    "readonly": false,
+    "required": false,
+    "sort": 14,
+    "special": [
+      "alias",
+      "no-data"
+    ],
+    "translations": null,
+    "validation": null,
+    "validation_message": null,
+    "width": "full"
+  }
+}

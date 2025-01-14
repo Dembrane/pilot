@@ -7,6 +7,13 @@
     "_syncId": "_sync_default_admin_role"
   },
   {
+    "name": "Application User",
+    "icon": "supervised_user_circle",
+    "description": null,
+    "parent": null,
+    "_syncId": "2446660a-ab6c-4801-ad69-5711030cba83"
+  },
+  {
     "name": "Project User",
     "icon": "supervised_user_circle",
     "description": null,

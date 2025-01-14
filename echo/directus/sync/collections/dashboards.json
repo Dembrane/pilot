@@ -1,9 +1,23 @@
 [
   {
+    "name": "Give me the stats!",
+    "icon": "space_dashboard",
+    "note": null,
+    "color": null,
+    "_syncId": "2a617714-a47e-4ae1-a4ea-8a3fb75c0491"
+  },
+  {
     "name": "Impact Measurements",
     "icon": "space_dashboard",
     "note": null,
     "color": "#2ECDA7",
     "_syncId": "79cde56d-c5cd-4a4c-9903-d99d3b4b796b"
+  },
+  {
+    "name": "Impact Measurements",
+    "icon": "space_dashboard",
+    "note": null,
+    "color": "#2ECDA7",
+    "_syncId": "b7337f5f-a82f-42b4-a9da-a2c605a1d7c4"
   }
 ]

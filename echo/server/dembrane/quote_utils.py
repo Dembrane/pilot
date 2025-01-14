@@ -249,8 +249,9 @@ def count_tokens(text: str) -> int:
     return len(encoding.encode(text))
 
 
+# TODO: fix the sampling algo
 def get_random_sample_quotes(
-    db: Session, project_analysis_run_id: str, context_limit: int = 80000, batch_size: int = 1000
+    db: Session, project_analysis_run_id: str, context_limit: int = 100000, batch_size: int = 1000
 ) -> List[QuoteModel]:
     """
     Generate a random sample of quotes for a given project and project analysis run, avoiding frequency bias.
@@ -258,12 +259,27 @@ def get_random_sample_quotes(
     Args:
     - session: SQLAlchemy session for database access.
     - project_analysis_run_id: The ID of the project analysis run.
-    - context_limit: The token limit for the context (default is 120000).
+    - context_limit: The token limit for the context (default is 100000).
     - batch_size: The size of batches to fetch quotes in (default is 1000).
 
     Returns:
     - A list of randomly selected QuoteModel objects.
     """
+
+    # TODO: context_limit needs to be divided by 2 
+    # https://community.openai.com/t/whats-the-new-tokenization-algorithm-for-gpt-4o/746708
+    # OpenAIError('Error code: 400 - {\'error\': {\'message\': "This model\'s maximum context length is 128000 tokens. However, your messages resulted in 201901 tokens (including 92 in the response_format schemas.). Please reduce the length of the messages or schemas.", \'type\': \'invalid_request_error\', \'param\': \'messages\', \'code\': \'context_length_exceeded\'}}')
+    # I got this error when I was trying to get 100000 tokens
+    # when i counted the tokens, it was 100734, on openai end it was 201901
+    # so i decided to divide the context_limit by 2, let's try this for now
+
+    context_limit = context_limit // 2
+
+    logger.debug(f"Getting random sample quotes for project analysis run {project_analysis_run_id}")
+
+    # Initialize tracking variables at the start
+    selected_quotes = []
+    current_context_length = 0
 
     # Step 1: Select quotes ensuring at least one quote per conversation
     conversation_ids = db.scalars(
@@ -272,7 +288,6 @@ def get_random_sample_quotes(
         .distinct()
     ).all()
 
-    selected_quotes = []
     for conv_id in conversation_ids:
         conv_quote = db.scalars(
             select(QuoteModel)
@@ -281,7 +296,12 @@ def get_random_sample_quotes(
             .limit(1)
         ).first()
         if conv_quote:
-            selected_quotes.append(conv_quote)
+            additional_length = count_tokens(conv_quote.text)
+            if current_context_length + additional_length <= context_limit:
+                selected_quotes.append(conv_quote)
+                current_context_length += additional_length
+            if current_context_length >= context_limit:
+                break
 
     # Step 2: Fetch quotes in batches to avoid loading all quotes into memory
     offset = 0
@@ -298,12 +318,10 @@ def get_random_sample_quotes(
         all_quotes.extend(batch_quotes)
         offset += batch_size
 
-    # Step 3: Calculate the number of random vectors needed
-    avg_quote_length_tokens = 60  # Average length of a quote in tokens
+    # Step 3: Random vectors selection with context limit
+    avg_quote_length_tokens = 60
     num_random_vectors = context_limit // avg_quote_length_tokens
-    num_random_vectors = min(
-        num_random_vectors, len(all_quotes)
-    )  # Ensure we don't exceed the number of available quotes
+    num_random_vectors = min(num_random_vectors, len(all_quotes))
     random_vectors = np.random.randn(num_random_vectors, EMBEDDING_DIM)
 
     for vector in random_vectors:
@@ -314,25 +332,23 @@ def get_random_sample_quotes(
             .limit(1)
         ).first()
         if closest_quote and closest_quote not in selected_quotes:
-            selected_quotes.append(closest_quote)
+            additional_length = count_tokens(closest_quote.text)
+            if current_context_length + additional_length <= context_limit:
+                selected_quotes.append(closest_quote)
+                current_context_length += additional_length
+            if current_context_length >= context_limit:
+                break
 
-    # Step 4: Ensure the context limit is not exceeded
-
-    # Shuffle the list to ensure randomness
+    # Step 4: Add remaining random quotes while respecting context limit
     random.shuffle(all_quotes)
-
-    # Initialize variables
-    selected_quotes = []
-    current_context_length = 0
-
-    # Iterate over the shuffled quotes
     for quote in all_quotes:
-        additional_length = count_tokens(quote.text)
-        if current_context_length + additional_length <= context_limit:
-            selected_quotes.append(quote)
-            current_context_length += additional_length
-        if current_context_length >= context_limit:
-            break
+        if quote not in selected_quotes:
+            additional_length = count_tokens(quote.text)
+            if current_context_length + additional_length <= context_limit:
+                selected_quotes.append(quote)
+                current_context_length += additional_length
+            if current_context_length >= context_limit:
+                break
 
     return selected_quotes
 
@@ -1013,13 +1029,24 @@ def initialize_insights(db: Session, project_analysis_run_id: str) -> List[str]:
 
 
 # if __name__ == "__main__":
-    # from dembrane.database import get_db
+#     from dembrane.database import get_db
 
-    # db = next(get_db())
+#     db = next(get_db())
 
     # project_id = "f98d4ef2-1bc9-40f1-b360-3d784e2b22a0"
 
-    # analysis_id = "460ef51a-c698-4c0a-bd24-824785b2f982"
+    # analysis_id = "a27ad390-2f79-4db9-9f64-8e94abfc6fbc"
+
+    # quotes = get_random_sample_quotes(db, analysis_id)
+
+    # random_sample_quotes = "\n".join(['"' + quote.text + '"' for quote in quotes])
+
+    # print(count_tokens(random_sample_quotes))
+
+    # print(len(quotes))
+
+    # print("count - ",count_tokens(random_sample_quotes))
+ 
 
     # project_analysis_run = ProjectAnalysisRunModel(
     # id=generate_uuid(), project_id=project_id, processing_status="DONE"
@@ -1032,7 +1059,7 @@ def initialize_insights(db: Session, project_analysis_run_id: str) -> List[str]:
 
     # analysis_id = project_analysis_run.id
 
-    # generate_quotes(db, project_analysis_run.id, "a615ced7-fce1-4434-a88e-5041f30c2a15")
+    # generate_quotes(db, analysis_id, "a615ced7-fce1-4434-a88e-5041f30c2a15")
 
     # conversations = db.query(ConversationModel).filter(ConversationModel.project_id == project_id).all()
 

@@ -380,8 +380,9 @@ export const useViewById = (projectId: string, viewId: string) => {
         readItem("view", viewId, {
           fields: ["*", { aspects: ["*", "count(quotes)"] }],
           deep: {
+            // get the aspects that have at least one representative quote
             aspects: {
-              _sort: "name",
+              _sort: "-count(representative_quotes)",
             } as any,
           },
         }),

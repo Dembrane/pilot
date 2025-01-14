@@ -675,9 +675,9 @@ def task_create_project_library(_self, project_id: str, language: str):
 
             callback = chord(
                 group(
-                    insight_task,
                     sentiment_view,
                     theme_view,
+                    insight_task,
                 ),
                 task_finalize_project_library.si(project_analysis_run.id),
             )

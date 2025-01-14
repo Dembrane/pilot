@@ -221,6 +221,31 @@
     "_syncId": "a3492153-f6b8-45ee-9796-c21a3019bfcc"
   },
   {
+    "dashboard": "2a617714-a47e-4ae1-a4ea-8a3fb75c0491",
+    "name": "Live Chunks",
+    "icon": null,
+    "color": null,
+    "show_header": true,
+    "note": null,
+    "type": "time-series",
+    "position_x": 1,
+    "position_y": 8,
+    "width": 49,
+    "height": 18,
+    "options": {
+      "collection": "conversation_chunk",
+      "grouping": "conversation_id",
+      "aggregation": "count",
+      "xAxis": "timestamp",
+      "showLegend": true,
+      "function": "count",
+      "dateField": "timestamp",
+      "valueField": "id",
+      "filter": null
+    },
+    "_syncId": "b0672d62-873b-4c62-a0fd-34fb286450ca"
+  },
+  {
     "dashboard": "79cde56d-c5cd-4a4c-9903-d99d3b4b796b",
     "name": "Number of conversations past week",
     "icon": null,

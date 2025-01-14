@@ -328,6 +328,7 @@ export const ProjectLibraryRoute = () => {
               onClick={handleCreateLibrary}
               loading={requestProjectLibraryMutation.isPending}
               disabled={
+                // TODO: this should really be a server-side check
                 requestProjectLibraryMutation.isPending ||
                 conversationsQuery.data?.length === 0 ||
                 latestRun?.processing_status === "PROCESSING"

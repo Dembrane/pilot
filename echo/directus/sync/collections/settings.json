@@ -42,12 +42,17 @@
         "type": "module",
         "id": "schema-management-module",
         "enabled": true
+      },
+      {
+        "type": "module",
+        "id": "generate-types",
+        "enabled": true
       }
     ],
     "project_descriptor": null,
     "default_language": "en-US",
     "custom_aspect_ratios": null,
-    "default_appearance": "light",
+    "default_appearance": "auto",
     "default_theme_light": null,
     "theme_light_overrides": null,
     "default_theme_dark": null,
@@ -56,9 +61,9 @@
     "report_bug_url": null,
     "report_feature_url": null,
     "public_registration": true,
-    "public_registration_verify_email": false,
+    "public_registration_verify_email": true,
     "public_registration_role": "feebe863-90b1-41d1-a7ef-9694ddee3844",
     "public_registration_email_filter": null,
-    "_syncId": "390b2159-e750-4666-a3d8-fdccfd1d69ac"
+    "_syncId": "b6e2bbfa-b958-4062-b100-186514c3e197"
   }
 ]

@@ -1500,6 +1500,118 @@
     "_syncId": "217acc96-2f09-4562-ae43-b5ffd0dc36f4"
   },
   {
+    "collection": "project_report_metric",
+    "action": "read",
+    "permissions": {
+      "_and": [
+        {
+          "project_report_id": {
+            "project_id": {
+              "directus_user_id": {
+                "_eq": "$CURRENT_USER"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "*"
+    ],
+    "policy": "2446660a-ab6c-4801-ad69-5711030cba83",
+    "_syncId": "3e6071c0-74b5-4509-bdc5-55e9bc534a7f"
+  },
+  {
+    "collection": "project_report",
+    "action": "create",
+    "permissions": null,
+    "validation": {
+      "_and": [
+        {
+          "project_id": {
+            "directus_user_id": {
+              "_eq": "$CURRENT_USER"
+            }
+          }
+        }
+      ]
+    },
+    "presets": null,
+    "fields": [
+      "*"
+    ],
+    "policy": "2446660a-ab6c-4801-ad69-5711030cba83",
+    "_syncId": "502a417e-2cd2-494a-98f5-b19e9802847e"
+  },
+  {
+    "collection": "project_report",
+    "action": "delete",
+    "permissions": {
+      "_and": [
+        {
+          "project_id": {
+            "directus_user_id": {
+              "_eq": "$CURRENT_USER"
+            }
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "*"
+    ],
+    "policy": "2446660a-ab6c-4801-ad69-5711030cba83",
+    "_syncId": "f3152244-3c47-41a8-9698-9e0d872cb68f"
+  },
+  {
+    "collection": "project_report",
+    "action": "read",
+    "permissions": {
+      "_and": [
+        {
+          "project_id": {
+            "directus_user_id": {
+              "_eq": "$CURRENT_USER"
+            }
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "*"
+    ],
+    "policy": "2446660a-ab6c-4801-ad69-5711030cba83",
+    "_syncId": "7fe0b8e9-6191-40f6-bcf9-da290e520d75"
+  },
+  {
+    "collection": "project_report",
+    "action": "update",
+    "permissions": null,
+    "validation": {
+      "_and": [
+        {
+          "project_id": {
+            "directus_user_id": {
+              "_eq": "$CURRENT_USER"
+            }
+          }
+        }
+      ]
+    },
+    "presets": null,
+    "fields": [
+      "*"
+    ],
+    "policy": "2446660a-ab6c-4801-ad69-5711030cba83",
+    "_syncId": "06ee72fa-3edc-4cd4-b317-8cb0d92bac78"
+  },
+  {
     "collection": "project_tag",
     "action": "create",
     "permissions": {},

@@ -72,7 +72,7 @@ export const ConversationEdit = ({
 
         reset(data, { keepDirty: false, keepValues: true });
       },
-      initialLastSavedAt: conversation.updated_at,
+      initialLastSavedAt: conversation.updated_at ?? new Date(),
     });
 
   useEffect(() => {
@@ -115,7 +115,7 @@ export const ConversationEdit = ({
               <Trans>Created on</Trans>
             </Text>
             <Text size="sm">
-              {new Date(conversation.created_at).toLocaleString()}
+              {new Date(conversation.created_at ?? new Date()).toLocaleString()}
             </Text>
           </Box>
 

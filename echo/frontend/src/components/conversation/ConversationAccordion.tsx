@@ -339,7 +339,10 @@ const ConversationAccordionItem = ({
         </div>
         <div>
           <Text size="xs" c="gray.6" className="pl-[4px]">
-            {formatRelative(new Date(conversation.created_at), new Date())}
+            {formatRelative(
+              new Date(conversation.created_at ?? new Date()),
+              new Date(),
+            )}
           </Text>
         </div>
         <Group gap="4" pr="sm" wrap="wrap">

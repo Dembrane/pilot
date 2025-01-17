@@ -23,7 +23,7 @@ import { AnimatePresence } from "motion/react";
 import { CreateReportForm } from "@/components/report/CreateReportForm";
 import { Trans } from "@lingui/react/macro";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
-import { IconSettings, IconShare2 } from "@tabler/icons-react";
+import { IconPrinter, IconSettings, IconShare2 } from "@tabler/icons-react";
 import { Icons } from "@/icons";
 import { t } from "@lingui/core/macro";
 import { ReportRenderer } from "@/components/report/ReportRenderer";
@@ -189,6 +189,22 @@ export const ProjectReportRoute = () => {
                   color="gray.9"
                   size={20}
                 />
+
+                <Tooltip label={t`Print this report`}>
+                  <ActionIcon
+                    onClick={() => {
+                      window.open(
+                        getSharingLink(data) + "?print=true",
+                        "_blank",
+                      );
+                    }}
+                    variant="transparent"
+                    color="gray.9"
+                    size={24}
+                  >
+                    <IconPrinter />
+                  </ActionIcon>
+                </Tooltip>
 
                 <Divider orientation="vertical" />
               </Group>

@@ -54,7 +54,7 @@ export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
     lastSavedAt,
   } = useAutoSave({
     onSave,
-    initialLastSavedAt: project.updated_at,
+    initialLastSavedAt: project.updated_at ?? new Date(),
   });
 
   useEffect(() => {

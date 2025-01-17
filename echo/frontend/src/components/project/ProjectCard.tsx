@@ -34,8 +34,11 @@ export const ProjectCard = ({
           </Group>
           <Text size="sm" c="dimmed">
             <Trans>
-              {project.conversations_count ?? 0} Conversations • Edited{" "}
-              {formatRelative(new Date(project.updated_at), new Date())}
+              {project.conversations?.length ?? 0} Conversations • Edited{" "}
+              {formatRelative(
+                new Date(project.updated_at ?? new Date()),
+                new Date(),
+              )}
             </Trans>
           </Text>
         </Stack>

@@ -1,18 +1,8 @@
 import { Trans } from "@lingui/react/macro";
 import { cn } from "@/lib/utils";
-import {
-  Box,
-  Button,
-  Divider,
-  Group,
-  LoadingOverlay,
-  Paper,
-  Pill,
-  Stack,
-  Text,
-} from "@mantine/core";
+import { Box, Button, LoadingOverlay, Paper, Stack, Text } from "@mantine/core";
 import { IconArrowsDiagonal } from "@tabler/icons-react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { I18nLink } from "@/components/common/i18nLink";
 import { useProjectById } from "@/lib/query";
 

@@ -18,12 +18,12 @@ import {
   Title,
   Tooltip,
 } from "@mantine/core";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { IconExternalLink, IconTrash } from "@tabler/icons-react";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { apiCommonConfig } from "@/lib/api";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import { useI18nNavigate } from "@/hooks/useI18nNavigate";
 import { UnsavedChanges } from "@/components/form/UnsavedChanges";
 
 const ResourceDangerZone = ({ resource }: { resource: TResource }) => {

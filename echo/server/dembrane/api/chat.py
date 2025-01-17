@@ -13,11 +13,11 @@ from dembrane.database import (
     ProjectChatMessageModel,
     DependencyInjectDatabase,
 )
+from dembrane.anthropic import stream_anthropic_chat_response
 from dembrane.chat_utils import (
     MAX_CHAT_CONTEXT_LENGTH,
-    create_system_messages,
     get_project_chat_history,
-    stream_anthropic_chat_response,
+    create_system_messages_for_chat,
 )
 from dembrane.quote_utils import count_tokens
 from dembrane.api.conversation import get_conversation_token_count
@@ -301,7 +301,7 @@ async def post_chat(
     chat_context = await get_chat_context(chat_id, db)
     locked_conversation_id_list = chat_context.locked_conversation_id_list
 
-    system_messages = await create_system_messages(locked_conversation_id_list, db, language)
+    system_messages = await create_system_messages_for_chat(locked_conversation_id_list, db, language)
 
     def stream_response() -> Generator[str, None, None]:
         with DatabaseSession() as db:

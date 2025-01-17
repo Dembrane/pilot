@@ -1,13 +1,11 @@
 import { Trans } from "@lingui/react/macro";
-import { Icons } from "@/icons";
 import {
-  Box,
   Container,
   Divider,
+  Group,
   LoadingOverlay,
   Skeleton,
   Stack,
-  Text,
   Title,
 } from "@mantine/core";
 import { useParams } from "react-router-dom";
@@ -16,6 +14,8 @@ import { Markdown } from "@/components/common/Markdown";
 import { useAspectById, useProjectById } from "@/lib/query";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { useMemo } from "react";
+import { useCopyAspect } from "@/hooks/useCopyAspect";
+import { CopyIconButton } from "@/components/common/CopyIconButton";
 
 const dedupeQuotes = (quotes: QuoteAspect[]): QuoteAspect[] => {
   const seen = new Set();
@@ -36,6 +36,8 @@ export const ProjectLibraryAspect = () => {
     projectId ?? "",
     aspectId ?? "",
   );
+
+  const { copyAspect, copied } = useCopyAspect();
 
   const project = useProjectById({
     projectId: projectId ?? "",
@@ -83,7 +85,14 @@ export const ProjectLibraryAspect = () => {
         )}
         <Container size="sm">
           <Stack>
-            <Title order={1}>{aspect?.name}</Title>
+            <Group>
+              <Title order={1}>{aspect?.name}</Title>
+              <CopyIconButton
+                size={24}
+                onCopy={() => copyAspect(aspectId ?? "")}
+                copied={copied}
+              />
+            </Group>
             <Markdown
               content={aspect?.long_summary ?? ""}
               className="!max-w-full"

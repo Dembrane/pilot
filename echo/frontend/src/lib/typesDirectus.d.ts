@@ -1,6 +1,20 @@
+type Account = {
+  date_created?: string | null;
+  date_updated?: string | null;
+  id: string;
+  status: string;
+  users: any[] | AccountDirectusUsers[];
+};
+
+type AccountDirectusUsers = {
+  account_id?: string | Account | null;
+  directus_users_id?: string | DirectusUsers | null;
+  id: number;
+};
+
 type Aspect = {
   centroid_embedding?: string | null;
-  created_at: string;
+  created_at?: string | null;
   description?: string | null;
   id: string;
   image_url?: string | null;
@@ -9,15 +23,14 @@ type Aspect = {
   quotes: any[] | QuoteAspect[];
   representative_quotes: any[] | QuoteAspect1[];
   short_summary?: string | null;
-  updated_at: string;
+  updated_at?: string | null;
   view_id?: string | View | null;
-  quotes_count?: number | null;
 };
 
 type Conversation = {
   chunks: any[] | ConversationChunk[];
   context?: string | null;
-  created_at: string;
+  created_at?: string | null;
   description?: string | null;
   id: string;
   participant_email?: string | null;
@@ -33,19 +46,19 @@ type Conversation = {
   summary?: string | null;
   tags: any[] | ConversationProjectTag[];
   title?: string | null;
-  updated_at: string;
+  updated_at?: string | null;
 };
 
 type ConversationChunk = {
   conversation_id: string | Conversation;
-  created_at: string;
+  created_at?: string | null;
   id: string;
   path?: string | null;
   quotes: any[] | QuoteConversationChunk[];
   task_id?: string | null;
   timestamp: string;
   transcript?: string | null;
-  updated_at: string;
+  updated_at?: string | null;
 };
 
 type ConversationProjectTag = {
@@ -54,10 +67,17 @@ type ConversationProjectTag = {
   project_tag_id?: string | ProjectTag | null;
 };
 
+type DirectusAccess = {
+  id: string;
+  policy: string | DirectusPolicies;
+  role?: string | DirectusRoles | null;
+  sort?: number | null;
+  user?: string | DirectusUsers | null;
+};
+
 type DirectusActivity = {
   action: string;
   collection: string;
-  comment?: string | null;
   id: number;
   ip?: string | null;
   item: string;
@@ -89,6 +109,17 @@ type DirectusCollections = {
   translations?: unknown | null;
   unarchive_value?: string | null;
   versioning: boolean;
+};
+
+type DirectusComments = {
+  collection: string | DirectusCollections;
+  comment: string;
+  date_created?: string | null;
+  date_updated?: string | null;
+  id: string;
+  item: string;
+  user_created?: string | DirectusUsers | null;
+  user_updated?: string | DirectusUsers | null;
 };
 
 type DirectusDashboards = {
@@ -134,6 +165,7 @@ type DirectusFields = {
 
 type DirectusFiles = {
   charset?: string | null;
+  created_on: string;
   description?: string | null;
   duration?: number | null;
   embed?: string | null;
@@ -156,7 +188,7 @@ type DirectusFiles = {
   tus_id?: string | null;
   type?: string | null;
   uploaded_by?: string | DirectusUsers | null;
-  uploaded_on: string;
+  uploaded_on?: string | null;
   width?: number | null;
 };
 
@@ -239,9 +271,23 @@ type DirectusPermissions = {
   fields?: unknown | null;
   id: number;
   permissions?: unknown | null;
+  policy: string | DirectusPolicies;
   presets?: unknown | null;
-  role?: string | DirectusRoles | null;
   validation?: unknown | null;
+};
+
+type DirectusPolicies = {
+  admin_access: boolean;
+  app_access: boolean;
+  description?: string | null;
+  enforce_tfa: boolean;
+  icon: string;
+  id: string;
+  ip_access?: unknown | null;
+  name: string;
+  permissions: any[] | DirectusPermissions[];
+  roles: any[] | DirectusAccess[];
+  users: any[] | DirectusAccess[];
 };
 
 type DirectusPresets = {
@@ -285,15 +331,15 @@ type DirectusRevisions = {
 };
 
 type DirectusRoles = {
-  admin_access: boolean;
-  app_access: boolean;
+  children: any[] | DirectusRoles[];
   description?: string | null;
-  enforce_tfa: boolean;
   icon: string;
   id: string;
-  ip_access?: unknown | null;
   name: string;
+  parent?: string | DirectusRoles | null;
+  policies: any[] | DirectusAccess[];
   users: any[] | DirectusUsers[];
+  users_group: string;
 };
 
 type DirectusSessions = {
@@ -359,6 +405,14 @@ type DirectusShares = {
   user_created?: string | DirectusUsers | null;
 };
 
+type DirectusSyncIdMap = {
+  created_at?: string | null;
+  id: number;
+  local_id: string;
+  sync_id: string;
+  table: string;
+};
+
 type DirectusTranslations = {
   id: string;
   key: string;
@@ -367,6 +421,7 @@ type DirectusTranslations = {
 };
 
 type DirectusUsers = {
+  accounts: any[] | AccountDirectusUsers[];
   appearance?: string | null;
   auth_data?: unknown | null;
   avatar?: string | DirectusFiles | null;
@@ -382,6 +437,7 @@ type DirectusUsers = {
   last_page?: string | null;
   location?: string | null;
   password?: string | null;
+  policies: any[] | DirectusAccess[];
   projects: any[] | Project[];
   provider: string;
   role?: string | DirectusRoles | null;
@@ -400,6 +456,7 @@ type DirectusVersions = {
   collection: string | DirectusCollections;
   date_created?: string | null;
   date_updated?: string | null;
+  delta?: unknown | null;
   hash?: string | null;
   id: string;
   item: string;
@@ -425,39 +482,39 @@ type DirectusWebhooks = {
 
 type Document = {
   context?: string | null;
-  created_at: string;
+  created_at?: string | null;
   description?: string | null;
   id: string;
   is_processed: boolean;
   original_filename?: string | null;
   path?: string | null;
   processing_error?: string | null;
-  project_id: string;
+  project_id: string | Project;
   title?: string | null;
   type?: string | null;
-  updated_at: string;
+  updated_at?: string | null;
 };
 
 type Insight = {
-  created_at: string;
+  created_at?: string | null;
   id: string;
   project_analysis_run_id?: string | ProjectAnalysisRun | null;
   quotes: any[] | Quote[];
   summary?: string | null;
   title?: string | null;
-  updated_at: string;
+  updated_at?: string | null;
 };
 
 type Project = {
   context?: string | null;
   conversations: any[] | Conversation[];
-  created_at: string;
-  default_conversation_ask_for_participant_name: boolean;
-  default_conversation_title?: string | null;
+  created_at?: string | null;
+  default_conversation_ask_for_participant_name?: boolean | null;
   default_conversation_description?: string | null;
   default_conversation_finish_text?: string | null;
-  default_conversation_tutorial_slug?: string | null;
+  default_conversation_title?: string | null;
   default_conversation_transcript_prompt?: string | null;
+  default_conversation_tutorial_slug?: string | null;
   directus_user_id?: string | DirectusUsers | null;
   id: string;
   image_generation_model?: string | null;
@@ -467,13 +524,13 @@ type Project = {
   pin?: string | null;
   project_analysis_runs: any[] | ProjectAnalysisRun[];
   project_chats: any[] | ProjectChat[];
+  project_reports: any[] | ProjectReport[];
   tags: any[] | ProjectTag[];
-  updated_at: string;
-  conversations_count?: number | null;
+  updated_at?: string | null;
 };
 
 type ProjectAnalysisRun = {
-  created_at: string;
+  created_at?: string | null;
   id: string;
   insights: any[] | Insight[];
   processing_completed_at?: string | null;
@@ -483,7 +540,7 @@ type ProjectAnalysisRun = {
   processing_status?: string | null;
   project_id?: string | Project | null;
   quotes: any[] | Quote[];
-  updated_at: string;
+  updated_at?: string | null;
   views: any[] | View[];
 };
 
@@ -506,14 +563,15 @@ type ProjectChatConversation = {
 };
 
 type ProjectChatMessage = {
+  added_conversations: any[] | ProjectChatMessageConversation1[];
   date_created?: string | null;
   date_updated?: string | null;
   id: string;
   message_from?: string | null;
   project_chat_id?: string | ProjectChat | null;
   text?: string | null;
+  tokens_count?: number | null;
   used_conversations: any[] | ProjectChatMessageConversation[];
-  added_conversations: any[] | ProjectChatMessageConversation1[];
 };
 
 type ProjectChatMessageConversation = {
@@ -528,21 +586,44 @@ type ProjectChatMessageConversation1 = {
   project_chat_message_id?: string | ProjectChatMessage | null;
 };
 
+type ProjectReport = {
+  content?: string | null;
+  date_created?: string | null;
+  date_updated?: string | null;
+  error_code?: string | null;
+  id: number;
+  language?: string | null;
+  project_id?: string | Project | null;
+  status: "error" | "published" | "archived";
+  show_portal_link?: boolean | null;
+  user_created?: string | DirectusUsers | null;
+  user_updated?: string | DirectusUsers | null;
+};
+
+type ProjectReportMetric = {
+  date_created?: string | null;
+  date_updated?: string | null;
+  id: number;
+  ip?: string | null;
+  project_report_id?: number | ProjectReport | null;
+  type?: string | null;
+};
+
 type ProjectTag = {
   conversations: any[] | ConversationProjectTag[];
-  created_at: string;
+  created_at?: string | null;
   id: string;
   project_id: string | Project;
-  text?: string | null;
   sort?: number | null;
-  updated_at: string;
+  text?: string | null;
+  updated_at?: string | null;
 };
 
 type Quote = {
   aspects: any[] | QuoteAspect[];
   conversation_chunks: any[] | QuoteConversationChunk[];
   conversation_id: string | Conversation;
-  created_at: string;
+  created_at?: string | null;
   embedding: string;
   id: string;
   insight_id?: string | Insight | null;
@@ -551,7 +632,7 @@ type Quote = {
   representative_aspects: any[] | QuoteAspect1[];
   text: string;
   timestamp?: string | null;
-  updated_at: string;
+  updated_at?: string | null;
 };
 
 type QuoteAspect = {
@@ -574,7 +655,7 @@ type QuoteConversationChunk = {
 
 type View = {
   aspects: any[] | Aspect[];
-  created_at: string;
+  created_at?: string | null;
   id: string;
   name?: string | null;
   processing_completed_at?: string | null;
@@ -584,16 +665,20 @@ type View = {
   processing_status?: string | null;
   project_analysis_run_id?: string | ProjectAnalysisRun | null;
   summary?: string | null;
-  updated_at: string;
+  updated_at?: string | null;
 };
 
 type CustomDirectusTypes = {
+  account: Account[];
+  account_directus_users: AccountDirectusUsers[];
   aspect: Aspect[];
   conversation: Conversation[];
   conversation_chunk: ConversationChunk[];
   conversation_project_tag: ConversationProjectTag[];
+  directus_access: DirectusAccess[];
   directus_activity: DirectusActivity[];
   directus_collections: DirectusCollections[];
+  directus_comments: DirectusComments[];
   directus_dashboards: DirectusDashboards[];
   directus_extensions: DirectusExtensions[];
   directus_fields: DirectusFields[];
@@ -605,6 +690,7 @@ type CustomDirectusTypes = {
   directus_operations: DirectusOperations[];
   directus_panels: DirectusPanels[];
   directus_permissions: DirectusPermissions[];
+  directus_policies: DirectusPolicies[];
   directus_presets: DirectusPresets[];
   directus_relations: DirectusRelations[];
   directus_revisions: DirectusRevisions[];
@@ -612,6 +698,7 @@ type CustomDirectusTypes = {
   directus_sessions: DirectusSessions[];
   directus_settings: DirectusSettings;
   directus_shares: DirectusShares[];
+  directus_sync_id_map: DirectusSyncIdMap[];
   directus_translations: DirectusTranslations[];
   directus_users: DirectusUsers[];
   directus_versions: DirectusVersions[];
@@ -625,6 +712,8 @@ type CustomDirectusTypes = {
   project_chat_message: ProjectChatMessage[];
   project_chat_message_conversation: ProjectChatMessageConversation[];
   project_chat_message_conversation_1: ProjectChatMessageConversation1[];
+  project_report: ProjectReport[];
+  project_report_metric: ProjectReportMetric[];
   project_tag: ProjectTag[];
   quote: Quote[];
   quote_aspect: QuoteAspect[];

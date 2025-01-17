@@ -1,6 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { SUPPORTED_LANGUAGES } from "@/config";
-import { useLanguage } from "@/lib/useLanguage";
+import { useLanguage } from "@/hooks/useLanguage";
 import { NativeSelect } from "@mantine/core";
 import { ChangeEvent } from "react";
 import { useLocation } from "react-router-dom";

@@ -14,14 +14,10 @@ import {
   ParticipantConversationAudioRoute,
   ParticipantConversationTextRoute,
 } from "./routes/participant/ParticipantConversation";
-
-// import { SpikeParticipantConversationAudioRoute } from "./routes/participant/SpikeParticipantConversation";
-
 import { ProjectConversationLayout } from "./components/layout/ProjectConversationLayout";
 import { ProjectConversationOverviewRoute } from "./routes/project/conversation/ProjectConversationOverview";
 import { ProjectConversationTranscript } from "./routes/project/conversation/ProjectConversationTranscript";
 import { ProjectConversationAnalysis } from "./routes/project/conversation/ProjectConversationAnalysis";
-import { NotFoundRoute } from "./routes/404";
 import { ProjectLibraryRoute } from "./routes/project/library/ProjectLibrary";
 import { ProjectLibraryInsight } from "./routes/project/library/ProjectLibraryInsight";
 import { ParticipantPostConversation } from "./routes/participant/ParticipantPostConversation";
@@ -36,15 +32,19 @@ import { CheckYourEmailRoute } from "./routes/auth/CheckYourEmail";
 import { VerifyEmailRoute } from "./routes/auth/VerifyEmail";
 import { PasswordResetRoute } from "./routes/auth/PasswordReset";
 import { RequestPasswordResetRoute } from "./routes/auth/RequestPasswordReset";
-import { ProjectChatRoute } from "./routes/project/chat/ProjectChat";
+import { ProjectChatRoute } from "./routes/project/chat/ProjectChatRoute";
 import { ProjectOverviewLayout } from "./components/layout/ProjectOverviewLayout";
 import { ParticipantLayout } from "./components/layout/ParticipantLayout";
 import { ParticipantStartRoute } from "./routes/participant/ParticipantStart";
+import { ProjectReportRoute } from "./routes/project/report/ProjectReportRoute";
+import { ErrorPage } from "./components/error/ErrorPage";
+import { ParticipantReport } from "./routes/participant/ParticipantReport";
 
 export const mainRouter = createBrowserRouter([
   {
     path: "/:language?",
     element: <LanguageLayout />,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: "",
@@ -196,11 +196,19 @@ export const mainRouter = createBrowserRouter([
                       },
                     ],
                   },
+                  {
+                    path: "report",
+                    element: <ProjectReportRoute />,
+                  },
                 ],
               },
             ],
           },
         ],
+      },
+      {
+        path: "*",
+        element: <ErrorPage />,
       },
     ],
   },
@@ -210,7 +218,7 @@ export const participantRouter = createBrowserRouter([
   {
     path: "/:language?/:projectId",
     element: <ParticipantLayout />,
-    errorElement: <NotFoundRoute />,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: "",
@@ -235,6 +243,14 @@ export const participantRouter = createBrowserRouter([
       {
         path: "conversation/:conversationId/finish",
         element: <ParticipantPostConversation />,
+      },
+      {
+        path: "report",
+        element: <ParticipantReport />,
+      },
+      {
+        path: "*",
+        element: <ErrorPage />,
       },
     ],
   },

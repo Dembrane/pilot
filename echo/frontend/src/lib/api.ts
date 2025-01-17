@@ -6,7 +6,7 @@ import axios, {
   CreateAxiosDefaults,
 } from "axios";
 import { directus, directusContent, directusParticipant } from "./directus";
-import { readItem, readItems } from "@directus/sdk";
+import { readItem, readItems, updateItem } from "@directus/sdk";
 import { EchoPortalTutorial } from "./typesDirectusContent";
 
 export const apiCommonConfig: CreateAxiosDefaults = {
@@ -527,4 +527,27 @@ export const getChatHistory = async (chatId: string): Promise<ChatHistory> => {
     content: message.text ?? "",
     _original: message,
   }));
+};
+
+export const createProjectReport = async (payload: {
+  projectId: string;
+  language: string;
+  otherPayload?: Partial<ProjectReport>;
+}) => {
+  const response = await api.post<unknown, ProjectReport>(
+    `/projects/${payload.projectId}/create-report`,
+    {
+      language: payload.language,
+    },
+  );
+
+  const reportId = response.id;
+
+  if (payload.otherPayload) {
+    await directus.request(
+      updateItem("project_report", reportId, payload.otherPayload),
+    );
+  }
+
+  return response;
 };

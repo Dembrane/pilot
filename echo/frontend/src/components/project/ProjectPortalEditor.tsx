@@ -17,14 +17,14 @@ import {
   InputDescription,
 } from "@mantine/core";
 import { ProjectTagsInput } from "./ProjectTagsInput";
-import { MarkdownWYSIWYG } from "../common/MarkdownWYSIWYG/MarkdownWYSIWYG";
+import { MarkdownWYSIWYG } from "../form/MarkdownWYSIWYG/MarkdownWYSIWYG";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
 import { IconEye, IconEyeOff, IconRefresh } from "@tabler/icons-react";
 import { useProjectSharingLink } from "./ProjectQRCode";
 import { Resizable } from "re-resizable";
 import { FormLabel } from "../form/FormLabel";
 import { useForm, Controller } from "react-hook-form";
-import { useAutoSave } from "@/lib/useAutoSave";
+import { useAutoSave } from "@/hooks/useAutoSave";
 import { SaveStatus } from "../form/SaveStatus";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -197,7 +197,7 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
 
   return (
     <Box>
-      <Stack gap="3rem" px="2rem" pt="4rem" pb="4rem">
+      <Stack gap="3rem">
         <Group justify="space-between">
           <Group>
             <Title order={2}>

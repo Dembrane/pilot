@@ -1,16 +1,8 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useRequestPasswordResetMutation } from "@/lib/query";
-import {
-  Alert,
-  Button,
-  Container,
-  Stack,
-  TextInput,
-  Title,
-} from "@mantine/core";
+import { Button, Container, Stack, TextInput, Title } from "@mantine/core";
 import { useDocumentTitle } from "@mantine/hooks";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 export const RequestPasswordResetRoute = () => {

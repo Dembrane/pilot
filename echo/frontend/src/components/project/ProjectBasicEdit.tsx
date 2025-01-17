@@ -6,7 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { useUpdateProjectByIdMutation } from "@/lib/query";
 import { SaveStatus } from "../form/SaveStatus";
 import { FormLabel } from "../form/FormLabel";
-import { useAutoSave } from "@/lib/useAutoSave";
+import { useAutoSave } from "@/hooks/useAutoSave";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -73,66 +73,68 @@ export const ProjectBasicEdit: React.FC<ProjectBasicEditProps> = ({
 
   return (
     <Stack gap="3rem">
-      <Group>
-        <Title order={2}>
-          <Trans>Edit Project</Trans>
-        </Title>
-        <SaveStatus
-          savedAt={lastSavedAt}
-          formErrors={formState.errors}
-          isPendingSave={isPendingSave}
-          isSaving={isSaving}
-          isError={isError}
-        />
-      </Group>
-
-      <form
-        onSubmit={handleSubmit(async (values) => {
-          await triggerManualSave(values);
-        })}
-      >
-        <Stack gap="2rem">
-          <Controller
-            name="name"
-            control={control}
-            render={({ field }) => (
-              <TextInput
-                error={formState.errors.name?.message}
-                label={
-                  <FormLabel
-                    label={t`Name`}
-                    isDirty={formState.dirtyFields.name}
-                    error={formState.errors.name?.message}
-                  />
-                }
-                {...field}
-              />
-            )}
+      <Stack gap="1.5rem">
+        <Group>
+          <Title order={2}>
+            <Trans>Edit Project</Trans>
+          </Title>
+          <SaveStatus
+            savedAt={lastSavedAt}
+            formErrors={formState.errors}
+            isPendingSave={isPendingSave}
+            isSaving={isSaving}
+            isError={isError}
           />
+        </Group>
 
-          <Controller
-            name="context"
-            control={control}
-            render={({ field }) => (
-              <Textarea
-                error={formState.errors.context?.message}
-                label={
-                  <FormLabel
-                    label={t`Context`}
-                    isDirty={formState.dirtyFields.context}
-                    error={formState.errors.context?.message}
-                  />
-                }
-                rows={4}
-                placeholder={t`How would you describe to a colleague what are you trying to accomplish with this project?
+        <form
+          onSubmit={handleSubmit(async (values) => {
+            await triggerManualSave(values);
+          })}
+        >
+          <Stack gap="2rem">
+            <Controller
+              name="name"
+              control={control}
+              render={({ field }) => (
+                <TextInput
+                  error={formState.errors.name?.message}
+                  label={
+                    <FormLabel
+                      label={t`Name`}
+                      isDirty={formState.dirtyFields.name}
+                      error={formState.errors.name?.message}
+                    />
+                  }
+                  {...field}
+                />
+              )}
+            />
+
+            <Controller
+              name="context"
+              control={control}
+              render={({ field }) => (
+                <Textarea
+                  error={formState.errors.context?.message}
+                  label={
+                    <FormLabel
+                      label={t`Context`}
+                      isDirty={formState.dirtyFields.context}
+                      error={formState.errors.context?.message}
+                    />
+                  }
+                  rows={4}
+                  placeholder={t`How would you describe to a colleague what are you trying to accomplish with this project?
 * What is the north star goal or key metric
 * What does success look like`}
-                {...field}
-              />
-            )}
-          />
-        </Stack>
-      </form>
+                  {...field}
+                />
+              )}
+            />
+          </Stack>
+        </form>
+      </Stack>
     </Stack>
   );
 };

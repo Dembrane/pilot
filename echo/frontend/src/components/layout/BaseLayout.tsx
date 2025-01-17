@@ -3,6 +3,7 @@ import { Toaster } from "../common/Toaster";
 import { Outlet } from "react-router-dom";
 import { PropsWithChildren } from "react";
 import { Header } from "./Header";
+import { ErrorBoundary } from "../error/ErrorBoundary";
 
 export const BaseLayout = ({ children }: PropsWithChildren) => {
   return (
@@ -11,10 +12,12 @@ export const BaseLayout = ({ children }: PropsWithChildren) => {
         <Header />
       </Box>
 
-      <main className="h-[calc(100%-60px)] w-full pt-[60px]">
-        <Outlet />
-        {children}
-      </main>
+      <ErrorBoundary>
+        <main className="h-[calc(100%-60px)] w-full pt-[60px]">
+          <Outlet />
+          {children}
+        </main>
+      </ErrorBoundary>
 
       <Toaster />
     </Box>

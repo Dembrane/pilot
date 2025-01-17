@@ -17,6 +17,8 @@ import { NavigationButton } from "../common/NavigationButton";
 import { Breadcrumbs } from "../common/Breadcrumbs";
 import { ProjectQRCode } from "./ProjectQRCode";
 import { I18nLink } from "../common/i18nLink";
+import { IconEdit } from "@tabler/icons-react";
+import { ReportModalNavigationButton } from "../report/ReportModalNavigationButton";
 
 export const ProjectSidebar = () => {
   const { projectId, conversationId } = useParams();
@@ -106,6 +108,8 @@ export const ProjectSidebar = () => {
       >
         <Trans>Library</Trans>
       </NavigationButton>
+
+      <ReportModalNavigationButton />
 
       <Box hiddenFrom="lg">
         <ProjectQRCode project={projectQuery.data} />

@@ -1,7 +1,18 @@
-## How do I use the docs to write code with Cursor chat?
+# Why is a lot of code in this project redundant?
+
+The idea here is: I prefer duplication over the wrong abstraction.
+
+You might have noticed that a lot of code is redundant and repetitive.
+It is an artifact of using the style guides with Cursor chat. It helps me write code faster.
+I also think this is a "tailwind-y" way of writing code.
+
+However, it is definitely not the most principled way (not DRY), but I feel it reduces the barrier to entry and saves effort.
+
+## So, how do I use the docs to write code with Cursor chat?
 
 - Add the @developer-docs folder to your cursor context to ask questions
 - When doing something specific like adding spacing, find and then use the doc related to it (@frontend_spacing.md)
+- If you want to refactor, update the style guide doc and then ask Cursor to do a codebase wide refactor.
 
 ## When should I add something?
 

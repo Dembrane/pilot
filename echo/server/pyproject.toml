@@ -17,7 +17,7 @@ dependencies = [
     "pypdf==4.0.*",
     # SDKs for Models
     "openai==1.57.*",
-    "anthropic==0.37.*",
+    "anthropic==0.43.*",
     # Data
     "pandas==2.2.*",
     "numpy==1.26.*",
@@ -31,6 +31,7 @@ dependencies = [
     "alembic==1.13.*",
     "psycopg[binary,pool]==3.1.*",
     "pgvector==0.2.*",
+    "directus-sdk-py>=1.1.0",
     # Config
     "python-dotenv==1.0.*",
     # Other

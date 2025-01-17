@@ -1,5 +1,5 @@
 import { SUPPORTED_LANGUAGES } from "@/config";
-import { useLanguage } from "@/lib/useLanguage";
+import { useLanguage } from "@/hooks/useLanguage";
 import React from "react";
 import { Link, LinkProps, useParams } from "react-router-dom";
 

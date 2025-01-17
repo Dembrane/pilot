@@ -15,10 +15,13 @@ import {
   Title,
 } from "@mantine/core";
 import { useParams } from "react-router-dom";
+import { CopyIconButton } from "@/components/common/CopyIconButton";
+import { useCopyView } from "@/hooks/useCopyView";
 
 export const ProjectLibraryView = () => {
   const { projectId, viewId } = useParams();
 
+  const { copyView, copied } = useCopyView();
   const view = useViewById(projectId ?? "", viewId ?? "");
 
   return (
@@ -36,7 +39,14 @@ export const ProjectLibraryView = () => {
       />
       <Divider />
       <LoadingOverlay visible={view.isLoading} />
-      <Title order={1}>{view.data?.name}</Title>
+      <Group>
+        <Title order={1}>{view.data?.name}</Title>
+        <CopyIconButton
+          onCopy={() => copyView(viewId ?? "")}
+          copied={copied}
+          size={24}
+        />
+      </Group>
       <Markdown content={view.data?.summary ?? ""} />
       <Paper p="md">
         <Stack>

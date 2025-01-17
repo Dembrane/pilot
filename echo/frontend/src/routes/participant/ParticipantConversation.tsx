@@ -1,7 +1,7 @@
 import WelcomeImage from "@/assets/participant-welcome-pattern.png";
 import { Logo } from "@/components/common/Logo";
 import { Markdown } from "@/components/common/Markdown";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import { useI18nNavigate } from "@/hooks/useI18nNavigate";
 import { I18nLink } from "@/components/common/i18nLink";
 import {
   useUploadConversationChunk,
@@ -45,8 +45,8 @@ import {
 } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { useLanguage } from "@/lib/useLanguage";
-import { useWakeLock } from "@/lib/useWakeLock";
+import { useLanguage } from "@/hooks/useLanguage";
+import { useWakeLock } from "@/hooks/useWakeLock";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Trans, t } from "@lingui/macro";
 import clsx from "clsx";
@@ -647,8 +647,8 @@ export const ParticipantConversationAudioRoute = () => {
     return <LoadingOverlay visible />;
   }
 
-  const textModeUrl = `/${language}/${projectId}/conversation/${conversationId}/text`;
-  const finishUrl = `/${language}/${projectId}/conversation/${conversationId}/finish`;
+  const textModeUrl = `/${projectId}/conversation/${conversationId}/text`;
+  const finishUrl = `/${projectId}/conversation/${conversationId}/finish`;
 
   const handleFinish = () => {
     if (window.confirm(t`Are you sure you want to finish?`)) {

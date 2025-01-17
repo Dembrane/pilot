@@ -3,7 +3,7 @@ import { Trans } from "@lingui/react/macro";
 import { useDeleteProjectByIdMutation } from "@/lib/query";
 import { Box, Button, Stack, Title } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
-import { useI18nNavigate } from "@/lib/useI18nNavigate";
+import { useI18nNavigate } from "@/hooks/useI18nNavigate";
 
 export const ProjectDangerZone = ({ project }: { project: Project }) => {
   const deleteProjectByIdMutation = useDeleteProjectByIdMutation();

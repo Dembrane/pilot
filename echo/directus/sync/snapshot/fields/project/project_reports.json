@@ -14,7 +14,9 @@
     "note": null,
     "options": {
       "enableCreate": false,
-      "enableSelect": false
+      "enableSelect": false,
+      "sort": "-date_created",
+      "template": "{{date_created}}{{content}}"
     },
     "readonly": false,
     "required": false,

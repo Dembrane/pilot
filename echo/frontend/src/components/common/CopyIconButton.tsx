@@ -1,23 +1,26 @@
+import { t } from "@lingui/core/macro";
 import { IconCheck, IconCopy } from "@tabler/icons-react";
-import { ActionIcon, Tooltip } from "@mantine/core";
-import useCopyToRichText from "@/hooks/useCopyToRichText";
+import { ActionIcon, ActionIconProps, Tooltip } from "@mantine/core";
 
 export const CopyIconButton = ({
   onCopy,
   copied,
+  copyTooltip = t`Copy`,
   size = 16,
+  ...props
 }: {
+  copyTooltip?: string;
   onCopy: () => void;
   copied: boolean;
-  size?: number;
-}) => {
+} & ActionIconProps) => {
   return (
-    <Tooltip label={copied ? "Copied" : "Copy"} position="bottom">
+    <Tooltip label={copied ? t`Copied` : copyTooltip} position="bottom">
       <ActionIcon
         p="xs"
         color={copied ? "teal" : "gray"}
         variant="subtle"
         onClick={onCopy}
+        {...props}
       >
         {copied ? <IconCheck size={size} /> : <IconCopy size={size} />}
       </ActionIcon>

@@ -76,7 +76,7 @@ export const useCopyQuote = () => {
     }
 
     if (timestamp) {
-      stringBuilder.push(`**Time:** ${timestamp}`);
+      stringBuilder.push(`${timestamp}`);
       stringBuilder.push("");
     }
 

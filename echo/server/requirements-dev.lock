@@ -20,7 +20,7 @@ amqp==5.2.0
     # via kombu
 annotated-types==0.6.0
     # via pydantic
-anthropic==0.37.1
+anthropic==0.43.0
 anyio==4.3.0
     # via anthropic
     # via httpx
@@ -61,6 +61,7 @@ cryptography==42.0.8
 dataclasses-json==0.6.6
     # via langchain
     # via langchain-community
+directus-sdk-py==1.1.0
 distro==1.9.0
     # via anthropic
     # via openai
@@ -69,14 +70,10 @@ ecdsa==0.19.0
 fastapi==0.109.2
     # via sentry-sdk
 ffmpeg-python==0.2.0
-filelock==3.14.0
-    # via huggingface-hub
 flower==2.0.1
 frozenlist==1.4.1
     # via aiohttp
     # via aiosignal
-fsspec==2024.5.0
-    # via huggingface-hub
 future==1.0.0
     # via ffmpeg-python
 greenlet==3.0.3
@@ -91,8 +88,6 @@ httptools==0.6.1
 httpx==0.27.0
     # via anthropic
     # via openai
-huggingface-hub==0.23.2
-    # via tokenizers
 humanize==4.9.0
     # via flower
 idna==3.7
@@ -158,7 +153,6 @@ openai==1.57.2
 orjson==3.10.3
     # via langsmith
 packaging==23.2
-    # via huggingface-hub
     # via langchain-core
     # via marshmallow
 pandas==2.2.2
@@ -199,7 +193,6 @@ pytz==2024.1
     # via flower
     # via pandas
 pyyaml==6.0.1
-    # via huggingface-hub
     # via langchain
     # via langchain-community
     # via langchain-core
@@ -209,7 +202,7 @@ redis==5.0.6
 regex==2024.5.15
     # via tiktoken
 requests==2.31.0
-    # via huggingface-hub
+    # via directus-sdk-py
     # via langchain
     # via langchain-community
     # via langsmith
@@ -234,6 +227,8 @@ sqlalchemy==2.0.30
     # via langchain
     # via langchain-community
     # via sentry-sdk
+sqlparse==0.5.3
+    # via directus-sdk-py
 starlette==0.36.3
     # via fastapi
 tenacity==8.3.0
@@ -244,12 +239,9 @@ threadpoolctl==3.5.0
     # via scikit-learn
 tiktoken==0.7.0
     # via langchain-openai
-tokenizers==0.15.2
-    # via anthropic
 tornado==6.4.1
     # via flower
 tqdm==4.66.4
-    # via huggingface-hub
     # via openai
 types-aiofiles==23.2.0.20240403
 types-pyasn1==0.6.0.20240402
@@ -263,7 +255,6 @@ typing-extensions==4.11.0
     # via alembic
     # via anthropic
     # via fastapi
-    # via huggingface-hub
     # via mypy
     # via openai
     # via psycopg
@@ -278,6 +269,7 @@ tzdata==2024.1
     # via celery
     # via pandas
 urllib3==2.2.1
+    # via directus-sdk-py
     # via requests
     # via sentry-sdk
     # via types-requests

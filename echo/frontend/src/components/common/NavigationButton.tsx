@@ -7,10 +7,12 @@ import {
   Text,
   UnstyledButton,
   UnstyledButtonProps,
+  Tooltip,
 } from "@mantine/core";
 import { PropsWithChildren } from "react";
 import { Link } from "react-router-dom";
 import { I18nLink } from "@/components/common/i18nLink";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 type Props = {
   to?: string;
@@ -18,22 +20,41 @@ type Props = {
   rightSection?: React.ReactNode;
   active?: boolean;
   disabled?: boolean;
+  loading?: boolean;
+  loadingTooltip?: string;
+  disabledTooltip?: string;
 } & PolymorphicComponentProps<"a" | "button", UnstyledButtonProps>;
 
 export const NavigationButton = ({
   children,
   to,
-  rightSection, // not clickable
-  rightIcon, // clickable
+  rightSection,
+  rightIcon,
   active,
   disabled = false,
+  loading = false,
+  loadingTooltip,
+  disabledTooltip,
   ...props
 }: PropsWithChildren<Props>) => {
-  return (
+  const rightContent = loading ? (
+    <Tooltip label={loadingTooltip} disabled={!loadingTooltip}>
+      <span>
+        <LoadingSpinner size="sm" />
+      </span>
+    </Tooltip>
+  ) : (
+    rightIcon
+  );
+
+  const content = (
     <Paper
       className={cn(
-        "w-full border border-gray-200 bg-white transition-colors hover:border-primary-500",
+        "w-full border border-gray-200 bg-white transition-colors",
         active ? "border-primary-500" : "",
+        disabled || loading
+          ? "opacity-60 hover:border-gray-300"
+          : "hover:border-primary-500",
         props.className,
       )}
     >
@@ -51,7 +72,7 @@ export const NavigationButton = ({
                 <Text size="lg" className="font-semibold">
                   {children}
                 </Text>
-                {!!rightIcon && rightIcon}
+                {!!rightContent && rightContent}
               </Group>
             </UnstyledButton>
           </I18nLink>
@@ -69,7 +90,7 @@ export const NavigationButton = ({
               <Text size="lg" className="font-semibold">
                 {children}
               </Text>
-              {!!rightIcon && rightIcon}
+              {!!rightContent && rightContent}
             </Group>
           </UnstyledButton>
         )}
@@ -86,5 +107,11 @@ export const NavigationButton = ({
         )}
       </Group>
     </Paper>
+  );
+
+  return disabled && disabledTooltip ? (
+    <Tooltip label={disabledTooltip}>{content}</Tooltip>
+  ) : (
+    content
   );
 };

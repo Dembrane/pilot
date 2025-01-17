@@ -647,8 +647,8 @@ export const ParticipantConversationAudioRoute = () => {
     return <LoadingOverlay visible />;
   }
 
-  const textModeUrl = `/${language}/${projectId}/conversation/${conversationId}/text`;
-  const finishUrl = `/${language}/${projectId}/conversation/${conversationId}/finish`;
+  const textModeUrl = `/${projectId}/conversation/${conversationId}/text`;
+  const finishUrl = `/${projectId}/conversation/${conversationId}/finish`;
 
   const handleFinish = () => {
     if (window.confirm(t`Are you sure you want to finish?`)) {

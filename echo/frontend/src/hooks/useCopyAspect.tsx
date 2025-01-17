@@ -27,6 +27,7 @@ export const useCopyAspect = () => {
           "short_summary",
           "long_summary",
           "image_url",
+          "view_id",
           {
             representative_quotes: [
               {
@@ -44,7 +45,7 @@ export const useCopyAspect = () => {
     );
 
     stringBuilder.push(
-      `# Aspect: [${aspect.name}](${window.location.origin}/${language}/projects/${projectId}/library/aspects/${aspectId})`,
+      `# Aspect: [${aspect.name}](${window.location.origin}/${language}/projects/${projectId}/library/views/${aspect.view_id}/aspects/${aspectId})`,
     );
 
     if (aspect.image_url) {

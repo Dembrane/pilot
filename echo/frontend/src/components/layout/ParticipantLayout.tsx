@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Group } from "@mantine/core";
 import useSessionStorageState from "use-session-storage-state";
@@ -42,11 +42,14 @@ const ParticipantHeader = () => {
 };
 
 export const ParticipantLayout = () => {
+  const { pathname } = useLocation();
+  const isReportPage = pathname.includes("report");
+
   return (
     <I18nProvider>
       <main className="relative !h-dvh overflow-y-auto">
         <div className="flex h-full flex-col">
-          <ParticipantHeader />
+          {!isReportPage && <ParticipantHeader />}
           <main className="relative grow">
             <Outlet />
           </main>

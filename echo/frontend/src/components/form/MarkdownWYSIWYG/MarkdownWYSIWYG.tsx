@@ -39,7 +39,7 @@ export function MarkdownWYSIWYG(props: MDXEditorProps) {
         }),
       ]}
       contentEditableClassName="prose min-h-[200px] space-grotesk"
-      className="relative rounded border border-gray-200"
+      className="rounded border border-gray-200"
       {...props}
     />
   );

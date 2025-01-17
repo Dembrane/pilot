@@ -1,5 +1,89 @@
 [
   {
+    "collection": "project_report_metric",
+    "action": "create",
+    "permissions": null,
+    "validation": {
+      "_and": [
+        {
+          "project_report_id": {
+            "_nnull": true
+          }
+        },
+        {
+          "type": {
+            "_eq": "view"
+          }
+        }
+      ]
+    },
+    "presets": null,
+    "fields": [
+      "id",
+      "type",
+      "project_report_id",
+      "date_created",
+      "date_updated",
+      "ip"
+    ],
+    "policy": "_sync_default_public_policy",
+    "_syncId": "7e9bf416-04e8-4b62-8d62-fc3f91ee5402"
+  },
+  {
+    "collection": "project_report_metric",
+    "action": "read",
+    "permissions": {
+      "_and": [
+        {
+          "project_report_id": {
+            "project_id": {
+              "_nnull": true
+            }
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "type",
+      "date_updated",
+      "id",
+      "date_created",
+      "project_report_id"
+    ],
+    "policy": "_sync_default_public_policy",
+    "_syncId": "609129f4-4e57-4d75-b1f0-f70957ef2613"
+  },
+  {
+    "collection": "project_report",
+    "action": "read",
+    "permissions": {
+      "_and": [
+        {
+          "status": {
+            "_eq": "published"
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "status",
+      "id",
+      "date_created",
+      "content",
+      "language",
+      "project_id",
+      "show_portal_link",
+      "date_updated",
+      "error_code"
+    ],
+    "policy": "_sync_default_public_policy",
+    "_syncId": "78c87826-6a12-482f-a602-76373485067f"
+  },
+  {
     "collection": "project_tag",
     "action": "read",
     "permissions": {},

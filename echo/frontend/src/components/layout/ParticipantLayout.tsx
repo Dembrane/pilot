@@ -5,6 +5,7 @@ import useSessionStorageState from "use-session-storage-state";
 
 import { Logo } from "../common/Logo";
 import { I18nProvider } from "./I18nProvider";
+import { cn } from "@/lib/utils";
 
 const ParticipantHeader = () => {
   const [loadingFinished] = useSessionStorageState("loadingFinished", {
@@ -45,11 +46,21 @@ export const ParticipantLayout = () => {
   const { pathname } = useLocation();
   const isReportPage = pathname.includes("report");
 
+  if (isReportPage) {
+    return (
+      <I18nProvider>
+        <main className="relative min-h-dvh">
+          <Outlet />
+        </main>
+      </I18nProvider>
+    );
+  }
+
   return (
     <I18nProvider>
       <main className="relative !h-dvh overflow-y-auto">
         <div className="flex h-full flex-col">
-          {!isReportPage && <ParticipantHeader />}
+          <ParticipantHeader />
           <main className="relative grow">
             <Outlet />
           </main>

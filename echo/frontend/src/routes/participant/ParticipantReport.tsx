@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { ReportRenderer } from "@/components/report/ReportRenderer";
 import {
   useCreateProjectReportMetricOncePerDayMutation,
@@ -11,6 +11,9 @@ import { Logo } from "@/components/common/Logo";
 import { useEffect } from "react";
 
 export const ParticipantReport = () => {
+  const [searchParams] = useSearchParams();
+  const print = searchParams.get("print") === "true";
+
   const { language, projectId } = useParams();
 
   const { data: report, isLoading } = useLatestProjectReport(projectId ?? "");
@@ -28,8 +31,14 @@ export const ParticipantReport = () => {
           type: "view",
         },
       });
+
+      if (print) {
+        setTimeout(() => {
+          window.print();
+        }, 1000);
+      }
     }
-  }, [report]);
+  }, [report, print]);
 
   if (isLoading) {
     return <LoadingOverlay visible />;

@@ -173,7 +173,7 @@ export const ProjectPortalEditor = ({ project }: { project: Project }) => {
     lastSavedAt,
   } = useAutoSave({
     onSave,
-    initialLastSavedAt: project.updated_at,
+    initialLastSavedAt: project.updated_at ?? new Date(),
   });
 
   useEffect(() => {

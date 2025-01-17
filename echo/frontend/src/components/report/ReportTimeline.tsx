@@ -32,7 +32,7 @@ const COLORS = {
 const formatDateForAxis = (timestamp: number) =>
   format(new Date(timestamp), "MMM dd");
 
-const CustomReferenceLabel = ({ x, y, value, viewBox }: any) => {
+const CustomReferenceLabel = ({ value, viewBox }: any) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -242,7 +242,7 @@ export function ReportTimeline({
           verticalAlign="middle"
           layout="vertical"
           wrapperStyle={{
-            paddingLeft: "25px",
+            paddingLeft: "2",
           }}
           payload={[
             {
@@ -299,7 +299,7 @@ export function ReportTimeline({
         />
 
         {/* Show all subsequent reports as "Report Updated" */}
-        {data.allReports.slice(1).map((r, index) => (
+        {data.allReports.slice(1).map((r) => (
           <ReferenceLine
             key={r.id}
             x={new Date(r.createdAt!).getTime()}

@@ -85,7 +85,8 @@ export const ProjectLibraryRoute = () => {
       if (sortBy === "default") {
         return data.sort(
           (a, b) =>
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+            new Date(a.created_at!).getTime() -
+            new Date(b.created_at!).getTime(),
         );
       } else if (sortBy === "relevance") {
         // Ubiquity - Measured by the number of unique conversations in each insight.

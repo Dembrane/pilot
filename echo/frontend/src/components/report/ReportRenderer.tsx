@@ -12,6 +12,7 @@ import { Markdown } from "../common/Markdown";
 import { Logo } from "../common/Logo";
 import { Trans } from "@lingui/react/macro";
 import { cn } from "@/lib/utils";
+import { QRCode } from "../common/QRCode";
 
 const ContributeToReportCTA = ({ href }: { href: string }) => {
   return (
@@ -23,10 +24,18 @@ const ContributeToReportCTA = ({ href }: { href: string }) => {
           component="a"
           href={href}
           target="_blank"
-          className="rounded-3xl"
+          className="rounded-3xl print:hidden"
         >
           <Trans>Share your voice</Trans>
         </Button>
+
+        <div className="hidden print:block">
+          <Trans>Share your voice by scanning the QR code below.</Trans>
+        </div>
+
+        <div className="hidden h-[200px] w-[200px] print:block">
+          <QRCode value={href} />
+        </div>
       </Stack>
     </Paper>
   );
@@ -52,7 +61,7 @@ const ReportLayout = ({
       px={{ base: "1rem", md: "2rem" }}
       py={{ base: "2rem", md: "4rem" }}
       className={cn({
-        "border border-gray-200": showBorder,
+        "border border-gray-200 print:border-none": showBorder,
         "mx-auto max-w-2xl": true,
       })}
     >
@@ -63,8 +72,8 @@ const ReportLayout = ({
             <Trans>Report</Trans>
           </Text>
         </Group>
-        {readingNow && (
-          <Group>
+        {readingNow && readingNow > 0 && (
+          <Group className="print:hidden">
             <div className="h-[10px] w-[10px] animate-pulse rounded-full bg-green-500"></div>
             <Trans>{readingNow} reading now</Trans>
           </Group>
@@ -107,8 +116,10 @@ export const ReportRenderer = ({
   }
 
   return (
-    <ReportLayout {...opts}>
-      <Markdown content={data?.content ?? ""} />
-    </ReportLayout>
+    <div className="py-8">
+      <ReportLayout {...opts} showBorder={true}>
+        <Markdown content={data?.content ?? ""} />
+      </ReportLayout>
+    </div>
   );
 };

@@ -71,7 +71,7 @@ export const ProjectAnalysisRunStatus = ({
         )}
         <div>
           <Trans>This project library was generated on</Trans>{" "}
-          {new Date(data.created_at).toLocaleString()}.
+          {new Date(data.created_at ?? new Date()).toLocaleString()}.
         </div>
       </Stack>
     );

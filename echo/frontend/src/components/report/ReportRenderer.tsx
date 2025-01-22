@@ -17,7 +17,7 @@ import { QRCode } from "../common/QRCode";
 const ContributeToReportCTA = ({ href }: { href: string }) => {
   return (
     <Paper p="xl" className="bg-gray-100">
-      <Stack className="text-2xl font-semibold" align="center">
+      <Stack className="text-center text-2xl font-semibold" align="center">
         <Trans>Do you want to contribute to this project?</Trans>
 
         <Button
@@ -61,12 +61,12 @@ const ReportLayout = ({
       px={{ base: "1rem", md: "2rem" }}
       py={{ base: "2rem", md: "4rem" }}
       className={cn({
-        "border border-gray-200 print:border-none": showBorder,
+        "border-gray-200 md:border print:border-none": showBorder,
         "mx-auto max-w-2xl": true,
       })}
     >
-      <Group justify="space-between" align="baseline ">
-        <Group>
+      <Group justify="space-between" align="center">
+        <Group align="center">
           <Logo />
           <Text>
             <Trans>Report</Trans>

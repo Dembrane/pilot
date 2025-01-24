@@ -1,2 +1,3 @@
 infrastructure/*/.terraform
 .DS_Store
+cline_docs

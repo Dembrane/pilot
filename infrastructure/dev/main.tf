@@ -841,7 +841,7 @@ resource "azurerm_container_group" "directus" {
       PORT = "8055"
       TELEMETRY = "false"
       CORS_ENABLED = "true"
-      CORS_ORIGIN = "https://portal.dev.dembrane.com,https://dashboard.dev.dembrane.com"
+      CORS_ORIGIN = "https://portal.dev.dembrane.com,https://dashboard.dev.dembrane.com,https://directus.dev.dembrane.com"
       CORS_CREDENTIALS = "true"
       SESSION_COOKIE_DOMAIN = "dev.dembrane.com"
       SESSION_COOKIE_SAME_SITE = "lax"
@@ -863,20 +863,21 @@ resource "azurerm_container_group" "directus" {
       PASSWORD_RESET_URL_ALLOW_LIST = "${azurerm_key_vault_secret.admin_base_url.value}/password-reset"
       USER_INVITE_URL_ALLOW_LIST = "${azurerm_key_vault_secret.admin_base_url.value}/invite"
       ADMIN_EMAIL = "admin@dembrane.com"
+      # Database connection details
+      DB_CLIENT = "${azurerm_key_vault_secret.directus_db_client.value}"
+      DB_HOST = "${azurerm_key_vault_secret.directus_db_host.value}"
+      DB_PORT = "${azurerm_key_vault_secret.directus_db_port.value}"
+      DB_DATABASE = "${azurerm_key_vault_secret.directus_db_database.value}"
+      REDIS_ENABLED = "${azurerm_key_vault_secret.directus_redis_enabled.value}"
+      REDIS = "${azurerm_key_vault_secret.directus_redis_url.value}"
     }
 
     secure_environment_variables = {
       PUBLIC_URL = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_public_url.versionless_id})"
       SECRET = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_secret.versionless_id})"
       ADMIN_TOKEN = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
-      DB_CLIENT = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_client.versionless_id})"
-      DB_HOST = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_host.versionless_id})"
-      DB_PORT = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_port.versionless_id})"
       DB_USER = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_user.versionless_id})"
       DB_PASSWORD = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_password.versionless_id})"
-      DB_DATABASE = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_database.versionless_id})"
-      REDIS_ENABLED = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_redis_enabled.versionless_id})"
-      REDIS = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_redis_url.versionless_id})"
       # SMTP settings
       EMAIL_FROM = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_smtp_from.versionless_id})"
       EMAIL_SMTP_HOST = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_smtp_host.versionless_id})"

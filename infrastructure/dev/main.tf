@@ -1922,7 +1922,7 @@ resource "azurerm_network_security_rule" "allow_ssh_from_bastion" {
   source_port_range           = "*"
   destination_port_range      = "22"
   source_address_prefix       = azurerm_subnet.bastion_subnet.address_prefixes[0]
-  destination_address_prefix  = "*"
+  destination_address_prefix  = azurerm_subnet.ops_server_subnet.address_prefixes[0]
   resource_group_name         = azurerm_resource_group.rg.name
   network_security_group_name = azurerm_network_security_group.private_nsg.name
 }
@@ -1937,7 +1937,22 @@ resource "azurerm_network_security_rule" "allow_postgres_from_ops" {
   source_port_range           = "*"
   destination_port_range      = "5432"
   source_address_prefix       = azurerm_subnet.ops_server_subnet.address_prefixes[0]
-  destination_address_prefix  = azurerm_cosmosdb_postgresql_cluster.cosmo.name
+  destination_address_prefix  = azurerm_cosmosdb_postgresql_cluster.cosmo.server_fqdn
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.private_nsg.name
+}
+
+# Add a new rule to allow PostgreSQL traffic from the ops server subnet
+resource "azurerm_network_security_rule" "allow_postgres_to_ops" {
+  name                        = "AllowPostgresToOps"
+  priority                    = 220
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "5432"
+  source_address_prefix       = azurerm_cosmosdb_postgresql_cluster.cosmo.server_fqdn
+  destination_address_prefix  = azurerm_subnet.ops_server_subnet.address_prefixes[0]
   resource_group_name         = azurerm_resource_group.rg.name
   network_security_group_name = azurerm_network_security_group.private_nsg.name
 }

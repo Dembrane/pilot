@@ -9,6 +9,13 @@
       "cwd": "${workspaceFolder}/server"
     },
     {
+      "name": "Python Debugger: workspace_script",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "dembrane.workspace_script",
+      "cwd": "${workspaceFolder}/server"
+    },
+    {
       "name": "Python Debugger: quote_utils",
       "type": "debugpy",
       "request": "launch",

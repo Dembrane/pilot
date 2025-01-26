@@ -1818,3 +1818,95 @@ resource "azurerm_role_assignment" "directus_secret_access" {
 }
 
 # worker envs
+
+# Ubuntu Ops Server
+resource "azurerm_network_interface" "ops_server_nic" {
+  name                = "DBR-${var.environment}-OpsServer-NIC"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.private_subnet[0].id
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "ops_server" {
+  name                = "DBR-${var.environment}-OpsServer-VM"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  size                = "Standard_B1s"
+  admin_username      = "azureuser"
+  network_interface_ids = [
+    azurerm_network_interface.ops_server_nic.id,
+  ]
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = file("~/.ssh/id_rsa.pub")  # Make sure this SSH key exists
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "18.04-LTS"
+    version   = "latest"
+  }
+}
+
+# Bastion Host
+resource "azurerm_public_ip" "bastion_pip" {
+  name                = "DBR-${var.environment}-Bastion-PIP"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
+resource "azurerm_bastion_host" "bastion" {
+  name                = "DBR-${var.environment}-Bastion"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                 = "configuration"
+    subnet_id            = azurerm_subnet.public_subnet[0].id
+    public_ip_address_id = azurerm_public_ip.bastion_pip.id
+  }
+}
+
+# Update NSG to allow SSH from Bastion
+resource "azurerm_network_security_rule" "allow_ssh_from_bastion" {
+  name                        = "AllowSSHFromBastion"
+  priority                    = 200
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = azurerm_subnet.public_subnet[0].address_prefixes[0]
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.private_nsg.name
+}
+
+# Allow access to PostgreSQL from Ops Server
+resource "azurerm_network_security_rule" "allow_postgres_from_ops" {
+  name                        = "AllowPostgresFromOps"
+  priority                    = 210
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "5432"
+  source_address_prefix       = azurerm_network_interface.ops_server_nic.private_ip_address
+  destination_address_prefix  = azurerm_cosmosdb_postgresql_cluster.cosmo.name
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.private_nsg.name
+}

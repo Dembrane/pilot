@@ -7,7 +7,11 @@ Follow these steps to install pgvector on the Ubuntu ops server and configure it
 Use Azure Bastion to connect to the ops server:
 - In the Azure Portal, navigate to the "DBR-dev-OpsServer-VM" virtual machine
 - Click on "Connect" and select "Bastion"
-- Enter the username "azureuser" and use SSH key for authentication
+- Enter the username "azureuser"
+- For the password, use the following Azure CLI command to retrieve it from the Key Vault:
+  ```
+  az keyvault secret show --name ops-server-password --vault-name DBR-dev-RuntimeCfg-KV --query value -o tsv
+  ```
 
 ## 2. Update system and install dependencies
 
@@ -70,3 +74,4 @@ You should see "vector" listed in the extensions.
 - Replace the database connection details if they differ from the ones provided in the Terraform configuration.
 - The initial password used here is for demonstration purposes. Ensure to use a secure password in a production environment.
 - After setting up, consider removing or securing the `.pgpass` file to protect the database credentials.
+- The VM password is stored securely in the Azure Key Vault. Always use the Azure CLI command provided in step 1 to retrieve it when needed.

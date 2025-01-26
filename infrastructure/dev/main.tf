@@ -1842,10 +1842,8 @@ resource "azurerm_linux_virtual_machine" "ops_server" {
     azurerm_network_interface.ops_server_nic.id,
   ]
 
-  admin_ssh_key {
-    username   = "azureuser"
-    public_key = file("~/.ssh/id_rsa.pub")  # Make sure this SSH key exists
-  }
+  admin_password                  = azurerm_key_vault_secret.ops_server_password.value
+  disable_password_authentication = false
 
   os_disk {
     caching              = "ReadWrite"
@@ -1858,6 +1856,23 @@ resource "azurerm_linux_virtual_machine" "ops_server" {
     sku       = "18.04-LTS"
     version   = "latest"
   }
+}
+
+# Store the VM password in Key Vault
+resource "azurerm_key_vault_secret" "ops_server_password" {
+  name         = "ops-server-password"
+  value        = "P@ssw0rd1234!"  # Change this to a secure password
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+}
+
+# Output the admin username
+output "ops_server_admin_username" {
+  value = azurerm_linux_virtual_machine.ops_server.admin_username
+}
+
+# Output a message about password storage
+output "ops_server_password_message" {
+  value = "The ops server password is stored in the Key Vault. Retrieve it using: az keyvault secret show --name ops-server-password --vault-name ${azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.name} --query value -o tsv"
 }
 
 # Bastion Host

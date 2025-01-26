@@ -457,7 +457,7 @@ resource "azurerm_application_gateway" "main" {
     timeout             = 30
     unhealthy_threshold = 3
     pick_host_name_from_backend_http_settings = false
-    host                = "app.dev.dembrane.com"
+    host                = "portal.dev.dembrane.com"
   }
 
   # HTTP to HTTPS redirect configurations - one for each domain
@@ -478,7 +478,7 @@ resource "azurerm_application_gateway" "main" {
   }
 
   redirect_configuration {
-    name                 = "app-http-to-https"
+    name                 = "portal-http-to-https"
     redirect_type        = "Permanent"
     include_path         = true
     include_query_string = true
@@ -486,7 +486,7 @@ resource "azurerm_application_gateway" "main" {
   }
 
   redirect_configuration {
-    name                 = "admin-http-to-https"
+    name                 = "dashboard-http-to-https"
     redirect_type        = "Permanent"
     include_path         = true
     include_query_string = true
@@ -511,19 +511,19 @@ resource "azurerm_application_gateway" "main" {
   }
 
   http_listener {
-    name                           = "app-http-listener"
+    name                           = "portal-http-listener"
     frontend_ip_configuration_name = "frontend-ip-config"
     frontend_port_name            = "http-80"
     protocol                      = "Http"
-    host_name                     = "app.dev.dembrane.com"
+    host_name                     = "portal.dev.dembrane.com"
   }
 
   http_listener {
-    name                           = "admin-http-listener"
+    name                           = "dashboard-http-listener"
     frontend_ip_configuration_name = "frontend-ip-config"
     frontend_port_name            = "http-80"
     protocol                      = "Http"
-    host_name                     = "admin.dev.dembrane.com"
+    host_name                     = "dashboard.dev.dembrane.com"
   }
 
   # HTTP to HTTPS redirect rules - each rule uses its corresponding redirect configuration
@@ -544,19 +544,19 @@ resource "azurerm_application_gateway" "main" {
   }
 
   request_routing_rule {
-    name                        = "app-http-to-https-rule"
+    name                        = "portal-http-to-https-rule"
     priority                   = 3
     rule_type                  = "Basic"
-    http_listener_name         = "app-http-listener"
-    redirect_configuration_name = "app-http-to-https"
+    http_listener_name         = "portal-http-listener"
+    redirect_configuration_name = "portal-http-to-https"
   }
 
   request_routing_rule {
-    name                        = "admin-http-to-https-rule"
+    name                        = "dashboard-http-to-https-rule"
     priority                   = 4
     rule_type                  = "Basic"
-    http_listener_name         = "admin-http-listener"
-    redirect_configuration_name = "admin-http-to-https"
+    http_listener_name         = "dashboard-http-listener"
+    redirect_configuration_name = "dashboard-http-to-https"
   }
 
   # HTTPS listeners
@@ -584,7 +584,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_port_name            = "https-443"
     protocol                      = "Https"
     ssl_certificate_name          = "wildcard-cert-v2"
-    host_name                     = "app.dev.dembrane.com"
+    host_name                     = "portal.dev.dembrane.com"
   }
 
   http_listener {
@@ -593,7 +593,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_port_name            = "https-443"
     protocol                      = "Https"
     ssl_certificate_name          = "wildcard-cert-v2"
-    host_name                     = "admin.dev.dembrane.com"
+    host_name                     = "dashboard.dev.dembrane.com"
   }
 
   # Routing rules
@@ -726,7 +726,7 @@ resource "azurerm_container_group" "participant_frontend" {
     environment_variables = {
       VITE_USE_PARTICIPANT_ROUTER = "1"
       VITE_API_BASE_URL = "https://api.dev.dembrane.com/api"
-      VITE_PARTICIPANT_BASE_URL = "https://app.dev.dembrane.com"
+      VITE_PARTICIPANT_BASE_URL = "https://portal.dev.dembrane.com"
       VITE_BUILD_VERSION = "dev"
       VITE_DIRECTUS_PUBLIC_URL = "https://directus.dev.dembrane.com"
     }
@@ -780,7 +780,7 @@ resource "azurerm_container_group" "dashboard_frontend" {
     environment_variables = {
       VITE_USE_PARTICIPANT_ROUTER = "0"
       VITE_API_BASE_URL = "https://api.dev.dembrane.com/api"
-      VITE_ADMIN_BASE_URL = "https://admin.dev.dembrane.com"
+      VITE_ADMIN_BASE_URL = "https://dashboard.dev.dembrane.com"
       VITE_BUILD_VERSION = "dev"
       VITE_DIRECTUS_PUBLIC_URL = "https://directus.dev.dembrane.com"
     }
@@ -1551,16 +1551,16 @@ resource "azurerm_dns_a_record" "api" {
   target_resource_id  = azurerm_public_ip.appgw.id
 }
 
-resource "azurerm_dns_a_record" "app" {
-  name                = "app"
+resource "azurerm_dns_a_record" "portal" {
+  name                = "portal"
   zone_name           = azurerm_dns_zone.dev_zone.name
   resource_group_name = azurerm_resource_group.rg.name
   ttl                 = 300
   target_resource_id  = azurerm_public_ip.appgw.id
 }
 
-resource "azurerm_dns_a_record" "admin" {
-  name                = "admin"
+resource "azurerm_dns_a_record" "dashboard" {
+  name                = "dashboard"
   zone_name           = azurerm_dns_zone.dev_zone.name
   resource_group_name = azurerm_resource_group.rg.name
   ttl                 = 300
@@ -1757,16 +1757,14 @@ resource "azurerm_key_vault_secret" "directus_auth_google_client_secret" {
 
 resource "azurerm_key_vault_secret" "admin_base_url" {
   name         = "admin-base-url"
-  value        = "https://admin.dev.dembrane.com"  # Example value
+  value        = "https://dashboard.dev.dembrane.com"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-
 }
 
 resource "azurerm_key_vault_secret" "participant_base_url" {
   name         = "participant-base-url"
-  value        = "https://app.dev.dembrane.com"  # Example value
+  value        = "https://portal.dev.dembrane.com"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-
 }
 
 resource "azurerm_key_vault_secret" "openai_api_key" {

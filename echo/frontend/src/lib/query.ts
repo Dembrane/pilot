@@ -1,3 +1,6 @@
+// conventions
+// query key uses the following format: projects , chats (plural)
+// mutation key uses the following format: projects , chats (plural)
 import {
   UseQueryOptions,
   useMutation,
@@ -1246,9 +1249,12 @@ export const useUpdateChatMutation = () => {
   });
 };
 
-export const useProjectChats = (projectId: string) => {
+export const useProjectChats = (
+  projectId: string,
+  query?: Partial<Query<CustomDirectusTypes, ProjectChat>>,
+) => {
   return useQuery({
-    queryKey: ["projects", projectId, "chats"],
+    queryKey: ["projects", projectId, "chats", query],
     queryFn: () =>
       directus.request(
         readItems("project_chat", {
@@ -1259,6 +1265,7 @@ export const useProjectChats = (projectId: string) => {
               _eq: projectId,
             },
           },
+          ...query,
         }),
       ),
   });

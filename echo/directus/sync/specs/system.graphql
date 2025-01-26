@@ -279,11 +279,11 @@ type Subscription {
   directus_access_mutated(event: EventEnum): directus_access_mutated
   directus_comments_mutated(event: EventEnum): directus_comments_mutated
   directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
-  project_mutated(event: EventEnum): project_mutated
   project_chat_mutated(event: EventEnum): project_chat_mutated
   project_tag_mutated(event: EventEnum): project_tag_mutated
   account_mutated(event: EventEnum): account_mutated
   account_directus_users_mutated(event: EventEnum): account_directus_users_mutated
+  project_mutated(event: EventEnum): project_mutated
   project_report_metric_mutated(event: EventEnum): project_report_metric_mutated
   project_report_mutated(event: EventEnum): project_report_mutated
 }
@@ -1829,6 +1829,7 @@ type project {
   Manually syncronize this with https://admin-dembrane.azurewebsites.net/admin/content/echo__portal_tutorial
   """
   default_conversation_tutorial_slug: String
+  conversation_ask_for_participant_name_label: String
   conversations(filter: conversation_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [conversation]
   conversations_func: count_functions
   tags(filter: project_tag_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [project_tag]
@@ -2733,6 +2734,7 @@ input create_project_input {
   Manually syncronize this with https://admin-dembrane.azurewebsites.net/admin/content/echo__portal_tutorial
   """
   default_conversation_tutorial_slug: String
+  conversation_ask_for_participant_name_label: String
   conversations: [create_conversation_input]
   tags: [create_project_tag_input]
   project_analysis_runs: [create_project_analysis_run_input]
@@ -3443,6 +3445,7 @@ input project_filter {
   default_conversation_ask_for_participant_name: boolean_filter_operators
   default_conversation_transcript_prompt: string_filter_operators
   default_conversation_tutorial_slug: string_filter_operators
+  conversation_ask_for_participant_name_label: string_filter_operators
   conversations: conversation_filter
   conversations_func: count_function_filter_operators
   tags: project_tag_filter
@@ -4057,6 +4060,7 @@ input update_project_input {
   Manually syncronize this with https://admin-dembrane.azurewebsites.net/admin/content/echo__portal_tutorial
   """
   default_conversation_tutorial_slug: String
+  conversation_ask_for_participant_name_label: String
   conversations: [update_conversation_input]
   tags: [update_project_tag_input]
   project_analysis_runs: [update_project_analysis_run_input]

@@ -28,8 +28,9 @@ export const ChatContextProgress = ({ chatId }: { chatId: string }) => {
   return (
     <Box>
       <Progress.Root size={8}>
-        {conversationsAlreadyAdded?.map((m) => (
+        {conversationsAlreadyAdded?.map((m, idx) => (
           <Tooltip
+            key={idx}
             label={`${m.conversation_participant_name} - ${Math.ceil(
               m.token_usage * 100,
             )}%`}
@@ -42,8 +43,9 @@ export const ChatContextProgress = ({ chatId }: { chatId: string }) => {
           </Tooltip>
         ))}
 
-        {conversationsToBeAdded?.map((m) => (
+        {conversationsToBeAdded?.map((m, idx) => (
           <Tooltip
+            key={idx}
             label={`${m.conversation_participant_name} - ${Math.ceil(
               m.token_usage * 100,
             )}%`}
@@ -56,8 +58,9 @@ export const ChatContextProgress = ({ chatId }: { chatId: string }) => {
           </Tooltip>
         ))}
 
-        {chatContextQuery.data?.messages.map((m) => (
+        {chatContextQuery.data?.messages.map((m, idx) => (
           <Tooltip
+            key={idx}
             label={t`Messages from ${capitalize(m.role)} - ${Math.ceil(m.token_usage * 100)}%`}
           >
             <Progress.Section value={m.token_usage * 100} color="gray.5" />

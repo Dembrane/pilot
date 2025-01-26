@@ -119,7 +119,8 @@
       "default_conversation_title",
       "default_conversation_description",
       "default_conversation_finish_text",
-      "tags"
+      "tags",
+      "conversation_ask_for_participant_name_label"
     ],
     "policy": "_sync_default_public_policy",
     "_syncId": "04c17a5d-a8d8-4b2f-8efb-a0744f6c27c4"

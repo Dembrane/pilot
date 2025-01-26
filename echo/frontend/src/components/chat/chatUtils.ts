@@ -5,10 +5,15 @@ export const formatMessage = (
   userName: string = "User",
   assistantName: string = "Dembrane",
 ) => {
-  const date = formatDate(
-    new Date(message._original.date_created ?? new Date()),
-    "MMM d yy, h:mm:ss a",
-  );
+  let date = "Unknown";
+  try {
+    date = formatDate(
+      new Date(message._original.date_created ?? new Date()),
+      "MMM d yy, h:mm:ss a",
+    );
+  } catch (e) {
+    console.error(e);
+  }
 
   if (!["user", "dembrane"].includes(message.role)) {
     return ``;

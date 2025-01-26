@@ -6,7 +6,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { NavigationButton } from "../common/NavigationButton";
 import { useCallback } from "react";
 import { useLatestProjectReport } from "@/lib/query";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { t } from "@lingui/core/macro";
 import { useI18nNavigate } from "@/hooks/useI18nNavigate";
 import { CreateReportForm } from "./CreateReportForm";
@@ -17,6 +17,7 @@ export const ReportModalNavigationButton = () => {
   const navigate = useI18nNavigate();
 
   const { projectId } = useParams();
+  const { pathname } = useLocation();
 
   const { data: projectReport, isFetching: isLoadingProjectReport } =
     useLatestProjectReport(projectId ?? "");
@@ -47,6 +48,7 @@ export const ReportModalNavigationButton = () => {
         loadingTooltip={t`Connecting to report services...`}
         onClick={handleClick}
         rightIcon={<IconEdit />}
+        active={pathname.includes("report")}
       >
         <Trans>Report</Trans>
       </NavigationButton>

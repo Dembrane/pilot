@@ -67,10 +67,6 @@ type Query {
   directus_sync_id_map_by_id(id: ID!, version: String): directus_sync_id_map
   directus_sync_id_map_aggregated(groupBy: [String], filter: directus_sync_id_map_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_sync_id_map_aggregated!]!
   directus_sync_id_map_by_version(version: String!, id: ID!): version_directus_sync_id_map
-  project(filter: project_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [project!]!
-  project_by_id(id: ID!, version: String): project
-  project_aggregated(groupBy: [String], filter: project_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [project_aggregated!]!
-  project_by_version(version: String!, id: ID!): version_project
   project_chat(filter: project_chat_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [project_chat!]!
   project_chat_by_id(id: ID!, version: String): project_chat
   project_chat_aggregated(groupBy: [String], filter: project_chat_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [project_chat_aggregated!]!
@@ -87,6 +83,10 @@ type Query {
   account_directus_users_by_id(id: ID!, version: String): account_directus_users
   account_directus_users_aggregated(groupBy: [String], filter: account_directus_users_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [account_directus_users_aggregated!]!
   account_directus_users_by_version(version: String!, id: ID!): version_account_directus_users
+  project(filter: project_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [project!]!
+  project_by_id(id: ID!, version: String): project
+  project_aggregated(groupBy: [String], filter: project_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [project_aggregated!]!
+  project_by_version(version: String!, id: ID!): version_project
   project_report_metric(filter: project_report_metric_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [project_report_metric!]!
   project_report_metric_by_id(id: ID!, version: String): project_report_metric
   project_report_metric_aggregated(groupBy: [String], filter: project_report_metric_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [project_report_metric_aggregated!]!
@@ -132,8 +132,6 @@ type Mutation {
   create_conversation_chunk_item(data: create_conversation_chunk_input!): conversation_chunk
   create_directus_sync_id_map_items(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_sync_id_map_input!]): [directus_sync_id_map!]!
   create_directus_sync_id_map_item(data: create_directus_sync_id_map_input!): directus_sync_id_map
-  create_project_items(filter: project_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_project_input!]): [project!]!
-  create_project_item(data: create_project_input!): project
   create_project_chat_items(filter: project_chat_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_project_chat_input!]): [project_chat!]!
   create_project_chat_item(data: create_project_chat_input!): project_chat
   create_project_tag_items(filter: project_tag_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_project_tag_input!]): [project_tag!]!
@@ -142,6 +140,8 @@ type Mutation {
   create_account_item(data: create_account_input!): account
   create_account_directus_users_items(filter: account_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_account_directus_users_input!]): [account_directus_users!]!
   create_account_directus_users_item(data: create_account_directus_users_input!): account_directus_users
+  create_project_items(filter: project_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_project_input!]): [project!]!
+  create_project_item(data: create_project_input!): project
   create_project_report_metric_items(filter: project_report_metric_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_project_report_metric_input!]): [project_report_metric!]!
   create_project_report_metric_item(data: create_project_report_metric_input!): project_report_metric
   create_project_report_items(filter: project_report_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_project_report_input!]): [project_report!]!
@@ -197,9 +197,6 @@ type Mutation {
   update_directus_sync_id_map_items(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_sync_id_map_input!): [directus_sync_id_map!]!
   update_directus_sync_id_map_batch(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_sync_id_map_input!]): [directus_sync_id_map!]!
   update_directus_sync_id_map_item(id: ID!, data: update_directus_sync_id_map_input!): directus_sync_id_map
-  update_project_items(filter: project_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_project_input!): [project!]!
-  update_project_batch(filter: project_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_project_input!]): [project!]!
-  update_project_item(id: ID!, data: update_project_input!): project
   update_project_chat_items(filter: project_chat_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_project_chat_input!): [project_chat!]!
   update_project_chat_batch(filter: project_chat_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_project_chat_input!]): [project_chat!]!
   update_project_chat_item(id: ID!, data: update_project_chat_input!): project_chat
@@ -212,6 +209,9 @@ type Mutation {
   update_account_directus_users_items(filter: account_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_account_directus_users_input!): [account_directus_users!]!
   update_account_directus_users_batch(filter: account_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_account_directus_users_input!]): [account_directus_users!]!
   update_account_directus_users_item(id: ID!, data: update_account_directus_users_input!): account_directus_users
+  update_project_items(filter: project_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_project_input!): [project!]!
+  update_project_batch(filter: project_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_project_input!]): [project!]!
+  update_project_item(id: ID!, data: update_project_input!): project
   update_project_report_metric_items(filter: project_report_metric_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_project_report_metric_input!): [project_report_metric!]!
   update_project_report_metric_batch(filter: project_report_metric_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_project_report_metric_input!]): [project_report_metric!]!
   update_project_report_metric_item(id: ID!, data: update_project_report_metric_input!): project_report_metric
@@ -252,8 +252,6 @@ type Mutation {
   delete_conversation_chunk_item(id: ID!): delete_one
   delete_directus_sync_id_map_items(ids: [ID]!): delete_many
   delete_directus_sync_id_map_item(id: ID!): delete_one
-  delete_project_items(ids: [ID]!): delete_many
-  delete_project_item(id: ID!): delete_one
   delete_project_chat_items(ids: [ID]!): delete_many
   delete_project_chat_item(id: ID!): delete_one
   delete_project_tag_items(ids: [ID]!): delete_many
@@ -262,6 +260,8 @@ type Mutation {
   delete_account_item(id: ID!): delete_one
   delete_account_directus_users_items(ids: [ID]!): delete_many
   delete_account_directus_users_item(id: ID!): delete_one
+  delete_project_items(ids: [ID]!): delete_many
+  delete_project_item(id: ID!): delete_one
   delete_project_report_metric_items(ids: [ID]!): delete_many
   delete_project_report_metric_item(id: ID!): delete_one
   delete_project_report_items(ids: [ID]!): delete_many
@@ -307,11 +307,11 @@ type Subscription {
   directus_access_mutated(event: EventEnum): directus_access_mutated
   directus_comments_mutated(event: EventEnum): directus_comments_mutated
   directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
-  project_mutated(event: EventEnum): project_mutated
   project_chat_mutated(event: EventEnum): project_chat_mutated
   project_tag_mutated(event: EventEnum): project_tag_mutated
   account_mutated(event: EventEnum): account_mutated
   account_directus_users_mutated(event: EventEnum): account_directus_users_mutated
+  project_mutated(event: EventEnum): project_mutated
   project_report_metric_mutated(event: EventEnum): project_report_metric_mutated
   project_report_mutated(event: EventEnum): project_report_mutated
 }
@@ -1304,6 +1304,7 @@ type project {
   Manually syncronize this with https://admin-dembrane.azurewebsites.net/admin/content/echo__portal_tutorial
   """
   default_conversation_tutorial_slug: String
+  conversation_ask_for_participant_name_label: String
   conversations(filter: conversation_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [conversation]
   conversations_func: count_functions
   tags(filter: project_tag_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [project_tag]
@@ -1344,6 +1345,7 @@ type project_aggregated_count {
   Manually syncronize this with https://admin-dembrane.azurewebsites.net/admin/content/echo__portal_tutorial
   """
   default_conversation_tutorial_slug: Int
+  conversation_ask_for_participant_name_label: Int
   conversations: Int
   tags: Int
   project_analysis_runs: Int
@@ -2023,6 +2025,7 @@ type version_project {
   Manually syncronize this with https://admin-dembrane.azurewebsites.net/admin/content/echo__portal_tutorial
   """
   default_conversation_tutorial_slug: String
+  conversation_ask_for_participant_name_label: String
   conversations: JSON
   tags: JSON
   project_analysis_runs: JSON
@@ -2648,6 +2651,7 @@ input create_project_input {
   Manually syncronize this with https://admin-dembrane.azurewebsites.net/admin/content/echo__portal_tutorial
   """
   default_conversation_tutorial_slug: String
+  conversation_ask_for_participant_name_label: String
   conversations: [create_conversation_input]
   tags: [create_project_tag_input]
   project_analysis_runs: [create_project_analysis_run_input]
@@ -3207,6 +3211,7 @@ input project_filter {
   default_conversation_ask_for_participant_name: boolean_filter_operators
   default_conversation_transcript_prompt: string_filter_operators
   default_conversation_tutorial_slug: string_filter_operators
+  conversation_ask_for_participant_name_label: string_filter_operators
   conversations: conversation_filter
   conversations_func: count_function_filter_operators
   tags: project_tag_filter
@@ -3628,6 +3633,7 @@ input update_project_input {
   Manually syncronize this with https://admin-dembrane.azurewebsites.net/admin/content/echo__portal_tutorial
   """
   default_conversation_tutorial_slug: String
+  conversation_ask_for_participant_name_label: String
   conversations: [update_conversation_input]
   tags: [update_project_tag_input]
   project_analysis_runs: [update_project_analysis_run_input]

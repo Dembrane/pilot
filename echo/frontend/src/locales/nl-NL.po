@@ -84,7 +84,7 @@ msgstr "0 Aspecten"
 msgid "Add additional context (Optional)"
 msgstr "Voeg extra context toe (Optioneel)"
 
-#: src/components/participant/ParticipantInitiateForm.tsx:97
+#: src/components/participant/ParticipantInitiateForm.tsx:101
 msgid "Add all that apply"
 msgstr "Vink aan wat van toepassing is"
 
@@ -218,7 +218,7 @@ msgstr "Weet je zeker dat je de bibliotheek wilt genereren? Dit kan een tijdje d
 #~ msgid "Are you sure you want to stop recording?"
 #~ msgstr "Weet je zeker dat je wilt stoppen met opnemen?"
 
-#: src/components/project/ProjectSidebar.tsx:101
+#: src/components/project/ProjectSidebar.tsx:104
 msgid "Ask"
 msgstr "Stel vraag"
 
@@ -284,7 +284,7 @@ msgstr "Basis (Essentieel tutorial slides)"
 msgid "Basic Settings"
 msgstr "Basis instellingen"
 
-#: src/components/participant/ParticipantInitiateForm.tsx:123
+#: src/components/participant/ParticipantInitiateForm.tsx:127
 msgid "Begin!"
 msgstr "Begin!"
 
@@ -319,7 +319,7 @@ msgstr "Chat"
 msgid "Chat | Dembrane"
 msgstr "Chat | Dembrane"
 
-#: src/components/chat/ChatAccordion.tsx:94
+#: src/components/chat/ChatAccordion.tsx:119
 msgid "Chats"
 msgstr "Chats"
 
@@ -349,7 +349,7 @@ msgstr "Bevestig nieuw wachtwoord"
 msgid "Confirm Password"
 msgstr "Bevestig wachtwoord"
 
-#: src/components/report/ReportModalNavigationButton.tsx:47
+#: src/components/report/ReportModalNavigationButton.tsx:48
 msgid "Connecting to report services..."
 msgstr "Verbinding maken met rapportservices..."
 
@@ -463,6 +463,10 @@ msgstr "Wil je bijdragen aan dit project?"
 #: src/components/Documents.tsx:199
 #~ msgid "Document was deleted"
 #~ msgstr "Document is verwijderd"
+
+#: src/components/layout/Header.tsx:145
+msgid "Documentation"
+msgstr "Documentatie"
 
 #: src/components/Documents.tsx:48
 #~ msgid "Documents"
@@ -638,7 +642,7 @@ msgstr "Rasterweergave"
 #~ msgstr "Hallo, ik ben vandaag je onderzoeksassistent. Om te beginnen upload je de documenten die je wilt analyseren."
 
 #. placeholder {0}: user.first_name
-#: src/components/layout/Header.tsx:139
+#: src/components/layout/Header.tsx:132
 msgid "Hi, {0}"
 msgstr "Hallo, {0}"
 
@@ -757,7 +761,7 @@ msgstr "Laatst opgeslagen {0}"
 #: src/routes/project/library/ProjectLibraryView.tsx:32
 #: src/routes/project/library/ProjectLibraryAspect.tsx:63
 #: src/routes/project/library/ProjectLibrary.tsx:146
-#: src/components/project/ProjectSidebar.tsx:109
+#: src/components/project/ProjectSidebar.tsx:113
 msgid "Library"
 msgstr "Bibliotheek"
 
@@ -793,7 +797,7 @@ msgstr "Inloggen | Dembrane"
 msgid "Login as an existing user"
 msgstr "Inloggen als bestaande gebruiker"
 
-#: src/components/layout/Header.tsx:155
+#: src/components/layout/Header.tsx:152
 msgid "Logout"
 msgstr "Uitloggen"
 
@@ -803,7 +807,7 @@ msgstr "Vergaderingenotes"
 
 #. placeholder {0}: capitalize(m.role)
 #. placeholder {1}: Math.ceil(m.token_usage * 100)
-#: src/components/chat/ChatContextProgress.tsx:61
+#: src/components/chat/ChatContextProgress.tsx:64
 msgid "Messages from {0} - {1}%"
 msgstr "Berichten van {0} - {1}%"
 
@@ -830,7 +834,6 @@ msgid "Move to Project"
 msgstr "Verplaats naar project"
 
 #: src/components/project/ProjectBasicEdit.tsx:104
-#: src/components/participant/ParticipantInitiateForm.tsx:87
 #: src/components/conversation/ConversationEdit.tsx:125
 msgid "Name"
 msgstr "Naam"
@@ -865,7 +868,7 @@ msgstr "Nieuwste eerst"
 msgid "Next"
 msgstr "Volgende"
 
-#: src/components/chat/ChatAccordion.tsx:104
+#: src/components/chat/ChatAccordion.tsx:129
 msgid "No chats found. Start a chat using the \"Ask\" button."
 msgstr "Geen chats gevonden. Start een chat met behulp van de \"Vraag\" knop."
 
@@ -968,8 +971,8 @@ msgstr "Openen"
 #~ msgstr "Open Document Chat ✨"
 
 #: src/components/layout/Header.tsx:150
-msgid "Open Documentation"
-msgstr "Open documentatie"
+#~ msgid "Open Documentation"
+#~ msgstr "Open documentatie"
 
 #: src/components/conversation/OpenForParticipationSummaryCard.tsx:32
 msgid "Open for Participation?"
@@ -1119,7 +1122,7 @@ msgstr "Transcript wordt verwerkt"
 msgid "Processing your report..."
 msgstr "Rapport wordt verwerkt..."
 
-#: src/components/report/ReportTimeline.tsx:286
+#: src/components/report/ReportTimeline.tsx:296
 msgid "Project Created"
 msgstr "Project aangemaakt"
 
@@ -1155,7 +1158,7 @@ msgstr "Projecten"
 msgid "Projects | Dembrane"
 msgstr "Projecten | Dembrane"
 
-#: src/components/project/ProjectSidebar.tsx:52
+#: src/components/project/ProjectSidebar.tsx:54
 msgid "Projects Home"
 msgstr "Projecten Home"
 
@@ -1215,16 +1218,16 @@ msgstr "Naam wijzigen"
 
 #: src/routes/project/report/ProjectReportRoute.tsx:61
 #: src/components/report/ReportRenderer.tsx:72
-#: src/components/report/ReportModalNavigationButton.tsx:51
+#: src/components/report/ReportModalNavigationButton.tsx:53
 msgid "Report"
 msgstr "Rapport"
 
-#: src/components/layout/Header.tsx:78
+#: src/components/layout/Header.tsx:71
 msgid "Report an issue"
 msgstr "Rapporteer een probleem"
 
 #. placeholder {0}: formatDateForAxis(new Date(data.allReports[0]?.createdAt!).getTime())
-#: src/components/report/ReportTimeline.tsx:296
+#: src/components/report/ReportTimeline.tsx:306
 msgid "Report Created - {0}"
 msgstr "Rapport aangemaakt - {0}"
 
@@ -1233,7 +1236,7 @@ msgid "Report generation is currently in beta and limited to projects with fewer
 msgstr "Rapport generatie is momenteel in beta en beperkt tot projecten met minder dan 10 uur opname."
 
 #. placeholder {0}: formatDateForAxis(new Date(r.createdAt!).getTime())
-#: src/components/report/ReportTimeline.tsx:309
+#: src/components/report/ReportTimeline.tsx:319
 msgid "Report Updated - {0}"
 msgstr "Rapport bijgewerkt - {0}"
 
@@ -1327,6 +1330,10 @@ msgstr "Verzenden"
 #: src/components/view/DummyViews.tsx:27
 msgid "Sentiment"
 msgstr "Gevoel"
+
+#: src/components/participant/ParticipantInitiateForm.tsx:90
+msgid "Session Name"
+msgstr "Sessienaam"
 
 #: src/routes/auth/Login.tsx:91
 msgid "Setting up your first project"
@@ -1423,7 +1430,7 @@ msgid "Summary"
 msgstr "Samenvatting"
 
 #: src/components/project/ProjectTagsInput.tsx:219
-#: src/components/participant/ParticipantInitiateForm.tsx:96
+#: src/components/participant/ParticipantInitiateForm.tsx:100
 #: src/components/conversation/ConversationEdit.tsx:141
 msgid "Tags"
 msgstr "Trefwoorden"

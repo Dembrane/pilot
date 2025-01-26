@@ -1,6 +1,4 @@
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -29,7 +27,7 @@ const COLORS = {
   blueFill: "rgba(153, 204, 255, 0.2)", // Transparent blue for area fill
 };
 
-const formatDateForAxis = (timestamp: number) =>
+const formatDateForAxis = (timestamp: number): string =>
   format(new Date(timestamp), "MMM dd");
 
 const CustomReferenceLabel = ({ value, viewBox }: any) => {
@@ -93,6 +91,10 @@ export function ReportTimeline({
     return (
       <Text className="text-red-500">There was an error loading your data</Text>
     );
+  }
+
+  if (!data?.allReports?.length) {
+    return <Text>No report data available</Text>;
   }
 
   // Convert all dates to timestamps
@@ -160,7 +162,7 @@ export function ReportTimeline({
 
   // Add some padding dates
   const paddedStartDate = subDays(new Date(projectCreatedAt), 1).getTime();
-  const paddedEndDate = addDays(new Date(lastDate), 4).getTime();
+  const paddedEndDate = addDays(new Date(lastDate), 1).getTime();
 
   // Insert the padded start point:
   const paddedData = [
@@ -172,13 +174,20 @@ export function ReportTimeline({
     ...timelineData,
     {
       datetime: paddedEndDate,
-      conversations: 0,
-      views: 0,
+      conversations: null,
+      views: null,
     },
   ];
 
+  const ticks = [
+    projectCreatedAt,
+    ...data.allReports.map((r) => new Date(r.createdAt!).getTime()),
+  ];
+
+  console.log(ticks);
+
   return (
-    <ResponsiveContainer width="100%" height={250}>
+    <ResponsiveContainer width="100%" minWidth={300} height={200}>
       <AreaChart
         data={paddedData}
         margin={{ top: 40, right: 40, left: 40, bottom: 20 }}
@@ -199,8 +208,9 @@ export function ReportTimeline({
           domain={["dataMin", "dataMax"]}
           tickFormatter={formatDateForAxis}
           stroke="#6B7280"
-          tickLine={false}
+          tickLine={true}
           axisLine={{ stroke: "#E5E7EB" }}
+          ticks={ticks}
         />
 
         <YAxis
@@ -242,7 +252,7 @@ export function ReportTimeline({
           verticalAlign="middle"
           layout="vertical"
           wrapperStyle={{
-            paddingLeft: "2",
+            paddingLeft: "2rem",
           }}
           payload={[
             {
@@ -320,6 +330,7 @@ export function ReportTimeline({
           fill={COLORS.greenFill}
           strokeWidth={2}
           dot={{ r: 1, fill: COLORS.green }}
+          isAnimationActive={false}
         />
 
         <Area
@@ -330,6 +341,7 @@ export function ReportTimeline({
           fill={COLORS.blueFill}
           strokeWidth={2}
           dot={{ r: 1, fill: COLORS.blue }}
+          isAnimationActive={false}
         />
 
         {showBrush && (

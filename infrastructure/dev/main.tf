@@ -457,7 +457,7 @@ resource "azurerm_application_gateway" "main" {
     timeout             = 30
     unhealthy_threshold = 3
     pick_host_name_from_backend_http_settings = false
-    host                = "app.dev.dembrane.com"
+    host                = "portal.dev.dembrane.com"
   }
 
   # HTTP to HTTPS redirect configurations - one for each domain
@@ -478,7 +478,7 @@ resource "azurerm_application_gateway" "main" {
   }
 
   redirect_configuration {
-    name                 = "app-http-to-https"
+    name                 = "portal-http-to-https"
     redirect_type        = "Permanent"
     include_path         = true
     include_query_string = true
@@ -486,7 +486,7 @@ resource "azurerm_application_gateway" "main" {
   }
 
   redirect_configuration {
-    name                 = "admin-http-to-https"
+    name                 = "dashboard-http-to-https"
     redirect_type        = "Permanent"
     include_path         = true
     include_query_string = true
@@ -511,19 +511,19 @@ resource "azurerm_application_gateway" "main" {
   }
 
   http_listener {
-    name                           = "app-http-listener"
+    name                           = "portal-http-listener"
     frontend_ip_configuration_name = "frontend-ip-config"
     frontend_port_name            = "http-80"
     protocol                      = "Http"
-    host_name                     = "app.dev.dembrane.com"
+    host_name                     = "portal.dev.dembrane.com"
   }
 
   http_listener {
-    name                           = "admin-http-listener"
+    name                           = "dashboard-http-listener"
     frontend_ip_configuration_name = "frontend-ip-config"
     frontend_port_name            = "http-80"
     protocol                      = "Http"
-    host_name                     = "admin.dev.dembrane.com"
+    host_name                     = "dashboard.dev.dembrane.com"
   }
 
   # HTTP to HTTPS redirect rules - each rule uses its corresponding redirect configuration
@@ -544,19 +544,19 @@ resource "azurerm_application_gateway" "main" {
   }
 
   request_routing_rule {
-    name                        = "app-http-to-https-rule"
+    name                        = "portal-http-to-https-rule"
     priority                   = 3
     rule_type                  = "Basic"
-    http_listener_name         = "app-http-listener"
-    redirect_configuration_name = "app-http-to-https"
+    http_listener_name         = "portal-http-listener"
+    redirect_configuration_name = "portal-http-to-https"
   }
 
   request_routing_rule {
-    name                        = "admin-http-to-https-rule"
+    name                        = "dashboard-http-to-https-rule"
     priority                   = 4
     rule_type                  = "Basic"
-    http_listener_name         = "admin-http-listener"
-    redirect_configuration_name = "admin-http-to-https"
+    http_listener_name         = "dashboard-http-listener"
+    redirect_configuration_name = "dashboard-http-to-https"
   }
 
   # HTTPS listeners
@@ -584,7 +584,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_port_name            = "https-443"
     protocol                      = "Https"
     ssl_certificate_name          = "wildcard-cert-v2"
-    host_name                     = "app.dev.dembrane.com"
+    host_name                     = "portal.dev.dembrane.com"
   }
 
   http_listener {
@@ -593,7 +593,7 @@ resource "azurerm_application_gateway" "main" {
     frontend_port_name            = "https-443"
     protocol                      = "Https"
     ssl_certificate_name          = "wildcard-cert-v2"
-    host_name                     = "admin.dev.dembrane.com"
+    host_name                     = "dashboard.dev.dembrane.com"
   }
 
   # Routing rules
@@ -726,7 +726,7 @@ resource "azurerm_container_group" "participant_frontend" {
     environment_variables = {
       VITE_USE_PARTICIPANT_ROUTER = "1"
       VITE_API_BASE_URL = "https://api.dev.dembrane.com/api"
-      VITE_PARTICIPANT_BASE_URL = "https://app.dev.dembrane.com"
+      VITE_PARTICIPANT_BASE_URL = "https://portal.dev.dembrane.com"
       VITE_BUILD_VERSION = "dev"
       VITE_DIRECTUS_PUBLIC_URL = "https://directus.dev.dembrane.com"
     }
@@ -780,7 +780,7 @@ resource "azurerm_container_group" "dashboard_frontend" {
     environment_variables = {
       VITE_USE_PARTICIPANT_ROUTER = "0"
       VITE_API_BASE_URL = "https://api.dev.dembrane.com/api"
-      VITE_ADMIN_BASE_URL = "https://admin.dev.dembrane.com"
+      VITE_ADMIN_BASE_URL = "https://dashboard.dev.dembrane.com"
       VITE_BUILD_VERSION = "dev"
       VITE_DIRECTUS_PUBLIC_URL = "https://directus.dev.dembrane.com"
     }
@@ -841,7 +841,7 @@ resource "azurerm_container_group" "directus" {
       PORT = "8055"
       TELEMETRY = "false"
       CORS_ENABLED = "true"
-      CORS_ORIGIN = "https://app.dev.dembrane.com,https://admin.dev.dembrane.com"
+      CORS_ORIGIN = "https://portal.dev.dembrane.com,https://dashboard.dev.dembrane.com,https://directus.dev.dembrane.com"
       CORS_CREDENTIALS = "true"
       SESSION_COOKIE_DOMAIN = "dev.dembrane.com"
       SESSION_COOKIE_SAME_SITE = "lax"
@@ -863,20 +863,21 @@ resource "azurerm_container_group" "directus" {
       PASSWORD_RESET_URL_ALLOW_LIST = "${azurerm_key_vault_secret.admin_base_url.value}/password-reset"
       USER_INVITE_URL_ALLOW_LIST = "${azurerm_key_vault_secret.admin_base_url.value}/invite"
       ADMIN_EMAIL = "admin@dembrane.com"
+      # Database connection details
+      DB_CLIENT = "${azurerm_key_vault_secret.directus_db_client.value}"
+      DB_HOST = "${azurerm_key_vault_secret.directus_db_host.value}"
+      DB_PORT = "${azurerm_key_vault_secret.directus_db_port.value}"
+      DB_DATABASE = "${azurerm_key_vault_secret.directus_db_database.value}"
+      REDIS_ENABLED = "${azurerm_key_vault_secret.directus_redis_enabled.value}"
+      REDIS = "${azurerm_key_vault_secret.directus_redis_url.value}"
     }
 
     secure_environment_variables = {
       PUBLIC_URL = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_public_url.versionless_id})"
       SECRET = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_secret.versionless_id})"
       ADMIN_TOKEN = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
-      DB_CLIENT = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_client.versionless_id})"
-      DB_HOST = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_host.versionless_id})"
-      DB_PORT = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_port.versionless_id})"
       DB_USER = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_user.versionless_id})"
       DB_PASSWORD = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_password.versionless_id})"
-      DB_DATABASE = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_db_database.versionless_id})"
-      REDIS_ENABLED = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_redis_enabled.versionless_id})"
-      REDIS = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_redis_url.versionless_id})"
       # SMTP settings
       EMAIL_FROM = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_smtp_from.versionless_id})"
       EMAIL_SMTP_HOST = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_smtp_host.versionless_id})"
@@ -1551,16 +1552,16 @@ resource "azurerm_dns_a_record" "api" {
   target_resource_id  = azurerm_public_ip.appgw.id
 }
 
-resource "azurerm_dns_a_record" "app" {
-  name                = "app"
+resource "azurerm_dns_a_record" "portal" {
+  name                = "portal"
   zone_name           = azurerm_dns_zone.dev_zone.name
   resource_group_name = azurerm_resource_group.rg.name
   ttl                 = 300
   target_resource_id  = azurerm_public_ip.appgw.id
 }
 
-resource "azurerm_dns_a_record" "admin" {
-  name                = "admin"
+resource "azurerm_dns_a_record" "dashboard" {
+  name                = "dashboard"
   zone_name           = azurerm_dns_zone.dev_zone.name
   resource_group_name = azurerm_resource_group.rg.name
   ttl                 = 300
@@ -1757,16 +1758,14 @@ resource "azurerm_key_vault_secret" "directus_auth_google_client_secret" {
 
 resource "azurerm_key_vault_secret" "admin_base_url" {
   name         = "admin-base-url"
-  value        = "https://admin.dev.dembrane.com"  # Example value
+  value        = "https://dashboard.dev.dembrane.com"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-
 }
 
 resource "azurerm_key_vault_secret" "participant_base_url" {
   name         = "participant-base-url"
-  value        = "https://app.dev.dembrane.com"  # Example value
+  value        = "https://portal.dev.dembrane.com"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-
 }
 
 resource "azurerm_key_vault_secret" "openai_api_key" {
@@ -1819,3 +1818,126 @@ resource "azurerm_role_assignment" "directus_secret_access" {
 }
 
 # worker envs
+
+# Ubuntu Ops Server
+# Subnet for Ops Server
+resource "azurerm_subnet" "ops_server_subnet" {
+  name                 = "DBR-${var.environment}-Networks-ops-server-subnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.5.0/24"]
+}
+
+resource "azurerm_network_interface" "ops_server_nic" {
+  name                = "DBR-${var.environment}-OpsServer-NIC"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.ops_server_subnet.id
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "ops_server" {
+  name                = "DBR-${var.environment}-OpsServer-VM"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  size                = "Standard_B1s"
+  admin_username      = "azureuser"
+  network_interface_ids = [
+    azurerm_network_interface.ops_server_nic.id,
+  ]
+
+  admin_password                  = azurerm_key_vault_secret.ops_server_password.value
+  disable_password_authentication = false
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "18.04-LTS"
+    version   = "latest"
+  }
+}
+
+# Store the VM password in Key Vault
+resource "azurerm_key_vault_secret" "ops_server_password" {
+  name         = "ops-server-password"
+  value        = "P@ssw0rd1234!"  # Change this to a secure password
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+}
+
+# Output the admin username
+output "ops_server_admin_username" {
+  value = azurerm_linux_virtual_machine.ops_server.admin_username
+}
+
+# Output a message about password storage
+output "ops_server_password_message" {
+  value = "The ops server password is stored in the Key Vault. Retrieve it using: az keyvault secret show --name ops-server-password --vault-name ${azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.name} --query value -o tsv"
+}
+
+# Subnet for Azure Bastion
+resource "azurerm_subnet" "bastion_subnet" {
+  name                 = "AzureBastionSubnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.6.0/24"]
+}
+
+# Bastion Host
+resource "azurerm_public_ip" "bastion_pip" {
+  name                = "DBR-${var.environment}-Bastion-PIP"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
+resource "azurerm_bastion_host" "bastion" {
+  name                = "DBR-${var.environment}-Bastion"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                 = "configuration"
+    subnet_id            = azurerm_subnet.bastion_subnet.id
+    public_ip_address_id = azurerm_public_ip.bastion_pip.id
+  }
+}
+
+# Update NSG to allow SSH from Bastion
+resource "azurerm_network_security_rule" "allow_ssh_from_bastion" {
+  name                        = "AllowSSHFromBastion"
+  priority                    = 200
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = azurerm_subnet.bastion_subnet.address_prefixes[0]
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.private_nsg.name
+}
+
+# Allow access to PostgreSQL from Ops Server
+resource "azurerm_network_security_rule" "allow_postgres_from_ops" {
+  name                        = "AllowPostgresFromOps"
+  priority                    = 210
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "5432"
+  source_address_prefix       = azurerm_subnet.ops_server_subnet.address_prefixes[0]
+  destination_address_prefix  = azurerm_cosmosdb_postgresql_cluster.cosmo.name
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.private_nsg.name
+}

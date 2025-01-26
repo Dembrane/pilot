@@ -1820,6 +1820,14 @@ resource "azurerm_role_assignment" "directus_secret_access" {
 # worker envs
 
 # Ubuntu Ops Server
+# Subnet for Ops Server
+resource "azurerm_subnet" "ops_server_subnet" {
+  name                 = "DBR-${var.environment}-Networks-ops-server-subnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.5.0/24"]
+}
+
 resource "azurerm_network_interface" "ops_server_nic" {
   name                = "DBR-${var.environment}-OpsServer-NIC"
   location            = azurerm_resource_group.rg.location
@@ -1827,7 +1835,7 @@ resource "azurerm_network_interface" "ops_server_nic" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.private_subnet[0].id
+    subnet_id                     = azurerm_subnet.ops_server_subnet.id
     private_ip_address_allocation = "Dynamic"
   }
 }
@@ -1875,6 +1883,14 @@ output "ops_server_password_message" {
   value = "The ops server password is stored in the Key Vault. Retrieve it using: az keyvault secret show --name ops-server-password --vault-name ${azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.name} --query value -o tsv"
 }
 
+# Subnet for Azure Bastion
+resource "azurerm_subnet" "bastion_subnet" {
+  name                 = "AzureBastionSubnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.6.0/24"]
+}
+
 # Bastion Host
 resource "azurerm_public_ip" "bastion_pip" {
   name                = "DBR-${var.environment}-Bastion-PIP"
@@ -1891,7 +1907,7 @@ resource "azurerm_bastion_host" "bastion" {
 
   ip_configuration {
     name                 = "configuration"
-    subnet_id            = azurerm_subnet.public_subnet[0].id
+    subnet_id            = azurerm_subnet.bastion_subnet.id
     public_ip_address_id = azurerm_public_ip.bastion_pip.id
   }
 }
@@ -1905,7 +1921,7 @@ resource "azurerm_network_security_rule" "allow_ssh_from_bastion" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = azurerm_subnet.public_subnet[0].address_prefixes[0]
+  source_address_prefix       = azurerm_subnet.bastion_subnet.address_prefixes[0]
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.rg.name
   network_security_group_name = azurerm_network_security_group.private_nsg.name
@@ -1920,7 +1936,7 @@ resource "azurerm_network_security_rule" "allow_postgres_from_ops" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "5432"
-  source_address_prefix       = azurerm_network_interface.ops_server_nic.private_ip_address
+  source_address_prefix       = azurerm_subnet.ops_server_subnet.address_prefixes[0]
   destination_address_prefix  = azurerm_cosmosdb_postgresql_cluster.cosmo.name
   resource_group_name         = azurerm_resource_group.rg.name
   network_security_group_name = azurerm_network_security_group.private_nsg.name

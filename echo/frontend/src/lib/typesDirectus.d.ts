@@ -509,6 +509,7 @@ type Project = {
   context?: string | null;
   conversations: any[] | Conversation[];
   created_at?: string | null;
+  conversation_ask_for_participant_name_label?: string | null;
   default_conversation_ask_for_participant_name?: boolean | null;
   default_conversation_description?: string | null;
   default_conversation_finish_text?: string | null;

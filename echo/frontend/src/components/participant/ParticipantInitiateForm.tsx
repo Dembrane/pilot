@@ -81,11 +81,15 @@ export const ParticipantInitiateForm = ({ project }: { project: Project }) => {
 
         {project.default_conversation_ask_for_participant_name && (
           <TextInput
+            // this bug! haha. autoFocus was serioursly messing up the animations with the onboarding cards!
             // autoFocus
             required
             size="md"
-            label={t`Name`}
-            placeholder="John Doe, Group 1, etc."
+            label={
+              project.conversation_ask_for_participant_name_label ??
+              t`Session Name`
+            }
+            placeholder="Group 1, John Doe, etc."
             {...register("name")}
             error={errors.name?.message}
             className="w-full"

@@ -11,7 +11,7 @@ import {
   Title,
   Tooltip,
 } from "@mantine/core";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { ProjectAccordion } from "./ProjectAccordion";
 import { NavigationButton } from "../common/NavigationButton";
 import { Breadcrumbs } from "../common/Breadcrumbs";
@@ -24,6 +24,8 @@ export const ProjectSidebar = () => {
   const { projectId, conversationId } = useParams();
 
   const projectQuery = useProjectById({ projectId: projectId ?? "" });
+
+  const { pathname } = useLocation();
 
   // const { isCollapsed, toggleSidebar } = useSidebarCollapsed();
 
@@ -97,6 +99,7 @@ export const ProjectSidebar = () => {
         onClick={handleAsk}
         component="button"
         rightIcon={<Icons.Stars />}
+        active={pathname.includes("chat")}
       >
         <Trans>Ask</Trans>
       </NavigationButton>
@@ -105,6 +108,7 @@ export const ProjectSidebar = () => {
         to={`/projects/${projectId}/library`}
         component="a"
         rightIcon={<Icons.LightBulb />}
+        active={pathname.includes("library")}
       >
         <Trans>Library</Trans>
       </NavigationButton>

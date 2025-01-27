@@ -80,8 +80,33 @@ const ChatAccordionItemMenu = ({ chat }: { chat: Partial<ProjectChat> }) => {
 
 // Chat Accordion
 export const ChatAccordion = ({ projectId }: { projectId: string }) => {
-  const chatsQuery = useProjectChats(projectId);
   const { chatId: activeChatId } = useParams();
+
+  const chatsQuery = useProjectChats(projectId, {
+    filter: {
+      project_id: {
+        _eq: projectId,
+      },
+      _or: [
+        // @ts-ignore
+        ...(activeChatId
+          ? [
+              {
+                id: {
+                  _eq: activeChatId,
+                },
+              },
+            ]
+          : []),
+        // @ts-ignore
+        {
+          "count(project_chat_messages)": {
+            _gt: 0,
+          },
+        },
+      ],
+    },
+  });
 
   return (
     <Accordion.Item value="chat">
@@ -111,7 +136,9 @@ export const ChatAccordion = ({ projectId }: { projectId: string }) => {
               key={item.id}
               to={`/projects/${projectId}/chats/${item.id}`}
               active={item.id === activeChatId}
-              rightSection={<ChatAccordionItemMenu chat={item} />}
+              rightSection={
+                <ChatAccordionItemMenu chat={item as ProjectChat} />
+              }
             >
               <Text size="xs">
                 {item.name

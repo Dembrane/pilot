@@ -20,5 +20,8 @@ server_pid=$!
 wait $server_pid
 wait $frontend_pid
 
-echo "Before deploying check the following:"
-echo "1. Check if all translations are correct"
+echo -e "\033[1;33m\n==============================================\033[0m"
+echo -e "\033[1;33m   IMPORTANT PRE-DEPLOYMENT CHECKLIST:\033[0m"
+echo -e "\033[1;33m==============================================\033[0m"
+echo -e "\033[1;33m1. Check if all translations are correct\033[0m"
+echo -e "\033[1;33m==============================================\n\033[0m"

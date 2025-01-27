@@ -72,7 +72,7 @@ msgstr "0 Aspects"
 msgid "Add additional context (Optional)"
 msgstr "Ajouter un contexte supplémentaire (Optionnel)"
 
-#: src/components/participant/ParticipantInitiateForm.tsx:97
+#: src/components/participant/ParticipantInitiateForm.tsx:101
 msgid "Add all that apply"
 msgstr "Ajouter tout ce qui s'applique"
 
@@ -166,7 +166,7 @@ msgstr "Êtes-vous sûr de vouloir terminer ?"
 msgid "Are you sure you want to generate the library? This will take a while and overwrite your current views and insights."
 msgstr "Êtes-vous sûr de vouloir générer la bibliothèque ? Cela prendra du temps et écrasera vos vues et perspectives actuelles."
 
-#: src/components/project/ProjectSidebar.tsx:101
+#: src/components/project/ProjectSidebar.tsx:104
 msgid "Ask"
 msgstr "Demander"
 
@@ -208,7 +208,7 @@ msgstr "Basique (Diapositives tutorielles essentielles)"
 msgid "Basic Settings"
 msgstr "Paramètres de base"
 
-#: src/components/participant/ParticipantInitiateForm.tsx:123
+#: src/components/participant/ParticipantInitiateForm.tsx:127
 msgid "Begin!"
 msgstr "Commencer !"
 
@@ -243,7 +243,7 @@ msgstr "Discussion"
 msgid "Chat | Dembrane"
 msgstr "Discussion | Dembrane"
 
-#: src/components/chat/ChatAccordion.tsx:94
+#: src/components/chat/ChatAccordion.tsx:119
 msgid "Chats"
 msgstr "Discussions"
 
@@ -273,7 +273,7 @@ msgstr "Confirmer le nouveau mot de passe"
 msgid "Confirm Password"
 msgstr "Confirmer le mot de passe"
 
-#: src/components/report/ReportModalNavigationButton.tsx:47
+#: src/components/report/ReportModalNavigationButton.tsx:48
 msgid "Connecting to report services..."
 msgstr "Connexion aux services de création de rapports..."
 
@@ -359,6 +359,10 @@ msgstr "Supprimer le projet"
 #: src/components/report/ReportRenderer.tsx:21
 msgid "Do you want to contribute to this project?"
 msgstr "Voulez-vous contribuer à ce projet ?"
+
+#: src/components/layout/Header.tsx:145
+msgid "Documentation"
+msgstr "Documentation"
 
 #: src/routes/project/conversation/ProjectConversationTranscript.tsx:191
 msgid "Download"
@@ -497,7 +501,7 @@ msgid "Grid view"
 msgstr "Vue en grille"
 
 #. placeholder {0}: user.first_name
-#: src/components/layout/Header.tsx:139
+#: src/components/layout/Header.tsx:132
 msgid "Hi, {0}"
 msgstr "Bonjour, {0}"
 
@@ -596,7 +600,7 @@ msgstr "Dernièrement enregistré le {0}"
 #: src/routes/project/library/ProjectLibraryView.tsx:32
 #: src/routes/project/library/ProjectLibraryAspect.tsx:63
 #: src/routes/project/library/ProjectLibrary.tsx:146
-#: src/components/project/ProjectSidebar.tsx:109
+#: src/components/project/ProjectSidebar.tsx:113
 msgid "Library"
 msgstr "Bibliothèque"
 
@@ -632,7 +636,7 @@ msgstr "Connexion | Dembrane"
 msgid "Login as an existing user"
 msgstr "Se connecter en tant qu'utilisateur existant"
 
-#: src/components/layout/Header.tsx:155
+#: src/components/layout/Header.tsx:152
 msgid "Logout"
 msgstr "Déconnexion"
 
@@ -642,7 +646,7 @@ msgstr "Notes de réunion"
 
 #. placeholder {0}: capitalize(m.role)
 #. placeholder {1}: Math.ceil(m.token_usage * 100)
-#: src/components/chat/ChatContextProgress.tsx:61
+#: src/components/chat/ChatContextProgress.tsx:64
 msgid "Messages from {0} - {1}%"
 msgstr "Messages de {0} - {1}%"
 
@@ -669,7 +673,6 @@ msgid "Move to Project"
 msgstr "Déplacer vers un projet"
 
 #: src/components/project/ProjectBasicEdit.tsx:104
-#: src/components/participant/ParticipantInitiateForm.tsx:87
 #: src/components/conversation/ConversationEdit.tsx:125
 msgid "Name"
 msgstr "Nom"
@@ -704,7 +707,7 @@ msgstr "Plus récent en premier"
 msgid "Next"
 msgstr "Suivant"
 
-#: src/components/chat/ChatAccordion.tsx:104
+#: src/components/chat/ChatAccordion.tsx:129
 msgid "No chats found. Start a chat using the \"Ask\" button."
 msgstr "Aucune discussion trouvée. Commencez une discussion en utilisant le bouton \"Demander\"."
 
@@ -795,8 +798,8 @@ msgid "Open"
 msgstr "Ouvrir"
 
 #: src/components/layout/Header.tsx:150
-msgid "Open Documentation"
-msgstr "Ouvrir la documentation"
+#~ msgid "Open Documentation"
+#~ msgstr "Ouvrir la documentation"
 
 #: src/components/conversation/OpenForParticipationSummaryCard.tsx:32
 msgid "Open for Participation?"
@@ -929,7 +932,7 @@ msgstr "Traitement de la transcription"
 msgid "Processing your report..."
 msgstr "Traitement de votre rapport..."
 
-#: src/components/report/ReportTimeline.tsx:286
+#: src/components/report/ReportTimeline.tsx:296
 msgid "Project Created"
 msgstr "Projet créé"
 
@@ -957,7 +960,7 @@ msgstr "Projets"
 msgid "Projects | Dembrane"
 msgstr "Projets | Dembrane"
 
-#: src/components/project/ProjectSidebar.tsx:52
+#: src/components/project/ProjectSidebar.tsx:54
 msgid "Projects Home"
 msgstr "Accueil des projets"
 
@@ -1009,16 +1012,16 @@ msgstr "Renommer"
 
 #: src/routes/project/report/ProjectReportRoute.tsx:61
 #: src/components/report/ReportRenderer.tsx:72
-#: src/components/report/ReportModalNavigationButton.tsx:51
+#: src/components/report/ReportModalNavigationButton.tsx:53
 msgid "Report"
 msgstr "Rapport"
 
-#: src/components/layout/Header.tsx:78
+#: src/components/layout/Header.tsx:71
 msgid "Report an issue"
 msgstr "Signaler un problème"
 
 #. placeholder {0}: formatDateForAxis(new Date(data.allReports[0]?.createdAt!).getTime())
-#: src/components/report/ReportTimeline.tsx:296
+#: src/components/report/ReportTimeline.tsx:306
 msgid "Report Created - {0}"
 msgstr "Rapport créé - {0}"
 
@@ -1027,7 +1030,7 @@ msgid "Report generation is currently in beta and limited to projects with fewer
 msgstr "La génération de rapports est actuellement en version bêta et limitée aux projets avec moins de 10 heures d'enregistrement."
 
 #. placeholder {0}: formatDateForAxis(new Date(r.createdAt!).getTime())
-#: src/components/report/ReportTimeline.tsx:309
+#: src/components/report/ReportTimeline.tsx:319
 msgid "Report Updated - {0}"
 msgstr "Rapport mis à jour - {0}"
 
@@ -1112,6 +1115,10 @@ msgstr "Envoyer"
 #: src/components/view/DummyViews.tsx:27
 msgid "Sentiment"
 msgstr "Sentiment"
+
+#: src/components/participant/ParticipantInitiateForm.tsx:90
+msgid "Session Name"
+msgstr "Nom de la Séance"
 
 #: src/routes/auth/Login.tsx:91
 msgid "Setting up your first project"
@@ -1204,7 +1211,7 @@ msgid "Summary"
 msgstr "Résumé"
 
 #: src/components/project/ProjectTagsInput.tsx:219
-#: src/components/participant/ParticipantInitiateForm.tsx:96
+#: src/components/participant/ParticipantInitiateForm.tsx:100
 #: src/components/conversation/ConversationEdit.tsx:141
 msgid "Tags"
 msgstr "Étiquettes"

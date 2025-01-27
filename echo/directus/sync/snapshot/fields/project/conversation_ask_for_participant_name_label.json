@@ -1,37 +1,33 @@
 {
   "collection": "project",
-  "field": "directus_user_id",
-  "type": "uuid",
+  "field": "conversation_ask_for_participant_name_label",
+  "type": "string",
   "meta": {
     "collection": "project",
     "conditions": null,
     "display": null,
     "display_options": null,
-    "field": "directus_user_id",
+    "field": "conversation_ask_for_participant_name_label",
     "group": null,
     "hidden": false,
-    "interface": "select-dropdown-m2o",
+    "interface": "input",
     "note": null,
-    "options": {
-      "template": "{{email}}"
-    },
+    "options": null,
     "readonly": false,
     "required": false,
-    "sort": 20,
-    "special": [
-      "m2o"
-    ],
+    "sort": 10,
+    "special": null,
     "translations": null,
     "validation": null,
     "validation_message": null,
-    "width": "full"
+    "width": "half"
   },
   "schema": {
-    "name": "directus_user_id",
+    "name": "conversation_ask_for_participant_name_label",
     "table": "project",
-    "data_type": "uuid",
+    "data_type": "character varying",
     "default_value": null,
-    "max_length": null,
+    "max_length": 255,
     "numeric_precision": null,
     "numeric_scale": null,
     "is_nullable": true,
@@ -41,7 +37,7 @@
     "is_generated": false,
     "generation_expression": null,
     "has_auto_increment": false,
-    "foreign_key_table": "directus_users",
-    "foreign_key_column": "id"
+    "foreign_key_table": null,
+    "foreign_key_column": null
   }
 }

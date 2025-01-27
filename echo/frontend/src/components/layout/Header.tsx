@@ -26,24 +26,15 @@ import * as Sentry from "@sentry/react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useParams } from "react-router-dom";
 
-const User = ({
-  image,
-  name,
-  email,
-}: {
-  image: string;
-  name: string;
-  email: string;
-}) => (
+const User = ({ name, email }: { name: string; email: string }) => (
   <div
+    className="px-2"
     style={{
       color: "var(--mantine-color-text)",
       borderRadius: "var(--mantine-radius-sm)",
     }}
   >
     <Group gap="sm">
-      <Avatar src={image} radius="xl" />
-
       <div style={{ flex: 1 }} className="hidden md:block">
         <Text size="sm" fw={500}>
           {name}
@@ -53,6 +44,8 @@ const User = ({
           {email}
         </Text>
       </div>
+
+      {/* <Avatar src={image} radius="xl" /> */}
     </Group>
   </div>
 );
@@ -66,7 +59,7 @@ function CreateFeedbackButton() {
 
   return (
     <Menu.Item
-      leftSection={<IconBug color="gray" />}
+      rightSection={<IconBug />}
       onClick={async () => {
         const form = await feedback?.createForm();
         if (form) {
@@ -135,10 +128,12 @@ export const Header = () => {
             <Menu.Dropdown className="py-4">
               <Stack gap="md" className="px-2">
                 <User
-                  image={typeof user.avatar === "string" ? user.avatar : ""}
+                  // image={typeof user.avatar === "string" ? user.avatar : ""}
                   name={t`Hi, ${user.first_name}`}
                   email={user.email || ""}
                 />
+
+                <Menu.Divider />
 
                 <Menu.Item
                   rightSection={<IconNotes />}
@@ -147,15 +142,15 @@ export const Header = () => {
                   target="_blank"
                 >
                   <Group>
-                    <Trans>Open Documentation</Trans>
+                    <Trans>Documentation</Trans>
                   </Group>
                 </Menu.Item>
+
+                <CreateFeedbackButton />
 
                 <Menu.Item rightSection={<IconLogout />} onClick={handleLogout}>
                   <Trans>Logout</Trans>
                 </Menu.Item>
-
-                <CreateFeedbackButton />
 
                 <Menu.Divider />
 

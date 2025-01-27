@@ -1007,7 +1007,7 @@ resource "azurerm_container_group" "worker" {
       DISABLE_REDACTION           = "1"
       DISABLE_SENTRY              = "0"
       SERVE_API_DOCS              = "0"
-      DATABASE_URL               = "postgresql+psycopg://dembrane:dembrane@${azurerm_cosmosdb_postgresql_cluster.cosmo.name}:5432/dembrane"
+      DATABASE_URL               = "postgresql+psycopg://dembrane:dembrane@c-${azurerm_cosmosdb_postgresql_cluster.cosmo.name}.lb7c3a7waq4qwf.postgres.cosmos.azure.com:5432/dembrane"
     }
   }
 
@@ -1079,7 +1079,7 @@ resource "azurerm_container_group" "api_server" {
       DISABLE_REDACTION          = "1"
       DISABLE_SENTRY             = "0"
       SERVE_API_DOCS             = "0"
-      DATABASE_URL               = "postgresql+psycopg://dembrane:dembrane@${azurerm_cosmosdb_postgresql_cluster.cosmo.name}:5432/dembrane"
+      DATABASE_URL               = "postgresql+psycopg://dembrane:dembrane@c-${azurerm_cosmosdb_postgresql_cluster.cosmo.name}.lb7c3a7waq4qwf.postgres.cosmos.azure.com:5432/dembrane"
     }
 
     ports {
@@ -1803,11 +1803,6 @@ resource "azurerm_key_vault_secret" "anthropic_api_key" {
   }
 }
 
-resource "azurerm_key_vault_secret" "database_url" {
-  name         = "database-url"
-  value        = "postgresql+psycopg://dembrane:dembrane@${azurerm_cosmosdb_postgresql_cluster.cosmo.name}.postgres.cosmos.azure.com:5432/dembrane?sslmode=require"
-  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-}
 
 resource "azurerm_user_assigned_identity" "api_server_identity" {
   name                = "DBR-${var.environment}-api-server-identity"

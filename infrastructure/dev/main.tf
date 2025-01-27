@@ -888,9 +888,8 @@ resource "azurerm_container_group" "directus" {
       DB_DATABASE = "${azurerm_key_vault_secret.directus_db_database.value}"
       REDIS_ENABLED = "${azurerm_key_vault_secret.directus_redis_enabled.value}"
       REDIS = "${azurerm_key_vault_secret.directus_redis_url.value}"
-    }
 
-    secure_environment_variables = {
+      #secret vars below. These are stored in the keyvault. todo: change these back to secret vars in future. 
       PUBLIC_URL = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_public_url.versionless_id})"
       SECRET = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_secret.versionless_id})"
       ADMIN_TOKEN = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_admin_token.versionless_id})"

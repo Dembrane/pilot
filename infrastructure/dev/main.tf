@@ -137,19 +137,7 @@ resource "azurerm_network_security_rule" "allow_app_gateway_health_probes" {
   network_security_group_name = azurerm_network_security_group.private_nsg.name
 }
 
-resource "azurerm_network_security_rule" "allow_postgres_from_ops" {
-  name                        = "AllowPostgresFromOps"
-  priority                    = 210
-  direction                   = "Outbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "5432"
-  source_address_prefix       = "10.0.5.0/24"
-  destination_address_prefix  = "10.0.1.0/24"
-  resource_group_name         = azurerm_resource_group.rg.name
-  network_security_group_name = azurerm_network_security_group.private_nsg.name
-}
+# This duplicate rule has been removed
 
 # NSG for Public Subnets
 # NSG for Public Subnets (Updated for App Gateway)
@@ -159,6 +147,18 @@ resource "azurerm_network_security_group" "public_nsg" {
   resource_group_name = azurerm_resource_group.rg.name
 
   # Original rule
+  security_rule {
+    name                       = "AllowFromPublicSubnet"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefixes    = azurerm_subnet.public_subnet[*].address_prefixes[0]
+    destination_address_prefix = "*"
+  }
+
   security_rule {
     name                       = "AllowFromPublicSubnet"
     priority                   = 100
@@ -1945,17 +1945,4 @@ resource "azurerm_network_security_rule" "allow_ssh_from_bastion" {
   network_security_group_name = azurerm_network_security_group.private_nsg.name
 }
 
-# Allow access to PostgreSQL from Ops Server
-resource "azurerm_network_security_rule" "allow_postgres_from_ops" {
-  name                        = "AllowPostgresFromOps"
-  priority                    = 210
-  direction                   = "Outbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "5432"
-  source_address_prefix       = azurerm_subnet.ops_server_subnet.address_prefixes[0]
-  destination_address_prefix  = azurerm_subnet.private_subnet[0].address_prefixes[0]
-  resource_group_name         = azurerm_resource_group.rg.name
-  network_security_group_name = azurerm_network_security_group.private_nsg.name
-}
+# The duplicate "allow_postgres_from_ops" rule has been removed

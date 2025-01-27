@@ -1834,12 +1834,6 @@ resource "azurerm_role_assignment" "directus_secret_access" {
   principal_id         = azurerm_user_assigned_identity.directus_identity.principal_id
 }
 
-# Additional role assignment for Directus to ensure Key Vault access
-resource "azurerm_role_assignment" "directus_keyvault_secrets" {
-  scope                = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = azurerm_user_assigned_identity.directus_identity.principal_id
-}
 
 # worker envs
 

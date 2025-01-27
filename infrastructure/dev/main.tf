@@ -131,6 +131,18 @@ resource "azurerm_network_security_group" "private_nsg" {
     source_address_prefixes    = ["10.0.10.0/24"]
     destination_address_prefix = "*"
   }
+
+  security_rule {
+    name                        = "AllowSSHFromBastion"
+    priority                    = 200
+    direction                   = "Inbound"
+    access                      = "Allow"
+    protocol                    = "Tcp"
+    source_port_range           = "*"
+    destination_port_range      = "22"
+    source_address_prefix       = azurerm_subnet.bastion_subnet.address_prefixes[0]
+    destination_address_prefix  = azurerm_subnet.ops_server_subnet.address_prefixes[0]
+  }
 }
 
 # NSG for Public Subnets

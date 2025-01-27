@@ -883,14 +883,13 @@ resource "azurerm_container_group" "directus" {
       ADMIN_EMAIL = "admin@dembrane.com"
       # Database connection details
       DB_CLIENT = "${azurerm_key_vault_secret.directus_db_client.value}"
-      DB_HOST = "${azurerm_cosmosdb_postgresql_cluster.cosmo.name}.postgres.cosmos.azure.com"
+      DB_HOST = "${azurerm_key_vault_secret.directus_db_host.value}"
       DB_PORT = "${azurerm_key_vault_secret.directus_db_port.value}"
       DB_DATABASE = "${azurerm_key_vault_secret.directus_db_database.value}"
       REDIS_ENABLED = "${azurerm_key_vault_secret.directus_redis_enabled.value}"
       REDIS = "${azurerm_key_vault_secret.directus_redis_url.value}"
-    }
 
-    secure_environment_variables = {
+      #secret vars below. These are stored in the keyvault. todo: change these back to secret vars in future. 
       PUBLIC_URL = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_public_url.versionless_id})"
       SECRET = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_secret.versionless_id})"
       ADMIN_TOKEN = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
@@ -1835,8 +1834,8 @@ resource "azurerm_role_assignment" "directus_secret_access" {
   principal_id         = azurerm_user_assigned_identity.directus_identity.principal_id
 }
 
-# Ensure Directus managed identity has Key Vault Secrets User role
-resource "azurerm_role_assignment" "directus_keyvault_secrets_user" {
+# Additional role assignment for Directus to ensure Key Vault access
+resource "azurerm_role_assignment" "directus_keyvault_secrets" {
   scope                = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_user_assigned_identity.directus_identity.principal_id

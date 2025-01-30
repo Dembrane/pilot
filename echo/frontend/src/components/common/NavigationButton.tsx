@@ -60,7 +60,7 @@ export const NavigationButton = ({
     >
       <Group align="center" wrap="nowrap">
         {to ? (
-          <I18nLink to={to} className="flex-grow px-4 py-2">
+          <I18nLink to={to} className="flex-grow px-4 py-2 max-w-full">
             <UnstyledButton
               {...props}
               className={cn(
@@ -69,7 +69,7 @@ export const NavigationButton = ({
               )}
             >
               <Group className="w-full justify-between">
-                <Text size="lg" className="font-semibold">
+                <Text size="lg" className="font-semibold max-w-full">
                   {children}
                 </Text>
                 {!!rightContent && rightContent}

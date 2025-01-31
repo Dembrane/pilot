@@ -889,11 +889,13 @@ resource "azurerm_container_group" "directus" {
       PASSWORD_RESET_URL_ALLOW_LIST = "${azurerm_key_vault_secret.admin_base_url.value}/password-reset"
       USER_INVITE_URL_ALLOW_LIST = "${azurerm_key_vault_secret.admin_base_url.value}/invite"
       ADMIN_EMAIL = "admin@dembrane.com"
+
       # Database connection details
       DB_CLIENT = "${azurerm_key_vault_secret.directus_db_client.value}"
       DB_HOST = "${azurerm_key_vault_secret.directus_db_host.value}"
       DB_PORT = "${azurerm_key_vault_secret.directus_db_port.value}"
       DB_DATABASE = "${azurerm_key_vault_secret.directus_db_database.value}"
+      
       REDIS_ENABLED = "${azurerm_key_vault_secret.directus_redis_enabled.value}"
       REDIS = "${azurerm_key_vault_secret.directus_redis_url.value}"
 
@@ -901,9 +903,11 @@ resource "azurerm_container_group" "directus" {
       PUBLIC_URL = "${azurerm_key_vault_secret.directus_public_url.versionless_id})"
       SECRET = "${azurerm_key_vault_secret.directus_secret.versionless_id})"
       ADMIN_TOKEN = "${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
+      
       DB_USER = "${azurerm_key_vault_secret.directus_db_user.versionless_id})"
       DB_PASSWORD = "${azurerm_key_vault_secret.directus_db_password.versionless_id})"
-      # SMTP settings
+      
+            # SMTP settings
       EMAIL_FROM = "${azurerm_key_vault_secret.directus_smtp_from.versionless_id})"
       EMAIL_SMTP_HOST = "${azurerm_key_vault_secret.directus_smtp_host.versionless_id})"
       EMAIL_SMTP_PORT = "${azurerm_key_vault_secret.directus_smtp_port.versionless_id})"
@@ -914,6 +918,8 @@ resource "azurerm_container_group" "directus" {
       # Auth settings
       AUTH_GOOGLE_CLIENT_ID = "${azurerm_key_vault_secret.directus_auth_google_client_id.versionless_id})"
       AUTH_GOOGLE_CLIENT_SECRET = "${azurerm_key_vault_secret.directus_auth_google_client_secret.versionless_id})"
+      # Database URL
+      DB_CONNECTION_STRING = "${azurerm_key_vault_secret.database_url.versionless_id})"
     }
   }
 
@@ -1014,7 +1020,7 @@ resource "azurerm_container_group" "worker" {
       DISABLE_REDACTION           = "1"
       DISABLE_SENTRY              = "0"
       SERVE_API_DOCS              = "0"
-      DATABASE_URL               = "postgresql+psycopg://dembrane:dembrane@${azurerm_private_endpoint.psql_endpoint.private_service_connection[0].private_ip_address}:5432/dembrane"
+      DATABASE_URL               = "${azurerm_key_vault_secret.database_url.versionless_id})"
     }
   }
 
@@ -1084,7 +1090,7 @@ resource "azurerm_container_group" "api_server" {
       DISABLE_REDACTION          = "1"
       DISABLE_SENTRY             = "0"
       SERVE_API_DOCS             = "0"
-      DATABASE_URL               = "postgresql+psycopg://dembrane:dembrane@${azurerm_private_endpoint.psql_endpoint.private_service_connection[0].private_ip_address}:5432/dembrane"
+      DATABASE_URL               = "${azurerm_key_vault_secret.database_url.versionless_id})"
     }
 
     ports {
@@ -1370,6 +1376,12 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
   node_server_edition             = "MemoryOptimized"
   node_storage_quota_in_mb        = 524288
   node_vcores                     = 2
+}
+
+resource "azurerm_key_vault_secret" "database_url" {
+  name         = "psql-database-url"
+  value        = "postgres://dembrane:placeholder_password@${azurerm_private_endpoint.psql_endpoint.private_service_connection[0].private_ip_address}:5432/dembrane?sslmode=require"
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 }
 
 # Private Endpoint for PostgreSQL

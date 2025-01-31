@@ -42,15 +42,17 @@ import { useI18nNavigate } from "@/hooks/useI18nNavigate";
 import { useLanguage } from "@/hooks/useLanguage";
 import { CloseableAlert } from "@/components/common/ClosableAlert";
 import { useInView } from "react-intersection-observer";
+import { useSearchParams } from "react-router-dom";
 
 export const ProjectsHomeRoute = () => {
   useDocumentTitle(t`Projects | Dembrane`);
 
   const [gridParent] = useAutoAnimate();
   const [listParent] = useAutoAnimate();
-
-  const [search, setSearch] = useState("");
-
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
+  const [search, setSearch] = useState(initialSearch);
+  
   const [debouncedSearchValue] = useDebouncedValue(search, 200);
 
   const { ref: loadMoreRef, inView } = useInView();
@@ -70,6 +72,14 @@ export const ProjectsHomeRoute = () => {
       search: debouncedSearchValue,
     },
   });
+
+  useEffect(() => {
+    if (search) {
+      setSearchParams({ search });
+    } else {
+      setSearchParams({});
+    }
+  }, [search, setSearchParams]);
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {

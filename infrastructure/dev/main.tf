@@ -1367,7 +1367,7 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
 # Private Endpoint for PostgreSQL
 resource "azurerm_private_endpoint" "psql_endpoint" {
   name                = "DBR-${var.environment}-PSQL-PrivateEndpoint"
-  location            = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   subnet_id           = azurerm_subnet.private_subnet[0].id
 
@@ -1904,8 +1904,8 @@ resource "azurerm_linux_virtual_machine" "ops_server" {
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
     version   = "latest"
   }
 }

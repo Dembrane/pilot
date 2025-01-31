@@ -1006,7 +1006,7 @@ resource "azurerm_container_group" "worker" {
       DISABLE_REDACTION           = "1"
       DISABLE_SENTRY              = "0"
       SERVE_API_DOCS              = "0"
-      DATABASE_URL               = "postgresql+psycopg://dembrane:dembrane@c-${azurerm_cosmosdb_postgresql_cluster.cosmo.name}.lb7c3a7waq4qwf.postgres.cosmos.azure.com:5432/dembrane"
+      DATABASE_URL               = "postgresql+psycopg://dembrane:dembrane@${azurerm_private_endpoint.psql_endpoint.private_service_connection[0].private_ip_address}:5432/dembrane"
     }
   }
 
@@ -1076,7 +1076,7 @@ resource "azurerm_container_group" "api_server" {
       DISABLE_REDACTION          = "1"
       DISABLE_SENTRY             = "0"
       SERVE_API_DOCS             = "0"
-      DATABASE_URL               = "postgresql+psycopg://dembrane:dembrane@c-${azurerm_cosmosdb_postgresql_cluster.cosmo.name}.lb7c3a7waq4qwf.postgres.cosmos.azure.com:5432/dembrane"
+      DATABASE_URL               = "postgresql+psycopg://dembrane:dembrane@${azurerm_private_endpoint.psql_endpoint.private_service_connection[0].private_ip_address}:5432/dembrane"
     }
 
     ports {
@@ -1362,6 +1362,40 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
   node_server_edition             = "MemoryOptimized"
   node_storage_quota_in_mb        = 524288
   node_vcores                     = 2
+}
+
+# Private Endpoint for PostgreSQL
+resource "azurerm_private_endpoint" "psql_endpoint" {
+  name                = "DBR-${var.environment}-PSQL-PrivateEndpoint"
+  location            = azurerm_resource_group.rg.name
+  resource_group_name = azurerm_resource_group.rg.name
+  subnet_id           = azurerm_subnet.private_subnet[0].id
+
+  private_service_connection {
+    name                           = "DBR-${var.environment}-PSQL-PrivateServiceConnection"
+    private_connection_resource_id = azurerm_cosmosdb_postgresql_cluster.cosmo.id
+    is_manual_connection           = false
+    subresource_names              = ["coordinator"]
+  }
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [azurerm_private_dns_zone.psql_zone.id]
+  }
+}
+
+# Private DNS Zone for PostgreSQL
+resource "azurerm_private_dns_zone" "psql_zone" {
+  name                = "privatelink.postgres.cosmos.azure.com"
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+# Link the Private DNS Zone to the VNet
+resource "azurerm_private_dns_zone_virtual_network_link" "psql_zone_link" {
+  name                  = "DBR-${var.environment}-PSQL-DNSLink"
+  resource_group_name   = azurerm_resource_group.rg.name
+  private_dns_zone_name = azurerm_private_dns_zone.psql_zone.name
+  virtual_network_id    = azurerm_virtual_network.vnet.id
 }
 
 ### OAI
@@ -1652,7 +1686,7 @@ resource "azurerm_key_vault_secret" "directus_db_client" {
 
 resource "azurerm_key_vault_secret" "directus_db_host" {
   name         = "directus-db-host"
-  value        = azurerm_cosmosdb_postgresql_cluster.cosmo.name
+  value        = azurerm_private_endpoint.psql_endpoint.private_service_connection[0].private_ip_address
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 }
 

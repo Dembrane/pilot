@@ -1406,6 +1406,37 @@ resource "azurerm_private_dns_zone_virtual_network_link" "psql_zone_link" {
   virtual_network_id    = azurerm_virtual_network.vnet.id
 }
 
+# NSG for Private Endpoint Subnet
+resource "azurerm_network_security_group" "private_endpoint_nsg" {
+  name                = "DBR-${var.environment}-Networks-private-endpoint-NSG"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+# NSG rule to allow access from private subnets to PostgreSQL port
+resource "azurerm_network_security_rule" "allow_postgres_from_private" {
+  name                        = "AllowPostgresFromPrivate"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "5432"
+  source_address_prefixes     = concat(
+    azurerm_subnet.private_subnet[*].address_prefixes[0],
+    azurerm_subnet.private_internal_subnet[*].address_prefixes[0]
+  )
+  destination_address_prefix  = azurerm_subnet.private_endpoint_subnet.address_prefixes[0]
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.private_endpoint_nsg.name
+}
+
+# Associate the NSG with the Private Endpoint Subnet
+resource "azurerm_subnet_network_security_group_association" "private_endpoint_nsg_association" {
+  subnet_id                 = azurerm_subnet.private_endpoint_subnet.id
+  network_security_group_id = azurerm_network_security_group.private_endpoint_nsg.id
+}
+
 ### OAI
 
 

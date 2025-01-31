@@ -892,9 +892,6 @@ resource "azurerm_container_group" "directus" {
 
       # Database connection details
       DB_CLIENT = "${azurerm_key_vault_secret.directus_db_client.value}"
-      DB_HOST = "${azurerm_key_vault_secret.directus_db_host.value}"
-      DB_PORT = "${azurerm_key_vault_secret.directus_db_port.value}"
-      DB_DATABASE = "${azurerm_key_vault_secret.directus_db_database.value}"
       
       REDIS_ENABLED = "${azurerm_key_vault_secret.directus_redis_enabled.value}"
       REDIS = "${azurerm_key_vault_secret.directus_redis_url.value}"
@@ -903,11 +900,8 @@ resource "azurerm_container_group" "directus" {
       PUBLIC_URL = "${azurerm_key_vault_secret.directus_public_url.versionless_id})"
       SECRET = "${azurerm_key_vault_secret.directus_secret.versionless_id})"
       ADMIN_TOKEN = "${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
-      
-      DB_USER = "${azurerm_key_vault_secret.directus_db_user.versionless_id})"
-      DB_PASSWORD = "${azurerm_key_vault_secret.directus_db_password.versionless_id})"
-      
-            # SMTP settings
+
+      # SMTP settings
       EMAIL_FROM = "${azurerm_key_vault_secret.directus_smtp_from.versionless_id})"
       EMAIL_SMTP_HOST = "${azurerm_key_vault_secret.directus_smtp_host.versionless_id})"
       EMAIL_SMTP_PORT = "${azurerm_key_vault_secret.directus_smtp_port.versionless_id})"
@@ -995,14 +989,6 @@ resource "azurerm_container_group" "worker" {
       storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
     }
 
-    volume {
-      name       = "trankit-cache-volume"
-      mount_path = "/code/server/trankit_cache"
-      share_name = azurerm_storage_share.trankit.name
-      storage_account_name = azurerm_storage_account.api-server-storage.name
-      storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
-    }
-
     environment_variables = {
       
       DIRECTUS_PUBLIC_URL     = "${azurerm_key_vault_secret.directus_public_url.versionless_id})"
@@ -1020,7 +1006,7 @@ resource "azurerm_container_group" "worker" {
       DISABLE_REDACTION           = "1"
       DISABLE_SENTRY              = "0"
       SERVE_API_DOCS              = "0"
-      DATABASE_URL               = "${azurerm_key_vault_secret.database_url.versionless_id})"
+      DATABASE_URL               = "${azurerm_key_vault_secret.python_database_url.versionless_id})"
     }
   }
 
@@ -1090,7 +1076,7 @@ resource "azurerm_container_group" "api_server" {
       DISABLE_REDACTION          = "1"
       DISABLE_SENTRY             = "0"
       SERVE_API_DOCS             = "0"
-      DATABASE_URL               = "${azurerm_key_vault_secret.database_url.versionless_id})"
+      DATABASE_URL               = "${azurerm_key_vault_secret.python_database_url.versionless_id})"
     }
 
     ports {
@@ -1106,13 +1092,6 @@ resource "azurerm_container_group" "api_server" {
       storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
     }
 
-    volume {
-      name       = "trankit-cache-volume"
-      mount_path = "/code/server/trankit_cache"
-      share_name = azurerm_storage_share.trankit.name
-      storage_account_name = azurerm_storage_account.api-server-storage.name
-      storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
-    }
   }
 
   image_registry_credential {
@@ -1381,6 +1360,12 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
 resource "azurerm_key_vault_secret" "database_url" {
   name         = "psql-database-url"
   value        = "postgres://citus:1n1t14l_p@ssw0rd@${azurerm_private_endpoint.psql_endpoint.private_service_connection[0].private_ip_address}:5432/citus?sslmode=require"
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_secret" "python_database_url" {
+  name         = "python-database-url"
+  value        = "postgres+psycopg://citus:1n1t14l_p@ssw0rd@${azurerm_private_endpoint.psql_endpoint.private_service_connection[0].private_ip_address}:5432/citus?sslmode=require"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 }
 
@@ -1731,7 +1716,7 @@ resource "azurerm_key_vault_secret" "directus_secret" {
 
 resource "azurerm_key_vault_secret" "directus_db_client" {
   name         = "directus-db-client"
-  value        = "postgres"
+  value        = "pg"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 }
 

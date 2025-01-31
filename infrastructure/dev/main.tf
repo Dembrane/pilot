@@ -1380,7 +1380,7 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
 
 resource "azurerm_key_vault_secret" "database_url" {
   name         = "psql-database-url"
-  value        = "postgres://citus:placeholder_password@${azurerm_private_endpoint.psql_endpoint.private_service_connection[0].private_ip_address}:5432/citus?sslmode=require"
+  value        = "postgres://citus:1n1t14l_p@ssw0rd@${azurerm_private_endpoint.psql_endpoint.private_service_connection[0].private_ip_address}:5432/citus?sslmode=require"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 }
 

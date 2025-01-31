@@ -696,8 +696,8 @@ resource "azurerm_container_group" "rabbitmq" {
       protocol = "TCP"
     }
     environment_variables = {
-      RABBITMQ_DEFAULT_USER = "${azurerm_key_vault_secret.rabbitmq_user.versionless_id})"
-      RABBITMQ_DEFAULT_PASS = "${azurerm_key_vault_secret.rabbitmq_password.versionless_id})"
+      RABBITMQ_DEFAULT_USER = "${azurerm_key_vault_secret.rabbitmq_user.value}"
+      RABBITMQ_DEFAULT_PASS = "${azurerm_key_vault_secret.rabbitmq_password.value}"
     }
   }
 
@@ -898,23 +898,23 @@ resource "azurerm_container_group" "directus" {
       REDIS = "${azurerm_key_vault_secret.directus_redis_url.value}"
 
       #secret vars below. These are stored in the keyvault. todo: change these back to secret vars in future. 
-      PUBLIC_URL = "${azurerm_key_vault_secret.directus_public_url.versionless_id})"
-      SECRET = "${azurerm_key_vault_secret.directus_secret.versionless_id})"
-      ADMIN_TOKEN = "${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
+      PUBLIC_URL = "${azurerm_key_vault_secret.directus_public_url.value}"
+      SECRET = "${azurerm_key_vault_secret.directus_secret.value}"
+      ADMIN_TOKEN = "${azurerm_key_vault_secret.directus_admin_token.value}"
 
       # SMTP settings
-      EMAIL_FROM = "${azurerm_key_vault_secret.directus_smtp_from.versionless_id})"
-      EMAIL_SMTP_HOST = "${azurerm_key_vault_secret.directus_smtp_host.versionless_id})"
-      EMAIL_SMTP_PORT = "${azurerm_key_vault_secret.directus_smtp_port.versionless_id})"
-      EMAIL_SMTP_USER = "${azurerm_key_vault_secret.directus_smtp_user.versionless_id})"
-      EMAIL_SMTP_PASSWORD = "${azurerm_key_vault_secret.directus_smtp_password.versionless_id})"
+      EMAIL_FROM = "${azurerm_key_vault_secret.directus_smtp_from.value}"
+      EMAIL_SMTP_HOST = "${azurerm_key_vault_secret.directus_smtp_host.value}"
+      EMAIL_SMTP_PORT = "${azurerm_key_vault_secret.directus_smtp_port.value}"
+      EMAIL_SMTP_USER = "${azurerm_key_vault_secret.directus_smtp_user.value}"
+      EMAIL_SMTP_PASSWORD = "${azurerm_key_vault_secret.directus_smtp_password.value}"
       # Admin credentials
-      ADMIN_PASSWORD = "${azurerm_key_vault_secret.directus_admin_password.versionless_id})"
+      ADMIN_PASSWORD = "${azurerm_key_vault_secret.directus_admin_password.value}"
       # Auth settings
-      AUTH_GOOGLE_CLIENT_ID = "${azurerm_key_vault_secret.directus_auth_google_client_id.versionless_id})"
-      AUTH_GOOGLE_CLIENT_SECRET = "${azurerm_key_vault_secret.directus_auth_google_client_secret.versionless_id})"
+      AUTH_GOOGLE_CLIENT_ID = "${azurerm_key_vault_secret.directus_auth_google_client_id.value}"
+      AUTH_GOOGLE_CLIENT_SECRET = "${azurerm_key_vault_secret.directus_auth_google_client_secret.value}"
       # Database URL
-      DB_CONNECTION_STRING = "${azurerm_key_vault_secret.database_url.versionless_id})"
+      DB_CONNECTION_STRING = "${azurerm_key_vault_secret.database_url.value}"
     }
   }
 
@@ -992,13 +992,13 @@ resource "azurerm_container_group" "worker" {
 
     environment_variables = {
       
-      DIRECTUS_PUBLIC_URL     = "${azurerm_key_vault_secret.directus_public_url.versionless_id})"
-      DIRECTUS_TOKEN          = "${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
-      DIRECTUS_SECRET         = "${azurerm_key_vault_secret.directus_secret.versionless_id})"
-      ADMIN_BASE_URL          = "${azurerm_key_vault_secret.admin_base_url.versionless_id})"
-      PARTICIPANT_BASE_URL    = "${azurerm_key_vault_secret.participant_base_url.versionless_id})"
-      OPENAI_API_KEY          = "${azurerm_key_vault_secret.openai_api_key.versionless_id})"
-      ANTHROPIC_API_KEY       = "${azurerm_key_vault_secret.anthropic_api_key.versionless_id})"
+      DIRECTUS_PUBLIC_URL     = "${azurerm_key_vault_secret.directus_public_url.value}"
+      DIRECTUS_TOKEN          = "${azurerm_key_vault_secret.directus_admin_token.value}"
+      DIRECTUS_SECRET         = "${azurerm_key_vault_secret.directus_secret.value}"
+      ADMIN_BASE_URL          = "${azurerm_key_vault_secret.admin_base_url.value}"
+      PARTICIPANT_BASE_URL    = "${azurerm_key_vault_secret.participant_base_url.value}"
+      OPENAI_API_KEY          = "${azurerm_key_vault_secret.openai_api_key.value}"
+      ANTHROPIC_API_KEY       = "${azurerm_key_vault_secret.anthropic_api_key.value}"
 
       DIRECTUS_SESSION_COOKIE_NAME = "directus_session_token"
       BUILD_VERSION               = "dev"
@@ -1007,7 +1007,7 @@ resource "azurerm_container_group" "worker" {
       DISABLE_REDACTION           = "1"
       DISABLE_SENTRY              = "0"
       SERVE_API_DOCS              = "0"
-      DATABASE_URL               = "${azurerm_key_vault_secret.python_database_url.versionless_id})"
+      DATABASE_URL               = "${azurerm_key_vault_secret.python_database_url.value}"
     }
   }
 
@@ -1062,13 +1062,13 @@ resource "azurerm_container_group" "api_server" {
     memory = "2"
 
     environment_variables = {
-      DIRECTUS_PUBLIC_URL           = "${azurerm_key_vault_secret.directus_public_url.versionless_id})"
-      DIRECTUS_TOKEN               = "${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
-      DIRECTUS_SECRET             = "${azurerm_key_vault_secret.directus_secret.versionless_id})"
-      ADMIN_BASE_URL              = "${azurerm_key_vault_secret.admin_base_url.versionless_id})"
-      PARTICIPANT_BASE_URL        = "${azurerm_key_vault_secret.participant_base_url.versionless_id})"
-      OPENAI_API_KEY             = "${azurerm_key_vault_secret.openai_api_key.versionless_id})"
-      ANTHROPIC_API_KEY          = "${azurerm_key_vault_secret.anthropic_api_key.versionless_id})"
+      DIRECTUS_PUBLIC_URL           = "${azurerm_key_vault_secret.directus_public_url.value}"
+      DIRECTUS_TOKEN               = "${azurerm_key_vault_secret.directus_admin_token.value}"
+      DIRECTUS_SECRET             = "${azurerm_key_vault_secret.directus_secret.value}"
+      ADMIN_BASE_URL              = "${azurerm_key_vault_secret.admin_base_url.value}"
+      PARTICIPANT_BASE_URL        = "${azurerm_key_vault_secret.participant_base_url.value}"
+      OPENAI_API_KEY             = "${azurerm_key_vault_secret.openai_api_key.value}"
+      ANTHROPIC_API_KEY          = "${azurerm_key_vault_secret.anthropic_api_key.value}"
 
       DIRECTUS_SESSION_COOKIE_NAME = "directus_session_token"
       BUILD_VERSION               = "dev"
@@ -1077,7 +1077,7 @@ resource "azurerm_container_group" "api_server" {
       DISABLE_REDACTION          = "1"
       DISABLE_SENTRY             = "0"
       SERVE_API_DOCS             = "0"
-      DATABASE_URL               = "${azurerm_key_vault_secret.python_database_url.versionless_id})"
+      DATABASE_URL               = "${azurerm_key_vault_secret.python_database_url.value}"
     }
 
     ports {

@@ -892,7 +892,8 @@ resource "azurerm_container_group" "directus" {
 
       # Database connection details
       DB_CLIENT = "${azurerm_key_vault_secret.directus_db_client.value}"
-      DB_ACQUIRE_CONNECTION_TIMEOUT = 60000
+      DB_ACQUIRE_CONNECTION_TIMEOUT = 60000     
+      DB_CONNECTION_STRING = "${azurerm_key_vault_secret.database_url.value}"
       
       REDIS_ENABLED = "${azurerm_key_vault_secret.directus_redis_enabled.value}"
       REDIS = "${azurerm_key_vault_secret.directus_redis_url.value}"
@@ -913,8 +914,7 @@ resource "azurerm_container_group" "directus" {
       # Auth settings
       AUTH_GOOGLE_CLIENT_ID = "${azurerm_key_vault_secret.directus_auth_google_client_id.value}"
       AUTH_GOOGLE_CLIENT_SECRET = "${azurerm_key_vault_secret.directus_auth_google_client_secret.value}"
-      # Database URL
-      DB_CONNECTION_STRING = "${azurerm_key_vault_secret.database_url.value}"
+
     }
   }
 
@@ -1347,7 +1347,7 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
   location            = azurerm_resource_group.rg.location
   node_count          = 0
 
-  administrator_login_password = "1n1t14l_p@ssw0rd"
+  administrator_login_password = "Ej3n3pgbaXcyq9VaQuw"
 
   coordinator_storage_quota_in_mb = 65536
   coordinator_vcore_count         = 1
@@ -1360,13 +1360,13 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
 
 resource "azurerm_key_vault_secret" "database_url" {
   name         = "psql-database-url"
-  value        = "postgres://citus:1n1t14l_p@ssw0rd@${azurerm_private_endpoint.psql_endpoint.private_service_connection[0].private_ip_address}:5432/citus?sslmode=require"
+  value        = "postgres://citus:Ej3n3pgbaXcyq9VaQuw@c-dbr-dev-backend-database-psql.lb7c3a7waq4qwf.postgres.cosmos.azure.com:5432/citus?sslmode=require"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 }
 
 resource "azurerm_key_vault_secret" "python_database_url" {
   name         = "python-database-url"
-  value        = "postgres+psycopg://citus:1n1t14l_p@ssw0rd@${azurerm_private_endpoint.psql_endpoint.private_service_connection[0].private_ip_address}:5432/citus?sslmode=require"
+  value        = "postgres+psycopg://citus:Ej3n3pgbaXcyq9VaQuw@c-dbr-dev-backend-database-psql.lb7c3a7waq4qwf.postgres.cosmos.azure.com:5432/citus?sslmode=require"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 }
 
@@ -1721,38 +1721,6 @@ resource "azurerm_key_vault_secret" "directus_db_client" {
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 }
 
-resource "azurerm_key_vault_secret" "directus_db_host" {
-  name         = "directus-db-host"
-  value        = azurerm_private_endpoint.psql_endpoint.private_service_connection[0].private_ip_address
-  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-}
-
-resource "azurerm_key_vault_secret" "directus_db_port" {
-  name         = "directus-db-port"
-  value        = "5432"
-  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-}
-
-resource "azurerm_key_vault_secret" "directus_db_user" {
-  name         = "directus-db-user"
-  value        = "dembrane"
-  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-}
-
-resource "azurerm_key_vault_secret" "directus_db_password" {
-  name         = "directus-db-password"
-  value        = "1n1t14l_p@ssw0rd"  # Should be changed post-deployment
-  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-resource "azurerm_key_vault_secret" "directus_db_database" {
-  name         = "directus-db-database"
-  value        = "dembrane"
-  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-}
 
 resource "azurerm_key_vault_secret" "directus_redis_enabled" {
   name         = "directus-redis-enabled"

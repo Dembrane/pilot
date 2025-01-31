@@ -894,7 +894,7 @@ resource "azurerm_container_group" "directus" {
       DB_CLIENT = "${azurerm_key_vault_secret.directus_db_client.value}"
       DB_ACQUIRE_CONNECTION_TIMEOUT = 60000     
       DB_CONNECTION_STRING = "${azurerm_key_vault_secret.database_url.value}"
-      
+      DB_SSL__REJECT_UNAUTHORIZED="false"
       REDIS_ENABLED = "${azurerm_key_vault_secret.directus_redis_enabled.value}"
       REDIS = "${azurerm_key_vault_secret.directus_redis_url.value}"
 

@@ -1733,7 +1733,7 @@ resource "azurerm_key_vault_secret" "directus_redis_enabled" {
 
 resource "azurerm_key_vault_secret" "directus_redis_url" {
   name         = "directus-redis-url"
-  value        = "redis://${azurerm_redis_cache.basic_redis.hostname}:${azurerm_redis_cache.basic_redis.ssl_port}"
+  value        = "rediss://default:${azurerm_redis_cache.basic_redis.primary_access_key}@${azurerm_redis_cache.basic_redis.hostname}:${azurerm_redis_cache.basic_redis.ssl_port}"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 }
 

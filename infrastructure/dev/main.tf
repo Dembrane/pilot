@@ -1073,7 +1073,7 @@ resource "azurerm_container_group" "api_server" {
       PARTICIPANT_BASE_URL        = "${azurerm_key_vault_secret.participant_base_url.value}"
       OPENAI_API_KEY             = "${azurerm_key_vault_secret.openai_api_key.value}"
       ANTHROPIC_API_KEY          = "${azurerm_key_vault_secret.anthropic_api_key.value}"
-      DEBUG_MODE              = "true"
+      DEBUG_MODE                 = "true"
       DIRECTUS_SESSION_COOKIE_NAME = "directus_session_token"
       BUILD_VERSION               = "dev"
       RABBITMQ_URL               = "amqp://${azurerm_key_vault_secret.rabbitmq_user.value}:${azurerm_key_vault_secret.rabbitmq_password.value}@rabbitmq.dembrane.internal:5672"
@@ -1370,7 +1370,7 @@ resource "azurerm_key_vault_secret" "database_url" {
 
 resource "azurerm_key_vault_secret" "python_database_url" {
   name         = "python-database-url"
-  value        = "postgresql+psycopg2://citus:Ej3n3pgbaXcyq9VaQuw@c-dbr-dev-backend-database-psql.lb7c3a7waq4qwf.postgres.cosmos.azure.com:5432/citus?sslmode=require"
+  value        = "postgres+psycopg://citus:Ej3n3pgbaXcyq9VaQuw@c-dbr-dev-backend-database-psql.lb7c3a7waq4qwf.postgres.cosmos.azure.com:5432/citus?sslmode=require"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 }
 

@@ -995,7 +995,7 @@ resource "azurerm_container_group" "worker" {
     }
 
     environment_variables = {
-      
+      DIRECTUS_BASE_URL     = "${azurerm_key_vault_secret.directus_public_url.value}"
       DIRECTUS_PUBLIC_URL     = "${azurerm_key_vault_secret.directus_public_url.value}"
       DIRECTUS_TOKEN          = "${azurerm_key_vault_secret.directus_admin_token.value}"
       DIRECTUS_SECRET         = "${azurerm_key_vault_secret.directus_secret.value}"
@@ -1066,6 +1066,7 @@ resource "azurerm_container_group" "api_server" {
     memory = "2"
 
     environment_variables = {
+      DIRECTUS_BASE_URL     = "${azurerm_key_vault_secret.directus_public_url.value}"
       DIRECTUS_PUBLIC_URL           = "${azurerm_key_vault_secret.directus_public_url.value}"
       DIRECTUS_TOKEN               = "${azurerm_key_vault_secret.directus_admin_token.value}"
       DIRECTUS_SECRET             = "${azurerm_key_vault_secret.directus_secret.value}"
@@ -1370,7 +1371,7 @@ resource "azurerm_key_vault_secret" "database_url" {
 
 resource "azurerm_key_vault_secret" "python_database_url" {
   name         = "python-database-url"
-  value        = "postgresql+psycopg2://citus:Ej3n3pgbaXcyq9VaQuw@c-dbr-dev-backend-database-psql.lb7c3a7waq4qwf.postgres.cosmos.azure.com:5432/citus?sslmode=require"
+  value        = "postgres+psycopg://citus:Ej3n3pgbaXcyq9VaQuw@c-dbr-dev-backend-database-psql.lb7c3a7waq4qwf.postgres.cosmos.azure.com:5432/citus?sslmode=require"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 }
 

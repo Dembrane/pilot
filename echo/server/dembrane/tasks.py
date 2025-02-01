@@ -54,6 +54,10 @@ class BaseTask(celery_app.Task):  # type: ignore
 
     abstract = True
 
+    def __call__(self, *args, **kwargs):
+        logger.info(f"Task {self.name} is connecting to the database")
+        return super().__call__(*args, **kwargs)
+
     def on_retry(self, exc, task_id, args, kwargs, einfo):
         """Log the exceptions to sentry at retry."""
         capture_exception(exc)
@@ -546,10 +550,6 @@ def task_create_view(
 
         except Exception as e:
             logger.error(f"Error: {e}")
-            db.rollback()
-            raise
-
-
 @celery_app.task(bind=True, retry_backoff=True, ignore_result=False, base=BaseTask)
 def task_finalize_project_library(_self, project_analysis_run_id: str):
     with DatabaseSession() as db:

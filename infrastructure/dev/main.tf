@@ -1003,7 +1003,7 @@ resource "azurerm_container_group" "worker" {
       PARTICIPANT_BASE_URL    = "${azurerm_key_vault_secret.participant_base_url.value}"
       OPENAI_API_KEY          = "${azurerm_key_vault_secret.openai_api_key.value}"
       ANTHROPIC_API_KEY       = "${azurerm_key_vault_secret.anthropic_api_key.value}"
-
+      DEBUG_MODE              = "true"
       DIRECTUS_SESSION_COOKIE_NAME = "directus_session_token"
       BUILD_VERSION               = "dev"
       RABBITMQ_URL                = "amqp://${azurerm_key_vault_secret.rabbitmq_user.value}:${azurerm_key_vault_secret.rabbitmq_password.value}@rabbitmq.dembrane.internal:5672"
@@ -1073,7 +1073,7 @@ resource "azurerm_container_group" "api_server" {
       PARTICIPANT_BASE_URL        = "${azurerm_key_vault_secret.participant_base_url.value}"
       OPENAI_API_KEY             = "${azurerm_key_vault_secret.openai_api_key.value}"
       ANTHROPIC_API_KEY          = "${azurerm_key_vault_secret.anthropic_api_key.value}"
-
+      DEBUG_MODE              = "true"
       DIRECTUS_SESSION_COOKIE_NAME = "directus_session_token"
       BUILD_VERSION               = "dev"
       RABBITMQ_URL               = "amqp://${azurerm_key_vault_secret.rabbitmq_user.value}:${azurerm_key_vault_secret.rabbitmq_password.value}@rabbitmq.dembrane.internal:5672"

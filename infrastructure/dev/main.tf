@@ -869,7 +869,7 @@ resource "azurerm_container_group" "directus" {
       CORS_ENABLED = "true"
       CORS_ORIGIN = "https://portal.dev.dembrane.com,https://dashboard.dev.dembrane.com,https://directus.dev.dembrane.com"
       CORS_CREDENTIALS = "true"
-      LOG_LEVEL = "debug"
+      LOG_LEVEL = "trace"
 
       SESSION_COOKIE_DOMAIN = "dev.dembrane.com"
       SESSION_COOKIE_SAME_SITE = "lax"

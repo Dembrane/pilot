@@ -21,5 +21,4 @@ A Next.js-based website with:
 - Directus CMS integration
 - Multi-language support (en-US, nl-NL)
 
-Rest of the docs are a TODO -sam
-
+Rest of the docs are a TODO

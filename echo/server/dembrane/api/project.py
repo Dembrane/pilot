@@ -395,7 +395,7 @@ async def create_report(project_id: str, db: DependencyInjectDatabase, body: Cre
 		"content": report_content_response,
 		"project_id": project_id,
 		"language": language,
-		"status": "published"
+		"status": "archived"
 	})["data"]
 
 	return report

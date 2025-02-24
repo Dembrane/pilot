@@ -63,6 +63,14 @@ resource "azurerm_subnet" "private_subnet" {
   }
 }
 
+# New subnet for private endpoints
+resource "azurerm_subnet" "private_endpoint_subnet" {
+  name                 = "DBR-${var.environment}-Networks-private-endpoint-subnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.7.0/24"]
+}
+
 resource "azurerm_subnet" "private_internal_subnet" {
   count                = 2
   name                 = "DBR-${var.environment}-Networks-private-subnet-new-${count.index + 1}"
@@ -688,8 +696,8 @@ resource "azurerm_container_group" "rabbitmq" {
       protocol = "TCP"
     }
     environment_variables = {
-      RABBITMQ_DEFAULT_USER = "${azurerm_key_vault_secret.rabbitmq_user.versionless_id})"
-      RABBITMQ_DEFAULT_PASS = "${azurerm_key_vault_secret.rabbitmq_password.versionless_id})"
+      RABBITMQ_DEFAULT_USER = "${azurerm_key_vault_secret.rabbitmq_user.value}"
+      RABBITMQ_DEFAULT_PASS = "${azurerm_key_vault_secret.rabbitmq_password.value}"
     }
   }
 
@@ -861,6 +869,9 @@ resource "azurerm_container_group" "directus" {
       CORS_ENABLED = "true"
       CORS_ORIGIN = "https://portal.dev.dembrane.com,https://dashboard.dev.dembrane.com,https://directus.dev.dembrane.com"
       CORS_CREDENTIALS = "true"
+      CORS_METHODS = "GET,POST,PUT,DELETE"
+      LOG_LEVEL = "trace"
+
       SESSION_COOKIE_DOMAIN = "dev.dembrane.com"
       SESSION_COOKIE_SAME_SITE = "lax"
       SESSION_COOKIE_SECURE = "true"
@@ -881,31 +892,33 @@ resource "azurerm_container_group" "directus" {
       PASSWORD_RESET_URL_ALLOW_LIST = "${azurerm_key_vault_secret.admin_base_url.value}/password-reset"
       USER_INVITE_URL_ALLOW_LIST = "${azurerm_key_vault_secret.admin_base_url.value}/invite"
       ADMIN_EMAIL = "admin@dembrane.com"
+
       # Database connection details
       DB_CLIENT = "${azurerm_key_vault_secret.directus_db_client.value}"
-      DB_HOST = "${azurerm_key_vault_secret.directus_db_host.value}"
-      DB_PORT = "${azurerm_key_vault_secret.directus_db_port.value}"
-      DB_DATABASE = "${azurerm_key_vault_secret.directus_db_database.value}"
+      DB_ACQUIRE_CONNECTION_TIMEOUT = 60000     
+      DB_CONNECTION_STRING = "${azurerm_key_vault_secret.database_url.value}"
+      DB_SSL__REJECT_UNAUTHORIZED = "false"
+
       REDIS_ENABLED = "${azurerm_key_vault_secret.directus_redis_enabled.value}"
       REDIS = "${azurerm_key_vault_secret.directus_redis_url.value}"
 
       #secret vars below. These are stored in the keyvault. todo: change these back to secret vars in future. 
-      PUBLIC_URL = "${azurerm_key_vault_secret.directus_public_url.versionless_id})"
-      SECRET = "${azurerm_key_vault_secret.directus_secret.versionless_id})"
-      ADMIN_TOKEN = "${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
-      DB_USER = "${azurerm_key_vault_secret.directus_db_user.versionless_id})"
-      DB_PASSWORD = "${azurerm_key_vault_secret.directus_db_password.versionless_id})"
+      PUBLIC_URL = "${azurerm_key_vault_secret.directus_public_url.value}"
+      SECRET = "${azurerm_key_vault_secret.directus_secret.value}"
+      ADMIN_TOKEN = "${azurerm_key_vault_secret.directus_admin_token.value}"
+
       # SMTP settings
-      EMAIL_FROM = "${azurerm_key_vault_secret.directus_smtp_from.versionless_id})"
-      EMAIL_SMTP_HOST = "${azurerm_key_vault_secret.directus_smtp_host.versionless_id})"
-      EMAIL_SMTP_PORT = "${azurerm_key_vault_secret.directus_smtp_port.versionless_id})"
-      EMAIL_SMTP_USER = "${azurerm_key_vault_secret.directus_smtp_user.versionless_id})"
-      EMAIL_SMTP_PASSWORD = "${azurerm_key_vault_secret.directus_smtp_password.versionless_id})"
+      EMAIL_FROM = "${azurerm_key_vault_secret.directus_smtp_from.value}"
+      EMAIL_SMTP_HOST = "${azurerm_key_vault_secret.directus_smtp_host.value}"
+      EMAIL_SMTP_PORT = "${azurerm_key_vault_secret.directus_smtp_port.value}"
+      EMAIL_SMTP_USER = "${azurerm_key_vault_secret.directus_smtp_user.value}"
+      EMAIL_SMTP_PASSWORD = "${azurerm_key_vault_secret.directus_smtp_password.value}"
       # Admin credentials
-      ADMIN_PASSWORD = "${azurerm_key_vault_secret.directus_admin_password.versionless_id})"
+      ADMIN_PASSWORD = "${azurerm_key_vault_secret.directus_admin_password.value}"
       # Auth settings
-      AUTH_GOOGLE_CLIENT_ID = "${azurerm_key_vault_secret.directus_auth_google_client_id.versionless_id})"
-      AUTH_GOOGLE_CLIENT_SECRET = "${azurerm_key_vault_secret.directus_auth_google_client_secret.versionless_id})"
+      AUTH_GOOGLE_CLIENT_ID = "${azurerm_key_vault_secret.directus_auth_google_client_id.value}"
+      AUTH_GOOGLE_CLIENT_SECRET = "${azurerm_key_vault_secret.directus_auth_google_client_secret.value}"
+
     }
   }
 
@@ -981,24 +994,16 @@ resource "azurerm_container_group" "worker" {
       storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
     }
 
-    volume {
-      name       = "trankit-cache-volume"
-      mount_path = "/code/server/trankit_cache"
-      share_name = azurerm_storage_share.trankit.name
-      storage_account_name = azurerm_storage_account.api-server-storage.name
-      storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
-    }
-
     environment_variables = {
-      
-      DIRECTUS_PUBLIC_URL     = "${azurerm_key_vault_secret.directus_public_url.versionless_id})"
-      DIRECTUS_TOKEN          = "${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
-      DIRECTUS_SECRET         = "${azurerm_key_vault_secret.directus_secret.versionless_id})"
-      ADMIN_BASE_URL          = "${azurerm_key_vault_secret.admin_base_url.versionless_id})"
-      PARTICIPANT_BASE_URL    = "${azurerm_key_vault_secret.participant_base_url.versionless_id})"
-      OPENAI_API_KEY          = "${azurerm_key_vault_secret.openai_api_key.versionless_id})"
-      ANTHROPIC_API_KEY       = "${azurerm_key_vault_secret.anthropic_api_key.versionless_id})"
-
+      DIRECTUS_BASE_URL     = "${azurerm_key_vault_secret.directus_public_url.value}"
+      DIRECTUS_PUBLIC_URL     = "${azurerm_key_vault_secret.directus_public_url.value}"
+      DIRECTUS_TOKEN          = "${azurerm_key_vault_secret.directus_admin_token.value}"
+      DIRECTUS_SECRET         = "${azurerm_key_vault_secret.directus_secret.value}"
+      ADMIN_BASE_URL          = "${azurerm_key_vault_secret.admin_base_url.value}"
+      PARTICIPANT_BASE_URL    = "${azurerm_key_vault_secret.participant_base_url.value}"
+      OPENAI_API_KEY          = "${azurerm_key_vault_secret.openai_api_key.value}"
+      ANTHROPIC_API_KEY       = "${azurerm_key_vault_secret.anthropic_api_key.value}"
+      DEBUG_MODE              = "true"
       DIRECTUS_SESSION_COOKIE_NAME = "directus_session_token"
       BUILD_VERSION               = "dev"
       RABBITMQ_URL                = "amqp://${azurerm_key_vault_secret.rabbitmq_user.value}:${azurerm_key_vault_secret.rabbitmq_password.value}@rabbitmq.dembrane.internal:5672"
@@ -1006,7 +1011,7 @@ resource "azurerm_container_group" "worker" {
       DISABLE_REDACTION           = "1"
       DISABLE_SENTRY              = "0"
       SERVE_API_DOCS              = "0"
-      DATABASE_URL               = "postgresql+psycopg://dembrane:dembrane@c-${azurerm_cosmosdb_postgresql_cluster.cosmo.name}.lb7c3a7waq4qwf.postgres.cosmos.azure.com:5432/dembrane"
+      DATABASE_URL               = "${azurerm_key_vault_secret.python_database_url.value}"
     }
   }
 
@@ -1061,14 +1066,15 @@ resource "azurerm_container_group" "api_server" {
     memory = "2"
 
     environment_variables = {
-      DIRECTUS_PUBLIC_URL           = "${azurerm_key_vault_secret.directus_public_url.versionless_id})"
-      DIRECTUS_TOKEN               = "${azurerm_key_vault_secret.directus_admin_token.versionless_id})"
-      DIRECTUS_SECRET             = "${azurerm_key_vault_secret.directus_secret.versionless_id})"
-      ADMIN_BASE_URL              = "${azurerm_key_vault_secret.admin_base_url.versionless_id})"
-      PARTICIPANT_BASE_URL        = "${azurerm_key_vault_secret.participant_base_url.versionless_id})"
-      OPENAI_API_KEY             = "${azurerm_key_vault_secret.openai_api_key.versionless_id})"
-      ANTHROPIC_API_KEY          = "${azurerm_key_vault_secret.anthropic_api_key.versionless_id})"
-
+      DIRECTUS_BASE_URL     = "${azurerm_key_vault_secret.directus_public_url.value}"
+      DIRECTUS_PUBLIC_URL           = "${azurerm_key_vault_secret.directus_public_url.value}"
+      DIRECTUS_TOKEN               = "${azurerm_key_vault_secret.directus_admin_token.value}"
+      DIRECTUS_SECRET             = "${azurerm_key_vault_secret.directus_secret.value}"
+      ADMIN_BASE_URL              = "${azurerm_key_vault_secret.admin_base_url.value}"
+      PARTICIPANT_BASE_URL        = "${azurerm_key_vault_secret.participant_base_url.value}"
+      OPENAI_API_KEY             = "${azurerm_key_vault_secret.openai_api_key.value}"
+      ANTHROPIC_API_KEY          = "${azurerm_key_vault_secret.anthropic_api_key.value}"
+      DEBUG_MODE              = "true"
       DIRECTUS_SESSION_COOKIE_NAME = "directus_session_token"
       BUILD_VERSION               = "dev"
       RABBITMQ_URL               = "amqp://${azurerm_key_vault_secret.rabbitmq_user.value}:${azurerm_key_vault_secret.rabbitmq_password.value}@rabbitmq.dembrane.internal:5672"
@@ -1076,7 +1082,7 @@ resource "azurerm_container_group" "api_server" {
       DISABLE_REDACTION          = "1"
       DISABLE_SENTRY             = "0"
       SERVE_API_DOCS             = "0"
-      DATABASE_URL               = "postgresql+psycopg://dembrane:dembrane@c-${azurerm_cosmosdb_postgresql_cluster.cosmo.name}.lb7c3a7waq4qwf.postgres.cosmos.azure.com:5432/dembrane"
+      DATABASE_URL               = "${azurerm_key_vault_secret.python_database_url.value}"
     }
 
     ports {
@@ -1092,13 +1098,6 @@ resource "azurerm_container_group" "api_server" {
       storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
     }
 
-    volume {
-      name       = "trankit-cache-volume"
-      mount_path = "/code/server/trankit_cache"
-      share_name = azurerm_storage_share.trankit.name
-      storage_account_name = azurerm_storage_account.api-server-storage.name
-      storage_account_key  = azurerm_storage_account.api-server-storage.primary_access_key
-    }
   }
 
   image_registry_credential {
@@ -1353,7 +1352,7 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
   location            = azurerm_resource_group.rg.location
   node_count          = 0
 
-  administrator_login_password = "1n1t14l_p@ssw0rd"
+  administrator_login_password = "Ej3n3pgbaXcyq9VaQuw"
 
   coordinator_storage_quota_in_mb = 65536
   coordinator_vcore_count         = 1
@@ -1362,6 +1361,83 @@ resource "azurerm_cosmosdb_postgresql_cluster" "cosmo" {
   node_server_edition             = "MemoryOptimized"
   node_storage_quota_in_mb        = 524288
   node_vcores                     = 2
+}
+
+resource "azurerm_key_vault_secret" "database_url" {
+  name         = "psql-database-url"
+  value        = "postgres://citus:Ej3n3pgbaXcyq9VaQuw@c-dbr-dev-backend-database-psql.lb7c3a7waq4qwf.postgres.cosmos.azure.com:5432/citus?sslmode=require"
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+}
+
+resource "azurerm_key_vault_secret" "python_database_url" {
+  name         = "python-database-url"
+  value        = "postgresql+psycopg://citus:Ej3n3pgbaXcyq9VaQuw@c-dbr-dev-backend-database-psql.lb7c3a7waq4qwf.postgres.cosmos.azure.com:5432/citus?sslmode=require"
+  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
+}
+
+# Private Endpoint for PostgreSQL
+resource "azurerm_private_endpoint" "psql_endpoint" {
+  name                = "DBR-${var.environment}-PSQL-PrivateEndpoint"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  subnet_id           = azurerm_subnet.private_endpoint_subnet.id
+
+  private_service_connection {
+    name                           = "DBR-${var.environment}-PSQL-PrivateServiceConnection"
+    private_connection_resource_id = azurerm_cosmosdb_postgresql_cluster.cosmo.id
+    is_manual_connection           = false
+    subresource_names              = ["coordinator"]
+  }
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [azurerm_private_dns_zone.psql_zone.id]
+  }
+}
+
+# Private DNS Zone for PostgreSQL
+resource "azurerm_private_dns_zone" "psql_zone" {
+  name                = "privatelink.postgres.cosmos.azure.com"
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+# Link the Private DNS Zone to the VNet
+resource "azurerm_private_dns_zone_virtual_network_link" "psql_zone_link" {
+  name                  = "DBR-${var.environment}-PSQL-DNSLink"
+  resource_group_name   = azurerm_resource_group.rg.name
+  private_dns_zone_name = azurerm_private_dns_zone.psql_zone.name
+  virtual_network_id    = azurerm_virtual_network.vnet.id
+}
+
+# NSG for Private Endpoint Subnet
+resource "azurerm_network_security_group" "private_endpoint_nsg" {
+  name                = "DBR-${var.environment}-Networks-private-endpoint-NSG"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+# NSG rule to allow access from private subnets to PostgreSQL port
+resource "azurerm_network_security_rule" "allow_postgres_from_private" {
+  name                        = "AllowPostgresFromPrivate"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "5432"
+  source_address_prefixes     = concat(
+    azurerm_subnet.private_subnet[*].address_prefixes[0],
+    azurerm_subnet.private_internal_subnet[*].address_prefixes[0]
+  )
+  destination_address_prefix  = azurerm_subnet.private_endpoint_subnet.address_prefixes[0]
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.private_endpoint_nsg.name
+}
+
+# Associate the NSG with the Private Endpoint Subnet
+resource "azurerm_subnet_network_security_group_association" "private_endpoint_nsg_association" {
+  subnet_id                 = azurerm_subnet.private_endpoint_subnet.id
+  network_security_group_id = azurerm_network_security_group.private_endpoint_nsg.id
 }
 
 ### OAI
@@ -1646,42 +1722,10 @@ resource "azurerm_key_vault_secret" "directus_secret" {
 
 resource "azurerm_key_vault_secret" "directus_db_client" {
   name         = "directus-db-client"
-  value        = "postgres"
+  value        = "pg"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 }
 
-resource "azurerm_key_vault_secret" "directus_db_host" {
-  name         = "directus-db-host"
-  value        = azurerm_cosmosdb_postgresql_cluster.cosmo.name
-  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-}
-
-resource "azurerm_key_vault_secret" "directus_db_port" {
-  name         = "directus-db-port"
-  value        = "5432"
-  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-}
-
-resource "azurerm_key_vault_secret" "directus_db_user" {
-  name         = "directus-db-user"
-  value        = "dembrane"
-  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-}
-
-resource "azurerm_key_vault_secret" "directus_db_password" {
-  name         = "directus-db-password"
-  value        = "1n1t14l_p@ssw0rd"  # Should be changed post-deployment
-  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-resource "azurerm_key_vault_secret" "directus_db_database" {
-  name         = "directus-db-database"
-  value        = "dembrane"
-  key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
-}
 
 resource "azurerm_key_vault_secret" "directus_redis_enabled" {
   name         = "directus-redis-enabled"
@@ -1691,7 +1735,7 @@ resource "azurerm_key_vault_secret" "directus_redis_enabled" {
 
 resource "azurerm_key_vault_secret" "directus_redis_url" {
   name         = "directus-redis-url"
-  value        = "redis://${azurerm_redis_cache.basic_redis.hostname}:${azurerm_redis_cache.basic_redis.ssl_port}"
+  value        = "rediss://default:${azurerm_redis_cache.basic_redis.primary_access_key}@${azurerm_redis_cache.basic_redis.hostname}:${azurerm_redis_cache.basic_redis.ssl_port}"
   key_vault_id = azurerm_key_vault.DBR-dev-Backend-RuntimeConfig-KeyVault.id
 }
 
@@ -1870,8 +1914,8 @@ resource "azurerm_linux_virtual_machine" "ops_server" {
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
     version   = "latest"
   }
 }
